@@ -287,3 +287,32 @@ h3, h4, h5, h6 {
 .swiper-button-prev {
   @apply text-primary !important;
 }
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (min-width: 256px) and (max-width: 344px) {
+  .input-field {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  button {
+    font-size: 11px;
+  }
+}

@@ -16,7 +16,7 @@ import Logo from './Logo';
 
 const Footer = () => {
   return (
-    <footer className="bg-footer text-footer-text pt-24 pb-12 overflow-hidden relative">
+    <footer className="bg-footer text-footer-text pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden relative">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px] -mr-64 -mt-64" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px] -ml-64 -mb-64" />
@@ -24,7 +24,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Top Section: Brand & Newsletter */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 mb-12 sm:mb-20 items-center">
           <div className="space-y-8">
             <Link to="/" className="flex items-center gap-4 group">
               <Logo className="w-20 h-20 bg-surface rounded-2xl p-1 shadow-premium border border-border/10 backdrop-blur-md" />
@@ -73,7 +73,7 @@ const Footer = () => {
         </div>
 
         {/* Middle Section: Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-12 sm:mb-20">
           <div>
             <h4 className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-8">Navigation</h4>
             <ul className="space-y-4">
@@ -165,7 +165,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section: Payment & Copyright */}
-        <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="pt-8 sm:pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 opacity-40 grayscale hover:grayscale-0 transition-all">
              <div className="flex items-center gap-2">
                 <ShieldCheck size={16} />

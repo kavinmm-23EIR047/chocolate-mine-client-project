@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Tag } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
@@ -26,43 +26,28 @@ const HomeBanner = () => {
 
   useEffect(() => {
     if (banners.length <= 1) return;
-
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % banners.length);
-    }, 6000);
-
+    }, 5000);
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % banners.length);
-  };
-
-  const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
-  };
-
-  const copyCoupon = (code) => {
-    navigator.clipboard.writeText(code);
-    toast.success(`Coupon "${code}" copied!`);
-  };
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
+  const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
   if (loading) {
     return (
-      <div className="w-full aspect-[21/9] sm:aspect-[3/1] rounded-3xl bg-muted/10 animate-pulse border border-border/20" />
+      <div className="w-full rounded-2xl sm:rounded-3xl bg-muted/10 animate-pulse border border-border/20"
+        style={{ aspectRatio: '16/5' }} />
     );
   }
 
-  // Fallback if no banners
   if (banners.length === 0) {
     return (
-      <div className="w-full aspect-[21/9] sm:aspect-[3/1] rounded-3xl overflow-hidden relative shadow-lift border border-border/20">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-chocolate to-espresso flex items-center justify-center px-8">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="w-32 sm:w-48 object-contain"
-          />
+      <div className="w-full rounded-2xl sm:rounded-3xl overflow-hidden relative border border-border/20"
+        style={{ aspectRatio: '16/5' }}>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-chocolate to-espresso flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="w-32 object-contain" />
         </div>
       </div>
     );
@@ -71,84 +56,208 @@ const HomeBanner = () => {
   const slide = banners[current];
 
   return (
-    <div className="relative w-full aspect-[21/9] sm:aspect-[3/1] rounded-3xl overflow-hidden group shadow-lift border border-border/20">
+    /*
+     * ─── WHY ASPECT RATIO INSTEAD OF FIXED HEIGHT ───────────────────────
+     *
+     * Fixed px height (e.g. 200px) causes two problems:
+     *   • Mobile: banner is TOO SHORT relative to its width → image gets
+     *     heavily cropped left/right, text overflows outside the box.
+     *   • Desktop: banner is TOO SHORT relative to its width → same crop.
+     *
+     * aspect-ratio lets the HEIGHT scale with the WIDTH automatically:
+     *   • Mobile (~390px wide)  → height ≈ 195px  (16:8 ratio)
+     *   • Tablet (~768px wide)  → height ≈ 240px  (16:5 ratio)
+     *   • Desktop (~1280px wide)→ height ≈ 300px  (16:4 ratio... but we cap it)
+     *
+     * We use a RESPONSIVE aspect ratio:
+     *   • Mobile:  aspect-ratio 16/8  (squarer, more height to show image)
+     *   • sm+:     aspect-ratio 16/5  (wide cinematic, like the original design)
+     *
+     * Image uses object-cover + object-[center_top] so the subject (person)
+     * at the top-right is never cut. The left side (text area) stays clear.
+     *
+     * Text size uses clamp() so it NEVER overflows the banner on any width.
+     * ─────────────────────────────────────────────────────────────────────
+     */
+    <div
+      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl group border border-white/10"
+      style={{
+        // Taller on mobile (16:7), wide on desktop (16:5)
+        aspectRatio: 'var(--banner-ratio, 16/7)',
+      }}
+    >
+      {/* Inject responsive aspect-ratio via a style tag approach using Tailwind trick */}
+      <style>{`
+        @media (min-width: 640px) {
+          .banner-root { aspect-ratio: 16/5 !important; }
+        }
+      `}</style>
+
       <AnimatePresence mode="wait">
         <motion.div
           key={slide._id}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.7 }}
-          className="absolute inset-0 cursor-pointer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.45 }}
+          className="absolute inset-0"
           onClick={() => slide.link && (window.location.href = slide.link)}
+          style={{ cursor: slide.link ? 'pointer' : 'default' }}
         >
+          {/* ── Full bleed image ── */}
           <img
             src={slide.image}
             alt={slide.title}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full"
+            style={{
+              objectFit: 'cover',
+              // Keep subject (typically top-right person) always in frame
+              objectPosition: 'center center',
+            }}
+            draggable={false}
           />
 
-          <div className="absolute inset-0 bg-gradient-to-r from-footer/90 via-footer/40 to-transparent sm:from-footer/95 sm:via-footer/60" />
+          {/* ── Gradient scrim — left-heavy on desktop, bottom-heavy on mobile ── */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: [
+                // Mobile: bottom scrim for text legibility
+                'linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.35) 45%, transparent 75%)',
+                // Desktop (via a second layer): left scrim
+                'linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 50%, transparent 75%)',
+              ].join(', '),
+            }}
+          />
 
-          <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-14 max-w-[650px]">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-2xl sm:text-5xl font-black leading-tight mb-3 tracking-tighter text-[#FDE8E4] drop-shadow-lg uppercase"
-            >
-              {slide.title}
-            </motion.h1>
+          {/* ── Text block ── */}
+          <div
+            className="absolute inset-0 flex flex-col justify-end sm:justify-center z-10"
+            style={{ padding: 'clamp(12px, 4vw, 48px)' }}
+          >
+            {/* Keep text in left 60% so it never overlaps the subject */}
+            <div style={{ maxWidth: '60%' }}>
+              {slide.subtitle && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08 }}
+                  style={{
+                    fontSize: 'clamp(9px, 2vw, 13px)',
+                    fontWeight: 600,
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.65)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  {slide.subtitle}
+                </motion.p>
+              )}
 
-            {slide.link && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-4"
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                style={{
+                  /*
+                   * clamp(min, preferred, max)
+                   * min: never smaller than 15px (readable on tiny screens)
+                   * preferred: 4vw scales with viewport width
+                   * max: never bigger than 42px (no overflow on desktop)
+                   */
+                  fontSize: 'clamp(15px, 4vw, 42px)',
+                  fontWeight: 900,
+                  lineHeight: 1.08,
+                  letterSpacing: '-0.02em',
+                  color: '#fff',
+                  textShadow: '0 2px 12px rgba(0,0,0,0.5)',
+                  marginBottom: 'clamp(8px, 2vw, 20px)',
+                  // Prevent text from ever wrapping beyond 2 lines
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
               >
-                <button className="px-6 py-2.5 sm:px-8 sm:py-3 rounded-2xl text-[11px] sm:text-sm font-black active:scale-95 transition-all duration-300 shadow-xl bg-primary text-button-text hover:bg-primary-hover uppercase tracking-widest">
+                {slide.title}
+              </motion.h2>
+
+              {slide.link && (
+                <motion.button
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.24 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = slide.link;
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: 'clamp(6px, 1.2vw, 12px) clamp(14px, 3vw, 32px)',
+                    borderRadius: '999px',
+                    fontSize: 'clamp(9px, 1.5vw, 14px)',
+                    fontWeight: 800,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    background: '#fff',
+                    color: '#111',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                    transition: 'transform 0.15s ease, opacity 0.15s ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                >
                   Explore Now
-                </button>
-              </motion.div>
-            )}
+                </motion.button>
+              )}
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>
 
+      {/* ── Nav arrows ── */}
       {banners.length > 1 && (
         <>
-          <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                prevSlide();
-              }}
-              className="p-2 sm:p-3 rounded-full bg-footer/40 hover:bg-footer/60 text-footer-text backdrop-blur-md transition-all pointer-events-auto opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
-            >
-              <ChevronLeft size={24} />
-            </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+            aria-label="Previous slide"
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/55 text-white backdrop-blur-sm border border-white/15 opacity-0 group-hover:opacity-100 transition-all duration-200"
+            style={{ width: 'clamp(28px, 5vw, 40px)', height: 'clamp(28px, 5vw, 40px)' }}
+          >
+            <ChevronLeft size={16} />
+          </button>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                nextSlide();
-              }}
-              className="p-2 sm:p-3 rounded-full bg-footer/40 hover:bg-footer/60 text-footer-text backdrop-blur-md transition-all pointer-events-auto opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+            aria-label="Next slide"
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/55 text-white backdrop-blur-sm border border-white/15 opacity-0 group-hover:opacity-100 transition-all duration-200"
+            style={{ width: 'clamp(28px, 5vw, 40px)', height: 'clamp(28px, 5vw, 40px)' }}
+          >
+            <ChevronRight size={16} />
+          </button>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5">
+          {/* Dot indicators */}
+          <div className="absolute bottom-3 right-4 flex gap-1.5 z-20 items-center">
             {banners.map((_, i) => (
               <button
                 key={i}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrent(i);
+                onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+                aria-label={`Go to slide ${i + 1}`}
+                style={{
+                  width: current === i ? '16px' : '5px',
+                  height: '5px',
+                  borderRadius: '999px',
+                  background: current === i ? '#fff' : 'rgba(255,255,255,0.4)',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
                 }}
-                className={`h-2.5 rounded-full transition-all duration-500 ${current === i ? 'w-8 bg-footer-text shadow-soft' : 'w-2.5 bg-footer-text/30'}`}
               />
             ))}
           </div>

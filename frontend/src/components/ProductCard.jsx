@@ -153,8 +153,8 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
               </div>
             )}
           </div>
-          <button onClick={wish} className="absolute top-5 right-5 z-20 p-3 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-all border border-white/20">
-            <Heart size={20} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-primary/60 dark:text-white/60'} />
+          <button onClick={wish} className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 p-2 sm:p-3 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-all border border-white/20">
+            <Heart size={18} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-primary/60 dark:text-white/60'} />
           </button>
           
           <div className="absolute bottom-5 left-5 right-5 flex justify-between items-end">
@@ -174,44 +174,44 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
         </div>
 
         {/* Right: Content Box */}
-        <div className="p-6 sm:p-10 flex flex-col flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary dark:text-white bg-primary/5 dark:bg-white/10 px-4 py-1.5 rounded-full border border-primary/20">
+        <div className="p-4 sm:p-10 flex flex-col flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary dark:text-white bg-primary/5 dark:bg-white/10 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full border border-primary/20">
                {product.category}
              </span>
              {product.occasion?.map((occ, idx) => idx < 2 && (
-               <span key={occ} className="text-[10px] font-black text-primary/60 dark:text-white/60 uppercase tracking-widest bg-primary/5 dark:bg-white/5 px-3 py-1.5 rounded-lg">
+               <span key={occ} className="text-[9px] sm:text-[10px] font-black text-primary/60 dark:text-white/60 uppercase tracking-widest bg-primary/5 dark:bg-white/5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg">
                  {occ}
                </span>
              ))}
           </div>
 
           <Link to={`/product/${product.slug}`}>
-            <h3 className="text-2xl md:text-5xl font-black text-heading dark:text-white leading-[1] mb-6 hover:text-primary transition-colors tracking-tighter">
+            <h3 className="text-xl sm:text-2xl md:text-5xl font-black text-heading dark:text-white leading-[1.1] mb-4 sm:mb-6 hover:text-primary transition-colors tracking-tighter line-clamp-2 sm:whitespace-normal">
               {product.name}
             </h3>
           </Link>
 
-          <p className="text-lg text-muted font-medium line-clamp-3 leading-relaxed mb-10">
+          <p className="text-xs sm:text-lg text-muted font-medium line-clamp-2 sm:line-clamp-3 leading-relaxed mb-6 sm:mb-10">
             {product.shortDescription || product.description?.substring(0, 200)}
           </p>
 
           <div className="flex flex-wrap items-end gap-12 mt-auto">
             {/* Price Block */}
-            <div className="space-y-2">
-               <div className="flex items-baseline gap-3">
-                 <span className="text-4xl font-black text-heading dark:text-white tracking-tighter">
+            <div className="space-y-1 sm:space-y-2">
+               <div className="flex items-baseline gap-2 sm:gap-3">
+                 <span className="text-2xl sm:text-4xl font-black text-heading dark:text-white tracking-tighter">
                    ₹{hasVariants && variantStartingPrice ? variantStartingPrice : displayPrice}
                  </span>
-                 <span className="text-[11px] font-black text-muted uppercase tracking-[0.2em]">
+                 <span className="text-[9px] sm:text-[11px] font-black text-muted uppercase tracking-[0.2em]">
                    {hasVariants ? 'From' : 'Net Price'}
                  </span>
                </div>
-               <div className="flex items-center gap-4 h-6">
+               <div className="flex items-center gap-3 sm:gap-4 h-5 sm:h-6">
                  {hasOffer && !hasVariants && (
                    <>
-                     <span className="text-lg text-muted/60 line-through">₹{mrp}</span>
-                     <span className="text-base font-black text-primary dark:text-white">{discountPct}% OFF</span>
+                     <span className="text-sm sm:text-lg text-muted/60 line-through">₹{mrp}</span>
+                     <span className="text-xs sm:text-base font-black text-primary dark:text-white">{discountPct}% OFF</span>
                    </>
                  )}
                </div>

@@ -49,7 +49,7 @@ const CategorySlider = () => {
     <section className="py-10">
       <div className="flex items-center justify-between mb-10">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-heading uppercase tracking-tighter">
+          <h2 className="text-xl sm:text-3xl font-black text-heading uppercase tracking-tighter">
             What's on your mind?
           </h2>
           <p className="text-xs font-bold text-muted uppercase tracking-widest mt-1">

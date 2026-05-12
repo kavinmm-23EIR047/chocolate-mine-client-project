@@ -204,10 +204,10 @@ const Cart = () => {
                   key={`${item.productId}-${item.selectedFlavor || ""}-${item.selectedWeight || ""}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-2xl shadow-card border border-border/50 p-4 sm:p-6"
+                  className="bg-card rounded-2xl shadow-card border border-border/50 p-3 sm:p-6"
                 >
-                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                    <div className="w-full sm:w-32 h-48 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+                    <div className="w-full sm:w-32 h-40 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40">
                       <img
                         src={item.image}
                         alt={item.name}
@@ -368,11 +368,11 @@ const Cart = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
-                <div className="p-5 border-b border-border/40 bg-card-soft/80">
-                  <p className="text-[11px] font-black text-muted uppercase tracking-[0.2em] mb-2">
+                <div className="p-4 sm:p-5 border-b border-border/40 bg-card-soft/80">
+                  <p className="text-[10px] sm:text-[11px] font-black text-muted uppercase tracking-[0.2em] mb-2">
                     Bag subtotal
                   </p>
-                  <p className="text-3xl font-black text-heading tracking-tight tabular-nums">
+                  <p className="text-2xl sm:text-3xl font-black text-heading tracking-tight tabular-nums">
                     {formatCurrency(subtotal)}
                   </p>
                   <p className="text-xs text-muted mt-2 font-medium leading-relaxed">
@@ -382,7 +382,7 @@ const Cart = () => {
                   </p>
                 </div>
 
-                <div className="p-5 space-y-4">
+                <div className="p-4 sm:p-5 space-y-4">
                   <div className="border border-border/50 rounded-xl overflow-hidden">
                     <button
                       type="button"
@@ -494,7 +494,7 @@ const Cart = () => {
                           type="button"
                           onClick={handleApplyCoupon}
                           disabled={couponBusy || hasAppliedCoupon}
-                          className="bg-primary text-button-text hover:brightness-110 px-6 h-11 shrink-0"
+                          className="bg-primary text-button-text hover:brightness-110 px-4 sm:px-6 h-11 shrink-0 text-[10px] sm:text-xs"
                         >
                           {couponBusy ? "…" : "APPLY"}
                         </Button>

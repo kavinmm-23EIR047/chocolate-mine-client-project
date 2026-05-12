@@ -279,37 +279,37 @@ const Home = () => {
             {/* ── DYNAMIC CATEGORY CIRCLES FROM BACKEND ────────────────── */}
             <section className="py-10">
               {categoriesLoading ? (
-                <div className="flex flex-wrap justify-center gap-6 sm:gap-12 px-4">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-12 px-2">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div key={i} className="flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-muted/10 animate-pulse" />
-                      <div className="w-14 h-3 bg-muted/10 rounded-full animate-pulse" />
+                      <div className="w-16 h-16 sm:w-28 sm:h-28 rounded-3xl bg-muted/10 animate-pulse" />
+                      <div className="w-12 h-3 bg-muted/10 rounded-full animate-pulse" />
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-wrap justify-center gap-6 sm:gap-12 px-4">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-12 px-2">
                   {categories.map((cat) => (
                     <button
                       key={cat.name}
                       onClick={() => handleCategory(cat.name)}
                       className="flex flex-col items-center gap-4 group outline-none shrink-0"
                     >
-                      <div className={`w-20 h-20 sm:w-28 sm:h-28 rounded-[2rem] border-2 p-1 transition-all duration-500 overflow-hidden shadow-xl ${activeCategory === cat.name
-                        ? 'border-primary ring-8 ring-primary/5 shadow-primary/20 scale-110'
+                      <div className={`w-16 h-16 sm:w-28 sm:h-28 rounded-[1.5rem] sm:rounded-[2rem] border-2 p-1 transition-all duration-500 overflow-hidden shadow-xl ${activeCategory === cat.name
+                        ? 'border-primary ring-4 sm:ring-8 ring-primary/5 shadow-primary/20 scale-110'
                         : 'border-border/40 group-hover:border-primary/40 group-hover:scale-105'
                         }`}>
                         <img
                           src={cat.image}
                           alt={cat.name}
-                          className={`w-full h-full object-cover rounded-[1.8rem] transition-transform duration-700 ${activeCategory === cat.name ? 'scale-110' : 'group-hover:scale-110'
+                          className={`w-full h-full object-cover rounded-[1.3rem] sm:rounded-[1.8rem] transition-transform duration-700 ${activeCategory === cat.name ? 'scale-110' : 'group-hover:scale-110'
                             }`}
                           onError={(e) => {
                             e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&q=80';
                           }}
                         />
                       </div>
-                      <span className={`text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeCategory === cat.name ? 'text-primary' : 'text-muted/60 group-hover:text-primary group-hover:tracking-[0.3em]'
+                      <span className={`text-[9px] sm:text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeCategory === cat.name ? 'text-primary' : 'text-muted/60 group-hover:text-primary group-hover:tracking-[0.3em]'
                         }`}>
                         {cat.name}
                       </span>
@@ -321,7 +321,7 @@ const Home = () => {
 
             {/* ── DELIVERY STRIP ───────────────────────────────────────── */}
             <section
-              className="rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 sm:gap-12 relative overflow-hidden group cutting-edge-border shadow-premium"
+              className="rounded-[2.5rem] sm:rounded-[3rem] p-5 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 relative overflow-hidden group cutting-edge-border shadow-premium"
               style={{ background: 'var(--card)' }}
             >
               {/* Background Glows */}

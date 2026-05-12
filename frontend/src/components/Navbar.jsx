@@ -46,18 +46,18 @@ const Navbar = () => {
             : 'bg-navbar py-4'
           }`}
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-          <div className="flex items-center justify-between gap-4 lg:gap-12">
+        <div className="max-w-[1440px] mx-auto px-2 sm:px-8">
+          <div className="flex items-center justify-between gap-1 sm:gap-4 lg:gap-12">
 
             {/* 1. LOGO */}
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
+            <Link to="/" className="flex items-center gap-1.5 sm:gap-3 shrink-0 group">
               <div className="relative">
-                <Logo className="w-10 h-10 sm:w-14 sm:h-14 bg-card rounded-xl sm:rounded-2xl p-1.5 shadow-lg sm:shadow-xl shadow-primary/10 border border-border/50 group-hover:scale-105 transition-transform duration-500" />
+                <Logo className="w-9 h-9 sm:w-14 sm:h-14 bg-card rounded-xl sm:rounded-2xl p-1.5 shadow-lg sm:shadow-xl shadow-primary/10 border border-border/50 group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute -inset-1 bg-primary/5 blur-lg rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] xs:text-[12px] sm:text-[18px] font-black text-primary tracking-tighter leading-none uppercase">The Chocolate</span>
-                <span className="text-[8px] xs:text-[9px] sm:text-[12px] font-black text-accent tracking-[0.4em] uppercase mt-0.5 sm:mt-1 leading-none">Mine</span>
+                <span className="text-[9px] xs:text-[11px] sm:text-[18px] font-black text-primary tracking-tighter leading-none uppercase">The Chocolate</span>
+                <span className="text-[7px] xs:text-[8px] sm:text-[12px] font-black text-accent tracking-[0.3em] sm:tracking-[0.4em] uppercase mt-0.5 sm:mt-1 leading-none">Mine</span>
               </div>
             </Link>
 
@@ -165,10 +165,10 @@ const Navbar = () => {
               {/* Cart Button */}
               <Link
                 to="/cart"
-                className="relative flex items-center gap-3 group py-2.5 px-4 rounded-2xl hover:bg-primary/5 border border-transparent hover:border-border/50 transition-all"
+                className="relative flex items-center gap-3 group py-2.5 px-2 sm:px-4 rounded-2xl hover:bg-primary/5 border border-transparent hover:border-border/50 transition-all"
               >
                 <div className="relative">
-                  <ShoppingCart size={22} className="text-primary transition-transform group-hover:-translate-y-0.5" />
+                  <ShoppingCart size={20} className="text-primary transition-transform group-hover:-translate-y-0.5" />
                   {cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-accent text-primary text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg border-2 border-navbar group-hover:scale-110 transition-transform">
                       {cartCount}

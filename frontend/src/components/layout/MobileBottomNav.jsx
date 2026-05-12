@@ -47,15 +47,15 @@ const MobileBottomNav = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="lg:hidden fixed bottom-6 left-0 right-0 z-[100] px-4 pointer-events-none"
+          className="lg:hidden fixed bottom-6 left-0 right-0 z-[100] px-2 sm:px-4 pointer-events-none"
         >
-          <nav className="rounded-full flex items-center justify-between p-1 px-2 pointer-events-auto max-w-lg mx-auto cutting-edge-border">
+          <nav className="rounded-full flex items-center justify-between p-1 px-1 sm:px-2 pointer-events-auto max-w-lg mx-auto cutting-edge-border">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) => 
-                  `flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-full transition-all duration-300 relative group ${
+                  `flex flex-col items-center justify-center gap-1 w-10 xs:w-11 sm:w-12 h-10 xs:h-11 sm:h-12 rounded-full transition-all duration-300 relative group ${
                     isActive ? 'text-button-text border-2 border-primary ring-2 ring-primary/20' : 'text-heading hover:text-primary/70'
                   }`
                 }
@@ -72,7 +72,7 @@ const MobileBottomNav = () => {
                     
                     <div className="relative">
                       <item.icon 
-                        size={isActive ? 20 : 22} 
+                        size={isActive ? 16 : 18} 
                         className="transition-all duration-300" 
                         strokeWidth={isActive ? 3 : 2}
                       />

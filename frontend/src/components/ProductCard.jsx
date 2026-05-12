@@ -138,118 +138,117 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="group relative bg-card rounded-[2.5rem] overflow-hidden border border-border/40 hover:shadow-2xl transition-all duration-500 flex flex-col md:flex-row w-full bg-white dark:bg-[#1a0f0d] shadow-premium"
+        className="group relative bg-card rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden border border-border/40 hover:shadow-2xl transition-all duration-500 flex flex-row w-full bg-white dark:bg-[#1a0f0d] shadow-premium"
       >
-        {/* Left: Image Box */}
-        <div className="relative w-full md:w-[40%] lg:w-[35%] shrink-0 aspect-[4/3] md:aspect-auto overflow-hidden bg-background dark:bg-[#221210] m-4 rounded-[2rem]">
+        {/* Left: Image Section */}
+        <div className="relative w-[35%] xs:w-[40%] sm:w-[35%] shrink-0 overflow-hidden bg-surface border-r border-border/10">
           <Link to={`/product/${product.slug}`} className="block w-full h-full">
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+            />
           </Link>
-          <div className="absolute top-5 left-5 z-20">
+          
+          {/* Ratings Badge */}
+          <div className="absolute top-2 left-2 sm:top-5 sm:left-5 z-20">
             {product.ratingsAverage > 0 && (
-              <div className="flex items-center gap-1.5 px-4 py-2 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full shadow-lg border border-white/20">
-                <Star size={14} fill="#3D1F1A" className="text-[#3D1F1A] dark:text-white" />
-                <span className="text-[12px] font-black text-primary dark:text-white">{product.ratingsAverage.toFixed(1)}</span>
+              <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-4 sm:py-2 bg-white rounded-full shadow-xl">
+                <Star size={10} sm:size={14} fill="currentColor" className="text-heading" />
+                <span className="text-[10px] sm:text-[12px] font-black text-heading">{product.ratingsAverage.toFixed(1)}</span>
               </div>
             )}
           </div>
-          <button onClick={wish} className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 p-2 sm:p-3 bg-white/90 dark:bg-black/60 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-all border border-white/20">
-            <Heart size={18} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-primary/60 dark:text-white/60'} />
-          </button>
-          
-          <div className="absolute bottom-5 left-5 right-5 flex justify-between items-end">
-             <div className="bg-primary/90 dark:bg-black/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-xl">
-               <div className="flex items-center gap-2">
-                 <MapPin size={12} className="text-white" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-white">{productLocation}</span>
-               </div>
-             </div>
+
+          {/* Location Badge */}
+          <div className="absolute bottom-2 left-2 sm:bottom-5 sm:left-5">
+            <div className="bg-heading/80 dark:bg-black/60 backdrop-blur-md px-2 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-2xl border border-white/10 flex items-center gap-1 sm:gap-2 shadow-xl">
+              <MapPin size={10} sm:size={14} className="text-white" />
+              <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white truncate max-w-[50px] sm:max-w-none">{productLocation}</span>
+            </div>
           </div>
 
           {isOutOfStock && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-[4px] flex items-center justify-center z-10">
-              <span className="bg-white text-primary border-2 border-primary/20 px-8 py-3 rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-2xl">Sold Out</span>
+              <span className="bg-white text-primary border border-primary/20 px-4 py-2 rounded-xl text-[9px] sm:text-sm font-black uppercase tracking-widest shadow-2xl">Sold Out</span>
             </div>
           )}
         </div>
 
-        {/* Right: Content Box */}
-        <div className="p-4 sm:p-10 flex flex-col flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-primary dark:text-white bg-primary/5 dark:bg-white/10 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full border border-primary/20">
-               {product.category}
-             </span>
-             {product.occasion?.map((occ, idx) => idx < 2 && (
-               <span key={occ} className="text-[9px] sm:text-[10px] font-black text-primary/60 dark:text-white/60 uppercase tracking-widest bg-primary/5 dark:bg-white/5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg">
-                 {occ}
-               </span>
-             ))}
+        {/* Right: Details Section */}
+        <div className="p-3 xs:p-4 sm:p-8 flex flex-col flex-1 min-w-0 relative">
+          <button onClick={wish} className="absolute top-3 right-3 sm:top-5 sm:right-5 p-2 sm:p-3 bg-surface dark:bg-white/5 rounded-full shadow-sm hover:scale-110 transition-all border border-border/40">
+            <Heart size={16} sm:size={20} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-primary/60 dark:text-white/60'} />
+          </button>
+
+          {/* Category Tags */}
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+            <span className="px-2 py-1 sm:px-4 sm:py-1.5 bg-muted/5 dark:bg-white/10 rounded-full border border-border/40 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-muted">
+              {product.category}
+            </span>
           </div>
 
           <Link to={`/product/${product.slug}`}>
-            <h3 className="text-xl sm:text-2xl md:text-5xl font-black text-heading dark:text-white leading-[1.1] mb-4 sm:mb-6 hover:text-primary transition-colors tracking-tighter line-clamp-2 sm:whitespace-normal">
+            <h3 className="text-sm xs:text-base sm:text-3xl font-black text-heading dark:text-white leading-tight hover:text-primary transition-colors tracking-tight line-clamp-1 sm:line-clamp-2">
               {product.name}
             </h3>
           </Link>
 
-          <p className="text-xs sm:text-lg text-muted font-medium line-clamp-2 sm:line-clamp-3 leading-relaxed mb-6 sm:mb-10">
-            {product.shortDescription || product.description?.substring(0, 200)}
+          <p className="hidden xs:block text-[10px] sm:text-base text-muted font-medium line-clamp-1 sm:line-clamp-2 opacity-60 mt-1 sm:mt-2">
+            {product.shortDescription}
           </p>
 
-          <div className="flex flex-wrap items-end gap-12 mt-auto">
-            {/* Price Block */}
-            <div className="space-y-1 sm:space-y-2">
-               <div className="flex items-baseline gap-2 sm:gap-3">
-                 <span className="text-2xl sm:text-4xl font-black text-heading dark:text-white tracking-tighter">
-                   ₹{hasVariants && variantStartingPrice ? variantStartingPrice : displayPrice}
-                 </span>
-                 <span className="text-[9px] sm:text-[11px] font-black text-muted uppercase tracking-[0.2em]">
-                   {hasVariants ? 'From' : 'Net Price'}
-                 </span>
-               </div>
-               <div className="flex items-center gap-3 sm:gap-4 h-5 sm:h-6">
-                 {hasOffer && !hasVariants && (
-                   <>
-                     <span className="text-sm sm:text-lg text-muted/60 line-through">₹{mrp}</span>
-                     <span className="text-xs sm:text-base font-black text-primary dark:text-white">{discountPct}% OFF</span>
-                   </>
-                 )}
-               </div>
+          {/* Price & Add to Cart Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mt-auto">
+            <div className="space-y-0.5 sm:space-y-1">
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <span className="text-lg xs:text-xl sm:text-3xl font-black text-heading dark:text-white tracking-tighter">
+                  ₹{hasVariants && variantStartingPrice ? variantStartingPrice : displayPrice}
+                </span>
+                <span className="text-[8px] sm:text-[10px] font-black text-muted/40 uppercase tracking-widest">
+                  {hasVariants ? 'Start' : 'Net'}
+                </span>
+              </div>
+              {hasOffer && !hasVariants && (
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-[10px] sm:text-sm text-muted/40 line-through font-bold">₹{mrp}</span>
+                  <span className="text-[9px] sm:text-sm font-black text-primary uppercase">{discountPct}% OFF</span>
+                </div>
+              )}
             </div>
 
-            {/* Action Block */}
-             <div className="flex-1 w-full flex items-center gap-4">
-                {couponLive ? (
-                  <div className="flex-1 bg-primary/5 dark:bg-white/5 border border-dashed border-primary/30 dark:border-white/20 p-4 sm:p-5 rounded-3xl flex items-center justify-between gap-4 sm:gap-6 hover:bg-primary/10 transition-all">
-                     <div className="min-w-0">
-                        <p className="text-[9px] sm:text-[10px] font-black text-primary dark:text-white uppercase tracking-[0.2em] mb-1">Coupon Available</p>
-                        <p className="text-xs sm:text-sm font-bold text-heading dark:text-white truncate">Code: <span className="text-primary font-black tracking-widest uppercase">{couponCodeDisplay}</span></p>
-                     </div>
-                     <button onClick={add} className="shrink-0 h-10 sm:h-12 px-6 sm:px-8 bg-primary text-button-text rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-primary/20">Claim</button>
-                  </div>
-                ) : (
-                  <button onClick={add} disabled={isOutOfStock || addingToCart} className="flex-1 h-14 sm:h-16 bg-primary text-button-text rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] hover:shadow-2xl shadow-xl shadow-primary/10 transition-all disabled:opacity-50 flex items-center justify-center gap-4">
-                    {addingToCart ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ShoppingCart size={20} />}
-                    {needsVariantSelection ? 'Personalize' : 'Add to Cart'}
-                  </button>
-                )}
-             </div>
+            <button 
+              onClick={add} 
+              disabled={isOutOfStock || addingToCart}
+              className="h-9 xs:h-11 sm:h-14 px-3 xs:px-6 sm:px-8 bg-[#3D1F1A] text-white rounded-xl sm:rounded-[1.5rem] flex items-center justify-center gap-2 sm:gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-primary/10 disabled:opacity-50"
+            >
+              {addingToCart ? (
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <ShoppingCart size={14} className="sm:w-5 sm:h-5" />
+                  <span className="text-[8px] xs:text-[10px] sm:text-xs font-black uppercase tracking-widest">{needsVariantSelection ? 'Personalize' : 'Add to Cart'}</span>
+                </>
+              )}
+            </button>
           </div>
-          
-          <div className="mt-10 pt-8 border-t border-border/30 flex flex-wrap items-center justify-between gap-6">
-             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 dark:bg-white/5 rounded-xl border border-primary/10">
-                   <div className={`w-2.5 h-2.5 rounded-full ${stockStatus.urgent ? 'animate-pulse' : ''}`} style={{ background: stockStatus.dot }} />
-                   <span className="text-[11px] font-black uppercase tracking-[0.15em] text-primary dark:text-white">{stockStatus.label}</span>
-                </div>
+
+          {/* Footer Actions */}
+          <div className="hidden sm:flex items-center gap-3 mt-4 pt-4 border-t border-border/20">
+             <div className="bg-primary/5 dark:bg-white/5 border border-primary/10 px-4 py-2 rounded-2xl flex items-center gap-2 w-fit">
+                <div className={`w-2.5 h-2.5 rounded-full ${stockStatus.urgent ? 'animate-pulse' : ''}`} style={{ background: stockStatus.dot }} />
+                <span className="text-[11px] font-black uppercase tracking-widest text-primary dark:text-white">
+                  {stockStatus.label}
+                </span>
              </div>
+             
              <Link 
-               to={`/product/${product.slug}`} 
-               className="group/details h-12 px-8 rounded-2xl bg-primary/5 hover:bg-primary border border-primary/20 hover:border-primary text-[11px] font-black uppercase tracking-widest text-primary hover:text-button-text transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-xl hover:shadow-primary/20"
-             >
-               <span>View Full Details</span>
-               <ChevronRight size={14} strokeWidth={3} className="group-hover/details:translate-x-1 transition-transform" />
-             </Link>
+              to={`/product/${product.slug}`}
+              className="flex-1 h-12 bg-surface dark:bg-white/5 border border-border/60 rounded-2xl flex items-center justify-center gap-3 group/btn hover:bg-primary hover:border-primary transition-all duration-300"
+            >
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-heading dark:text-white group-hover/btn:text-button-text">Full Details</span>
+              <ChevronRight size={14} className="text-muted group-hover/btn:text-button-text group-hover/btn:translate-x-1 transition-all" />
+            </Link>
           </div>
         </div>
       </motion.div>
@@ -323,7 +322,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       </div>
 
       {/* ─── DETAILS SECTION ─────────────────────── */}
-      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 flex flex-col flex-1 min-h-0">
+      <div className="px-3 sm:px-5 pb-3 sm:pb-5 pt-1 flex flex-col flex-1 min-h-0">
         <div className="mb-2">
            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted/5 dark:bg-white/5 border border-border/40 rounded-md text-[9px] font-black text-muted uppercase tracking-widest">
               <Zap size={9} fill="currentColor" className="text-primary" />
@@ -332,7 +331,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
         </div>
 
         <Link to={`/product/${product.slug}`}>
-          <h3 className="text-xl sm:text-[1.35rem] font-black text-heading dark:text-white leading-tight mb-2.5 group-hover:text-primary transition-colors tracking-tight line-clamp-1">
+          <h3 className="text-lg sm:text-[1.35rem] font-black text-heading dark:text-white leading-tight mb-2 group-hover:text-primary transition-colors tracking-tight line-clamp-1">
             {productName}
           </h3>
         </Link>
@@ -340,7 +339,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
         {/* Price Section */}
         <div className="mb-4">
           <div className="flex items-baseline gap-1.5 mb-0.5">
-            <span className="text-2xl sm:text-3xl font-black text-heading dark:text-white tracking-tighter">
+            <span className="text-xl sm:text-3xl font-black text-heading dark:text-white tracking-tighter">
               ₹{hasVariants && variantStartingPrice ? variantStartingPrice : displayPrice}
             </span>
             <span className="text-[9px] font-black text-muted/60 uppercase tracking-widest">
@@ -368,8 +367,8 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
 
            {/* Special Deal / Coupon Box */}
            {couponLive && (
-             <div className="bg-muted/5 dark:bg-white/5 p-3 rounded-xl border border-border/30 relative group/deal overflow-hidden shrink-0">
-                <div className="flex items-center justify-between gap-3 relative z-10">
+              <div className="bg-muted/5 dark:bg-white/5 p-2 sm:p-3 rounded-xl border border-border/30 relative group/deal overflow-hidden shrink-0">
+                 <div className="flex items-center justify-between gap-2 sm:gap-3 relative z-10">
                    <div className="min-w-0">
                      <p className="text-[8px] font-black text-muted/60 uppercase tracking-widest mb-0.5">Special Deal</p>
                      <p className="text-[10px] font-black text-heading dark:text-white truncate">
@@ -396,11 +395,11 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-4 mt-4 border-t border-border/40 flex gap-3 shrink-0">
+        <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-border/40 flex gap-2 sm:gap-3 shrink-0">
            <button 
              onClick={add}
              disabled={isOutOfStock || addingToCart}
-             className="flex-[3] flex items-center justify-center gap-3 h-14 bg-primary text-button-text rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-primary/20 group/add"
+             className="flex-[3] flex items-center justify-center gap-2 sm:gap-3 h-12 sm:h-14 bg-primary text-button-text rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-primary/20 group/add"
            >
              {addingToCart ? (
                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -413,7 +412,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
            </button>
            <Link 
              to={`/product/${product.slug}`}
-             className="w-12 h-12 border border-border hover:border-primary hover:bg-primary/5 rounded-xl flex items-center justify-center transition-all group/eye shrink-0"
+             className="w-12 h-12 border border-border hover:border-primary hover:bg-primary/5 rounded-xl flex items-center justify-center transition-all group/eye shrink-0 hidden xs:flex"
            >
              <Eye size={18} className="text-muted/40 group-hover:text-primary transition-colors" />
            </Link>

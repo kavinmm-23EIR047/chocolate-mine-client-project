@@ -875,10 +875,10 @@ const Checkout = () => {
                 </div>
               </div>
               <div className="p-5">
-                <div className="p-5 border border-primary/30 rounded-2xl bg-primary/5">
+                <div className="p-4 sm:p-5 border border-primary/30 rounded-2xl bg-primary/5">
                   <CreditCard size={24} className="mb-3 text-primary" />
-                  <p className="font-black text-heading text-sm uppercase tracking-widest">Online Payment Only</p>
-                  <p className="text-[10px] text-muted font-bold mt-1 uppercase tracking-wider">Cards, UPI, NetBanking via Razorpay</p>
+                  <p className="font-black text-heading text-[11px] sm:text-sm uppercase tracking-widest">Online Payment Only</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted font-bold mt-1 uppercase tracking-wider">Cards, UPI, NetBanking via Razorpay</p>
                 </div>
                 <p className="text-[10px] text-muted/40 mt-4 text-center font-bold uppercase tracking-widest italic">We only accept online payments for a seamless and secure experience.</p>
               </div>
@@ -888,30 +888,30 @@ const Checkout = () => {
           {/* RIGHT COLUMN - Order Summary */}
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-4">
-              <div className="bg-card rounded-2xl shadow-card border border-border/50 p-6">
-                <h3 className="font-black text-heading text-xs uppercase tracking-widest mb-6">ORDER SUMMARY</h3>
+              <div className="bg-card rounded-2xl shadow-card border border-border/50 p-4 sm:p-6">
+                <h3 className="font-black text-heading text-[10px] sm:text-xs uppercase tracking-widest mb-4 sm:mb-6">ORDER SUMMARY</h3>
 
                 <div className="max-h-64 overflow-y-auto space-y-4 mb-6 pr-2 custom-scrollbar">
                   {cartItems.map((item) => (
                     <div
                       key={`${item.productId}-${item.selectedFlavor || ''}-${item.selectedWeight || ''}`}
-                      className="flex gap-4"
+                      className="flex gap-2 sm:gap-4"
                     >
-                      <img src={item.image} className="w-14 h-14 rounded-xl object-cover border border-border/10" />
+                      <img src={item.image} className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-border/10" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
+                        <p className="text-[11px] sm:text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
                         {item.selectedFlavor && (
-                          <p className="text-[9px] text-muted font-bold uppercase tracking-widest mt-0.5">Flavor: {item.selectedFlavor}</p>
+                          <p className="text-[8px] sm:text-[9px] text-muted font-bold uppercase tracking-widest mt-0.5">Flavor: {item.selectedFlavor}</p>
                         )}
                         {item.selectedWeight && (
-                          <p className="text-[9px] text-muted font-bold uppercase tracking-widest">Weight: {item.selectedWeight}</p>
+                          <p className="text-[8px] sm:text-[9px] text-muted font-bold uppercase tracking-widest">Weight: {item.selectedWeight}</p>
                         )}
-                        <p className="text-[10px] text-muted/60 font-black mt-1">QTY: {item.qty}</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted/60 font-black mt-1">QTY: {item.qty}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-black text-heading text-sm tracking-tight">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
+                      <div className="text-right shrink-0">
+                        <p className="font-black text-heading text-xs sm:text-sm tracking-tight">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
                         {Number(item.price) > getFinalItemPrice(item) && (
-                          <p className="text-[10px] line-through text-muted/40 font-bold">{formatCurrency(Number(item.price) * item.qty)}</p>
+                          <p className="text-[9px] sm:text-[10px] line-through text-muted/40 font-bold">{formatCurrency(Number(item.price) * item.qty)}</p>
                         )}
                       </div>
                     </div>
@@ -919,47 +919,47 @@ const Checkout = () => {
                 </div>
 
                 <div className="space-y-3 text-sm border-t border-border/30 pt-6">
-                  <div className="flex justify-between font-bold">
-                    <span className="text-muted text-[11px] uppercase tracking-widest">Total MRP</span>
-                    <span className="text-heading">{formatCurrency(originalTotal)}</span>
+                  <div className="flex justify-between gap-2 font-bold">
+                    <span className="text-muted text-[10px] sm:text-[11px] uppercase tracking-widest">Total MRP</span>
+                    <span className="text-heading text-xs sm:text-sm">{formatCurrency(originalTotal)}</span>
                   </div>
 
                   {offerDiscount > 0 && (
-                    <div className="flex justify-between text-success font-black text-[11px] uppercase tracking-widest">
+                    <div className="flex justify-between gap-2 text-success font-black text-[10px] sm:text-[11px] uppercase tracking-widest">
                       <span>Offer Discount</span>
-                      <span>- {formatCurrency(offerDiscount)}</span>
+                      <span className="text-xs sm:text-sm">- {formatCurrency(offerDiscount)}</span>
                     </div>
                   )}
 
                   {couponDiscount > 0 && (
-                    <div className="flex justify-between text-success font-black text-[11px] uppercase tracking-widest">
+                    <div className="flex justify-between gap-2 text-success font-black text-[10px] sm:text-[11px] uppercase tracking-widest">
                       <span>Coupon ({appliedCouponDisplay})</span>
-                      <span>- {formatCurrency(couponDiscount)}</span>
+                      <span className="text-xs sm:text-sm">- {formatCurrency(couponDiscount)}</span>
                     </div>
                   )}
 
-                  <div className="border-t border-border/30 pt-2 flex justify-between font-black">
-                    <span className="text-muted text-[11px] uppercase tracking-widest">Subtotal</span>
-                    <span className="text-heading">{formatCurrency(subtotal)}</span>
+                  <div className="border-t border-border/30 pt-2 flex justify-between gap-2 font-black">
+                    <span className="text-muted text-[10px] sm:text-[11px] uppercase tracking-widest">Subtotal</span>
+                    <span className="text-heading text-xs sm:text-sm">{formatCurrency(subtotal)}</span>
                   </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-muted font-medium">Delivery Fee</span>
-                    <span className="text-heading font-black">{deliveryInfo.position ? formatCurrency(deliveryFee) : '--'}</span>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted font-medium text-[11px] sm:text-sm">Delivery Fee</span>
+                    <span className="text-heading font-black text-xs sm:text-sm">{deliveryInfo.position ? formatCurrency(deliveryFee) : '--'}</span>
                   </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-muted font-medium">GST (18%)</span>
-                    <span className="text-heading font-black">{deliveryInfo.position ? formatCurrency(gst) : '--'}</span>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted font-medium text-[11px] sm:text-sm">GST (18%)</span>
+                    <span className="text-heading font-black text-xs sm:text-sm">{deliveryInfo.position ? formatCurrency(gst) : '--'}</span>
                   </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-muted font-medium">Convenience Fee</span>
-                    <span className="text-heading font-black">{deliveryInfo.position ? formatCurrency(convenienceFee) : '--'}</span>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted font-medium text-[11px] sm:text-sm">Convenience Fee</span>
+                    <span className="text-heading font-black text-xs sm:text-sm">{deliveryInfo.position ? formatCurrency(convenienceFee) : '--'}</span>
                   </div>
 
                   {(offerDiscount + couponDiscount) > 0 && (
-                    <div className="bg-success-light rounded-xl px-4 py-3 flex justify-between text-success-text font-black text-xs uppercase tracking-widest border border-success/10">
+                    <div className="bg-success-light rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex justify-between text-success-text font-black text-[10px] sm:text-xs uppercase tracking-widest border border-success/10">
                       <span>You Save</span>
                       <span>- {formatCurrency(offerDiscount + couponDiscount)}</span>
                     </div>
@@ -999,7 +999,7 @@ const Checkout = () => {
                         type="button"
                         onClick={() => handleApplyCoupon()}
                         disabled={couponBusy || hasAppliedCoupon}
-                        className="bg-primary text-button-text hover:brightness-110 px-8 h-12 shrink-0"
+                        className="bg-primary text-button-text hover:brightness-110 px-4 sm:px-8 h-12 shrink-0 text-[10px] sm:text-xs"
                       >
                         {couponBusy ? '…' : 'APPLY'}
                       </Button>

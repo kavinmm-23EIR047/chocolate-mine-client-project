@@ -70,13 +70,13 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-4xl lg:text-5xl font-black text-heading uppercase tracking-tighter">Shop All Cakes</h1>
-            <p className="text-sm text-muted font-black uppercase tracking-widest mt-2">
+            <h1 className="text-2xl xs:text-3xl lg:text-5xl font-black text-heading uppercase tracking-tighter">Shop All Cakes</h1>
+            <p className="text-[10px] sm:text-sm text-muted font-black uppercase tracking-widest mt-2">
               Showing {products.length} of {totalProducts} delicious creations
             </p>
           </div>

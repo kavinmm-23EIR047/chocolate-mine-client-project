@@ -29,8 +29,8 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-4 group">
               <Logo className="w-20 h-20 bg-surface rounded-2xl p-1 shadow-premium border border-border/10 backdrop-blur-md" />
               <div className="flex flex-col">
-                <span className="text-xl sm:text-3xl font-black text-footer-text tracking-tighter leading-none uppercase transition-colors">THE CHOCOLATE</span>
-                <span className="text-xs sm:text-sm font-black text-secondary tracking-[0.4em] uppercase mt-1 transition-colors">Mine</span>
+                <span className="text-lg xs:text-xl sm:text-3xl font-black text-footer-text tracking-tighter leading-none uppercase transition-colors">THE CHOCOLATE</span>
+                <span className="text-[10px] sm:text-sm font-black text-secondary tracking-[0.4em] uppercase mt-1 transition-colors">Mine</span>
               </div>
             </Link>
             <p className="text-xl font-bold text-footer-text/60 max-w-md leading-relaxed italic">
@@ -49,8 +49,8 @@ const Footer = () => {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                <Whatsapp size={80} className="-rotate-12" />
             </div>
-            <h3 className="text-2xl font-black mb-2 text-footer-text uppercase tracking-tighter">Join our WhatsApp Group</h3>
-            <p className="text-footer-text/50 font-bold text-[10px] mb-8 uppercase tracking-widest">Join our WhatsApp group and get exciting offers</p>
+            <h3 className="text-xl sm:text-2xl font-black mb-2 text-footer-text uppercase tracking-tighter">Join our WhatsApp Group</h3>
+            <p className="text-footer-text/50 font-bold text-[9px] sm:text-[10px] mb-6 sm:mb-8 uppercase tracking-widest">Join our WhatsApp group and get exciting offers</p>
             <form 
               className="flex flex-col sm:flex-row gap-4"
               onSubmit={(e) => { 
@@ -61,13 +61,13 @@ const Footer = () => {
             >
               <input
                 type="tel"
-                placeholder="Enter your mobile number"
+                placeholder="Enter number"
                 required
                 pattern="[0-9]{10}"
                 title="Please enter a valid 10-digit mobile number"
-                className="flex-1 bg-white/5 border border-footer-text/10 rounded-xl px-6 py-4 outline-none focus:border-[#25D366] transition-all font-bold placeholder:text-footer-text/30"
+                className="flex-1 bg-white/5 border border-footer-text/10 rounded-xl px-4 py-3 outline-none focus:border-[#25D366] transition-all font-bold placeholder:text-footer-text/30 text-sm"
               />
-              <Button type="submit" className="py-4 px-8 rounded-xl shadow-xl font-black tracking-widest" style={{ background: '#25D366', color: '#ffffff' }} icon={Whatsapp}>JOIN NOW</Button>
+              <Button type="submit" className="py-3 px-6 rounded-xl shadow-xl font-black tracking-widest text-xs" style={{ background: '#25D366', color: '#ffffff' }} icon={Whatsapp}>JOIN NOW</Button>
             </form>
           </div>
         </div>
@@ -166,18 +166,18 @@ const Footer = () => {
 
         {/* Bottom Section: Payment & Copyright */}
         <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 opacity-40 grayscale hover:grayscale-0 transition-all">
              <div className="flex items-center gap-2">
-                <ShieldCheck size={18} />
-                <span className="text-[10px] font-black uppercase tracking-widest">100% Secure</span>
+                <ShieldCheck size={16} />
+                <span className="text-[9px] font-black uppercase tracking-widest">100% Secure</span>
              </div>
              <div className="flex items-center gap-2">
-                <CreditCard size={18} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Razorpay</span>
+                <CreditCard size={16} />
+                <span className="text-[9px] font-black uppercase tracking-widest">Razorpay</span>
              </div>
              <div className="flex items-center gap-2">
-                <Truck size={18} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Fast Delivery</span>
+                <Truck size={16} />
+                <span className="text-[9px] font-black uppercase tracking-widest">Fast Delivery</span>
              </div>
           </div>
 

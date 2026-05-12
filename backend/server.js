@@ -28,12 +28,6 @@ app.set('trust proxy', 1);
 /* ==================================
    SECURITY HEADERS
 ================================== */
-app.use(
-  helmet({
-    crossOriginResourcePolicy: false
-  })
-);
-
 /* ==================================
    CORS CONFIG (Express 5 Safe)
 ================================== */
@@ -49,18 +43,7 @@ const allowedOrigins = [
   .map(origin => origin.replace(/\/$/, '')); // Remove trailing slashes
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    const normalizedOrigin = origin.replace(/\/$/, '');
-    if (allowedOrigins.includes(normalizedOrigin)) {
-      return callback(null, true);
-    }
-
-    console.warn(`🚨 CORS blocked for origin: ${origin}`);
-    return callback(new Error('CORS blocked by server configuration'));
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
@@ -68,6 +51,16 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+/* ==================================
+   SECURITY HEADERS
+================================== */
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false
+  })
+);
+
 
 /* ==================================
    BODY PARSER

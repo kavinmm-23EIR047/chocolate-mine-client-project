@@ -5,7 +5,7 @@ import {
   Box, Cake
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
+import { useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ import SearchOverlay from './search/SearchOverlay';
 import ThemeToggle from './ui/ThemeToggle';
 
 const Navbar = () => {
-  const { cart } = useCart();
+  const cartItems = useSelector((state) => state.cart.items);
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,7 +25,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const cartCount = cart.items ? cart.items.reduce((acc, item) => acc + (item.qty || item.quantity), 0) : 0;
+  const cartCount = cartItems ? cartItems.reduce((acc, item) => acc + item.qty, 0) : 0;
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);

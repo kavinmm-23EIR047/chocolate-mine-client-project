@@ -42,6 +42,7 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
+  'https://chocolate-mine-client-project.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -170,11 +171,15 @@ app.set('io', io);
 const socketHandler = require('./src/sockets');
 const staffController = require('./src/controllers/staffController');
 const orderController = require('./src/controllers/orderController');
+const paymentController = require('./src/controllers/paymentController');
 
 // Pass io instance to controllers
 staffController.setIo(io);
 if (orderController.setIo) {
   orderController.setIo(io);
+}
+if (paymentController.setIo) {
+  paymentController.setIo(io);
 }
 
 // Initialize socket handler

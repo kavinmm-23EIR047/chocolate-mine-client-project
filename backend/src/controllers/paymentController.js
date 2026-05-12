@@ -9,6 +9,11 @@ const telegramService = require('../services/telegramService');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
+let ioInstance = null;
+const setIo = (io) => {
+  ioInstance = io;
+};
+
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
   console.error('❌ Razorpay ENV missing');
 }
@@ -179,14 +184,60 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       total: finalPrice * directItem.qty
     };
   } else {
-    const cartKey = `cart:${req.user._id}`;
-    const cartData = await cacheService.get(cartKey);
+    // Check if items are provided in the request body (Redux cart)
+    if (req.body.items && Array.isArray(req.body.items) && req.body.items.length > 0) {
+      const validatedItems = [];
+      let total = 0;
 
-    if (!cartData) {
-      throw new AppError('Cart is empty', 400);
+      for (const item of req.body.items) {
+        const product = await Product.findById(item.productId);
+        if (!product || product.stock < item.qty) {
+          throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
+        }
+
+        let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
+        if (product.hasVariants && product.variants && item.options?.flavor && item.options?.weight) {
+          const variant = product.variants.find(
+            v => v.flavor === item.options.flavor && v.weight === item.options.weight
+          );
+          if (variant) {
+            salePrice = variant.price;
+          }
+        }
+
+        let finalPrice = salePrice;
+        let activeCouponCode = null;
+
+        // Check coupon logic if applicable to this product
+        if (product.coupon && product.coupon.enabled) {
+          // This logic might need to be refined if coupons apply to the whole cart
+          // For now, we follow the same logic as directItem if it matches
+        }
+
+        validatedItems.push({
+          productId: product._id,
+          name: product.name,
+          qty: item.qty,
+          price: product.price,
+          image: product.image,
+          finalPrice: finalPrice,
+          selectedFlavor: item.options?.flavor,
+          selectedWeight: item.options?.weight
+        });
+        total += finalPrice * item.qty;
+      }
+
+      cart = { items: validatedItems, total };
+    } else {
+      const cartKey = `cart:${req.user._id}`;
+      const cartData = await cacheService.get(cartKey);
+
+      if (!cartData) {
+        throw new AppError('Cart is empty', 400);
+      }
+
+      cart = typeof cartData === 'string' ? JSON.parse(cartData) : cartData;
     }
-
-    cart = typeof cartData === 'string' ? JSON.parse(cartData) : cartData;
   }
 
   if (!cart.items || cart.items.length === 0) {
@@ -401,11 +452,50 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
 
   // Update Stock
   for (const item of order.items) {
+    // 1. Decrement main stock
     const product = await Product.findByIdAndUpdate(
       item.productId,
       { $inc: { stock: -item.qty } },
       { new: true }
     );
+
+    // 2. Decrement variant stock if applicable
+    if (product && product.hasVariants && item.selectedFlavor && item.selectedWeight) {
+      await Product.updateOne(
+        { 
+          _id: item.productId, 
+          "variants.flavor": item.selectedFlavor, 
+          "variants.weight": item.selectedWeight 
+        },
+        { 
+          $inc: { "variants.$.stock": -item.qty } 
+        }
+      );
+    }
+
+    // 3. Emit real-time stock update
+    if (ioInstance) {
+      const socketData = {
+        productId: item.productId,
+        newStock: product ? product.stock : 0
+      };
+
+      // Add variant info if this was a variant order
+      if (product && product.hasVariants && item.selectedFlavor && item.selectedWeight) {
+        const variant = product.variants.find(v => 
+          v.flavor === item.selectedFlavor && v.weight === item.selectedWeight
+        );
+        if (variant) {
+          socketData.variantUpdate = {
+            flavor: item.selectedFlavor,
+            weight: item.selectedWeight,
+            newVariantStock: variant.stock
+          };
+        }
+      }
+
+      ioInstance.emit('stock_updated', socketData);
+    }
 
     // Low stock alert
     if (product && product.stock <= 5) {
@@ -472,3 +562,5 @@ exports.handleWebhook = asyncHandler(async (req, res) => {
   console.log('Webhook:', req.body);
   res.status(200).send('OK');
 });
+
+module.exports.setIo = setIo;

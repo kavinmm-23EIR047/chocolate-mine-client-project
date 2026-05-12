@@ -5,18 +5,15 @@ import {
   SlidersHorizontal, Search, Star, X, ChevronDown, 
   LayoutGrid, List, Sliders, Filter, ArrowUpDown
 } from 'lucide-react';
-import productService from '../services/productService';
 import ProductCard from '../components/ProductCard';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
+import { useGetProductsQuery } from '../services/api/productApi';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState([]);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [occasions, setOccasions] = useState([]);
@@ -46,35 +43,21 @@ const Shop = () => {
     fetchFilters();
   }, []);
 
-  /* Load Products */
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        const params = {
-          category: activeCategory !== 'All' ? activeCategory : '',
-          occasion: activeOccasion !== 'All' ? activeOccasion : '',
-          rating: activeRating > 0 ? activeRating : '',
-          minPrice: priceRange[0],
-          maxPrice: priceRange[1],
-          sort: sortBy,
-          q: searchQuery,
-          limit: 20
-        };
-        
-        const response = await productService.getAll(params);
-        setProducts(response.data?.data || []);
-        setTotalProducts(response.data?.total || 0);
-      } catch (error) {
-        toast.error('Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // RTK Query for Products
+  const { data: productRes, isLoading: loading, isFetching } = useGetProductsQuery({
+    category: activeCategory !== 'All' ? activeCategory : '',
+    occasion: activeOccasion !== 'All' ? activeOccasion : '',
+    rating: activeRating > 0 ? activeRating : '',
+    minPrice: priceRange[0],
+    maxPrice: priceRange[1],
+    sort: sortBy,
+    q: searchQuery,
+    limit: 20
+  });
 
-    const timer = setTimeout(loadProducts, 300);
-    return () => clearTimeout(timer);
-  }, [activeCategory, activeOccasion, activeRating, priceRange, sortBy, searchQuery]);
+  const products = productRes?.data || [];
+  const totalProducts = productRes?.total || 0;
+
 
   const clearFilters = () => {
     setActiveCategory('All');
@@ -222,7 +205,7 @@ const Shop = () => {
                 {[...Array(4)].map((_, i) => <CardSkeleton key={i} />)}
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8">
+              <div className="grid grid-cols-1 gap-10">
                 {products.map((product, i) => (
                   <motion.div
                     key={product._id}
@@ -230,7 +213,7 @@ const Shop = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <ProductCard product={product} />
+                    <ProductCard product={product} layout="horizontal" />
                   </motion.div>
                 ))}
               </div>

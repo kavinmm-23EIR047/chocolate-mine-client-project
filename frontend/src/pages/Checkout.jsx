@@ -13,7 +13,9 @@ import {
   Cake,
 } from 'lucide-react';
 
-import { useCart } from '../context/CartContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearCart, setCoupon } from '../redux/slices/cartSlice';
+import { useCreateOrderMutation } from '../services/api/orderApi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
@@ -31,7 +33,11 @@ import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 const Checkout = () => {
-  const { cart, fetchCart, applyCoupon, removeCoupon, loading: cartLoading } = useCart();
+  const dispatch = useDispatch();
+  const cartItemsFromRedux = useSelector((state) => state.cart.items);
+  const appliedCouponFromRedux = useSelector((state) => state.cart.appliedCoupon);
+  const [createOrder, { isLoading: orderCreating }] = useCreateOrderMutation();
+  
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,7 +47,7 @@ const Checkout = () => {
 
   const appliedCouponDisplay = directItem
     ? normalizeCartCoupon(localCoupon)
-    : normalizeCartCoupon(cart?.appliedCoupon);
+    : normalizeCartCoupon(appliedCouponFromRedux);
   const hasAppliedCoupon = appliedCouponDisplay !== '';
 
   const [showMap, setShowMap] = useState(false);
@@ -178,7 +184,7 @@ const Checkout = () => {
   };
 
   const getItemCouponDiscount = (item) => {
-    const code = directItem ? normalizeCartCoupon(localCoupon) : normalizeCartCoupon(cart?.appliedCoupon);
+    const code = directItem ? normalizeCartCoupon(localCoupon) : normalizeCartCoupon(appliedCouponFromRedux);
     if (!code || !item.coupon?.enabled) return 0;
     if (code !== normalizeCartCoupon(item.coupon.code)) return 0;
 
@@ -245,7 +251,7 @@ const Checkout = () => {
   }, [deliveryInfo.position]);
 
 
-  const cartItems = directItem ? [directItem] : (cart?.items || []);
+  const cartItems = directItem ? [directItem] : cartItemsFromRedux;
 
   const subtotal = cartItems.reduce((sum, item) =>
     sum + getFinalItemPrice(item) * item.qty, 0
@@ -275,10 +281,7 @@ const Checkout = () => {
   // ==================== FETCH ADDRESSES ====================
 
   useEffect(() => {
-    if (user && !directItem) {
-      fetchCart();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchCart is stable enough for refresh-on-mount
+    // Initial data verification
   }, [user, directItem]);
 
   useEffect(() => {
@@ -363,10 +366,7 @@ const Checkout = () => {
     const raw = presetCode != null ? String(presetCode) : couponInput;
     const code = raw.trim().toUpperCase();
     if (!code) return toast.error('Enter coupon code');
-    if (!directItem && hasAppliedCoupon) {
-      toast.error('Remove the applied coupon before entering another code.');
-      return;
-    }
+    
     if (directItem) {
       if (directItem.coupon?.enabled && directItem.coupon.code.toUpperCase() === code) {
         setLocalCoupon(directItem.coupon.code.toUpperCase());
@@ -377,16 +377,15 @@ const Checkout = () => {
       }
       return;
     }
-    setCouponBusy(true);
-    try {
-      const res = await applyCoupon(code);
-      toast.success(res?.message || `Coupon ${code} applied`);
+
+    // For Redux cart, we just check if it's valid for any item
+    const isValid = cartItemsFromRedux.some(i => normalizeCartCoupon(i.coupon?.code) === code);
+    if (isValid) {
+      dispatch(setCoupon(code));
+      toast.success(`Coupon ${code} applied`);
       setCouponInput('');
-      await fetchCart();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || err?.message || 'Invalid coupon');
-    } finally {
-      setCouponBusy(false);
+    } else {
+      toast.error('Invalid coupon for items in bag');
     }
   };
 
@@ -396,13 +395,8 @@ const Checkout = () => {
       toast.success('Coupon removed');
       return;
     }
-    try {
-      await removeCoupon();
-      toast.success('Coupon removed');
-      await fetchCart();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Could not remove coupon');
-    }
+    dispatch(setCoupon(null));
+    toast.success('Coupon removed');
   };
 
   const loadRazorpayScript = () => new Promise((resolve) => {
@@ -492,6 +486,7 @@ const Checkout = () => {
         deliveryDate: payload.deliveryDate,
         deliverySlot: payload.deliverySlot,
         directItem: payload.directItem,
+        items: cartItemsFromRedux,
         notes: notesMerged || undefined,
         cakeMessage: cakeMessage || undefined,
       }, {
@@ -545,7 +540,9 @@ const Checkout = () => {
               headers: { Authorization: `Bearer ${token}` }
             });
 
-            await fetchCart();
+            if (!directItem) {
+              dispatch(clearCart());
+            }
             clearCustomCakeRequest();
             setLoading(false);
             isProcessingPayment.current = false;
@@ -983,7 +980,7 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                {!hasAppliedCoupon && cartItems.length > 0 && (directItem || !cartLoading) && (
+                {!hasAppliedCoupon && cartItems.length > 0 && (
                   <div className="mt-6 pt-6 border-t border-border/30">
                     <div className="flex items-center gap-2 text-xs font-black text-muted uppercase tracking-widest mb-4">
                       <Tag size={16} />

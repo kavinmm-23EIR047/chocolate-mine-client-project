@@ -32,7 +32,10 @@ import 'swiper/css/navigation';
 
 import productService from '../services/productService';
 import reviewService from '../services/reviewService';
-import { useCart } from '../context/CartContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart, updateCartQty, setCoupon } from '../redux/slices/cartSlice';
+import { useGetProductBySlugQuery } from '../services/api/productApi';
+import { useGetProductReviewsQuery } from '../services/api/reviewApi';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/ProductCard';
@@ -42,16 +45,22 @@ import toast from 'react-hot-toast';
 const ProductDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { data: productRes, isLoading: loading } = useGetProductBySlugQuery(slug);
+  const product = productRes?.data;
+  
+  const productId = product?._id?.$oid || product?._id;
+  const { data: reviewRes } = useGetProductReviewsQuery(productId, { skip: !productId });
+  const productReviews = reviewRes?.data?.reviews || [];
 
   const { user } = useAuth();
-  const { cart, addToCart, updateQuantity, applyCoupon, removeCoupon, fetchCart } = useCart();
+  const cartItems = useSelector((state) => state.cart.items);
+  const appliedCoupon = useSelector((state) => state.cart.appliedCoupon);
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [activeTab, setActiveTab] = useState('description');
-  const [reviewStats, setReviewStats] = useState({ avg: 0, total: 0, list: [] });
   const [imgZoom, setImgZoom] = useState(false);
   const [displayImage, setDisplayImage] = useState(null);
   const quantity = 1; // Fixed quantity for product details page
@@ -68,75 +77,36 @@ const ProductDetails = () => {
   const [showCustomFlavorInput, setShowCustomFlavorInput] = useState(false);
   const [showCustomWeightInput, setShowCustomWeightInput] = useState(false);
 
-  // ─── FETCH ─────────────────────────────────────────────
+  // ─── INITIALIZE SELECTIONS ─────────────────────────────
   useEffect(() => {
-    const load = async () => {
-      if (!slug) return;
-      try {
-        setLoading(true);
-        const res = await productService.getBySlug(slug);
-        const prod = res?.data?.data;
-
-        if (!prod) {
-          throw new Error('Product not found in database');
-        }
-
-        setProduct(prod);
-
-        // Initialize cake selections if product has variants
-        if (prod.category === 'cakes' && prod.hasVariants && prod.flavors && prod.flavors.length > 0) {
-          setSelectedFlavor(prod.flavors[0]);
-          const firstVariant = prod.variants?.find(v => v.flavor === prod.flavors[0].name);
-          if (firstVariant) {
-            setSelectedWeight(firstVariant.weight);
-            setSelectedPrice(firstVariant.price);
-            setSelectedStock(firstVariant.stock);
-          }
-          if (prod.flavors[0].images && prod.flavors[0].images.length > 0) {
-            setDisplayImage(prod.flavors[0].images[0]);
+    if (product) {
+      // Initialize cake selections if product has variants
+      if (product.category === 'cakes' && product.hasVariants && product.variants && product.variants.length > 0) {
+        const initialVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
+        
+        if (initialVariant) {
+          const initialFlavor = product.flavors?.find(f => f.name === initialVariant.flavor) || { name: initialVariant.flavor };
+          setSelectedFlavor(initialFlavor);
+          setSelectedWeight(initialVariant.weight);
+          setSelectedPrice(initialVariant.price);
+          setSelectedStock(initialVariant.stock);
+          
+          if (initialFlavor.images && initialFlavor.images.length > 0) {
+            setDisplayImage(initialFlavor.images[0]);
           } else {
-            setDisplayImage(prod.image || null);
+            setDisplayImage(product.image || null);
           }
         } else {
-          setDisplayImage(prod.image || null);
+          setDisplayImage(product.image || null);
         }
-
-        const related = await productService.getAll({ category: prod.category, limit: 4 });
-        if (related?.data?.data) {
-          setRelatedProducts(related.data.data.filter(p => p._id !== prod._id));
-        }
-
-        try {
-          const reviewRes = await reviewService.getProductReviews(prod._id);
-          const list = reviewRes.data.data?.reviews || [];
-          if (list.length) {
-            const sum = list.reduce((a, b) => a + b.rating, 0);
-            setReviewStats({
-              avg: (sum / list.length).toFixed(1),
-              total: list.length,
-              list: list.filter(r => r.productId === prod._id || r.product === prod._id)
-            });
-          } else {
-            setReviewStats({ avg: prod.ratingsAverage || 0, total: prod.ratingsCount || 0, list: [] });
-          }
-        } catch (err) {
-          console.warn('Failed to fetch reviews:', err);
-          setReviewStats({ avg: prod.ratingsAverage || 0, total: prod.ratingsCount || 0, list: [] });
-        }
-      } catch (err) {
-        console.error('Product fetch error:', err);
-        toast.error('Product not found or failed to load');
-        navigate('/');
-      } finally {
-        setLoading(false);
+      } else {
+        setDisplayImage(product.image || null);
+        setSelectedStock(product.stock);
       }
-    };
-    load();
-  }, [slug, navigate]);
 
-  useEffect(() => {
-    if (user && slug) fetchCart();
-  }, [user, slug, fetchCart]);
+      // Related products (we'll keep it simple for now or use another RTK Query)
+    }
+  }, [product]);
 
   // Handle quantity change - removed as per requirements
 
@@ -194,32 +164,41 @@ const ProductDetails = () => {
     }
   };
 
+  // ─── BACKEND DATA MAPPING ─────────────────────────────
+  const productName = product?.name;
+  const productDescription = product?.description;
+  const productPrice = Number(product?.price || 0);
+  const productOfferPrice = Number(product?.offerPrice || 0);
+  const productStock = Number(product?.stock ?? 0);
+  const productCategory = product?.category;
+  const productOccasions = product?.occasion || [];
+
   // ─── CART / WISHLIST STATE ──────────────────────────────
-  const currentVariantFlavor = product?.category === 'cakes'
+  const currentVariantFlavor = productCategory === 'cakes'
     ? (showCustomFlavorInput ? customFlavor : selectedFlavor?.name)
     : null;
-  const currentVariantWeight = product?.category === 'cakes'
+  const currentVariantWeight = productCategory === 'cakes'
     ? (showCustomWeightInput ? customWeight : selectedWeight)
     : null;
 
   // Find cart item with same variant
-  const cartItem = cart?.items?.find(i =>
-    idsMatch(i.productId, product?._id) &&
-    (product.category !== 'cakes' || (i.selectedFlavor === currentVariantFlavor && i.selectedWeight === currentVariantWeight))
+  const cartItem = cartItems?.find(i =>
+    idsMatch(i.productId, productId) &&
+    (productCategory !== 'cakes' || (i.selectedFlavor === currentVariantFlavor && i.selectedWeight === currentVariantWeight))
   );
   const cartQty = cartItem?.qty || 0;
-  const isWishlisted = product ? isInWishlist(product._id) : false;
+  const isWishlisted = product ? isInWishlist(productId) : false;
 
   // ─── PRICE LOGIC ───────────────────────────────────────
   const getCurrentPrice = () => {
-    return product?.category === 'cakes' && selectedPrice
+    return productCategory === 'cakes' && selectedPrice
       ? selectedPrice
-      : Number(product?.price || 0);
+      : productPrice;
   };
 
   const currentPrice = getCurrentPrice();
-  const hasOffer = product?.offerPrice && Number(product.offerPrice) > 0 && Number(product.offerPrice) < currentPrice;
-  const basePrice = hasOffer ? Number(product.offerPrice) : currentPrice;
+  const hasOffer = productOfferPrice > 0 && productOfferPrice < currentPrice;
+  const basePrice = hasOffer ? productOfferPrice : currentPrice;
   const offerDiscount = currentPrice - basePrice;
   const offerPct = currentPrice > 0 ? Math.round((offerDiscount / currentPrice) * 100) : 0;
 
@@ -227,11 +206,11 @@ const ProductDetails = () => {
 
   // Cart coupon matches this product's offer (server stores uppercase code)
   const isCouponApplied =
-    !!normalizeCouponCode(cart?.appliedCoupon) &&
+    !!normalizeCouponCode(appliedCoupon) &&
     !!normalizeCouponCode(product?.coupon?.code) &&
-    normalizeCouponCode(cart?.appliedCoupon) === normalizeCouponCode(product?.coupon?.code);
+    normalizeCouponCode(appliedCoupon) === normalizeCouponCode(product?.coupon?.code);
 
-  const hasAnyCartCoupon = !!normalizeCouponCode(cart?.appliedCoupon);
+  const hasAnyCartCoupon = !!normalizeCouponCode(appliedCoupon);
   const otherCouponBlocksApply = hasAnyCartCoupon && !isCouponApplied && !!product?.coupon?.enabled;
 
   // Calculate discount per unit
@@ -257,9 +236,9 @@ const ProductDetails = () => {
   const couponSavings = totalCouponDiscount;
 
   // Check if variant is in stock
-  const isInStock = product?.category === 'cakes'
+  const isInStock = productCategory === 'cakes'
     ? (selectedStock > 0)
-    : (product?.stock > 0);
+    : (productStock > 0);
 
   // ─── COUPON ACTIONS ───────────────────────────────────────────
   const handleApplyCoupon = async () => {
@@ -275,7 +254,7 @@ const ProductDetails = () => {
     setApplyingCoupon(true);
 
     try {
-      const isInCart = cart?.items?.some(item =>
+      const isInCart = cartItems?.some(item =>
         idsMatch(item.productId, product._id) &&
         (product.category !== 'cakes' ||
           (item.selectedFlavor === currentVariantFlavor &&
@@ -296,13 +275,12 @@ const ProductDetails = () => {
             options.weight = selectedWeight;
           }
         }
-        await addToCart(product._id, quantity, options);
+        dispatch(addToCart({ product, qty: quantity, options }));
         toast.success(`${quantity} item(s) added to cart`);
       }
 
-      const res = await applyCoupon(product.coupon.code);
-      toast.success(res?.message || `${product.coupon.code} applied`);
-      await fetchCart();
+      dispatch(setCoupon(product.coupon.code));
+      toast.success(`${product.coupon.code} applied`);
 
     } catch (err) {
       console.error('Coupon application error:', err);
@@ -322,46 +300,44 @@ const ProductDetails = () => {
     }
   };
 
+  // ─── CART QUANTITY UPDATES ──────────────────────────
+  const handleUpdateQuantity = (id, newQty) => {
+    if (newQty < 1) {
+      // Logic for removing if quantity is 0 could go here if needed
+      return;
+    }
+    dispatch(updateCartQty({ productId: id, qty: newQty }));
+  };
+
   // ─── ADD TO CART ───────────────────────────────────────────
   const handleAddToCart = async () => {
     if (!isInStock) {
       toast.error('Out of stock');
       return;
     }
+    
+    // Stock Validation
+    const currentStockLimit = productCategory === 'cakes' ? selectedStock : productStock;
+    if (cartQty + 1 > currentStockLimit) {
+      toast.error(`Only ${currentStockLimit} units available`);
+      return;
+    }
 
     setAddingToCart(true);
-    try {
-      const options = {};
-      if (product?.category === 'cakes') {
-        if (showCustomFlavorInput && customFlavor) {
-          options.flavor = customFlavor;
-        } else if (selectedFlavor) {
-          options.flavor = selectedFlavor.name;
-        } else {
-          toast.error('Please select flavor');
-          setAddingToCart(false);
-          return;
-        }
+    const options = {};
+    if (productCategory === 'cakes') {
+      if (showCustomFlavorInput && customFlavor) options.flavor = customFlavor;
+      else if (selectedFlavor) options.flavor = selectedFlavor.name;
+      else { toast.error('Please select flavor'); setAddingToCart(false); return; }
 
-        if (showCustomWeightInput && customWeight) {
-          options.weight = customWeight;
-        } else if (selectedWeight) {
-          options.weight = selectedWeight;
-        } else {
-          toast.error('Please select weight');
-          setAddingToCart(false);
-          return;
-        }
-      }
-
-      await addToCart(product._id, 1, options);
-      toast.success(`Item added to cart!`);
-      await fetchCart();
-    } catch (err) {
-      toast.error('Failed to add to cart');
-    } finally {
-      setAddingToCart(false);
+      if (showCustomWeightInput && customWeight) options.weight = customWeight;
+      else if (selectedWeight) options.weight = selectedWeight;
+      else { toast.error('Please select weight'); setAddingToCart(false); return; }
     }
+
+    dispatch(addToCart({ product, qty: 1, options }));
+    toast.success(`Item added to cart!`);
+    setAddingToCart(false);
   };
 
   // ─── BUY NOW ──
@@ -372,37 +348,25 @@ const ProductDetails = () => {
     }
 
     // Validate cake selections before proceeding
-    if (product?.category === 'cakes') {
-      if (!currentVariantFlavor) {
-        toast.error('Please select flavor');
-        return;
-      }
-      if (!currentVariantWeight) {
-        toast.error('Please select weight');
-        return;
-      }
+    if (productCategory === 'cakes') {
+      if (!currentVariantFlavor) { toast.error('Please select flavor'); return; }
+      if (!currentVariantWeight) { toast.error('Please select weight'); return; }
     }
 
-    setAddingToCart(true);
-    try {
-      const directItem = {
-        productId: product._id,
-        name: product.name,
-        image: displayImage || product.image,
-        price: product.price,
-        offerPrice: product.offerPrice,
-        qty: 1,
-        selectedFlavor: currentVariantFlavor,
-        selectedWeight: currentVariantWeight,
-        coupon: product.coupon,
-      };
+    const directItem = {
+      productId: productId,
+      name: productName,
+      image: displayImage || product.image,
+      price: productPrice,
+      offerPrice: productOfferPrice,
+      qty: 1,
+      selectedFlavor: currentVariantFlavor,
+      selectedWeight: currentVariantWeight,
+      coupon: product.coupon,
+      stock: productCategory === 'cakes' ? selectedStock : productStock
+    };
 
-      navigate('/checkout', { state: { directItem } });
-    } catch (err) {
-      toast.error('Failed to process. Please try again.');
-    } finally {
-      setAddingToCart(false);
-    }
+    navigate('/checkout', { state: { directItem } });
   };
 
   // Get valid flavor images
@@ -419,7 +383,21 @@ const ProductDetails = () => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-muted font-black uppercase tracking-widest">Loading Delights...</p>
+          <p className="text-sm text-muted font-black uppercase tracking-widest">Preparing your treats...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <p className="text-2xl font-black text-heading uppercase tracking-tight">Product Not Found</p>
+          <p className="text-sm text-muted">This product may have been removed or is unavailable.</p>
+          <button onClick={() => navigate('/shop')} className="mt-4 px-6 py-3 bg-primary text-button-text rounded-2xl font-black text-xs uppercase tracking-widest">
+            Back to Shop
+          </button>
         </div>
       </div>
     );
@@ -434,9 +412,9 @@ const ProductDetails = () => {
           <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted">
             <button onClick={() => navigate('/')} className="hover:text-primary transition">Home</button>
             <ChevronRight size={12} />
-            <button onClick={() => navigate(`/shop?category=${product.category}`)} className="hover:text-primary transition capitalize">{product.category}</button>
+            <button onClick={() => navigate(`/shop?category=${product?.category}`)} className="hover:text-primary transition capitalize">{product?.category}</button>
             <ChevronRight size={12} />
-            <span className="text-heading truncate max-w-[200px]">{product.name}</span>
+            <span className="text-heading truncate max-w-[200px]">{product?.name}</span>
           </div>
         </div>
       </div>
@@ -526,7 +504,7 @@ const ProductDetails = () => {
               <div className="bg-card rounded-[2.5rem] border border-border/50 p-8 shadow-sm">
                 <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-heading mb-6">Highlights</h3>
                 <div className="grid grid-cols-2 gap-y-5 gap-x-6">
-                  {['Freshly Baked', 'Premium Quality', 'Eggless Available', 'No Preservatives', 'Secure Packing', 'Fast Delivery'].map(item => (
+                  {(product.occasion?.length > 0 ? product.occasion : ['Freshly Baked', 'Premium Quality', 'Eggless Available']).map(item => (
                     <div key={item} className="flex items-center gap-3">
                       <div className="w-6 h-6 rounded-full bg-success-light flex items-center justify-center border border-success/10 flex-shrink-0">
                         <CheckCircle2 size={12} className="text-success" />
@@ -545,18 +523,18 @@ const ProductDetails = () => {
             <div className="bg-card rounded-[2.5rem] border border-border/50 p-6 lg:p-10 shadow-card hover:shadow-premium transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[11px] font-black text-primary uppercase bg-primary/5 px-4 py-1.5 rounded-full tracking-widest border border-primary/10">
-                  {product.category}
+                  {productCategory}
                 </span>
                 <button className="p-2.5 text-muted hover:text-primary transition-colors bg-card-soft rounded-full border border-border/40 shadow-soft"><Share2 size={18} /></button>
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{product.name}</h1>
+              <h1 className="text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{productName}</h1>
 
               <div className="flex items-center gap-4 mb-8">
                 <div className="flex items-center gap-1.5 bg-success text-button-text px-3 py-1 rounded-xl text-xs font-black shadow-sm">
-                  {reviewStats.avg} <Star size={12} fill="currentColor" />
+                  {product?.ratingsAverage || 0} <Star size={12} fill="currentColor" />
                 </div>
-                <span className="text-xs text-muted font-black uppercase tracking-widest">{reviewStats.total} verified ratings</span>
+                <span className="text-xs text-muted font-black uppercase tracking-widest">{product?.ratingsCount || 0} verified ratings</span>
               </div>
 
               {/* Cake Flavor and Weight Selection */}
@@ -765,7 +743,7 @@ const ProductDetails = () => {
                   <div className="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
                     {otherCouponBlocksApply && (
                       <p className="text-[10px] text-muted font-bold uppercase tracking-wider text-center sm:text-right max-w-[220px] sm:max-w-[200px]">
-                        Cart already has <span className="font-mono text-heading">{cart.appliedCoupon}</span>. Remove it in the cart to use this code.
+                        Cart already has <span className="font-mono text-heading">{appliedCoupon}</span>. Remove it in the cart to use this code.
                       </p>
                     )}
                     <button
@@ -783,26 +761,29 @@ const ProductDetails = () => {
 
             {/* Buttons Section — Desktop Only */}
             <div className="hidden lg:grid grid-cols-2 gap-4 bg-card rounded-[2.5rem] border p-8 shadow-sm">
-              <div className="col-span-2 mb-2 flex items-center gap-2">
-                <CheckCircle2 size={16} className={isInStock ? 'text-success' : 'text-error'} />
-                <span className={`text-[11px] font-black uppercase tracking-widest ${isInStock ? 'text-success-text' : 'text-error-text'}`}>
-                  {isInStock ? 'In Stock & Ready to Ship' : 'Out of Stock'}
+              <div className="col-span-2 mb-2 flex items-center gap-3 bg-muted/5 p-4 rounded-2xl border border-border/20">
+                <div className={`w-2.5 h-2.5 rounded-full ${isInStock ? 'bg-success animate-pulse' : 'bg-error'}`} />
+                <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${isInStock ? 'text-success-text' : 'text-error-text'}`}>
+                  {isInStock 
+                    ? `${productCategory === 'cakes' ? selectedStock : productStock} UNITS AVAILABLE & READY TO SHIP` 
+                    : 'CURRENTLY OUT OF STOCK'}
                 </span>
               </div>
 
               {cartQty > 0 ? (
                 <div className="flex items-center border-2 border-border/30 rounded-2xl h-16 bg-muted/5">
-                  <button onClick={() => updateQuantity(product._id, cartQty - 1)} className="w-16 h-full flex items-center justify-center hover:bg-muted/10 transition"><Minus size={20} /></button>
+                  <button onClick={() => handleUpdateQuantity(productId, cartQty - 1)} className="w-16 h-full flex items-center justify-center hover:bg-muted/10 transition"><Minus size={20} /></button>
                   <span className="flex-1 text-center font-black text-xl text-heading">{cartQty}</span>
-                  <button onClick={() => updateQuantity(product._id, cartQty + 1)} className="w-16 h-full flex items-center justify-center hover:bg-muted/10 transition"><Plus size={20} /></button>
+                  <button onClick={() => handleUpdateQuantity(productId, cartQty + 1)} className="w-16 h-full flex items-center justify-center hover:bg-muted/10 transition"><Plus size={20} /></button>
                 </div>
               ) : (
                 <button
                   onClick={handleAddToCart}
-                  disabled={!isInStock}
+                  disabled={!isInStock || addingToCart}
                   className={`h-16 border-2 border-primary text-primary font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl transition flex items-center justify-center gap-3 ${!isInStock ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/5'}`}
                 >
-                  <ShoppingCart size={20} /> {isInStock ? 'Add to Cart' : 'Out of Stock'}
+                  {addingToCart ? <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /> : <ShoppingCart size={20} />} 
+                  {isInStock ? 'Add to Cart' : 'Sold Out'}
                 </button>
               )}
 
@@ -838,7 +819,7 @@ const ProductDetails = () => {
       <div className="space-y-4 block lg:hidden">
         <div className="bg-card rounded-[2rem] border border-border/50 p-6 shadow-card">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-heading mb-4">Description</h3>
-          <p className="text-sm text-muted font-medium leading-relaxed tracking-wide italic">"{product.description}"</p>
+          <p className="text-sm text-muted font-medium leading-relaxed tracking-wide italic">"{productDescription}"</p>
         </div>
         <div className="bg-card rounded-[2rem] border border-border/50 p-6 shadow-card">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-heading mb-6">Highlights</h3>
@@ -862,14 +843,14 @@ const ProductDetails = () => {
             <h2 className="text-2xl lg:text-3xl font-black text-heading mb-2 uppercase tracking-tight">Ratings & Reviews</h2>
             <div className="flex items-center gap-3 mt-1">
               <div className="flex items-center gap-1 bg-success text-button-text px-3 py-1.5 rounded-lg text-lg font-black shadow-sm">
-                {reviewStats.avg} <Star size={16} fill="currentColor" />
+                {product.ratingsAverage || 0} <Star size={16} fill="currentColor" />
               </div>
-              <span className="text-sm font-bold text-muted uppercase tracking-widest">{reviewStats.total} Verified Reviews</span>
+              <span className="text-sm font-bold text-muted uppercase tracking-widest">{product.ratingsCount || 0} Verified Reviews</span>
             </div>
           </div>
         </div>
 
-        {reviewStats.list.length > 0 ? (
+        {productReviews.length > 0 ? (
           <div className="relative reviews-swiper-wrapper">
             <style>{`
               .reviews-swiper-wrapper .swiper-pagination {
@@ -900,9 +881,9 @@ const ProductDetails = () => {
               }}
               className="pb-16"
             >
-              {reviewStats.list.map((rev, i) => (
+              {productReviews.map((rev, i) => (
                 <SwiperSlide key={i}>
-                  <div className="bg-surface border border-border/30 rounded-[2rem] p-6 h-full flex flex-col shadow-card hover:shadow-premium transition-shadow duration-300">
+                  <div className="rounded-[2.5rem] p-8 h-full flex flex-col transition-all duration-500 cutting-edge-border hover:shadow-premium">
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-1">
                         {[...Array(5)].map((_, idx) => (
@@ -957,9 +938,9 @@ const ProductDetails = () => {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[110] bg-card border-t border-border p-3 grid grid-cols-2 gap-3 shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
         {cartQty > 0 ? (
           <div className="flex items-center border-2 border-border/30 rounded-xl h-14 bg-muted/5">
-            <button onClick={() => updateQuantity(product._id, cartQty - 1)} className="w-12 h-full flex items-center justify-center hover:bg-muted/10 transition"><Minus size={18} /></button>
+            <button onClick={() => handleUpdateQuantity(productId, cartQty - 1)} className="w-12 h-full flex items-center justify-center hover:bg-muted/10 transition"><Minus size={18} /></button>
             <span className="flex-1 text-center font-black text-lg text-heading">{cartQty}</span>
-            <button onClick={() => updateQuantity(product._id, cartQty + 1)} className="w-12 h-full flex items-center justify-center hover:bg-muted/10 transition"><Plus size={18} /></button>
+            <button onClick={() => handleUpdateQuantity(productId, cartQty + 1)} className="w-12 h-full flex items-center justify-center hover:bg-muted/10 transition"><Plus size={18} /></button>
           </div>
         ) : (
           <button

@@ -14,18 +14,19 @@ export const Skeleton = ({ className = '', count = 1 }) => {
 };
 
 export const CardSkeleton = () => (
-  <div className="bg-card border border-border/40 rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row w-full h-[400px] md:h-[350px]">
-    <Skeleton className="h-full w-full md:w-[35%] rounded-none" />
-    <div className="p-8 md:p-10 flex-1 space-y-6">
-      <div className="space-y-3">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-3/4" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-      </div>
-      <div className="mt-auto pt-8 border-t border-border/30 flex justify-between items-center">
-        <Skeleton className="h-10 w-32" />
-        <Skeleton className="h-14 w-40 rounded-2xl" />
+  <div className="bg-card border border-border/40 rounded-[1.5rem] overflow-hidden flex flex-col h-full bg-white dark:bg-[#1a1a1a] animate-pulse">
+    {/* Image side */}
+    <div className="relative aspect-[4/3] bg-border/40 m-2 rounded-t-[1.5rem]" />
+    {/* Info side */}
+    <div className="p-5 flex flex-col flex-1 space-y-4">
+      <Skeleton className="h-6 w-3/4 rounded-lg" />
+      <Skeleton className="h-5 w-1/3 rounded-md" />
+      <div className="mt-auto space-y-3">
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="border-t border-dashed border-border/60 pt-4">
+          <Skeleton className="h-10 w-full rounded-xl" />
+        </div>
       </div>
     </div>
   </div>

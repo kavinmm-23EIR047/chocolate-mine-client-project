@@ -2,7 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useWishlist } from '../../context/WishlistContext';
-import { useCart } from '../../context/CartContext';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/slices/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import ProductCard from '../../components/ProductCard';
@@ -10,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 const Wishlist = () => {
   const { wishlist, loading, toggleWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const dispatch = useDispatch();
 
   if (loading && wishlist.length === 0) {
     return (

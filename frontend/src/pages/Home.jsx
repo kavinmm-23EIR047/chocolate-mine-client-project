@@ -3,7 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight, Star, Search, SlidersHorizontal,
-  MapPin, Clock, Tag, Truck, ShieldCheck, Phone, ChevronLeft
+  MapPin, Clock, Tag, Truck, ShieldCheck, Phone, ChevronLeft,
+  Zap, PackageCheck, ShoppingCart
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -12,8 +13,8 @@ import { Pagination, Autoplay, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-import productService from '../services/productService';
-import reviewService from '../services/reviewService';
+import { useGetProductsQuery } from '../services/api/productApi';
+import { useGetLatestReviewsQuery } from '../services/api/reviewApi';
 import toast from 'react-hot-toast';
 import ProductCard from '../components/ProductCard';
 import { CardSkeleton } from '../components/ui/Skeleton';
@@ -96,10 +97,6 @@ const Home = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('search') || '';
 
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState([]);
-  const [bestsellers, setBestsellers] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [copiedCode, setCopiedCode] = useState('');
@@ -107,10 +104,26 @@ const Home = () => {
   const [activeTrustIndex, setActiveTrustIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [page, setPage] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const productsPerPage = 10;
+  
+  // RTK Query for Products
+  const { data: productRes, isLoading: loading, isFetching } = useGetProductsQuery({
+    q: query,
+    category: activeCategory !== 'All' ? activeCategory.toLowerCase() : '',
+    location: deliveryCity,
+    limit: productsPerPage,
+    page,
+    sort: sortBy
+  });
+  
+  const products = productRes?.data || [];
+  const totalProducts = productRes?.total || 0;
+  
+  const { data: reviewRes } = useGetLatestReviewsQuery();
+  const reviews = reviewRes?.data?.reviews || [];
+  
   const timerRef = useRef(null);
 
   /* Responsive Listeners */
@@ -158,49 +171,16 @@ const Home = () => {
     fetchCategories();
   }, []);
 
-  /* load backend data */
+  /* load reviews (optional: move to RTK query later) */
   useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        // Using activeCategory for filtering if not searching
-        const catFilter = activeCategory !== 'All' ? activeCategory.toLowerCase() : '';
-
-        const [allRes, bestRes, revRes] = await Promise.all([
-          productService.getAll({
-            q: query,
-            category: catFilter,
-            location: deliveryCity,
-            limit: productsPerPage,
-            page,
-            sort: sortBy
-          }),
-          !query ? productService.getAll({ bestseller: 'true', location: deliveryCity, limit: 10 }) : Promise.resolve(null),
-          !query ? reviewService.getLatest() : Promise.resolve(null),
-        ]);
-
-        const mainItems = allRes?.data?.data || [];
-        setProducts(mainItems);
-        setTotalProducts(allRes?.data?.total || mainItems.length);
-
-        if (!query) {
-          setBestsellers(bestRes?.data?.data || []);
-          setReviews(revRes?.data?.data?.reviews || []);
-        }
-      } catch {
-        toast.error('Failed to load products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [query, page, sortBy, activeCategory, deliveryCity]);
+    // Handled by RTK Query
+  }, []);
 
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
   }, [query, sortBy, activeCategory]);
-
+  
   const categoryRef = useRef(null);
   const reviewsRef = useRef(null);
 
@@ -341,49 +321,47 @@ const Home = () => {
 
             {/* ── DELIVERY STRIP ───────────────────────────────────────── */}
             <section
-              className="rounded-[2.5rem] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 shadow-2xl shadow-primary/5 border border-border/40 overflow-hidden relative group"
+              className="rounded-[3rem] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group cutting-edge-border shadow-premium"
               style={{ background: 'var(--card)' }}
             >
-              {/* Animated background glow */}
-              <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-[100px] group-hover:bg-primary/10 transition-colors duration-1000" />
-              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-accent/5 rounded-full blur-[100px] group-hover:bg-accent/10 transition-colors duration-1000" />
+              {/* Background Glows */}
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-48 -mt-48 group-hover:bg-primary/10 transition-colors duration-1000" />
+              <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-accent/5 rounded-full blur-[100px] -ml-24 -mb-24 group-hover:bg-accent/10 transition-colors duration-1000" />
 
-              <div className="flex flex-col sm:flex-row items-center gap-10 relative z-10 text-center sm:text-left">
+              <div className="flex flex-col md:flex-row items-center gap-12 relative z-10 text-center md:text-left">
+                {/* Icon Container */}
                 <div className="relative shrink-0">
-                  <div className="w-28 h-28 sm:w-40 sm:h-40 flex items-center justify-center p-3 rounded-[3rem] bg-gradient-to-br from-primary/5 to-accent/5 border border-border/30 shadow-inner group-hover:scale-105 transition-transform duration-700">
-                    <img
-                      src="https://assets-v2.lottiefiles.com/a/2fb1820a-7b6b-48ef-8719-d055a442e43a/pj49dgWhuA.gif"
-                      alt="Delivery Scooter"
-                      className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-screen"
-                    />
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center rounded-[2.5rem] bg-heading dark:bg-black/40 border border-white/10 shadow-2xl group-hover:scale-105 transition-transform duration-700">
+                    <Truck size={48} className="text-white opacity-80" strokeWidth={1.5} />
+                    <div className="absolute -bottom-2 -right-2 bg-primary p-3 rounded-2xl shadow-xl shadow-primary/20">
+                      <Zap size={20} className="text-button-text" fill="currentColor" />
+                    </div>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full animate-ping border-4 border-card" />
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-card shadow-sm" />
                 </div>
 
                 <div className="max-w-xl">
-                  <h3 className="font-black text-3xl sm:text-5xl tracking-tighter uppercase leading-tight" style={{ color: 'var(--card-text)' }}>
-                    Exclusive Local <span className="text-primary">Delivery</span>
-                  </h3>
-                  <div className="flex items-center justify-center sm:justify-start gap-3 mt-3">
-                    <div className="h-[3px] w-10 bg-accent rounded-full" />
-                    <p className="text-xs font-black uppercase tracking-[0.3em] text-primary">
-                      Delivering fresh across {deliveryCity}
-                    </p>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 mb-4">
+                    <PackageCheck size={14} className="text-primary" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Priority Service</span>
                   </div>
-                  <p className="text-base font-medium opacity-60 mt-6 leading-relaxed" style={{ color: 'var(--card-text)' }}>
-                    We bake fresh every morning and hand-deliver straight to your door to guarantee the luxury quality you deserve. Same-day delivery available across {deliveryCity}.
+                  <h3 className="font-black text-4xl sm:text-6xl tracking-tighter uppercase leading-[0.95] mb-6 text-heading">
+                    Exclusive <br /> <span className="text-primary">Local Delivery</span>
+                  </h3>
+                  <p className="text-sm sm:text-lg font-medium opacity-60 leading-relaxed text-heading/80">
+                    We bake fresh every morning and hand-deliver straight to your door to guarantee the luxury quality you deserve. Same-day delivery available across <span className="text-primary font-black uppercase tracking-widest">{deliveryCity}</span>.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-5 shrink-0 px-10 py-6 rounded-[2.5rem] bg-background/50 backdrop-blur-xl border border-border shadow-2xl relative z-10 group-hover:border-primary/20 transition-all duration-500">
-                <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600 shadow-inner">
-                  <MapPin size={28} className="animate-bounce" />
+              {/* Active Zone Badge */}
+              <div className="flex items-center gap-6 shrink-0 px-10 py-8 rounded-[2.5rem] bg-card/40 backdrop-blur-md border border-border/40 shadow-premium relative z-10 group-hover:border-primary/30 transition-all duration-500">
+                <div className="w-16 h-16 rounded-2xl bg-success/10 flex items-center justify-center text-success shadow-inner border border-success/20">
+                  <MapPin size={32} className="animate-pulse" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Active Zone</span>
-                  <span className="text-xl font-black uppercase tracking-[0.1em] text-green-600 capitalize">{deliveryCity}</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40 mb-1">Active Zone</span>
+                  <span className="text-2xl font-black uppercase tracking-[0.05em] text-success capitalize leading-none">{deliveryCity}</span>
+                  <div className="h-0.5 w-8 bg-success/30 mt-3 rounded-full" />
                 </div>
               </div>
             </section>
@@ -398,8 +376,7 @@ const Home = () => {
                     whileInView="show"
                     viewport={{ once: true }}
                     custom={i}
-                    className="relative rounded-3xl overflow-hidden group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-700 border border-border/10"
-                    style={{ height: 160 }}
+                    className="relative rounded-3xl overflow-hidden group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-700 bg-white dark:bg-card"
                   >
                     <img
                       src={ad.img}
@@ -427,23 +404,92 @@ const Home = () => {
 
             <OccasionSection />
 
-            {/* ── BESTSELLERS ──────────────────────────────────────────── */}
-            {bestsellers.length > 0 && (
-              <section className="pt-4">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h2 className="text-3xl font-black tracking-tighter">Bestsellers</h2>
-                    <p className="text-xs font-bold text-muted uppercase tracking-widest mt-1">Our most loved creations</p>
+          </>
+        ) : null}
+
+        {/* ── MAIN PRODUCT GRID ────────────────────────────────────── */}
+        <section className="pt-8" id="main-catalog">
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+            
+            {/* Sidebar Box */}
+            <aside className="lg:w-80 shrink-0 space-y-10">
+              <div className="sticky top-24 space-y-10">
+                
+                {/* Header Side Box */}
+                <div className="bg-card rounded-[2.5rem] border border-border/40 p-10 shadow-sm">
+                  <h2 className="text-3xl font-black tracking-tighter uppercase mb-2">
+                    {query ? 'Results' : 'Browse'}
+                  </h2>
+                  <p className="text-[10px] font-black text-muted uppercase tracking-[0.3em]">
+                    {loading ? 'Refreshing...' : `${totalProducts} Premium Items`}
+                  </p>
+                  
+                  <div className="mt-10 space-y-6">
+                    <div className="flex flex-col gap-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Sort By</label>
+                      <select
+                        value={sortBy}
+                        onChange={e => handleSort(e.target.value)}
+                        className="w-full text-[11px] font-black uppercase tracking-[0.15em] rounded-2xl px-6 py-4 outline-none transition-all cursor-pointer border-2 bg-background text-card-text border-border focus:border-primary shadow-sm hover:border-primary/50"
+                      >
+                        <option value="">Default</option>
+                        <option value="newest">Newest First</option>
+                        <option value="popularity">Popularity</option>
+                        <option value="price-low">Price: Low → High</option>
+                        <option value="price-high">Price: High → Low</option>
+                        <option value="ratings">Top Rated</option>
+                      </select>
+                    </div>
                   </div>
-                  <Link
-                    to="/?search="
-                    className="text-xs font-black uppercase tracking-[0.2em] px-6 py-3 rounded-2xl border-2 border-border hover:bg-primary hover:text-button-text transition-all shadow-sm active:scale-95"
-                  >
-                    Explore All
-                  </Link>
                 </div>
-                <div className="grid grid-cols-1 gap-10">
-                  {bestsellers.map((p, i) => (
+
+                {/* Categories Side Box */}
+                <div className="bg-card rounded-[2.5rem] border border-border/40 p-10 shadow-sm hidden lg:block">
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-primary mb-8">Categories</h3>
+                  <div className="flex flex-col gap-4">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.name}
+                        onClick={() => handleCategory(cat.name)}
+                        className={`flex items-center gap-4 group transition-all p-2 rounded-2xl ${activeCategory === cat.name ? 'bg-primary/5 border border-primary/20' : 'hover:bg-muted/5'}`}
+                      >
+                        <div className={`w-12 h-12 rounded-xl overflow-hidden border-2 ${activeCategory === cat.name ? 'border-primary' : 'border-border/40'}`}>
+                          <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-xs font-black uppercase tracking-widest ${activeCategory === cat.name ? 'text-primary' : 'text-muted/60'}`}>
+                          {cat.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-12 pt-8 border-t border-border/20">
+                     <Link to="/shop" className="w-full py-4 bg-primary text-button-text rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20">
+                        View Full Shop <ChevronRight size={14} />
+                     </Link>
+                  </div>
+                </div>
+
+              </div>
+            </aside>
+
+            {/* Main Content Box */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-10">
+                 <div>
+                   <h2 className="text-3xl font-black tracking-tighter uppercase leading-none">Our Collections</h2>
+                   <div className="h-1 w-12 bg-primary mt-4 rounded-full" />
+                 </div>
+                 <Link to="/shop" className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:tracking-[0.3em] transition-all flex items-center gap-2">
+                   See More <ChevronRight size={14} />
+                 </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                {loading && products.length === 0 ? (
+                  Array(5).fill(0).map((_, i) => <CardSkeleton key={i} />)
+                ) : products.length > 0 ? (
+                  products.map((p, i) => (
                     <motion.div
                       key={p._id}
                       variants={fadeUp}
@@ -454,106 +500,26 @@ const Home = () => {
                     >
                       <ProductCard product={p} />
                     </motion.div>
-                  ))}
+                  ))
+                ) : (
+                  <div className="col-span-full py-40 text-center bg-card rounded-[3rem] border-2 border-dashed border-border/50 shadow-inner">
+                    <Search size={64} className="mx-auto mb-8 text-primary/10" />
+                    <p className="text-3xl font-black uppercase tracking-tighter text-heading">No delicacies found</p>
+                    <p className="text-[11px] font-bold text-muted mt-4 uppercase tracking-[0.3em]">Adjust your filters or try a different search</p>
+                  </div>
+                )}
+              </div>
+
+              {totalProducts > 5 && (
+                <div className="mt-16 flex justify-center">
+                   <Link to="/shop" className="px-12 py-5 bg-card border-2 border-primary text-primary rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-button-text transition-all shadow-xl shadow-primary/5 active:scale-95">
+                      View More Delicacies
+                   </Link>
                 </div>
-              </section>
-            )}
-          </>
-        ) : null}
-
-        {/* ── MAIN PRODUCT GRID ────────────────────────────────────── */}
-        <section className="pt-8" id="main-catalog">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-12 border-b-2 border-border pb-10">
-            <div className="flex-1 space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-black tracking-tighter uppercase">
-                    {query ? `Results for "${query}"` : activeCategory === 'All' ? 'Our Collection' : activeCategory}
-                  </h2>
-                  <p className="text-[10px] font-black text-muted uppercase tracking-[0.3em] mt-1">
-                    {loading ? 'Refreshing...' : `${totalProducts} Premium Items`}
-                  </p>
-                </div>
-              </div>
-
-
+              )}
             </div>
 
-            <div className="flex items-center gap-4">
-              <SlidersHorizontal size={18} className="text-muted" />
-              <select
-                value={sortBy}
-                onChange={e => handleSort(e.target.value)}
-                className="text-[11px] font-black uppercase tracking-[0.15em] rounded-2xl px-6 py-3.5 outline-none transition-all cursor-pointer border-2 bg-card text-card-text border-border focus:border-primary shadow-sm hover:border-primary/50"
-              >
-                <option value="">Sort: Default</option>
-                <option value="newest">Newest First</option>
-                <option value="popularity">Popularity</option>
-                <option value="price-low">Price: Low → High</option>
-                <option value="price-high">Price: High → Low</option>
-                <option value="ratings">Top Rated</option>
-              </select>
-            </div>
           </div>
-
-          <div className="grid grid-cols-1 gap-10">
-            {loading && products.length === 0 ? (
-              Array(10).fill(0).map((_, i) => <CardSkeleton key={i} />)
-            ) : products.length > 0 ? (
-              products.map((p, i) => (
-                <motion.div
-                  key={p._id}
-                  variants={fadeUp}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={i % 5}
-                >
-                  <ProductCard product={p} />
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full py-40 text-center card-premium rounded-[2.5rem] border-2 border-dashed border-border/50">
-                <Search size={56} className="mx-auto mb-6 opacity-10" />
-                <p className="text-2xl font-black uppercase tracking-tighter">No products found</p>
-                <p className="text-xs font-bold text-muted mt-3 uppercase tracking-widest">Adjust filters or search query</p>
-              </div>
-            )}
-          </div>
-
-          {/* ─── PAGINATION ─── */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 pt-20">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-                className="p-4 rounded-2xl border-2 border-border hover:bg-primary hover:text-button-text disabled:opacity-20 transition-all shadow-md active:scale-90"
-              >
-                <ChevronLeft size={28} />
-              </button>
-              <div className="flex items-center gap-3">
-                {[...Array(totalPages)].map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i + 1)}
-                    className={`w-14 h-14 rounded-2xl border-2 font-black text-sm transition-all active:scale-90 shadow-sm ${page === i + 1
-                      ? 'bg-primary text-button-text border-primary shadow-2xl scale-110'
-                      : 'bg-card text-card-text border-border hover:border-primary/40'
-                      }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage(p => p + 1)}
-                className="p-4 rounded-2xl border-2 border-border hover:bg-primary hover:text-button-text disabled:opacity-20 transition-all shadow-md active:scale-90"
-              >
-                <ChevronRight size={28} />
-              </button>
-            </div>
-          )}
         </section>
 
         {/* ── REVIEWS with Swiper Controls ─────────────────────────── */}
@@ -588,13 +554,13 @@ const Home = () => {
                   <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Testimonials</span>
                 </div>
-                <h2 className="text-4xl sm:text-6xl font-black tracking-tighter uppercase leading-tight" style={{ color: 'var(--card-text)' }}>
+                <h2 className="text-4xl sm:text-6xl font-black tracking-tighter uppercase leading-tight text-heading">
                   Customer <br /> <span className="text-primary">Stories</span>
                 </h2>
                 <p className="text-sm font-bold opacity-40 uppercase tracking-[0.4em] mt-6">Voices of the sweet community</p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-10 bg-card/60 backdrop-blur-xl px-10 py-8 rounded-[3rem] border border-border/50 shadow-2xl relative overflow-hidden group/rating">
+              <div className="flex flex-col sm:flex-row items-center gap-10 px-10 py-8 rounded-[3rem] shadow-2xl relative overflow-hidden group/rating cutting-edge-border">
                 <div className="absolute inset-0 bg-gradient-to-br from-card/40 to-transparent pointer-events-none" />
                 <div className="flex items-center gap-6 relative z-10">
                   <div className="text-center">
@@ -641,8 +607,7 @@ const Home = () => {
                 {reviews.map((r, i) => (
                   <SwiperSlide key={i} className="h-auto pb-4">
                     <motion.div
-                      whileHover={{ y: -6 }}
-                      className="rounded-[2.5rem] border border-border/30 p-8 flex flex-col h-full transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:border-primary/20 group/card relative overflow-hidden bg-gradient-to-br from-card-soft to-card"
+                      className="rounded-[3rem] p-10 flex flex-col h-full transition-all duration-700 group/card relative overflow-hidden cutting-edge-border hover:shadow-premium"
                     >
                       <div className="absolute top-4 right-6 opacity-[0.04] group-hover/card:opacity-[0.08] transition-opacity duration-700">
                         <Star size={120} />

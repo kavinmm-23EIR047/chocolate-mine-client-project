@@ -268,7 +268,7 @@ const Home = () => {
       </div>
 
 
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-32 space-y-16">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 pb-32 space-y-12 sm:space-y-16">
 
         {!query ? (
           <>
@@ -321,7 +321,7 @@ const Home = () => {
 
             {/* ── DELIVERY STRIP ───────────────────────────────────────── */}
             <section
-              className="rounded-[3rem] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group cutting-edge-border shadow-premium"
+              className="rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-10 sm:gap-12 relative overflow-hidden group cutting-edge-border shadow-premium"
               style={{ background: 'var(--card)' }}
             >
               {/* Background Glows */}
@@ -344,7 +344,7 @@ const Home = () => {
                     <PackageCheck size={14} className="text-primary" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Priority Service</span>
                   </div>
-                  <h3 className="font-black text-4xl sm:text-6xl tracking-tighter uppercase leading-[0.95] mb-6 text-heading">
+                  <h3 className="font-black text-2xl sm:text-4xl md:text-6xl tracking-tighter uppercase leading-[0.95] mb-6 text-heading">
                     Exclusive <br /> <span className="text-primary">Local Delivery</span>
                   </h3>
                   <p className="text-sm sm:text-lg font-medium opacity-60 leading-relaxed text-heading/80">
@@ -354,14 +354,14 @@ const Home = () => {
               </div>
 
               {/* Active Zone Badge */}
-              <div className="flex items-center gap-6 shrink-0 px-10 py-8 rounded-[2.5rem] bg-card/40 backdrop-blur-md border border-border/40 shadow-premium relative z-10 group-hover:border-primary/30 transition-all duration-500">
-                <div className="w-16 h-16 rounded-2xl bg-success/10 flex items-center justify-center text-success shadow-inner border border-success/20">
-                  <MapPin size={32} className="animate-pulse" />
+              <div className="flex items-center gap-4 sm:gap-6 shrink-0 px-6 sm:px-10 py-6 sm:py-8 rounded-[2rem] sm:rounded-[2.5rem] bg-card/40 backdrop-blur-md border border-border/40 shadow-premium relative z-10 group-hover:border-primary/30 transition-all duration-500 w-full lg:w-auto">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-success/10 flex items-center justify-center text-success shadow-inner border border-success/20">
+                  <MapPin size={24} className="animate-pulse sm:w-8 sm:h-8" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-[0.4em] opacity-40 mb-1">Active Zone</span>
-                  <span className="text-2xl font-black uppercase tracking-[0.05em] text-success capitalize leading-none">{deliveryCity}</span>
-                  <div className="h-0.5 w-8 bg-success/30 mt-3 rounded-full" />
+                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.4em] opacity-40 mb-1">Active Zone</span>
+                  <span className="text-xl sm:text-2xl font-black uppercase tracking-[0.05em] text-success capitalize leading-none">{deliveryCity}</span>
+                  <div className="h-0.5 w-6 sm:w-8 bg-success/30 mt-2 sm:mt-3 rounded-full" />
                 </div>
               </div>
             </section>
@@ -607,7 +607,7 @@ const Home = () => {
                 {reviews.map((r, i) => (
                   <SwiperSlide key={i} className="h-auto pb-4">
                     <motion.div
-                      className="rounded-[3rem] p-10 flex flex-col h-full transition-all duration-700 group/card relative overflow-hidden cutting-edge-border hover:shadow-premium"
+                      className="rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 flex flex-col h-full transition-all duration-700 group/card relative overflow-hidden cutting-edge-border hover:shadow-premium"
                     >
                       <div className="absolute top-4 right-6 opacity-[0.04] group-hover/card:opacity-[0.08] transition-opacity duration-700">
                         <Star size={120} />

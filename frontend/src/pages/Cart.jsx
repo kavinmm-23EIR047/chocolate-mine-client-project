@@ -204,10 +204,10 @@ const Cart = () => {
                   key={`${item.productId}-${item.selectedFlavor || ""}-${item.selectedWeight || ""}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-2xl shadow-card border border-border/50 p-6"
+                  className="bg-card rounded-2xl shadow-card border border-border/50 p-4 sm:p-6"
                 >
-                  <div className="flex gap-6">
-                    <div className="w-32 h-32 rounded-lg overflow-hidden bg-surface flex-shrink-0 border border-border/40">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    <div className="w-full sm:w-32 h-48 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40">
                       <img
                         src={item.image}
                         alt={item.name}

@@ -174,7 +174,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
         </div>
 
         {/* Right: Content Box */}
-        <div className="p-8 md:p-10 flex flex-col flex-1 min-w-0">
+        <div className="p-6 sm:p-10 flex flex-col flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3 mb-6">
              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-primary dark:text-white bg-primary/5 dark:bg-white/10 px-4 py-1.5 rounded-full border border-primary/20">
                {product.category}
@@ -187,7 +187,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
           </div>
 
           <Link to={`/product/${product.slug}`}>
-            <h3 className="text-3xl md:text-5xl font-black text-heading dark:text-white leading-[1] mb-6 hover:text-primary transition-colors tracking-tighter">
+            <h3 className="text-2xl md:text-5xl font-black text-heading dark:text-white leading-[1] mb-6 hover:text-primary transition-colors tracking-tighter">
               {product.name}
             </h3>
           </Link>
@@ -218,22 +218,22 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             </div>
 
             {/* Action Block */}
-            <div className="flex-1 min-w-[280px] flex items-center gap-4">
-               {couponLive ? (
-                 <div className="flex-1 bg-primary/5 dark:bg-white/5 border border-dashed border-primary/30 dark:border-white/20 p-5 rounded-3xl flex items-center justify-between gap-6 hover:bg-primary/10 transition-all">
-                    <div className="min-w-0">
-                       <p className="text-[10px] font-black text-primary dark:text-white uppercase tracking-[0.2em] mb-1">Coupon Available</p>
-                       <p className="text-sm font-bold text-heading dark:text-white truncate">Code: <span className="text-primary font-black tracking-widest uppercase">{couponCodeDisplay}</span></p>
-                    </div>
-                    <button onClick={add} className="shrink-0 h-12 px-8 bg-primary text-button-text rounded-2xl text-[11px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-primary/20">Claim</button>
-                 </div>
-               ) : (
-                 <button onClick={add} disabled={isOutOfStock || addingToCart} className="flex-1 h-16 bg-primary text-button-text rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] hover:shadow-2xl shadow-xl shadow-primary/10 transition-all disabled:opacity-50 flex items-center justify-center gap-4">
-                   {addingToCart ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ShoppingCart size={20} />}
-                   {needsVariantSelection ? 'Personalize' : 'Add to Cart'}
-                 </button>
-               )}
-            </div>
+             <div className="flex-1 w-full flex items-center gap-4">
+                {couponLive ? (
+                  <div className="flex-1 bg-primary/5 dark:bg-white/5 border border-dashed border-primary/30 dark:border-white/20 p-4 sm:p-5 rounded-3xl flex items-center justify-between gap-4 sm:gap-6 hover:bg-primary/10 transition-all">
+                     <div className="min-w-0">
+                        <p className="text-[9px] sm:text-[10px] font-black text-primary dark:text-white uppercase tracking-[0.2em] mb-1">Coupon Available</p>
+                        <p className="text-xs sm:text-sm font-bold text-heading dark:text-white truncate">Code: <span className="text-primary font-black tracking-widest uppercase">{couponCodeDisplay}</span></p>
+                     </div>
+                     <button onClick={add} className="shrink-0 h-10 sm:h-12 px-6 sm:px-8 bg-primary text-button-text rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-primary/20">Claim</button>
+                  </div>
+                ) : (
+                  <button onClick={add} disabled={isOutOfStock || addingToCart} className="flex-1 h-14 sm:h-16 bg-primary text-button-text rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] hover:scale-[1.02] hover:shadow-2xl shadow-xl shadow-primary/10 transition-all disabled:opacity-50 flex items-center justify-center gap-4">
+                    {addingToCart ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ShoppingCart size={20} />}
+                    {needsVariantSelection ? 'Personalize' : 'Add to Cart'}
+                  </button>
+                )}
+             </div>
           </div>
           
           <div className="mt-10 pt-8 border-t border-border/30 flex flex-wrap items-center justify-between gap-6">
@@ -323,7 +323,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       </div>
 
       {/* ─── DETAILS SECTION ─────────────────────── */}
-      <div className="px-5 pb-5 pt-1 flex flex-col flex-1 min-h-0">
+      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 flex flex-col flex-1 min-h-0">
         <div className="mb-2">
            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted/5 dark:bg-white/5 border border-border/40 rounded-md text-[9px] font-black text-muted uppercase tracking-widest">
               <Zap size={9} fill="currentColor" className="text-primary" />

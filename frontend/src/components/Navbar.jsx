@@ -56,8 +56,8 @@ const Navbar = () => {
                 <div className="absolute -inset-1 bg-primary/5 blur-lg rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[12px] sm:text-[18px] font-black text-primary tracking-tighter leading-none uppercase">The Chocolate</span>
-                <span className="text-[9px] sm:text-[12px] font-black text-accent tracking-[0.4em] uppercase mt-0.5 sm:mt-1 leading-none">Mine</span>
+                <span className="text-[10px] xs:text-[12px] sm:text-[18px] font-black text-primary tracking-tighter leading-none uppercase">The Chocolate</span>
+                <span className="text-[8px] xs:text-[9px] sm:text-[12px] font-black text-accent tracking-[0.4em] uppercase mt-0.5 sm:mt-1 leading-none">Mine</span>
               </div>
             </Link>
 

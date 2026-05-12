@@ -29,8 +29,8 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-4 group">
               <Logo className="w-20 h-20 bg-surface rounded-2xl p-1 shadow-premium border border-border/10 backdrop-blur-md" />
               <div className="flex flex-col">
-                <span className="text-3xl font-black text-footer-text tracking-tighter leading-none uppercase transition-colors">THE CHOCOLATE</span>
-                <span className="text-sm font-black text-secondary tracking-[0.4em] uppercase mt-1 transition-colors">Mine</span>
+                <span className="text-xl sm:text-3xl font-black text-footer-text tracking-tighter leading-none uppercase transition-colors">THE CHOCOLATE</span>
+                <span className="text-xs sm:text-sm font-black text-secondary tracking-[0.4em] uppercase mt-1 transition-colors">Mine</span>
               </div>
             </Link>
             <p className="text-xl font-bold text-footer-text/60 max-w-md leading-relaxed italic">
@@ -45,7 +45,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="bg-white/5 border border-footer-text/10 p-10 rounded-3xl shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+          <div className="bg-white/5 border border-footer-text/10 p-6 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                <Whatsapp size={80} className="-rotate-12" />
             </div>

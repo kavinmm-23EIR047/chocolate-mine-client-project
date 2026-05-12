@@ -520,7 +520,7 @@ const ProductDetails = () => {
           {/* ── RIGHT — DETAILS ── */}
           <div className="w-full lg:sticky lg:top-24 space-y-6 px-1 lg:px-0">
             {/* Main Header Card */}
-            <div className="bg-card rounded-[2.5rem] border border-border/50 p-6 lg:p-10 shadow-card hover:shadow-premium transition-shadow">
+            <div className="bg-card rounded-[2rem] sm:rounded-[2.5rem] border border-border/50 p-5 sm:p-10 shadow-card hover:shadow-premium transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[11px] font-black text-primary uppercase bg-primary/5 px-4 py-1.5 rounded-full tracking-widest border border-primary/10">
                   {productCategory}
@@ -528,7 +528,7 @@ const ProductDetails = () => {
                 <button className="p-2.5 text-muted hover:text-primary transition-colors bg-card-soft rounded-full border border-border/40 shadow-soft"><Share2 size={18} /></button>
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{productName}</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{productName}</h1>
 
               <div className="flex items-center gap-4 mb-8">
                 <div className="flex items-center gap-1.5 bg-success text-button-text px-3 py-1 rounded-xl text-xs font-black shadow-sm">

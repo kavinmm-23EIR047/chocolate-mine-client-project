@@ -37,6 +37,13 @@ module.exports = (err, req, res, next) => {
     error = new AppError('Your token has expired. Please log in again.', 401);
   }
 
+  // Ensure CORS headers are present even on errors
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
   res.status(error.statusCode || 500).json({
     status: error.status || 'error',
     message: error.message || 'Something went wrong',

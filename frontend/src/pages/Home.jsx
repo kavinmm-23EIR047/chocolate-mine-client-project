@@ -220,8 +220,12 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-body">
 
+      {/* ── SEO HIDDEN H1 ─────────────────────────────────────────── */}
+      <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore</h1>
+
       {/* ── TRUST TICKER ─────────────────────────────────────────── */}
       <div className="bg-navbar border-b border-border">
+
         <div className="max-w-7xl mx-auto px-4 py-3">
           {/* Desktop Grid */}
           <div className="hidden lg:flex items-center justify-between gap-8">

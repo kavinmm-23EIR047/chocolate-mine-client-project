@@ -70,11 +70,6 @@ export const paymentLogos = {
       "https://commons.wikimedia.org/wiki/Special:FilePath/Paytm_logo.png",
   },
 
-  wallets: {
-    amazonpay:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Amazon%20Pay%20logo.svg",
-  },
-
   banking: {
     sbi:
       "https://upload.wikimedia.org/wikipedia/commons/c/cc/SBI-logo.svg",
@@ -143,20 +138,6 @@ const PAYMENT_METHODS = [
       { name: 'SBI', url: paymentLogos.banking.sbi },
       { name: 'HDFC', url: paymentLogos.banking.hdfc },
       { name: 'ICICI', url: paymentLogos.banking.icici },
-    ],
-  },
-  {
-    id: 'wallet',
-    rzpMethod: 'wallet',
-    label: 'Wallets',
-    sub: 'Amazon Pay · Freecharge · MobiKwik',
-    icon: Wallet,
-    gradient: 'from-rose-500 to-pink-600',
-    bg: 'bg-gradient-to-br from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20',
-    border: 'border-rose-200 dark:border-rose-500/30',
-    ring: 'ring-rose-400',
-    logos: [
-      { name: 'Amazon Pay', url: paymentLogos.wallets.amazonpay },
     ],
   },
 ];
@@ -625,85 +606,89 @@ const Checkout = () => {
       clearInterval(interval);
       setLoading(false);
 
-      /* ── Razorpay options with method pre-selection ── */
       const selectedMethod = PAYMENT_METHODS.find((m) => m.id === selectedPayMethod);
 
       const options = {
         key: razorpayKey,
         amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        name: 'The Chocolate Mine',
-        description: 'Order Payment',
+        currency: "INR",
+        name: "The Chocolate Mine",
+        description: "Secure Order Payment",
+        image: "https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg",
         order_id: razorpayOrder.id,
-
-        /* Pre-select payment tab when user chose one */
-        ...(selectedMethod && {
-          config: {
-            display: {
-              blocks: {
-                banks: {
-                  name: 'Pay using ' + (selectedMethod.label || 'Online'),
-                  instruments: [
-                    {
-                      method: selectedMethod.rzpMethod
-                    }
-                  ]
-                }
-              },
-              sequence: ['block.banks'],
-              preferences: { show_default_blocks: true }
-            }
-          }
-        }),
-
         handler: async (response) => {
           try {
             setLoading(true);
-            setLoaderText('Verifying payment...');
+            setLoaderText("Verifying payment...");
             await api.post(
-              '/payment/verify',
+              "/payment/verify",
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 orderId,
               },
-              { headers: { Authorization: `Bearer ${token}` } }
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
             );
-            if (!directItem) dispatch(clearCart());
+            if (!directItem) {
+              dispatch(clearCart());
+            }
             clearCustomCakeRequest();
             setLoading(false);
             isProcessingPayment.current = false;
-            toast.success('Payment successful! 🎉');
-            navigate('/order-success', { state: { orderId } });
+            toast.success("Payment successful! 🎉");
+            navigate("/order-success", {
+              state: { orderId },
+            });
           } catch (e) {
             setLoading(false);
             isProcessingPayment.current = false;
-            toast.error(e?.response?.data?.message || 'Verification failed. Contact support.');
+            toast.error(
+              e?.response?.data?.message ||
+              "Verification failed. Contact support."
+            );
           }
         },
-
         modal: {
           ondismiss: async () => {
             setLoading(false);
             isProcessingPayment.current = false;
             try {
-              await api.post('/payment/log-failure', {
+              await api.post("/payment/log-failure", {
                 orderId,
-                reason: 'User closed payment window',
+                reason: "User closed payment window",
               });
-            } catch { }
-            toast.error('Payment cancelled.');
+            } catch {}
+            toast.error("Payment cancelled.");
           },
         },
-
         prefill: {
-          name: addressDetails.fullName || user?.name || '',
-          email: user?.email || '',
-          contact: addressDetails.phone || user?.phone || '',
+          name: addressDetails.fullName || user?.name || "",
+          email: user?.email || "",
+          contact: addressDetails.phone || user?.phone || "",
         },
-
-        theme: { color: '#4A2C2A' },
+        notes: {
+          payment_for: "Cake Order",
+        },
+        theme: {
+          color: "#4A2C2A",
+        },
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+        },
+        config: {
+          display: {
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
+        },
       };
 
       const rzp = new window.Razorpay(options);
@@ -1142,11 +1127,8 @@ const Checkout = () => {
 
                       {/* Razorpay banner */}
                       <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card-soft/80 border border-border/20 backdrop-blur-sm">
-                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="var(--primary)" fillOpacity="0.3" />
-                            <path d="M12 12L2 17L12 22L22 17L12 12Z" fill="var(--primary)" />
-                          </svg>
+                        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
+                          <img src={paymentLogos.razorpay} alt="Razorpay" className="w-6 h-6 object-contain" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-black text-heading uppercase tracking-widest leading-none mb-1">Secure Payment via Razorpay</p>
@@ -1193,7 +1175,7 @@ const Checkout = () => {
                                 {method.logos.map((logo) => (
                                   <div
                                     key={logo.name}
-                                    className="flex items-center justify-center rounded-lg shadow-sm overflow-hidden h-8 sm:h-9 px-1.5 bg-white/10 backdrop-blur-sm border border-white/5"
+                                    className="flex items-center justify-center rounded-lg shadow-sm overflow-hidden h-8 sm:h-9 px-1.5 bg-white/10 dark:bg-white backdrop-blur-sm border border-white/5 dark:border-transparent"
                                   >
                                     <img
                                       src={logo.url}

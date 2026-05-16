@@ -141,12 +141,12 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             {(product.bestseller || discountPct > 0 || couponLabel) && (
               <div className="flex flex-wrap items-center gap-1">
                 {product.bestseller && (
-                  <span className="px-1.5 py-0.5 bg-secondary text-white text-[7px] font-black uppercase tracking-widest rounded-md shadow">
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-500/10 border border-orange-500/40 text-orange-700 dark:text-orange-400 text-[7px] font-black uppercase tracking-widest rounded-md shadow-sm">
                     🔥 Best
                   </span>
                 )}
                 {discountPct > 0 && (
-                  <span className="px-1.5 py-0.5 bg-primary text-button-text text-[7px] font-black uppercase tracking-widest rounded-md shadow">
+                  <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/40 text-red-700 dark:text-red-400 text-[7px] font-black uppercase tracking-widest rounded-md shadow-sm">
                     -{discountPct}%
                   </span>
                 )}
@@ -154,7 +154,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
                   <span
                     onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(coupon.code); }}
                     title="Click to copy"
-                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 border border-green-500/40 text-green-700 dark:text-green-400 text-[7px] font-black uppercase tracking-wide rounded-md cursor-pointer hover:bg-green-500/20 transition-colors"
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 border border-green-500/40 text-green-700 dark:text-green-400 text-[7px] font-black uppercase tracking-wide rounded-md cursor-pointer hover:bg-green-500/20 transition-colors shadow-sm"
                   >
                     <Tag size={7} /> {couponLabel}
                   </span>
@@ -270,12 +270,12 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
           {/* Badges row in content area — visible on ALL screens */}
           <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-2">
             {product.bestseller && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-secondary text-white text-[7px] sm:text-[9px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow">
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-500/10 border border-orange-500/40 text-orange-700 dark:text-orange-400 text-[7px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow-sm">
                 🔥 Bestseller
               </span>
             )}
             {discountPct > 0 && (
-              <span className="px-1.5 py-0.5 bg-primary text-button-text text-[7px] sm:text-[9px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow">
+              <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/40 text-red-700 dark:text-red-400 text-[7px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow-sm">
                 -{discountPct}% OFF
               </span>
             )}
@@ -283,30 +283,30 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
               <span
                 onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(coupon.code); }}
                 title="Click to copy coupon code"
-                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 border border-green-500/40 text-green-700 dark:text-green-400 text-[7px] sm:text-[9px] font-black uppercase tracking-wide rounded-md sm:rounded-lg cursor-pointer hover:bg-green-500/20 transition-colors"
+                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 border border-green-500/40 text-green-700 dark:text-green-400 text-[7px] sm:text-[10px] font-black uppercase tracking-wide rounded-md sm:rounded-lg cursor-pointer hover:bg-green-500/20 transition-colors shadow-sm"
               >
                 <Tag size={8} /> {couponLabel}
               </span>
             )}
           </div>
-          <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.18em] text-primary block mb-1 capitalize">{product.category}</span>
-          <h3 className="text-[12px] sm:text-[16px] font-black text-heading leading-tight uppercase italic tracking-tight line-clamp-2 group-hover:text-primary transition-colors">{productName}</h3>
+          <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.18em] text-primary block mb-1 capitalize">{product.category}</span>
+          <h3 className="text-[12px] sm:text-[17px] font-black text-heading leading-tight uppercase italic tracking-tight line-clamp-2 group-hover:text-primary transition-colors">{productName}</h3>
 
           {product.shortDescription && (
-            <p className="text-[9px] sm:text-[12px] text-heading/85 line-clamp-2 mt-2 leading-relaxed italic">
+            <p className="text-[9px] sm:text-[13px] text-heading/85 line-clamp-2 mt-2 leading-relaxed italic">
               {product.shortDescription}
             </p>
           )}
 
           <div className="flex items-center gap-2 mt-2 sm:mt-4">
             <div className={`w-1.5 h-1.5 rounded-full ${totalAvailableStock < 10 ? 'animate-pulse bg-orange-500' : 'bg-green-500'}`} />
-            <span className="text-[8px] sm:text-[12px] font-black uppercase tracking-widest text-heading/80">{totalAvailableStock} Left</span>
+            <span className="text-[8px] sm:text-[13px] font-black uppercase tracking-widest text-heading/80">{totalAvailableStock} Left</span>
             {product.location && (
               <>
                 <span className="text-heading/30">|</span>
                 <div className="flex items-center gap-1 text-heading/80">
                   <MapPin size={10} className="text-primary sm:w-4 sm:h-4" />
-                  <span className="text-[8px] sm:text-[12px] font-black uppercase tracking-widest capitalize">{product.location}</span>
+                  <span className="text-[8px] sm:text-[13px] font-black uppercase tracking-widest capitalize">{product.location}</span>
                 </div>
               </>
             )}

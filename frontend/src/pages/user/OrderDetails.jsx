@@ -359,7 +359,7 @@ const OrderDetails = () => {
                           {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
                         </div>
                       )}
-                      {item.customDetails && Object.keys(item.customDetails).length > 0 && (
+                      {item.customDetails && Object.values(item.customDetails).some(val => val) && (
                         <button 
                           onClick={() => toggleItemExpand(idx)}
                           className="text-xs text-secondary flex items-center gap-1 mt-2"
@@ -372,15 +372,14 @@ const OrderDetails = () => {
                   </div>
                   {expandedItems[idx] && item.customDetails && (
                     <div className="mt-3 p-4 bg-card-soft rounded-xl text-xs border border-border/30">
-
-                      {item.customDetails.flavour && <p><span className="font-medium">Flavor:</span> {item.customDetails.flavour}</p>}
-                      {item.customDetails.shape && <p><span className="font-medium">Shape:</span> {item.customDetails.shape}</p>}
-                      {item.customDetails.tiers && <p><span className="font-medium">Tiers:</span> {item.customDetails.tiers}</p>}
-                      {item.customDetails.weight && <p><span className="font-medium">Weight:</span> {item.customDetails.weight}</p>}
-                      {item.customDetails.eggless && <p><span className="font-medium">Eggless:</span> Yes</p>}
-                      {item.customDetails.lessSugar && <p><span className="font-medium">Less Sugar:</span> Yes</p>}
-                      {item.customDetails.messageOnCake && <p><span className="font-medium">Message:</span> {item.customDetails.messageOnCake}</p>}
-                      {item.customDetails.notes && <p><span className="font-medium">Notes:</span> {item.customDetails.notes}</p>}
+                      {Object.entries(item.customDetails).map(([k, v]) => {
+                        if (v === false || v === null || v === undefined || v === '') return null;
+                        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        const displayVal = v === true ? 'Yes' : v;
+                        return (
+                          <p key={k}><span className="font-medium">{label}:</span> {displayVal}</p>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

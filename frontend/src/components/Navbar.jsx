@@ -42,20 +42,20 @@ const Navbar = () => {
       {/* Sticky Navbar */}
       <nav
         className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-500 ${isScrolled
-            ? 'bg-navbar/95 backdrop-blur-xl shadow-premium border-b border-border/10'
-            : 'bg-navbar'
+          ? 'bg-navbar/95 backdrop-blur-xl shadow-premium border-b border-border/10'
+          : 'bg-navbar'
           }`}
->
+      >
         <div className="w-full px-4 sm:px-12 lg:px-20">
           {/* ROW 1: MAIN HEADER */}
           <div className={`flex items-center justify-between gap-6 transition-all duration-500 ${isScrolled ? 'py-2' : 'py-4'} border-b border-border/5`}>
-            
+
             {/* 1. LOGO */}
             <Link to="/" className="flex items-center gap-3 shrink-0 group">
               <Logo className={`bg-card rounded-2xl p-1.5 shadow-lg border border-border/50 group-hover:scale-105 transition-all duration-500 ${isScrolled ? 'w-8 h-8 sm:w-12 sm:h-12' : 'w-10 h-10 sm:w-16 sm:h-16'}`} />
               <div className="flex flex-col">
                 <span className={`font-black text-primary tracking-tighter leading-none uppercase transition-all ${isScrolled ? 'text-[12px] sm:text-[20px]' : 'text-[14px] sm:text-[24px]'}`}>Chocolate Mine</span>
-                <span className={`font-black text-primary/40 tracking-[0.4em] uppercase mt-1 leading-none transition-all ${isScrolled ? 'text-[6px] sm:text-[10px]' : 'text-[8px] sm:text-[12px]'}`}>Artisan Deli</span>
+
               </div>
             </Link>
 
@@ -65,13 +65,13 @@ const Navbar = () => {
             >
               <div className="flex items-center gap-3 w-full">
                 <div className="w-8 h-5 bg-primary/20 rounded flex items-center justify-center overflow-hidden">
-                   <MapPin size={14} className="text-primary" />
+                  <MapPin size={14} className="text-primary" />
                 </div>
                 <div className="flex flex-col flex-grow">
-                   <span className="text-[9px] font-black text-muted uppercase tracking-widest leading-none mb-1">Deliver to</span>
-                   <span className="text-xs font-black text-heading flex items-center justify-between gap-2 uppercase tracking-tight">
-                     {deliveryCity || 'Select City'} <ChevronDown size={14} className={`transition-transform duration-300 ${isLocationOpen ? 'rotate-180' : ''}`} />
-                   </span>
+                  <span className="text-[9px] font-black text-muted uppercase tracking-widest leading-none mb-1">Deliver to</span>
+                  <span className="text-xs font-black text-heading flex items-center justify-between gap-2 uppercase tracking-tight">
+                    {deliveryCity || 'Select City'} <ChevronDown size={14} className={`transition-transform duration-300 ${isLocationOpen ? 'rotate-180' : ''}`} />
+                  </span>
                 </div>
               </div>
             </div>
@@ -96,12 +96,12 @@ const Navbar = () => {
 
             {/* 4. ACTION ICONS */}
             <div className={`flex items-center gap-4 sm:gap-8 lg:gap-10 transition-all duration-500 ${isScrolled ? 'scale-90 origin-right' : ''}`}>
-              
+
               <Link to="/account/orders" className="hidden lg:flex flex-col items-center gap-2 group">
-                 <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
-                   <Box size={20} className="text-primary/80 group-hover:text-primary" />
-                 </div>
-                 <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-primary leading-none">Track Order</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                  <Box size={20} className="text-primary/80 group-hover:text-primary" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-primary leading-none">Track Order</span>
               </Link>
 
               {/* Account/User (Desktop Only) */}
@@ -146,7 +146,7 @@ const Navbar = () => {
 
               {/* Theme Toggle (Mobile & Desktop) */}
               <div className="flex">
-                 <ThemeToggle />
+                <ThemeToggle />
               </div>
 
               {/* Mobile Menu Icon (3 Dots / MoreVertical) */}
@@ -162,30 +162,30 @@ const Navbar = () => {
           {/* ROW 2: NAVIGATION LINKS (Full width & Balanced) */}
           <div className={`hidden lg:flex transition-all duration-500 overflow-hidden ${isScrolled ? 'h-0 opacity-0 pointer-events-none' : 'h-14 opacity-100'}`}>
             <div className="flex items-center justify-center py-4 gap-12 overflow-x-auto no-scrollbar">
-            {[
-              { label: 'Home', path: '/' },
-              { label: 'Shop All', path: '/shop' },
-              { label: 'Custom cake', path: '/custom-cake' },
-              { label: 'Bestsellers', path: '/shop?bestseller=true' },
-              { label: 'Flowers', path: '/shop?category=flowers' },
-              { label: 'Birthday', path: '/occasion/birthday' },
-              { label: 'Anniversary', path: '/occasion/anniversary' },
-              { label: 'Gifts', path: '/shop?category=gifts' },
-              { label: 'Chocolates', path: '/shop?category=chocolates' },
-            ].map((link) => (
-              <Link
-                key={link.label}
-                to={link.path}
-                className={`text-[13px] font-black uppercase tracking-[0.15em] transition-all hover:text-primary relative group pb-1 whitespace-nowrap ${location.pathname === link.path ? 'text-primary' : 'text-heading/60'}`}
-              >
-                {link.label}
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'}`} />
-              </Link>
-            ))}
+              {[
+                { label: 'Home', path: '/' },
+                { label: 'Shop All', path: '/shop' },
+                { label: 'Custom cake', path: '/custom-cake' },
+                { label: 'Bestsellers', path: '/shop?bestseller=true' },
+                { label: 'Flowers', path: '/shop?category=flowers' },
+                { label: 'Birthday', path: '/occasion/birthday' },
+                { label: 'Anniversary', path: '/occasion/anniversary' },
+                { label: 'Gifts', path: '/shop?category=gifts' },
+                { label: 'Chocolates', path: '/shop?category=chocolates' },
+              ].map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  className={`text-[13px] font-black uppercase tracking-[0.15em] transition-all hover:text-primary relative group pb-1 whitespace-nowrap ${location.pathname === link.path ? 'text-primary' : 'text-heading/60'}`}
+                >
+                  {link.label}
+                  <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
       {/* Mobile Sidebar */}
       <AnimatePresence>
@@ -210,7 +210,7 @@ const Navbar = () => {
                   <Link to="/" onClick={() => setIsMenuOpen(false)}>
                     <Logo className="w-10 h-10 bg-card rounded-xl p-1.5 shadow-lg border border-border/50" />
                   </Link>
-                  <button 
+                  <button
                     onClick={() => setIsMenuOpen(false)}
                     className="p-2 rounded-xl bg-primary/5 text-primary hover:bg-primary hover:text-button-text transition-all"
                   >
@@ -218,7 +218,7 @@ const Navbar = () => {
                   </button>
                 </div>
                 <p className="text-[14px] font-black uppercase tracking-[0.2em] text-primary">The Chocolate Mine</p>
-                
+
                 {/* Mobile Location Selector */}
                 <div className="mt-6 p-4 rounded-2xl bg-primary/5 border border-primary/10">
                   <div className="flex items-center gap-3 mb-3">

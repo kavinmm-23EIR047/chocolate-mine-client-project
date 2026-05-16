@@ -13,306 +13,317 @@
    LIGHT THEME
    ─────────────────────────────────────────── */
 :root {
-  /* ── Core Surfaces ── */
-  --background: #FFF4F2;
-  --background-rgb: 255 244 242;
-  --surface: #FFFFFF;
-  --surface-rgb: 255 255 255;
-  --card: #FFFFFF;
-  --card-rgb: 255 255 255;
-  --card-soft: #FFF9F8;
-  --card-soft-rgb: 255 249 248;
+   /* ── Core Surfaces ── */
+   --background: #FFF4F2;
+   --background-rgb: 255 244 242;
+   --surface: #FFFFFF;
+   --surface-rgb: 255 255 255;
+   --card: #FFFFFF;
+   --card-rgb: 255 255 255;
+   --card-soft: #FFF9F8;
+   --card-soft-rgb: 255 249 248;
 
-  /* ── Brand Colors ── */
-  --primary: #3D1F1A;         /* Primary Chocolate Brown */
-  --primary-rgb: 61 31 26;
-  --primary-hover: #5C3530;   /* Rich Cocoa Brown */
-  --primary-hover-rgb: 92 53 48;
-  --primary-active: #280F0B;  /* Deep Espresso */
-  --primary-active-rgb: 40 15 11;
-  --secondary: #7A4A44;       /* Warm Mocha */
-  --secondary-rgb: 122 74 68;
-  --accent: #D4A017;          /* Luxury Gold */
-  --accent-rgb: 212 160 23;
-  --accent-hover: #B8880F;
-  --accent-hover-rgb: 184 136 15;
+   /* ── Brand Colors ── */
+   --primary: #3D1F1A;
+   /* Primary Chocolate Brown */
+   --primary-rgb: 61 31 26;
+   --primary-hover: #5C3530;
+   /* Rich Cocoa Brown */
+   --primary-hover-rgb: 92 53 48;
+   --primary-active: #280F0B;
+   /* Deep Espresso */
+   --primary-active-rgb: 40 15 11;
+   --secondary: #7A4A44;
+   /* Warm Mocha */
+   --secondary-rgb: 122 74 68;
+   --accent: #D4A017;
+   /* Luxury Gold */
+   --accent-rgb: 212 160 23;
+   --accent-hover: #B8880F;
+   --accent-hover-rgb: 184 136 15;
 
-  /* ── Typography ── */
-  --foreground: #1A0F0D;
-  --foreground-rgb: 26 15 13;
-  --heading: #1A0F0D;
-  --heading-rgb: 26 15 13;
-  --body: #3D1F1A;
-  --body-rgb: 61 31 26;
-  --muted: #8C6A64;
-  --muted-rgb: 140 106 100;
-  --card-text: #1A0F0D;
-  --card-text-rgb: 26 15 13;
+   /* ── Typography ── */
+   --foreground: #1A0F0D;
+   --foreground-rgb: 26 15 13;
+   --heading: #1A0F0D;
+   --heading-rgb: 26 15 13;
+   --body: #3D1F1A;
+   --body-rgb: 61 31 26;
+   --muted: #8C6A64;
+   --muted-rgb: 140 106 100;
+   --card-text: #1A0F0D;
+   --card-text-rgb: 26 15 13;
 
-  /* ── Navigation ── */
-  --navbar: #FFF4F2;
-  --navbar-rgb: 255 244 242;
-  --navbar-text: #3D1F1A;
-  --navbar-text-rgb: 61 31 26;
-  --sidebar: #FFFFFF;
-  --sidebar-rgb: 255 255 255;
+   /* ── Navigation ── */
+   --navbar: #FFF4F2;
+   --navbar-rgb: 255 244 242;
+   --navbar-text: #3D1F1A;
+   --navbar-text-rgb: 61 31 26;
+   --sidebar: #FFFFFF;
+   --sidebar-rgb: 255 255 255;
 
-  /* ── Footer ── */
-  --footer: #1A0F0D;
-  --footer-rgb: 26 15 13;
-  --footer-text: #FDF4F2;
-  --footer-text-rgb: 253 244 242;
+   /* ── Footer ── */
+   --footer: #1A0F0D;
+   --footer-rgb: 26 15 13;
+   --footer-text: #FDF4F2;
+   --footer-text-rgb: 253 244 242;
 
-  /* ── Borders & Inputs ── */
-  --border: #E5D1CD;
-  --border-rgb: 229 209 205;
-  --border-muted: #D9B9B3;
-  --border-muted-rgb: 217 185 179;
-  --input: #FFFFFF;
-  --input-rgb: 255 255 255;
-  --input-border: #D9B9B3;
-  --input-border-rgb: 217 185 179;
-  --input-focus: #3D1F1A;
-  --ring: rgba(61, 31, 26, 0.15);
+   /* ── Borders & Inputs ── */
+   --border: #E5D1CD;
+   --border-rgb: 229 209 205;
+   --border-muted: #D9B9B3;
+   --border-muted-rgb: 217 185 179;
+   --input: #FFFFFF;
+   --input-rgb: 255 255 255;
+   --input-border: #D9B9B3;
+   --input-border-rgb: 217 185 179;
+   --input-focus: #3D1F1A;
+   --ring: rgba(61, 31, 26, 0.15);
 
-  /* ── Buttons ── */
-  --button-bg: #3D1F1A;
-  --button-bg-rgb: 61 31 26;
-  --button-text: #FFF4F2;
-  --button-text-rgb: 255 244 242;
-  --button-hover: #280F0B;
-  --button-hover-rgb: 40 15 11;
-  --button-alt-bg: #FFFFFF;
-  --button-alt-bg-rgb: 255 255 255;
-  --button-alt-text: #3D1F1A;
-  --button-alt-text-rgb: 61 31 26;
-  --button-alt-hover: #FDE8E4;
-  --button-alt-hover-rgb: 253 232 228;
-  --button-buy: #3D1F1A;
-  --button-buy-rgb: 61 31 26;
-  --button-buy-text: #FFF4F2;
-  --button-buy-text-rgb: 255 244 242;
+   /* ── Buttons ── */
+   --button-bg: #3D1F1A;
+   --button-bg-rgb: 61 31 26;
+   --button-text: #FFF4F2;
+   --button-text-rgb: 255 244 242;
+   --button-hover: #280F0B;
+   --button-hover-rgb: 40 15 11;
+   --button-alt-bg: #FFFFFF;
+   --button-alt-bg-rgb: 255 255 255;
+   --button-alt-text: #3D1F1A;
+   --button-alt-text-rgb: 61 31 26;
+   --button-alt-hover: #FDE8E4;
+   --button-alt-hover-rgb: 253 232 228;
+   --button-buy: #3D1F1A;
+   --button-buy-rgb: 61 31 26;
+   --button-buy-text: #FFF4F2;
+   --button-buy-text-rgb: 255 244 242;
 
-  /* ── Semantic: Success ── */
-  --success: #2E7D32;
-  --success-rgb: 46 125 50;
-  --success-light: #E8F5E9;
-  --success-light-rgb: 232 245 233;
-  --success-text: #1B5E20;
-  --success-text-rgb: 27 94 32;
+   /* ── Semantic: Success ── */
+   --success: #2E7D32;
+   --success-rgb: 46 125 50;
+   --success-light: #E8F5E9;
+   --success-light-rgb: 232 245 233;
+   --success-text: #1B5E20;
+   --success-text-rgb: 27 94 32;
 
-  /* ── Semantic: Error ── */
-  --error: #D32F2F;
-  --error-rgb: 211 47 47;
-  --error-light: #FFEBEE;
-  --error-light-rgb: 255 235 238;
-  --error-text: #B71C1C;
-  --error-text-rgb: 183 28 28;
+   /* ── Semantic: Error ── */
+   --error: #D32F2F;
+   --error-rgb: 211 47 47;
+   --error-light: #FFEBEE;
+   --error-light-rgb: 255 235 238;
+   --error-text: #B71C1C;
+   --error-text-rgb: 183 28 28;
 
-  /* ── Semantic: Warning ── */
-  --warning: #F9A825;
-  --warning-rgb: 249 168 37;
-  --warning-light: #FFF8E1;
-  --warning-light-rgb: 255 248 225;
-  --warning-text: #E65100;
-  --warning-text-rgb: 230 81 0;
+   /* ── Semantic: Warning ── */
+   --warning: #F9A825;
+   --warning-rgb: 249 168 37;
+   --warning-light: #FFF8E1;
+   --warning-light-rgb: 255 248 225;
+   --warning-text: #E65100;
+   --warning-text-rgb: 230 81 0;
 
-  /* ── Semantic: Info ── */
-  --info: #0288D1;
-  --info-rgb: 2 136 209;
-  --info-light: #E1F5FE;
-  --info-light-rgb: 225 245 254;
-  --info-text: #01579B;
-  --info-text-rgb: 1 87 155;
+   /* ── Semantic: Info ── */
+   --info: #0288D1;
+   --info-rgb: 2 136 209;
+   --info-light: #E1F5FE;
+   --info-light-rgb: 225 245 254;
+   --info-text: #01579B;
+   --info-text-rgb: 1 87 155;
 
-  /* ── Sale / Discount ── */
-  --sale: #E53935;
-  --sale-rgb: 229 57 53;
-  --sale-dark: #D32F2F;
-  --sale-dark-rgb: 211 47 47;
-  --sale-flash: #FF6F00;
-  --sale-flash-rgb: 255 111 0;
+   /* ── Sale / Discount ── */
+   --sale: #E53935;
+   --sale-rgb: 229 57 53;
+   --sale-dark: #D32F2F;
+   --sale-dark-rgb: 211 47 47;
+   --sale-flash: #FF6F00;
+   --sale-flash-rgb: 255 111 0;
 
-  /* ── Coupon / Savings ── */
-  --coupon: #2E7D32;
-  --coupon-rgb: 46 125 50;
-  --coupon-mid: #43A047;
-  --coupon-mid-rgb: 67 160 71;
-  --coupon-light: #66BB6A;
-  --coupon-light-rgb: 102 187 106;
+   /* ── Coupon / Savings ── */
+   --coupon: #2E7D32;
+   --coupon-rgb: 46 125 50;
+   --coupon-mid: #43A047;
+   --coupon-mid-rgb: 67 160 71;
+   --coupon-light: #66BB6A;
+   --coupon-light-rgb: 102 187 106;
 
-  /* ── Stock / Urgency ── */
-  --urgency: #F9A825;
-  --urgency-rgb: 249 168 37;
-  --urgency-dark: #FFB300;
-  --urgency-dark-rgb: 255 179 0;
+   /* ── Stock / Urgency ── */
+   --urgency: #F9A825;
+   --urgency-rgb: 249 168 37;
+   --urgency-dark: #FFB300;
+   --urgency-dark-rgb: 255 179 0;
 
-  /* ── Ratings ── */
-  --star: #FBC02D;
-  --star-rgb: 251 192 45;
+   /* ── Ratings ── */
+   --star: #FBC02D;
+   --star-rgb: 251 192 45;
 
-  /* ── Overlay ── */
-  --overlay: rgba(26, 15, 13, 0.5);
-  --backdrop: rgba(253, 244, 242, 0.85);
+   /* ── Overlay ── */
+   --overlay: rgba(26, 15, 13, 0.5);
+   --backdrop: rgba(253, 244, 242, 0.85);
 
-  /* ── Skeleton ── */
-  --skeleton: #E5D1CD;
-  --skeleton-rgb: 229 209 205;
-  --skeleton-shine: #FDE8E4;
-  --skeleton-shine-rgb: 253 232 228;
+   /* ── Skeleton ── */
+   --skeleton: #E5D1CD;
+   --skeleton-rgb: 229 209 205;
+   --skeleton-shine: #FDE8E4;
+   --skeleton-shine-rgb: 253 232 228;
 
-  /* ── Shadow tokens (used via box-shadow) ── */
-  --shadow-color: 15deg 30% 20%;
+   /* ── Shadow tokens (used via box-shadow) ── */
+   --shadow-color: 15deg 30% 20%;
 }
 
 /* ───────────────────────────────────────────
    DARK THEME
    ─────────────────────────────────────────── */
 .dark {
-  /* ── Core Surfaces ── */
-  --background: #150A08;
-  --background-rgb: 21 10 8;
-  --surface: #1A0F0D;
-  --surface-rgb: 26 15 13;
-  --card: #1A0F0D;
-  --card-rgb: 26 15 13;
-  --card-soft: #221210;
-  --card-soft-rgb: 34 18 16;
+   /* ── Core Surfaces ── */
+   --background: #150A08;
+   --background-rgb: 21 10 8;
+   --surface: #1A0F0D;
+   --surface-rgb: 26 15 13;
+   --card: #1A0F0D;
+   --card-rgb: 26 15 13;
+   --card-soft: #221210;
+   --card-soft-rgb: 34 18 16;
 
-  /* ── Brand Colors ── */
-  --primary: #FDF4F2;
-  --primary-rgb: 253 244 242;
-  --primary-hover: #FFFFFF;
-  --primary-hover-rgb: 255 255 255;
-  --primary-active: #E5D1CD;
-  --primary-active-rgb: 229 209 205;
-  --secondary: #D9B9B3;
-  --secondary-rgb: 217 185 179;
-  --accent: #E6C34A;
-  --accent-rgb: 230 195 74;
-  --accent-hover: #FFD740;
-  --accent-hover-rgb: 255 215 64;
+   /* ── Brand Colors ── */
+   --primary: #FDF4F2;
+   --primary-rgb: 253 244 242;
+   --primary-hover: #FFFFFF;
+   --primary-hover-rgb: 255 255 255;
+   --primary-active: #E5D1CD;
+   --primary-active-rgb: 229 209 205;
+   --secondary: #D9B9B3;
+   --secondary-rgb: 217 185 179;
+   --accent: #E6C34A;
+   --accent-rgb: 230 195 74;
+   --accent-hover: #FFD740;
+   --accent-hover-rgb: 255 215 64;
 
-  /* ── Typography ── */
-  --foreground: #FDF4F2;
-  --foreground-rgb: 253 244 242;
-  --heading: #FDF4F2;
-  --heading-rgb: 253 244 242;
-  --body: #E5D1CD;
-  --body-rgb: 229 209 205;
-  --muted: #B99E98;      /* Brightened for dark mode contrast */
-  --muted-rgb: 185 158 152;
-  --card-text: #FDF4F2;
-  --card-text-rgb: 253 244 242;
+   /* ── Typography ── */
+   --foreground: #FDF4F2;
+   --foreground-rgb: 253 244 242;
+   --heading: #FDF4F2;
+   --heading-rgb: 253 244 242;
+   --body: #E5D1CD;
+   --body-rgb: 229 209 205;
+   --muted: #B99E98;
+   /* Brightened for dark mode contrast */
+   --muted-rgb: 185 158 152;
+   --card-text: #FDF4F2;
+   --card-text-rgb: 253 244 242;
 
-  /* ── Navigation ── */
-  --navbar: #150A08;
-  --navbar-rgb: 21 10 8;
-  --navbar-text: #FDF4F2;
-  --navbar-text-rgb: 253 244 242;
-  --sidebar: #1A0F0D;
-  --sidebar-rgb: 26 15 13;
+   /* ── Navigation ── */
+   --navbar: #150A08;
+   --navbar-rgb: 21 10 8;
+   --navbar-text: #FDF4F2;
+   --navbar-text-rgb: 253 244 242;
+   --sidebar: #1A0F0D;
+   --sidebar-rgb: 26 15 13;
 
-  /* ── Footer ── */
-  --footer: #0D0504;
-  --footer-rgb: 13 5 4;
-  --footer-text: #FDF4F2;
-  --footer-text-rgb: 253 244 242;
+   /* ── Footer ── */
+   --footer: #0D0504;
+   --footer-rgb: 13 5 4;
+   --footer-text: #FDF4F2;
+   --footer-text-rgb: 253 244 242;
 
-  /* ── Borders & Inputs ── */
-  --border: #3D1F1A;
-  --border-rgb: 61 31 26;
-  --border-muted: #5C3530;
-  --border-muted-rgb: 92 53 48;
-  --input: #1A0F0D;
-  --input-rgb: 26 15 13;
-  --input-border: #3D1F1A;
-  --input-border-rgb: 61 31 26;
-  --input-focus: #FDF4F2;
-  --ring: rgba(253, 244, 242, 0.15);
+   /* ── Borders & Inputs ── */
+   --border: #3D1F1A;
+   --border-rgb: 61 31 26;
+   --border-muted: #5C3530;
+   --border-muted-rgb: 92 53 48;
+   --input: #1A0F0D;
+   --input-rgb: 26 15 13;
+   --input-border: #3D1F1A;
+   --input-border-rgb: 61 31 26;
+   --input-focus: #FDF4F2;
+   --ring: rgba(253, 244, 242, 0.15);
 
-  /* ── Buttons ── */
-  --button-bg: #FDF4F2;
-  --button-bg-rgb: 253 244 242;
-  --button-text: #1A0F0D;
-  --button-text-rgb: 26 15 13;
-  --button-hover: #FFFFFF;
-  --button-hover-rgb: 255 255 255;
-  --button-alt-bg: #1A0F0D;
-  --button-alt-bg-rgb: 26 15 13;
-  --button-alt-text: #FDF4F2;
-  --button-alt-text-rgb: 253 244 242;
-  --button-alt-hover: #3D1F1A;
-  --button-alt-hover-rgb: 61 31 26;
-  --button-buy: #FDF4F2;
-  --button-buy-rgb: 253 244 242;
-  --button-buy-text: #1A0F0D;
-  --button-buy-text-rgb: 26 15 13;
+   /* ── Buttons ── */
+   --button-bg: #FDF4F2;
+   --button-bg-rgb: 253 244 242;
+   --button-text: #1A0F0D;
+   --button-text-rgb: 26 15 13;
+   --button-hover: #FFFFFF;
+   --button-hover-rgb: 255 255 255;
+   --button-alt-bg: #1A0F0D;
+   --button-alt-bg-rgb: 26 15 13;
+   --button-alt-text: #FDF4F2;
+   --button-alt-text-rgb: 253 244 242;
+   --button-alt-hover: #3D1F1A;
+   --button-alt-hover-rgb: 61 31 26;
+   --button-buy: #FDF4F2;
+   --button-buy-rgb: 253 244 242;
+   --button-buy-text: #1A0F0D;
+   --button-buy-text-rgb: 26 15 13;
 
-  /* ── Semantic: Success ── */
-  --success: #66BB6A;
-  --success-rgb: 102 187 106;
-  --success-light: rgba(46, 125, 50, 0.15);
-  --success-text: #81C784;
-  --success-text-rgb: 129 199 132;
+   /* ── Semantic: Success ── */
+   --success: #66BB6A;
+   --success-rgb: 102 187 106;
+   --success-light: #1A381E; /* Dark green for dark mode backgrounds */
+   --success-light-rgb: 26 56 30;
+   --success-text: #4ADE80;
+   --success-text-rgb: 74 222 128;
 
-  /* ── Semantic: Error ── */
-  --error: #EF5350;
-  --error-rgb: 239 83 80;
-  --error-light: rgba(211, 47, 47, 0.15);
-  --error-text: #EF9A9A;
-  --error-text-rgb: 239 154 154;
+   /* ── Semantic: Error ── */
+   --error: #EF5350;
+   --error-rgb: 239 83 80;
+   --error-light: #4A1A1A; /* Dark red for dark mode backgrounds */
+   --error-light-rgb: 74 26 26;
+   --error-text: #EF9A9A;
+   --error-text-rgb: 239 154 154;
 
-  /* ── Semantic: Warning ── */
-  --warning: #FFB74D;
-  --warning-rgb: 255 183 77;
-  --warning-light: rgba(249, 168, 37, 0.15);
-  --warning-text: #FFD54F;
-  --warning-text-rgb: 255 213 79;
+   /* ── Semantic: Warning ── */
+   --warning: #FFB74D;
+   --warning-rgb: 255 183 77;
+   --warning-light: #4A3311; /* Dark orange/yellow for backgrounds */
+   --warning-light-rgb: 74 51 17;
+   --warning-text: #FFD54F;
+   --warning-text-rgb: 255 213 79;
 
-  /* ── Semantic: Info ── */
-  --info: #4FC3F7;
-  --info-rgb: 79 195 247;
-  --info-light: rgba(2, 136, 209, 0.15);
-  --info-text: #81D4FA;
-  --info-text-rgb: 129 212 250;
+   /* ── Semantic: Info ── */
+   --info: #4FC3F7;
+   --info-rgb: 79 195 247;
+   --info-light: #0B334A; /* Dark blue for backgrounds */
+   --info-light-rgb: 11 51 74;
+   --info-text: #81D4FA;
+   --info-text-rgb: 129 212 250;
 
-  /* ── Sale / Discount ── */
-  --sale: #FF5252;
-  --sale-rgb: 255 82 82;
-  --sale-dark: #FF1744;
-  --sale-dark-rgb: 255 23 68;
-  --sale-flash: #FF9100;
-  --sale-flash-rgb: 255 145 0;
+   /* ── Sale / Discount ── */
+   --sale: #FF5252;
+   --sale-rgb: 255 82 82;
+   --sale-dark: #FF1744;
+   --sale-dark-rgb: 255 23 68;
+   --sale-flash: #FF9100;
+   --sale-flash-rgb: 255 145 0;
 
-  /* ── Coupon / Savings ── */
-  --coupon: #66BB6A;
-  --coupon-rgb: 102 187 106;
-  --coupon-mid: #81C784;
-  --coupon-mid-rgb: 129 199 132;
-  --coupon-light: #A5D6A7;
-  --coupon-light-rgb: 165 214 167;
+   /* ── Coupon / Savings ── */
+   --coupon: #4ADE80;
+   --coupon-rgb: 74 222 128;
+   --coupon-mid: #22C55E;
+   --coupon-mid-rgb: 34 197 94;
+   --coupon-light: rgba(74, 222, 128, 0.15);
+   --coupon-light-rgb: 74 222 128;
 
-  /* ── Stock / Urgency ── */
-  --urgency: #FFD740;
-  --urgency-rgb: 255 215 64;
-  --urgency-dark: #FFC107;
-  --urgency-dark-rgb: 255 193 7;
 
-  /* ── Ratings ── */
-  --star: #FFD740;
-  --star-rgb: 255 215 64;
+   /* ── Stock / Urgency ── */
+   --urgency: #FFD740;
+   --urgency-rgb: 255 215 64;
+   --urgency-dark: #FFC107;
+   --urgency-dark-rgb: 255 193 7;
 
-  /* ── Overlay ── */
-  --overlay: rgba(0, 0, 0, 0.6);
-  --backdrop: rgba(21, 10, 8, 0.88);
+   /* ── Ratings ── */
+   --star: #FFD740;
+   --star-rgb: 255 215 64;
 
-  /* ── Skeleton ── */
-  --skeleton: #3D1F1A;
-  --skeleton-rgb: 61 31 26;
-  --skeleton-shine: #5C3530;
-  --skeleton-shine-rgb: 92 53 48;
+   /* ── Overlay ── */
+   --overlay: rgba(0, 0, 0, 0.6);
+   --backdrop: rgba(21, 10, 8, 0.88);
 
-  /* ── Shadow tokens ── */
-  --shadow-color: 15deg 10% 5%;
+   /* ── Skeleton ── */
+   --skeleton: #3D1F1A;
+   --skeleton-rgb: 61 31 26;
+   --skeleton-shine: #5C3530;
+   --skeleton-shine-rgb: 92 53 48;
+
+   /* ── Shadow tokens ── */
+   --shadow-color: 15deg 10% 5%;
 }

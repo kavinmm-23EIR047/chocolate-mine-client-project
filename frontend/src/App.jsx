@@ -98,6 +98,9 @@ import StaffDashboard from './pages/staff/StaffDashboard';
 
 /** Full-screen premium brand intro once per browser tab session */
 function BrandIntroGate() {
+  // TEMPORARILY DISABLED AS REQUESTED
+  return null;
+
   const [visible, setVisible] = useState(() => {
     try {
       return !sessionStorage.getItem('tcm_brand_intro_done');

@@ -39,7 +39,7 @@ const CategoryStrip = () => {
   if (loading) {
     return (
       <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="max-w-[1800px] mx-auto px-4 py-3 sm:px-12 overflow-x-auto no-scrollbar">
           <div className="flex items-center justify-center gap-6 sm:gap-12">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
@@ -55,7 +55,7 @@ const CategoryStrip = () => {
 
   return (
     <div className="bg-card border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 py-3 overflow-x-auto no-scrollbar">
+      <div className="max-w-[1800px] mx-auto px-4 py-3 sm:px-12 overflow-x-auto no-scrollbar">
         <div className="flex items-center justify-center gap-6 sm:gap-12 min-w-max">
           {categories.map((cat) => (
             <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Search, ShoppingCart, User, Menu, X, Sun, Moon,
   MapPin, Heart, ChevronDown, ShoppingBag, LogIn,
-  Box, Cake
+  Box, Cake, MoreVertical
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useSelector } from 'react-redux';
@@ -42,45 +42,43 @@ const Navbar = () => {
       {/* Sticky Navbar */}
       <nav
         className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-500 ${isScrolled
-            ? 'bg-navbar/95 backdrop-blur-xl shadow-premium py-2 border-b border-border/10'
-            : 'bg-navbar py-4'
+            ? 'bg-white/95 backdrop-blur-xl shadow-premium border-b border-border/10'
+            : 'bg-white'
           }`}
-      >
-        <div className="max-w-[1440px] mx-auto px-2 sm:px-8">
-          <div className="flex items-center justify-between gap-1 sm:gap-4 lg:gap-12">
-
+>
+        <div className="w-full px-4 sm:px-12 lg:px-20">
+          {/* ROW 1: MAIN HEADER */}
+          <div className={`flex items-center justify-between gap-6 transition-all duration-500 ${isScrolled ? 'py-2' : 'py-4'} border-b border-border/5`}>
+            
             {/* 1. LOGO */}
-            <Link to="/" className="flex items-center gap-1.5 sm:gap-3 shrink-0 group">
-              <div className="relative">
-                <Logo className="w-9 h-9 sm:w-14 sm:h-14 bg-card rounded-xl sm:rounded-2xl p-1.5 shadow-lg sm:shadow-xl shadow-primary/10 border border-border/50 group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute -inset-1 bg-primary/5 blur-lg rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+            <Link to="/" className="flex items-center gap-3 shrink-0 group">
+              <Logo className={`bg-card rounded-2xl p-1.5 shadow-lg border border-border/50 group-hover:scale-105 transition-all duration-500 ${isScrolled ? 'w-8 h-8 sm:w-12 sm:h-12' : 'w-10 h-10 sm:w-16 sm:h-16'}`} />
               <div className="flex flex-col">
-                <span className="text-[9px] xs:text-[11px] sm:text-[18px] font-black text-primary tracking-tighter leading-none uppercase">The Chocolate</span>
-                <span className="text-[7px] xs:text-[8px] sm:text-[12px] font-black text-accent tracking-[0.3em] sm:tracking-[0.4em] uppercase mt-0.5 sm:mt-1 leading-none">Mine</span>
+                <span className={`font-black text-primary tracking-tighter leading-none uppercase transition-all ${isScrolled ? 'text-[12px] sm:text-[20px]' : 'text-[14px] sm:text-[24px]'}`}>Chocolate Mine</span>
+                <span className={`font-black text-primary/40 tracking-[0.4em] uppercase mt-1 leading-none transition-all ${isScrolled ? 'text-[6px] sm:text-[10px]' : 'text-[8px] sm:text-[12px]'}`}>Artisan Deli</span>
               </div>
             </Link>
 
-            {/* 1.5 MAIN LINKS (Desktop) */}
-            <div className="hidden lg:flex items-center gap-8 px-4">
-              {[
-                { label: 'Home', path: '/' },
-                { label: 'Shop', path: '/shop' },
-                { label: 'Custom cake', path: '/custom-cake' },
-              ].map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-primary ${location.pathname === link.path ? 'text-primary' : 'text-muted'}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+            {/* 2. LOCATION SELECTOR (Desktop Only) */}
+            <div className={`hidden lg:flex items-center gap-4 cursor-pointer group px-6 rounded-2xl bg-primary/5 hover:bg-primary/10 border border-primary/10 transition-all duration-500 min-w-[200px] ${isScrolled ? 'py-1.5' : 'py-2.5'}`}
+              onClick={() => setIsLocationOpen(!isLocationOpen)}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-8 h-5 bg-primary/20 rounded flex items-center justify-center overflow-hidden">
+                   <MapPin size={14} className="text-primary" />
+                </div>
+                <div className="flex flex-col flex-grow">
+                   <span className="text-[9px] font-black text-muted uppercase tracking-widest leading-none mb-1">Deliver to</span>
+                   <span className="text-xs font-black text-heading flex items-center justify-between gap-2 uppercase tracking-tight">
+                     {deliveryCity || 'Select City'} <ChevronDown size={14} className={`transition-transform duration-300 ${isLocationOpen ? 'rotate-180' : ''}`} />
+                   </span>
+                </div>
+              </div>
             </div>
 
-            {/* 2. SEARCH BAR */}
+            {/* 3. SEARCH BAR (Desktop Only) */}
             <div
-              className="hidden md:flex flex-1 max-w-xl cursor-pointer"
+              className="hidden md:flex flex-1 max-w-3xl cursor-pointer mx-8"
               onClick={() => setIsSearchOverlayOpen(true)}
             >
               <div className="relative group w-full">
@@ -88,119 +86,106 @@ const Navbar = () => {
                   type="text"
                   readOnly
                   placeholder="Search for cakes, desserts and more..."
-                  className="w-full bg-surface/50 border border-border/60 text-foreground pl-6 pr-12 py-3 rounded-2xl shadow-sm outline-none placeholder:text-muted/50 font-semibold text-sm transition-all group-hover:bg-surface group-hover:border-primary/30 group-hover:shadow-md"
+                  className={`w-full bg-surface/90 border border-border/50 text-foreground pl-8 pr-14 rounded-2xl outline-none placeholder:text-muted/50 font-semibold text-sm transition-all group-hover:bg-surface group-hover:border-primary/30 group-hover:shadow-md ${isScrolled ? 'py-2.5' : 'py-4'}`}
                 />
-                <div className="absolute right-0 top-0 h-full px-5 flex items-center bg-transparent">
-                  <Search size={18} className="text-primary/60 group-hover:text-primary transition-colors" />
+                <div className="absolute right-0 top-0 h-full px-6 flex items-center bg-transparent">
+                  <Search size={isScrolled ? 18 : 22} className="text-primary/50 group-hover:text-primary transition-colors" />
                 </div>
               </div>
             </div>
 
-            {/* 3. ACTIONS */}
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
+            {/* 4. ACTION ICONS */}
+            <div className={`flex items-center gap-4 sm:gap-8 lg:gap-10 transition-all duration-500 ${isScrolled ? 'scale-90 origin-right' : ''}`}>
+              
+              <Link to="/account/orders" className="hidden lg:flex flex-col items-center gap-2 group">
+                 <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                   <Box size={20} className="text-primary/80 group-hover:text-primary" />
+                 </div>
+                 <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-primary leading-none">Track Order</span>
+              </Link>
 
-              {/* Delivery Location */}
-              <div className="hidden lg:relative lg:flex items-center gap-3 cursor-pointer group py-2.5 px-4 rounded-2xl hover:bg-primary/5 border border-transparent hover:border-border/50 transition-all duration-300"
-                onClick={() => setIsLocationOpen(!isLocationOpen)}
-              >
-                <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-button-text transition-all duration-300">
-                  <MapPin size={18} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-muted uppercase tracking-widest leading-none">Deliver to</span>
-                  <span className="text-xs font-black flex items-center gap-1 group-hover:text-primary transition-colors uppercase mt-1">
-                    {deliveryCity || 'Select City'} <ChevronDown size={14} className={`transition-transform duration-300 ${isLocationOpen ? 'rotate-180' : ''}`} />
-                  </span>
-                </div>
-
-                <AnimatePresence>
-                  {isLocationOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                      className="absolute top-full left-0 mt-3 w-56 bg-card/95 backdrop-blur-xl border border-border/40 shadow-2xl rounded-3xl py-3 z-[110] overflow-hidden"
-                    >
-                      <div className="px-4 pb-2 mb-2 border-b border-border/30">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">Select your city</span>
-                      </div>
-                      {['coimbatore'].map(city => (
-                        <button
-                          key={city}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeliveryCity(city);
-                            setIsLocationOpen(false);
-                          }}
-                          className={`w-full text-left px-5 py-2.5 text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-button-text transition-all ${deliveryCity === city ? 'bg-primary/10 text-primary' : 'text-heading'}`}
-                        >
-                          {city}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* User Account */}
+              {/* Account/User (Desktop Only) */}
               {user ? (
-                <Link
-                  to={user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard'}
-                  className="hidden sm:flex items-center gap-3 group py-2.5 px-4 rounded-2xl hover:bg-primary/5 border border-transparent hover:border-border/50 transition-all"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-button-text transition-all">
-                    <User size={18} />
+                <Link to={user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard'} className="hidden lg:flex flex-col items-center gap-2 group">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                    <User size={20} className="text-primary/80 group-hover:text-primary" />
                   </div>
-                  <span className="hidden lg:inline text-sm font-black uppercase tracking-tight group-hover:text-primary transition-colors">{user.name.split(' ')[0]}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-primary leading-none">{user.name.split(' ')[0]}</span>
                 </Link>
               ) : (
-                <Link to="/login" className="hidden sm:flex items-center gap-3 group py-2.5 px-4 rounded-2xl hover:bg-primary/5 border border-transparent hover:border-border/50 transition-all">
-                  <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-button-text transition-all">
-                    <User size={18} />
+                <Link to="/login" className="hidden lg:flex flex-col items-center gap-2 group">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                    <LogIn size={20} className="text-primary/80 group-hover:text-primary" />
                   </div>
-                  <span className="hidden lg:inline text-sm font-black uppercase tracking-tight group-hover:text-primary transition-colors">Login</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-primary leading-none">Sign In</span>
                 </Link>
               )}
 
-              {/* Cart Button */}
-              <Link
-                to="/cart"
-                className="relative flex items-center gap-3 group py-2.5 px-2 sm:px-4 rounded-2xl hover:bg-primary/5 border border-transparent hover:border-border/50 transition-all"
-              >
+              {/* Cart (Desktop Only) */}
+              <Link to="/cart" className="hidden lg:flex flex-col items-center gap-2 group">
                 <div className="relative">
-                  <ShoppingCart size={20} className="text-primary transition-transform group-hover:-translate-y-0.5" />
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                    <ShoppingCart size={20} className="text-primary/80 group-hover:text-primary" />
+                  </div>
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-accent text-primary text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg border-2 border-navbar group-hover:scale-110 transition-transform">
+                    <span className="absolute -top-1 -right-1 bg-accent text-primary text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg border-2 border-navbar group-hover:scale-110 transition-transform">
                       {cartCount}
                     </span>
                   )}
                 </div>
-                <span className="hidden lg:inline text-sm font-black uppercase tracking-tight group-hover:text-primary transition-colors">Cart</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-primary leading-none">Cart</span>
               </Link>
 
-              {/* Mobile Search & Menu Toggle */}
-              <div className="flex items-center gap-1">
-                <button 
-                  onClick={() => setIsSearchOverlayOpen(true)}
-                  className="md:hidden p-3 text-primary hover:bg-primary/5 rounded-2xl transition-all"
-                >
-                  <Search size={20} />
-                </button>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <ThemeToggle />
-                </div>
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="lg:hidden p-3 text-primary hover:bg-primary/5 rounded-2xl transition-all"
-                >
-                  <Menu size={24} />
-                </button>
+              {/* Mobile Search Icon */}
+              <button
+                onClick={() => setIsSearchOverlayOpen(true)}
+                className="lg:hidden p-2 text-primary hover:bg-primary/5 rounded-2xl transition-all"
+              >
+                <Search size={22} />
+              </button>
+
+              {/* Theme Toggle (Mobile & Desktop) */}
+              <div className="flex">
+                 <ThemeToggle />
               </div>
 
+              {/* Mobile Menu Icon (3 Dots / MoreVertical) */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="lg:hidden p-2 text-primary hover:bg-primary/5 rounded-2xl transition-all"
+              >
+                <MoreVertical size={24} />
+              </button>
             </div>
           </div>
+
+          {/* ROW 2: NAVIGATION LINKS (Full width & Balanced) */}
+          <div className={`hidden lg:flex transition-all duration-500 overflow-hidden ${isScrolled ? 'h-0 opacity-0 pointer-events-none' : 'h-14 opacity-100'}`}>
+            <div className="flex items-center justify-center py-4 gap-12 overflow-x-auto no-scrollbar">
+            {[
+              { label: 'Home', path: '/' },
+              { label: 'Shop All', path: '/shop' },
+              { label: 'Custom cake', path: '/custom-cake' },
+              { label: 'Bestsellers', path: '/shop?bestseller=true' },
+              { label: 'Flowers', path: '/shop?category=flowers' },
+              { label: 'Birthday', path: '/occasion/birthday' },
+              { label: 'Anniversary', path: '/occasion/anniversary' },
+              { label: 'Gifts', path: '/shop?category=gifts' },
+              { label: 'Chocolates', path: '/shop?category=chocolates' },
+            ].map((link) => (
+              <Link
+                key={link.label}
+                to={link.path}
+                className={`text-[13px] font-black uppercase tracking-[0.15em] transition-all hover:text-primary relative group pb-1 whitespace-nowrap ${location.pathname === link.path ? 'text-primary' : 'text-heading/60'}`}
+              >
+                {link.label}
+                <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${location.pathname === link.path ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+              </Link>
+            ))}
+          </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       {/* Mobile Sidebar */}
       <AnimatePresence>

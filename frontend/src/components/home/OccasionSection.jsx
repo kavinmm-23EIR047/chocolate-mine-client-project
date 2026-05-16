@@ -32,7 +32,7 @@ const OccasionSection = () => {
 
   return (
     <section className="py-16 px-4 bg-background">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-12">
         {/* Heading */}
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-black text-heading mb-3 tracking-tighter uppercase">

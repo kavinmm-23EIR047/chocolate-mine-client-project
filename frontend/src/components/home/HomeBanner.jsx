@@ -80,16 +80,16 @@ const HomeBanner = () => {
      * ─────────────────────────────────────────────────────────────────────
      */
     <div
-      className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl group border border-white/10"
+      className="banner-root relative w-full overflow-hidden rounded-2xl sm:rounded-3xl group border border-white/10 shadow-premium"
       style={{
-        // Taller on mobile (16:7), wide on desktop (16:5)
-        aspectRatio: 'var(--banner-ratio, 16/7)',
+        // Cinematic Floweraura Style
+        aspectRatio: 'var(--banner-ratio, 16/9)',
       }}
     >
       {/* Inject responsive aspect-ratio via a style tag approach using Tailwind trick */}
       <style>{`
         @media (min-width: 640px) {
-          .banner-root { aspect-ratio: 16/5 !important; }
+          .banner-root { aspect-ratio: 16/4.8 !important; }
         }
       `}</style>
 
@@ -242,7 +242,7 @@ const HomeBanner = () => {
           </button>
 
           {/* Dot indicators */}
-          <div className="absolute bottom-3 right-4 flex gap-1.5 z-20 items-center">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20 items-center">
             {banners.map((_, i) => (
               <button
                 key={i}

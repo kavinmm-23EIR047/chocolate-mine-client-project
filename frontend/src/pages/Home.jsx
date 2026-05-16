@@ -106,8 +106,8 @@ const Home = () => {
   const [page, setPage] = useState(1);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const productsPerPage = 10;
-  
+  const productsPerPage = 4;
+
   // RTK Query for Products
   const { data: productRes, isLoading: loading, isFetching } = useGetProductsQuery({
     q: query,
@@ -117,13 +117,13 @@ const Home = () => {
     page,
     sort: sortBy
   });
-  
+
   const products = productRes?.data || [];
   const totalProducts = productRes?.total || 0;
-  
+
   const { data: reviewRes } = useGetLatestReviewsQuery();
   const reviews = reviewRes?.data?.reviews || [];
-  
+
   const timerRef = useRef(null);
 
   /* Responsive Listeners */
@@ -180,7 +180,7 @@ const Home = () => {
   useEffect(() => {
     setPage(1);
   }, [query, sortBy, activeCategory]);
-  
+
   const categoryRef = useRef(null);
   const reviewsRef = useRef(null);
 
@@ -223,62 +223,65 @@ const Home = () => {
       {/* ── SEO HIDDEN H1 ─────────────────────────────────────────── */}
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore</h1>
 
-      {/* ── TRUST TICKER ─────────────────────────────────────────── */}
-      <div className="bg-navbar border-b border-border">
-
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          {/* Desktop Grid */}
-          <div className="hidden lg:flex items-center justify-between gap-8">
-            {TRUST.map((t, i) => (
-              <div key={i} className="flex items-center gap-3 whitespace-nowrap shrink-0 group">
-                <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-button-text transition-all duration-500 shadow-sm">
-                  {t.icon}
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted/80 group-hover:text-primary transition-colors">{t.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Mobile Swiper */}
-          <div className="lg:hidden relative">
-            <div className="overflow-hidden">
-              <motion.div
-                animate={{ x: `-${activeTrustIndex * 100}%` }}
-                className="flex transition-all duration-700 ease-in-out"
-              >
-                {TRUST.map((t, i) => (
-                  <div key={i} className="min-w-full flex items-center justify-center gap-4 py-1">
-                    <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary shadow-sm">
-                      {t.icon}
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary text-center leading-none">{t.label}</span>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-            {/* Pagination dots for Ticker */}
-            <div className="flex justify-center gap-2 mt-2">
-              {TRUST.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveTrustIndex(i)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${activeTrustIndex === i ? 'bg-primary w-5' : 'bg-primary/10'
-                    }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 pb-32 space-y-12 sm:space-y-16">
-
+      <main className="w-full mx-auto px-4 sm:px-8 lg:px-16 py-6 pb-32 space-y-12 sm:space-y-16">
         {!query ? (
           <>
+            {/* ── MOBILE PROMO STRIP SLIDER ───────────────────────────── */}
+            <div className="lg:hidden relative px-4 mb-8">
+              <div className="relative overflow-hidden">
+                {/* Content Area */}
+                <div className="py-2">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeTrustIndex}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex items-center justify-center gap-3"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                        {TRUST[activeTrustIndex].icon}
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary whitespace-nowrap">
+                        {TRUST[activeTrustIndex].label}
+                      </span>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Pagination Dots */}
+                <div className="flex justify-center gap-1.5 mt-2">
+                  {TRUST.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveTrustIndex(i)}
+                      className={`h-1 rounded-full transition-all duration-300 ${activeTrustIndex === i ? 'w-5 bg-primary' : 'w-1 bg-primary/20'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <section className="mb-4">
               <HomeBanner />
             </section>
+
+            {/* ── TRUST TICKER (Desktop Only now) ────────────────────── */}
+            <div className="hidden lg:block bg-card/50 backdrop-blur-sm border-y border-border/30 rounded-3xl overflow-hidden mb-12">
+              <div className="max-w-[1800px] mx-auto px-4 py-4 sm:px-12">
+                <div className="flex items-center justify-between gap-8">
+                  {TRUST.map((t, i) => (
+                    <div key={i} className="flex items-center gap-3 whitespace-nowrap shrink-0 group">
+                      <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary transition-all duration-500">
+                        {t.icon}
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted group-hover:text-primary transition-colors">{t.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             {/* ── DYNAMIC CATEGORY CIRCLES FROM BACKEND ────────────────── */}
             <section className="py-10">
@@ -411,118 +414,46 @@ const Home = () => {
           </>
         ) : null}
 
-        {/* ── MAIN PRODUCT GRID ────────────────────────────────────── */}
+        {/* ── MAIN PRODUCT GRID (Full Width Floweraura Style) ──────── */}
         <section className="pt-8" id="main-catalog">
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-            
-            {/* Sidebar Box */}
-            <aside className="lg:w-80 shrink-0 space-y-10">
-              <div className="sticky top-24 space-y-10">
-                
-                {/* Header Side Box */}
-                <div className="bg-card rounded-[2.5rem] border border-border/40 p-10 shadow-sm">
-                  <h2 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                    {query ? 'Results' : 'Browse'}
-                  </h2>
-                  <p className="text-[10px] font-black text-muted uppercase tracking-[0.3em]">
-                    {loading ? 'Refreshing...' : `${totalProducts} Premium Items`}
-                  </p>
-                  
-                  <div className="mt-10 space-y-6">
-                    <div className="flex flex-col gap-3">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Sort By</label>
-                      <select
-                        value={sortBy}
-                        onChange={e => handleSort(e.target.value)}
-                        className="w-full text-[11px] font-black uppercase tracking-[0.15em] rounded-2xl px-6 py-4 outline-none transition-all cursor-pointer border-2 bg-background text-card-text border-border focus:border-primary shadow-sm hover:border-primary/50"
-                      >
-                        <option value="">Default</option>
-                        <option value="newest">Newest First</option>
-                        <option value="popularity">Popularity</option>
-                        <option value="price-low">Price: Low → High</option>
-                        <option value="price-high">Price: High → Low</option>
-                        <option value="ratings">Top Rated</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
+          <div className="flex flex-col gap-10">
 
-                {/* Categories Side Box */}
-                <div className="bg-card rounded-[2.5rem] border border-border/40 p-10 shadow-sm hidden lg:block">
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-primary mb-8">Categories</h3>
-                  <div className="flex flex-col gap-4">
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.name}
-                        onClick={() => handleCategory(cat.name)}
-                        className={`flex items-center gap-4 group transition-all p-2 rounded-2xl ${activeCategory === cat.name ? 'bg-primary/5 border border-primary/20' : 'hover:bg-muted/5'}`}
-                      >
-                        <div className={`w-12 h-12 rounded-xl overflow-hidden border-2 ${activeCategory === cat.name ? 'border-primary' : 'border-border/40'}`}>
-                          <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
-                        </div>
-                        <span className={`text-xs font-black uppercase tracking-widest ${activeCategory === cat.name ? 'text-primary' : 'text-muted/60'}`}>
-                          {cat.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+            {/* Header Box */}
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl sm:text-4xl font-black tracking-tighter uppercase leading-none whitespace-nowrap">Our Collections</h2>
+              <div className="h-1 w-12 bg-primary rounded-full" />
+            </div>
 
-                  <div className="mt-12 pt-8 border-t border-border/20">
-                     <Link to="/shop" className="w-full py-4 bg-primary text-button-text rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20">
-                        View Full Shop <ChevronRight size={14} />
-                     </Link>
-                  </div>
-                </div>
-
-              </div>
-            </aside>
-
-            {/* Main Content Box */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-10">
-                 <div>
-                   <h2 className="text-3xl font-black tracking-tighter uppercase leading-none">Our Collections</h2>
-                   <div className="h-1 w-12 bg-primary mt-4 rounded-full" />
-                 </div>
-                 <Link to="/shop" className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:tracking-[0.3em] transition-all flex items-center gap-2">
-                   See More <ChevronRight size={14} />
-                 </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                {loading && products.length === 0 ? (
-                  Array(5).fill(0).map((_, i) => <CardSkeleton key={i} />)
-                ) : products.length > 0 ? (
-                  products.map((p, i) => (
-                    <motion.div
-                      key={p._id}
-                      variants={fadeUp}
-                      initial="hidden"
-                      whileInView="show"
-                      viewport={{ once: true }}
-                      custom={i % 5}
-                    >
-                      <ProductCard product={p} />
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="col-span-full py-40 text-center bg-card rounded-[3rem] border-2 border-dashed border-border/50 shadow-inner">
-                    <Search size={64} className="mx-auto mb-8 text-primary/10" />
-                    <p className="text-3xl font-black uppercase tracking-tighter text-heading">No delicacies found</p>
-                    <p className="text-[11px] font-bold text-muted mt-4 uppercase tracking-[0.3em]">Adjust your filters or try a different search</p>
-                  </div>
-                )}
-              </div>
-
-              {totalProducts > 5 && (
-                <div className="mt-16 flex justify-center">
-                   <Link to="/shop" className="px-12 py-5 bg-card border-2 border-primary text-primary rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:text-button-text transition-all shadow-xl shadow-primary/5 active:scale-95">
-                      View More Delicacies
-                   </Link>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 lg:gap-8">
+              {loading && products.length === 0 ? (
+                Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
+              ) : products.length > 0 ? (
+                products.map((p, i) => (
+                  <motion.div
+                    key={p._id}
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true }}
+                    custom={i % 4}
+                  >
+                    <ProductCard product={p} />
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full py-40 text-center bg-card rounded-[3rem] border-2 border-dashed border-border/50 shadow-inner">
+                  <Search size={64} className="mx-auto mb-8 text-primary/10" />
+                  <p className="text-3xl font-black uppercase tracking-tighter text-heading">No delicacies found</p>
+                  <p className="text-[11px] font-bold text-muted mt-4 uppercase tracking-[0.3em]">Adjust your filters or try a different search</p>
                 </div>
               )}
             </div>
 
+            <div className="mt-12 flex justify-center">
+              <Link to="/shop" className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] bg-primary text-button-text px-12 py-4 rounded-full hover:scale-105 transition-all shadow-xl shadow-primary/20 active:scale-95">
+                View All Collections
+              </Link>
+            </div>
           </div>
         </section>
 

@@ -84,7 +84,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
             exit={{ y: -100, opacity: 0 }}
             className="fixed top-0 left-0 right-0 bg-navbar z-[210] shadow-2xl border-b border-border/10 overflow-y-auto max-h-[90vh]"
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
+            <div className="max-w-[1800px] mx-auto px-4 sm:px-12 py-6 sm:py-10">
               
               {/* Premium Search Input Section */}
               <div className="flex items-center gap-4 mb-10">
@@ -99,19 +99,19 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                     onChange={(e) => handleSearch(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && onSelect(query)}
                     placeholder="Search for premium delicacies..."
-                    className="w-full bg-card/50 border-2 border-border/40 text-xl font-black text-heading pl-16 pr-12 py-5 rounded-3xl outline-none transition-all focus:border-primary/50 focus:bg-card focus:shadow-2xl shadow-inner placeholder:text-muted/30 uppercase tracking-tight"
+                    className="w-full bg-card/50 border-2 border-border/40 text-sm sm:text-xl font-black text-heading pl-10 sm:pl-16 pr-12 py-3 sm:py-5 rounded-2xl sm:rounded-3xl outline-none transition-all focus:border-primary/50 focus:bg-card focus:shadow-2xl shadow-inner placeholder:text-muted/30 uppercase tracking-tight"
                   />
                   {loading && (
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2">
-                      <div className="w-5 h-5 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                    <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2">
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 sm:border-3 border-primary border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
                 <button 
                   onClick={onClose}
-                  className="hidden sm:flex w-16 h-16 items-center justify-center rounded-3xl bg-primary/5 text-primary hover:bg-primary hover:text-button-text transition-all duration-300 border border-primary/10"
+                  className="flex w-10 h-10 sm:w-16 sm:h-16 items-center justify-center rounded-xl sm:rounded-3xl bg-primary/5 text-primary hover:bg-primary hover:text-button-text transition-all duration-300 border border-primary/10"
                 >
-                  <X size={28} />
+                  <X size={20} sm:size={28} />
                 </button>
               </div>
 
@@ -189,21 +189,21 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                                 navigate(`/product/${p.slug}`);
                                 onClose();
                               }}
-                              className="flex items-center gap-5 p-5 bg-card rounded-3xl border border-border/40 hover:border-primary/30 cursor-pointer transition-all group shadow-sm hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+                              className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/40 hover:border-primary/30 cursor-pointer transition-all group shadow-sm hover:shadow-lg relative overflow-hidden"
                             >
-                              <div className="w-20 h-20 shrink-0 rounded-2xl overflow-hidden shadow-inner">
+                              <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-inner">
                                 <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-black text-heading text-lg leading-tight truncate group-hover:text-primary transition-colors">{p.name}</p>
-                                <p className="text-[10px] text-muted font-black uppercase tracking-[0.2em] mt-1">{p.category}</p>
-                                <div className="flex items-center gap-3 mt-3">
-                                  <span className="text-sm font-black text-primary uppercase">₹{p.offerPrice || p.price}</span>
+                                <p className="font-bold text-heading text-base leading-tight truncate group-hover:text-primary transition-colors uppercase tracking-tight">{p.name}</p>
+                                <p className="text-[9px] text-muted font-black uppercase tracking-[0.2em] mt-1">{p.category}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-sm font-black text-primary">₹{p.offerPrice || p.price}</span>
                                   {p.offerPrice && <span className="text-[10px] line-through opacity-30">₹{p.price}</span>}
                                 </div>
                               </div>
-                              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <ArrowRight size={18} className="text-primary" />
+                              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight size={16} className="text-primary" />
                               </div>
                             </div>
                           ))}
@@ -224,7 +224,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                           Browse Shop <ShoppingBag size={14} className="group-hover:scale-110 transition-transform" />
                         </Link>
                       </div>
-
+ 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         {recommended.length > 0 ? (
                           recommended.map((p) => (
@@ -236,12 +236,12 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                               }}
                               className="group cursor-pointer"
                             >
-                              <div className="relative aspect-[16/10] rounded-[2.5rem] overflow-hidden shadow-2xl mb-4 border border-border/20">
+                              <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-xl mb-4 border border-border/20">
                                 <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-footer/90 via-footer/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-                                <div className="absolute bottom-6 left-6 right-6">
-                                  <span className="px-3 py-1 bg-primary text-button-text text-[9px] font-black uppercase tracking-widest rounded-lg mb-3 inline-block">Best Seller</span>
-                                  <p className="text-lg font-black text-white leading-tight uppercase tracking-tight">{p.name}</p>
+                                <div className="absolute bottom-4 left-4 right-4">
+                                  <span className="px-2 py-0.5 bg-primary text-button-text text-[8px] font-black uppercase tracking-widest rounded-md mb-2 inline-block">Best Seller</span>
+                                  <p className="text-base font-bold text-white leading-tight uppercase tracking-tight line-clamp-1">{p.name}</p>
                                 </div>
                               </div>
                             </div>

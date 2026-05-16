@@ -42,8 +42,8 @@ const Navbar = () => {
       {/* Sticky Navbar */}
       <nav
         className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-500 ${isScrolled
-            ? 'bg-white/95 backdrop-blur-xl shadow-premium border-b border-border/10'
-            : 'bg-white'
+            ? 'bg-navbar/95 backdrop-blur-xl shadow-premium border-b border-border/10'
+            : 'bg-navbar'
           }`}
 >
         <div className="w-full px-4 sm:px-12 lg:px-20">

@@ -125,7 +125,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
           {/* Wishlist */}
           <button
             onClick={wish}
-            className="absolute top-1.5 right-1.5 p-1 bg-white/80 backdrop-blur-sm rounded-full shadow hover:scale-110 transition-all z-20"
+            className="absolute top-1.5 right-1.5 p-1 bg-card/80 backdrop-blur-sm rounded-full shadow hover:scale-110 transition-all z-20"
             aria-label="Add to wishlist"
           >
             <Heart size={12} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-heading/40'} />
@@ -242,7 +242,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={() => navigate(`/product/${product.slug}`)}
-      className="group relative flex flex-col h-full bg-white border border-border/30 rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/8 transition-all duration-300 cursor-pointer"
+      className="group relative flex flex-col h-full bg-card border border-border/30 rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/8 transition-all duration-300 cursor-pointer"
     >
       {/* Image Area */}
       <div className="relative aspect-[1/1] sm:aspect-[1.5/1] overflow-hidden bg-surface">
@@ -254,7 +254,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             <span className="text-[10px] font-black uppercase tracking-widest text-white/90 bg-black/50 px-3 py-1.5 rounded-lg">Sold Out</span>
           </div>
         )}
-        <button onClick={wish} className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow hover:scale-110 active:scale-90 transition-all z-20">
+        <button onClick={wish} className="absolute top-2 right-2 p-2 bg-card/80 backdrop-blur-sm rounded-full shadow hover:scale-110 active:scale-90 transition-all z-20">
           <Heart size={16} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-heading/40'} />
         </button>
         {rating > 0 && (

@@ -141,12 +141,12 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             {(product.bestseller || discountPct > 0 || couponLabel) && (
               <div className="flex flex-wrap items-center gap-1">
                 {product.bestseller && (
-                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-500/10 border border-orange-500/40 text-orange-700 dark:text-orange-400 text-[7px] font-black uppercase tracking-widest rounded-md shadow-sm">
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-warning-light border border-warning-text/20 text-warning-text text-[7px] font-black uppercase tracking-widest rounded-md shadow-sm">
                     🔥 Best
                   </span>
                 )}
                 {discountPct > 0 && (
-                  <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/40 text-red-700 dark:text-red-400 text-[7px] font-black uppercase tracking-widest rounded-md shadow-sm">
+                  <span className="px-1.5 py-0.5 bg-error-light border border-error-text/20 text-error-text text-[7px] font-black uppercase tracking-widest rounded-md shadow-sm">
                     -{discountPct}%
                   </span>
                 )}
@@ -154,7 +154,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
                   <span
                     onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(coupon.code); }}
                     title="Click to copy"
-                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 border border-green-500/40 text-green-700 dark:text-green-400 text-[7px] font-black uppercase tracking-wide rounded-md cursor-pointer hover:bg-green-500/20 transition-colors shadow-sm"
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-success-light border border-success-text/20 text-success-text text-[7px] font-black uppercase tracking-wide rounded-md cursor-pointer hover:bg-success-light/80 transition-colors shadow-sm"
                   >
                     <Tag size={7} /> {couponLabel}
                   </span>
@@ -270,12 +270,12 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
           {/* Badges row in content area — visible on ALL screens */}
           <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-2">
             {product.bestseller && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-500/10 border border-orange-500/40 text-orange-700 dark:text-orange-400 text-[7px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow-sm">
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-warning-light border border-warning-text/20 text-warning-text text-[7px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow-sm">
                 🔥 Bestseller
               </span>
             )}
             {discountPct > 0 && (
-              <span className="px-1.5 py-0.5 bg-red-500/10 border border-red-500/40 text-red-700 dark:text-red-400 text-[7px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow-sm">
+              <span className="px-1.5 py-0.5 bg-error-light border border-error-text/20 text-error-text text-[7px] sm:text-[10px] font-black uppercase tracking-widest rounded-md sm:rounded-lg shadow-sm">
                 -{discountPct}% OFF
               </span>
             )}
@@ -283,7 +283,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
               <span
                 onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(coupon.code); }}
                 title="Click to copy coupon code"
-                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-500/10 border border-green-500/40 text-green-700 dark:text-green-400 text-[7px] sm:text-[10px] font-black uppercase tracking-wide rounded-md sm:rounded-lg cursor-pointer hover:bg-green-500/20 transition-colors shadow-sm"
+                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-success-light border border-success-text/20 text-success-text text-[7px] sm:text-[10px] font-black uppercase tracking-wide rounded-md sm:rounded-lg cursor-pointer hover:bg-success-light/80 transition-colors shadow-sm"
               >
                 <Tag size={8} /> {couponLabel}
               </span>

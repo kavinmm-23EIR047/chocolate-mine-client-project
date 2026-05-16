@@ -437,7 +437,7 @@ const ProductDetails = () => {
               </AnimatePresence>
 
               {offerPct > 0 && (
-                <div className="absolute top-6 left-6 bg-sale text-button-text text-xs font-black px-4 py-2 rounded-xl shadow-lg z-10 uppercase tracking-widest">
+                <div className="absolute top-6 left-6 bg-error-light text-error-text text-xs font-black px-4 py-2 rounded-xl shadow-lg z-10 uppercase tracking-widest">
                   {offerPct}% OFF
                 </div>
               )}
@@ -455,7 +455,7 @@ const ProductDetails = () => {
               </button>
 
               {product.bestseller && (
-                <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-secondary text-button-text text-xs font-black px-5 py-2.5 rounded-full uppercase tracking-widest shadow-xl z-10">
+                <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-warning-light text-warning-text text-xs font-black px-5 py-2.5 rounded-full uppercase tracking-widest shadow-xl z-10">
                   <Sparkles size={14} fill="currentColor" />
                   Bestseller
                 </div>

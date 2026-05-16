@@ -88,7 +88,7 @@ const validateAddress = (address) => {
 };
 
 exports.createRazorpayOrder = asyncHandler(async (req, res) => {
-  const { address, discount, deliveryDate, deliverySlot, directItem, notes, cakeMessage } = req.body;
+  const { address, discount, couponCode, deliveryDate, deliverySlot, directItem, notes, cakeMessage } = req.body;
 
   if (!req.user || !req.user._id) {
     throw new AppError('Unauthorized user', 401);
@@ -209,9 +209,24 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         let activeCouponCode = null;
 
         // Check coupon logic if applicable to this product
-        if (product.coupon && product.coupon.enabled) {
-          // This logic might need to be refined if coupons apply to the whole cart
-          // For now, we follow the same logic as directItem if it matches
+        if (product.coupon && product.coupon.enabled && couponCode && product.coupon.code.toUpperCase() === String(couponCode).toUpperCase()) {
+          const now = new Date();
+          const startDate = product.coupon.startDate ? new Date(product.coupon.startDate) : null;
+          const endDate = product.coupon.endDate ? new Date(product.coupon.endDate) : null;
+          
+          const isWithinDateRange = (!startDate || now >= startDate) && (!endDate || now <= endDate);
+          const isWithinUsageLimit = !product.coupon.usageLimit || (product.coupon.usedCount || 0) < product.coupon.usageLimit;
+          
+          if (isWithinDateRange && isWithinUsageLimit) {
+            activeCouponCode = product.coupon.code;
+            if (product.coupon.type === 'flat') {
+              finalPrice = Math.max(0, salePrice - product.coupon.value);
+            } else if (product.coupon.type === 'percent') {
+              finalPrice = Math.max(0, salePrice - Math.round((salePrice * product.coupon.value) / 100));
+            } else if (product.coupon.type === 'price') {
+              finalPrice = product.coupon.value;
+            }
+          }
         }
 
         validatedItems.push({
@@ -221,6 +236,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           price: product.price,
           image: product.image,
           finalPrice: finalPrice,
+          activeCouponCode: activeCouponCode,
           selectedFlavor: item.options?.flavor,
           selectedWeight: item.options?.weight
         });

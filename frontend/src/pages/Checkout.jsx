@@ -25,6 +25,8 @@ import {
   Landmark,
   Smartphone,
   Wallet,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -45,6 +47,49 @@ import {
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
+export const paymentLogos = {
+  cards: {
+    visa:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Visa_Inc._logo.svg",
+
+    mastercard:
+      "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",
+
+    rupay:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/RuPay.svg",
+  },
+
+  upi: {
+    gpay:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Google%20Pay%20Logo.svg",
+
+    phonepe:
+      "https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg",
+
+    paytm:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Paytm_logo.png",
+  },
+
+  wallets: {
+    amazonpay:
+      "https://commons.wikimedia.org/wiki/Special:FilePath/Amazon%20Pay%20logo.svg",
+  },
+
+  banking: {
+    sbi:
+      "https://upload.wikimedia.org/wikipedia/commons/c/cc/SBI-logo.svg",
+
+    hdfc:
+      "https://upload.wikimedia.org/wikipedia/commons/2/28/HDFC_Bank_Logo.svg",
+
+    icici:
+      "https://upload.wikimedia.org/wikipedia/commons/1/12/ICICI_Bank_Logo.svg",
+  },
+
+  razorpay:
+    "https://commons.wikimedia.org/wiki/Special:FilePath/Razorpay%20logo.svg",
+};
+
 /* ─────────────────────────────────────────────
    PAYMENT METHOD CONFIG
    `rzpMethod` maps exactly to Razorpay's `method` param:
@@ -54,182 +99,64 @@ import toast from 'react-hot-toast';
 const PAYMENT_METHODS = [
   {
     id: 'card',
-    rzpMethod: 'card',          // ← Razorpay method string
+    rzpMethod: 'card',
     label: 'Credit / Debit Card',
     sub: 'Visa · Mastercard · RuPay',
     icon: CreditCard,
     gradient: 'from-violet-600 to-indigo-600',
-    bg: 'bg-gradient-to-br from-violet-50 to-indigo-50',
-    border: 'border-violet-200',
+    bg: 'bg-gradient-to-br from-violet-500/10 to-indigo-500/10 dark:from-violet-500/20 dark:to-indigo-500/20',
+    border: 'border-violet-200 dark:border-violet-500/30',
     ring: 'ring-violet-400',
     logos: [
-      {
-        name: 'Visa',
-        svg: (
-          <svg viewBox="0 0 48 16" className="h-3.5" aria-label="Visa">
-            <rect width="48" height="16" rx="2" fill="#1A1F71" />
-            <text x="4" y="13" fontFamily="Arial" fontWeight="900" fontSize="13" fill="white" letterSpacing="0">VISA</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'Mastercard',
-        svg: (
-          <svg viewBox="0 0 36 24" className="h-5" aria-label="Mastercard">
-            <circle cx="13" cy="12" r="11" fill="#EB001B" />
-            <circle cx="23" cy="12" r="11" fill="#F79E1B" />
-            <path d="M18 4.8a11 11 0 0 1 0 14.4A11 11 0 0 1 18 4.8z" fill="#FF5F00" />
-          </svg>
-        ),
-      },
-      {
-        name: 'RuPay',
-        svg: (
-          <svg viewBox="0 0 54 22" className="h-4" aria-label="RuPay">
-            <rect width="54" height="22" rx="3" fill="#F7941D" />
-            <text x="4" y="15" fontFamily="Arial" fontWeight="900" fontSize="11" fill="white">Ru</text>
-            <text x="22" y="15" fontFamily="Arial" fontWeight="900" fontSize="11" fill="#1B6B3A">Pay</text>
-          </svg>
-        ),
-      },
+      { name: 'Visa', url: paymentLogos.cards.visa },
+      { name: 'Mastercard', url: paymentLogos.cards.mastercard },
+      { name: 'RuPay', url: paymentLogos.cards.rupay },
     ],
   },
   {
     id: 'upi',
-    rzpMethod: 'upi',           // ← Razorpay method string
+    rzpMethod: 'upi',
     label: 'UPI Payment',
     sub: 'GPay · PhonePe · Paytm · BHIM',
     icon: Smartphone,
     gradient: 'from-emerald-500 to-teal-600',
-    bg: 'bg-gradient-to-br from-emerald-50 to-teal-50',
-    border: 'border-emerald-200',
+    bg: 'bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20',
+    border: 'border-emerald-200 dark:border-emerald-500/30',
     ring: 'ring-emerald-400',
     logos: [
-      {
-        name: 'GPay',
-        svg: (
-          /* Official Google Pay wordmark colours */
-          <svg viewBox="0 0 44 20" className="h-4" aria-label="Google Pay">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="700" fontSize="12" fill="#5F6368">G</text>
-            <text x="9" y="14" fontFamily="Arial" fontWeight="700" fontSize="12" fill="#5F6368">Pay</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'PhonePe',
-        svg: (
-          <svg viewBox="0 0 44 20" className="h-4" aria-label="PhonePe">
-            <rect width="44" height="20" rx="4" fill="#5F259F" />
-            <text x="5" y="14" fontFamily="Arial" fontWeight="900" fontSize="11" fill="white">Pe</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'Paytm',
-        svg: (
-          <svg viewBox="0 0 52 20" className="h-4" aria-label="Paytm">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#00BAF2">Pay</text>
-            <text x="26" y="14" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#002970">tm</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'BHIM',
-        svg: (
-          /* BHIM UPI official blue */
-          <svg viewBox="0 0 46 20" className="h-4" aria-label="BHIM UPI">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="11" fill="#0072C6">BHIM</text>
-          </svg>
-        ),
-      },
+      { name: 'GPay', url: paymentLogos.upi.gpay },
+      { name: 'PhonePe', url: paymentLogos.upi.phonepe },
+      { name: 'Paytm', url: paymentLogos.upi.paytm },
     ],
   },
   {
     id: 'netbanking',
-    rzpMethod: 'netbanking',    // ← Razorpay method string
+    rzpMethod: 'netbanking',
     label: 'Net Banking',
     sub: 'SBI · HDFC · ICICI · Axis & more',
     icon: Landmark,
     gradient: 'from-amber-500 to-orange-500',
-    bg: 'bg-gradient-to-br from-amber-50 to-orange-50',
-    border: 'border-amber-200',
+    bg: 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20',
+    border: 'border-amber-200 dark:border-amber-500/30',
     ring: 'ring-amber-400',
     logos: [
-      {
-        name: 'SBI',
-        svg: (
-          <svg viewBox="0 0 36 20" className="h-4" aria-label="SBI">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#22409A">SBI</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'HDFC',
-        svg: (
-          <svg viewBox="0 0 46 20" className="h-4" aria-label="HDFC Bank">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="11" fill="#004C8F">HDFC</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'ICICI',
-        svg: (
-          <svg viewBox="0 0 48 20" className="h-4" aria-label="ICICI Bank">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="11" fill="#F06522">ICICI</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'Axis',
-        svg: (
-          <svg viewBox="0 0 38 20" className="h-4" aria-label="Axis Bank">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#97144D">Axis</text>
-          </svg>
-        ),
-      },
+      { name: 'SBI', url: paymentLogos.banking.sbi },
+      { name: 'HDFC', url: paymentLogos.banking.hdfc },
+      { name: 'ICICI', url: paymentLogos.banking.icici },
     ],
   },
   {
     id: 'wallet',
-    rzpMethod: 'wallet',        // ← Razorpay method string
+    rzpMethod: 'wallet',
     label: 'Wallets',
     sub: 'Amazon Pay · Freecharge · MobiKwik',
     icon: Wallet,
     gradient: 'from-rose-500 to-pink-600',
-    bg: 'bg-gradient-to-br from-rose-50 to-pink-50',
-    border: 'border-rose-200',
+    bg: 'bg-gradient-to-br from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20',
+    border: 'border-rose-200 dark:border-rose-500/30',
     ring: 'ring-rose-400',
     logos: [
-      {
-        name: 'Amazon Pay',
-        svg: (
-          /* Amazon Pay: "amazon" in Ember orange + smile arc + "pay" in Amazon blue */
-          <svg viewBox="0 0 60 22" className="h-4" aria-label="Amazon Pay">
-            <text x="0" y="12" fontFamily="Arial" fontWeight="900" fontSize="10" fill="#FF9900">amazon</text>
-            {/* smile arc */}
-            <path d="M2 15 Q28 21 54 15" stroke="#FF9900" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            {/* dot on right end of smile */}
-            <circle cx="54" cy="15" r="1.5" fill="#FF9900" />
-            <text x="0" y="21" fontFamily="Arial" fontWeight="700" fontSize="9" fill="#146EB4">pay</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'Freecharge',
-        svg: (
-          <svg viewBox="0 0 76 20" className="h-4" aria-label="Freecharge">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="9" fill="#EF3E42">Freecharge</text>
-          </svg>
-        ),
-      },
-      {
-        name: 'MobiKwik',
-        svg: (
-          <svg viewBox="0 0 66 20" className="h-4" aria-label="MobiKwik">
-            <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="9" fill="#2F3489">MobiKwik</text>
-          </svg>
-        ),
-      },
+      { name: 'Amazon Pay', url: paymentLogos.wallets.amazonpay },
     ],
   },
 ];
@@ -247,12 +174,35 @@ const slots = [
 /* ─────────────────────────────────────────────
    STEP BADGE
 ───────────────────────────────────────────── */
-const StepBadge = ({ n, label, icon: Icon }) => (
-  <div className="flex items-center gap-3 p-4 sm:p-5 border-b border-border/40 bg-gradient-to-r from-card-soft to-card">
-    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-black shadow-sm shrink-0">
-      {Icon ? <Icon size={13} /> : n}
+const StepBadge = ({ n, label, isActive, isCompleted, onEdit, summary }) => (
+  <div
+    onClick={isCompleted && !isActive ? onEdit : undefined}
+    className={`flex items-center gap-3 p-4 sm:p-5 border-b border-border/30 transition-all duration-300 ${isActive ? 'bg-primary/5' : 'bg-transparent'
+      } ${isCompleted && !isActive ? 'cursor-pointer hover:bg-muted/5' : ''}`}
+  >
+    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-black shadow-sm shrink-0 transition-all duration-300 ${isCompleted && !isActive ? 'bg-success text-white' : isActive ? 'bg-primary text-button-text' : 'bg-muted/20 text-muted'
+      }`}>
+      {isCompleted && !isActive ? <ShieldCheck size={14} /> : n}
     </div>
-    <h2 className="font-black text-heading text-xs sm:text-sm uppercase tracking-widest">{label}</h2>
+
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className={`font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? 'text-primary text-xs sm:text-sm' : 'text-muted text-[10px] sm:text-xs'
+          }`}>
+          {label}
+        </h2>
+        {isCompleted && !isActive && (
+          <button
+            className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline px-3 py-1 bg-primary/5 rounded-lg border border-primary/20"
+          >
+            Change
+          </button>
+        )}
+      </div>
+      {isCompleted && !isActive && summary && (
+        <p className="text-[10px] text-muted font-bold mt-1 truncate uppercase tracking-tight">{summary}</p>
+      )}
+    </div>
   </div>
 );
 
@@ -278,6 +228,16 @@ const Checkout = () => {
 
   const [showMap, setShowMap] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+
+  // Auto-scroll to active step
+  useEffect(() => {
+    const activeEl = document.querySelector(`[data-step="${activeStep}"]`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [activeStep]);
   const [loaderText, setLoaderText] = useState('Preparing your order...');
   const [couponInput, setCouponInput] = useState('');
   const [couponBusy, setCouponBusy] = useState(false);
@@ -446,6 +406,7 @@ const Checkout = () => {
 
   const handleSelectAddress = (addr) => {
     setSelectedAddressId(addr._id);
+    setEditingAddressId(null); // Reset editing mode when selecting
     setDeliveryInfo({
       address: `${addr.houseNo}, ${addr.street}, ${addr.city}`,
       position: { lat: addr.lat, lng: addr.lng },
@@ -456,6 +417,79 @@ const Checkout = () => {
       houseNo: addr.houseNo,
       street: addr.street,
     });
+    setActiveStep(2); // Auto-advance to Slot selection
+  };
+
+  const handleDeleteAddress = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm('Delete this address?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await api.delete(`/users/addresses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedAddresses(prev => prev.filter(a => a._id !== id));
+      if (selectedAddressId === id) setSelectedAddressId(null);
+      toast.success('Address deleted');
+    } catch (err) {
+      toast.error('Failed to delete address');
+    }
+  };
+
+  const handleEditAddress = (e, addr) => {
+    e.stopPropagation();
+    setEditingAddressId(addr._id);
+    setSelectedAddressId(addr._id); // Highlight it
+    setAddressDetails({
+      fullName: addr.fullName,
+      phone: addr.phone,
+      houseNo: addr.houseNo,
+      street: addr.street,
+    });
+    setDeliveryInfo({
+      address: `${addr.houseNo}, ${addr.street}`,
+      position: { lat: addr.lat, lng: addr.lng }
+    });
+    toast.success('Update the details in the form below');
+  };
+
+  const handleUpdateAddress = async () => {
+    if (!addressDetails.fullName.trim()) return toast.error('Full name is required');
+    if (!validatePhoneNumber(addressDetails.phone)) return toast.error('Valid 10-digit phone is required');
+    if (!deliveryInfo.position) return toast.error('Please select location on map');
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const { data } = await api.patch(`/users/addresses/${editingAddressId}`, {
+        ...addressDetails,
+        lat: deliveryInfo.position.lat,
+        lng: deliveryInfo.position.lng,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setSavedAddresses(prev => prev.map(a => a._id === editingAddressId ? data : a));
+      setEditingAddressId(null);
+      toast.success('Address updated successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update address');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeliverHere = () => {
+    if (!addressDetails.fullName.trim()) return toast.error('Please enter recipient name');
+    if (!validatePhoneNumber(addressDetails.phone)) return toast.error('Please enter a valid 10-digit phone number');
+    if (!deliveryInfo.position) return toast.error('Please select delivery location on map');
+    if (!locationValid) return toast.error(locationError || 'Location outside service area');
+    setActiveStep(2);
+  };
+
+  const handleSlotConfirmed = () => {
+    if (!deliverySlot) return toast.error('Please select a delivery slot');
+    setActiveStep(3);
   };
 
   const validatePhoneNumber = (p) => /^[0-9]{10}$/.test(p);
@@ -573,6 +607,8 @@ const Checkout = () => {
             }
             : undefined,
           items: cartItemsFromRedux,
+          discount: couponDiscount,
+          couponCode: directItem ? localCoupon : appliedCouponFromRedux,
           notes: notesMerged || undefined,
           cakeMessage: cakeMessage || undefined,
         },
@@ -709,8 +745,14 @@ const Checkout = () => {
     return Array.from(s);
   }, [cartItems]);
 
-  const handlePhoneChange = (e) =>
-    setAddressDetails({ ...addressDetails, phone: e.target.value.replace(/\D/g, '').slice(0, 10) });
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    // Automatically strip leading zero for Indian numbers if present
+    if (val.length > 10 && val.startsWith('0')) {
+      val = val.substring(1);
+    }
+    setAddressDetails({ ...addressDetails, phone: val.slice(0, 10) });
+  };
 
   const formatDate = (d) =>
     d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -747,336 +789,434 @@ const Checkout = () => {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 w-full min-w-0">
 
             {/* ── STEP 1: DELIVERY ADDRESS ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden"
-            >
-              <StepBadge n="1" label="Delivery Address" />
-              <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
+            <div data-step="1" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+              <StepBadge
+                n="1"
+                label="Delivery Address"
+                isActive={activeStep === 1}
+                isCompleted={!!deliveryInfo.position}
+                onEdit={() => setActiveStep(1)}
+                summary={deliveryInfo.position ? `${addressDetails.fullName} • ${addressDetails.phone}` : null}
+              />
+              <AnimatePresence>
+                {activeStep === 1 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
 
-                {/* Saved addresses */}
-                {savedAddresses.length > 0 && (
-                  <div className="space-y-3">
-                    <p className="text-[10px] text-muted font-black uppercase tracking-widest">Saved Addresses</p>
-                    <div className="grid gap-3 w-full min-w-0">
-                      {savedAddresses.map((addr) => (
-                        <button
-                          key={addr._id}
-                          onClick={() => handleSelectAddress(addr)}
-                          className={`w-full min-w-0 text-left p-3 sm:p-4 border-2 rounded-2xl transition-all relative overflow-hidden ${selectedAddressId === addr._id
-                              ? 'border-primary bg-primary/5 shadow-md'
-                              : 'border-border/30 hover:border-primary/30 bg-surface/20'
+                      {/* Saved addresses */}
+                      {savedAddresses.length > 0 && (
+                        <div className="space-y-3">
+                          <p className="text-[10px] text-heading font-black uppercase tracking-widest opacity-80">Saved Addresses</p>
+                          <div className="grid gap-3 w-full min-w-0">
+                            {savedAddresses.map((addr) => (
+                              <div
+                                key={addr._id}
+                                onClick={() => handleSelectAddress(addr)}
+                                className={`w-full min-w-0 text-left p-3 sm:p-4 border-2 rounded-2xl transition-all relative overflow-hidden group cursor-pointer ${selectedAddressId === addr._id
+                                  ? 'border-primary bg-primary/5 shadow-md'
+                                  : 'border-border/30 hover:border-primary/30 bg-surface/20'
+                                  }`}
+                              >
+                                <div className="flex justify-between items-start gap-2 min-w-0">
+                                  <div className="min-w-0 flex-1">
+                                    <span className="font-black text-heading text-sm break-words">{addr.fullName}</span>
+                                    <p className="text-[10px] text-muted font-bold mt-0.5">{addr.phone}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                      onClick={(e) => handleEditAddress(e, addr)}
+                                      className="w-7 h-7 rounded-lg bg-card border border-border/50 flex items-center justify-center text-muted hover:text-primary hover:border-primary/30 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                      title="Edit"
+                                    >
+                                      <Edit size={12} />
+                                    </button>
+                                    <button
+                                      onClick={(e) => handleDeleteAddress(e, addr._id)}
+                                      className="w-7 h-7 rounded-lg bg-card border border-border/50 flex items-center justify-center text-muted hover:text-error hover:border-error/30 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                                      title="Delete"
+                                    >
+                                      <Trash2 size={12} />
+                                    </button>
+                                    {selectedAddressId === addr._id && (
+                                      <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-button-text shadow shrink-0 border border-primary/20">
+                                        <CheckCircle2 size={13} />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <p className="text-[11px] sm:text-xs text-muted font-medium mt-2 break-all leading-relaxed pr-8">
+                                  {addr.houseNo}, {addr.street}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center">
+                              <div className="w-full border-t border-border/20" />
+                            </div>
+                            <div className="relative flex justify-center text-[10px]">
+                              <span className="bg-card px-3 text-heading font-black uppercase tracking-widest">OR</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Map picker */}
+                      <button
+                        onClick={() => setShowMap(true)}
+                        className="w-full p-3 sm:p-4 border-2 border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
+                      >
+                        <MapPin size={15} /> Add / Update Location on Map
+                      </button>
+
+                      {deliveryInfo.position && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.97 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`w-full min-w-0 p-3 sm:p-4 rounded-2xl border flex items-start gap-3 ${locationValid
+                            ? 'bg-success-light border-success/20'
+                            : 'bg-error-light border-error/20'
                             }`}
                         >
-                          <div className="flex justify-between items-start gap-2 min-w-0">
-                            <div className="min-w-0 flex-1">
-                              <span className="font-black text-heading text-sm break-words">{addr.fullName}</span>
-                              <p className="text-[10px] text-muted font-bold mt-0.5">{addr.phone}</p>
-                            </div>
-                            {selectedAddressId === addr._id && (
-                              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white shadow shrink-0">
-                                <CheckCircle2 size={13} />
-                              </div>
+                          <Navigation
+                            size={15}
+                            className={`mt-0.5 shrink-0 ${locationValid ? 'text-success-text' : 'text-error-text'}`}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={`text-xs font-black uppercase tracking-widest ${locationValid ? 'text-success-text' : 'text-error-text'
+                                }`}
+                            >
+                              {locationValid ? 'Delivery Location Set' : 'Outside Service Area'}
+                            </p>
+                            <p
+                              className={`text-[10px] sm:text-xs font-medium mt-0.5 leading-relaxed break-all ${locationValid ? 'text-success-text' : 'text-error-text'
+                                }`}
+                            >
+                              {locationValid ? deliveryInfo.address : locationError}
+                            </p>
+                            {locationValid && (
+                              <p className="text-[10px] text-success-text font-bold mt-1">
+                                {distance.toFixed(1)} km · Est. fee {formatCurrency(deliveryFee)}
+                              </p>
                             )}
                           </div>
-                          <p className="text-[11px] sm:text-xs text-muted font-medium mt-2 break-all leading-relaxed">
-                            {addr.houseNo}, {addr.street}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="relative py-2">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-border/20" />
-                      </div>
-                      <div className="relative flex justify-center text-[10px]">
-                        <span className="bg-card px-3 text-muted font-black uppercase tracking-widest">OR</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                        </motion.div>
+                      )}
 
-                {/* Map picker */}
-                <button
-                  onClick={() => setShowMap(true)}
-                  className="w-full p-3 sm:p-4 border-2 border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
-                >
-                  <MapPin size={15} /> Add / Update Location on Map
-                </button>
+                      {/* Name / Phone / Address fields */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 sm:pt-5 border-t border-border/30">
+                        {[
+                          { label: 'Full Name *', icon: User, placeholder: 'Recipient name', key: 'fullName', onChange: (v) => setAddressDetails({ ...addressDetails, fullName: v }) },
+                          { label: 'Phone Number *', icon: Phone, placeholder: '10-digit mobile', key: 'phone', onChange: null },
+                          { label: 'House / Flat No. *', icon: Home, placeholder: 'Apartment, studio…', key: 'houseNo', onChange: (v) => setAddressDetails({ ...addressDetails, houseNo: v }) },
+                          { label: 'Street / Landmark *', icon: MapPin, placeholder: 'Nearby building or area', key: 'street', onChange: (v) => setAddressDetails({ ...addressDetails, street: v }) },
+                        ].map(({ label, icon: Icon, placeholder, key, onChange }) => (
+                          <div key={key} className="space-y-1.5 sm:space-y-2">
+                            <label className="flex items-center gap-1.5 text-[10px] font-black text-muted uppercase tracking-widest ml-1">
+                              <Icon size={10} /> {label}
+                            </label>
+                            <input
+                              className="input-field text-sm min-w-0"
+                              placeholder={placeholder}
+                              value={addressDetails[key]}
+                              onChange={key === 'phone' ? handlePhoneChange : (e) => onChange(e.target.value)}
+                              type={key === 'phone' ? 'tel' : 'text'}
+                              maxLength={key === 'phone' ? 10 : undefined}
+                              inputMode={key === 'phone' ? 'numeric' : 'text'}
+                            />
+                            {key === 'phone' && addressDetails.phone && !validatePhoneNumber(addressDetails.phone) && (
+                              <p className="text-[10px] sm:text-xs text-red-500 font-bold ml-1">Enter valid 10-digit number</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-                {deliveryInfo.position && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.97 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`w-full min-w-0 p-3 sm:p-4 rounded-2xl border flex items-start gap-3 ${locationValid
-                        ? 'bg-emerald-50 border-emerald-200'
-                        : 'bg-red-50 border-red-200'
-                      }`}
-                  >
-                    <Navigation
-                      size={15}
-                      className={`mt-0.5 shrink-0 ${locationValid ? 'text-emerald-600' : 'text-red-500'}`}
-                    />
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-xs font-black uppercase tracking-widest ${locationValid ? 'text-emerald-700' : 'text-red-600'
-                            }`}
-                        >
-                          {locationValid ? 'Delivery Location Set' : 'Outside Service Area'}
-                        </p>
-                        <p
-                          className={`text-[10px] sm:text-xs font-medium mt-0.5 leading-relaxed break-all ${locationValid ? 'text-emerald-600' : 'text-red-500'
-                            }`}
-                        >
-                          {locationValid ? deliveryInfo.address : locationError}
-                        </p>
-                      {locationValid && (
-                        <p className="text-[10px] text-emerald-500 font-bold mt-1">
-                          {distance.toFixed(1)} km · Est. fee {formatCurrency(deliveryFee)}
-                        </p>
+                      {locationValid && deliveryInfo.position && (
+                        <div className="pt-4 flex justify-end gap-3">
+                          {editingAddressId && (
+                            <Button
+                              onClick={handleUpdateAddress}
+                              className="btn-secondary px-6 border-primary/20 text-primary"
+                            >
+                              Update Address
+                            </Button>
+                          )}
+                          <Button onClick={handleDeliverHere} className="btn-primary px-8">
+                            Deliver Here
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </motion.div>
                 )}
-
-                {/* Name / Phone / Address fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4 sm:pt-5 border-t border-border/30">
-                  {[
-                    { label: 'Full Name *', icon: User, placeholder: 'Recipient name', key: 'fullName', onChange: (v) => setAddressDetails({ ...addressDetails, fullName: v }) },
-                    { label: 'Phone Number *', icon: Phone, placeholder: '10-digit mobile', key: 'phone', onChange: null },
-                    { label: 'House / Flat No. *', icon: Home, placeholder: 'Apartment, studio…', key: 'houseNo', onChange: (v) => setAddressDetails({ ...addressDetails, houseNo: v }) },
-                    { label: 'Street / Landmark *', icon: MapPin, placeholder: 'Nearby building or area', key: 'street', onChange: (v) => setAddressDetails({ ...addressDetails, street: v }) },
-                  ].map(({ label, icon: Icon, placeholder, key, onChange }) => (
-                    <div key={key} className="space-y-1.5 sm:space-y-2">
-                      <label className="flex items-center gap-1.5 text-[10px] font-black text-muted uppercase tracking-widest ml-1">
-                        <Icon size={10} /> {label}
-                      </label>
-                      <input
-                        className="input-field text-sm min-w-0"
-                        placeholder={placeholder}
-                        value={addressDetails[key]}
-                        onChange={key === 'phone' ? handlePhoneChange : (e) => onChange(e.target.value)}
-                        type={key === 'phone' ? 'tel' : 'text'}
-                        maxLength={key === 'phone' ? 10 : undefined}
-                        inputMode={key === 'phone' ? 'numeric' : 'text'}
-                      />
-                      {key === 'phone' && addressDetails.phone && !validatePhoneNumber(addressDetails.phone) && (
-                        <p className="text-[10px] sm:text-xs text-red-500 font-bold ml-1">Enter valid 10-digit number</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
+              </AnimatePresence>
+            </div>
 
             {/* ── STEP 2: DELIVERY SLOT ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden"
-            >
-              <StepBadge n="2" label="Delivery Date & Slot" />
-              <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
-
-                {/* Date Selector */}
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => {
-                      const d = new Date(deliveryDate);
-                      d.setDate(d.getDate() - 1);
-                      if (d >= new Date(new Date().setHours(0, 0, 0, 0))) setDeliveryDate(d);
-                    }}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-muted/10 transition text-muted shrink-0"
+            <div data-step="2" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+              <StepBadge
+                n="2"
+                label="Delivery Date & Slot"
+                isActive={activeStep === 2}
+                isCompleted={!!deliverySlot}
+                onEdit={() => setActiveStep(2)}
+                summary={deliverySlot ? `${formatDate(deliveryDate)} • ${deliverySlot}` : null}
+              />
+              <AnimatePresence>
+                {activeStep === 2 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <ChevronDown size={16} />
-                  </button>
-                  <div className="flex-1 text-center">
-                    <p className="font-black text-heading text-sm uppercase tracking-widest">{formatDate(deliveryDate)}</p>
-                    {isToday && (
-                      <p className="text-[10px] text-primary font-bold mt-0.5 uppercase tracking-widest">Today</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => {
-                      const d = new Date(deliveryDate);
-                      d.setDate(d.getDate() + 1);
-                      setDeliveryDate(d);
-                    }}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-muted/10 transition text-muted shrink-0"
-                  >
-                    <ChevronUp size={16} />
-                  </button>
-                </div>
+                    <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
 
-                {/* Slot Grid — 2 cols on mobile, 4 on md+ */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                  {availableSlots.map((slot) => (
-                    <button
-                      key={slot.value}
-                      onClick={() => slot.available && setDeliverySlot(slot.value)}
-                      disabled={!slot.available}
-                      className={`relative p-3 sm:p-4 rounded-2xl border-2 transition-all text-center ${!slot.available
-                          ? 'opacity-40 cursor-not-allowed border-border/20 bg-surface/30'
-                          : deliverySlot === slot.value
-                            ? 'border-primary bg-primary/5 shadow-md'
-                            : 'border-border/40 hover:border-primary/40 bg-surface/30'
-                        }`}
-                    >
-                      <span className="text-lg sm:text-xl block mb-1">{slot.emoji}</span>
-                      <p className="text-[9px] sm:text-[10px] font-black text-heading uppercase tracking-wide leading-tight">
-                        {slot.label}
-                      </p>
-                      {!slot.available && (
-                        <span className="text-[8px] text-muted font-bold uppercase tracking-widest mt-1 block">
-                          Unavailable
-                        </span>
-                      )}
-                      {deliverySlot === slot.value && (
-                        <div className="absolute top-2 right-2 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle2 size={10} className="text-white" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[10px] text-muted text-center font-bold uppercase tracking-widest">
-                  {isToday ? 'Slots close 1 hour before delivery window' : 'All slots open for future dates'}
-                </p>
-              </div>
-            </motion.div>
-
-            {/* ── CUSTOM CAKE & NOTES ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden"
-            >
-              <StepBadge label="Custom Cake & Notes" icon={Cake} />
-              <div className="p-4 sm:p-5 space-y-4">
-                {customCakeRequest ? (
-                  <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-primary">
-                        From custom cake builder
-                      </p>
-                      <Link
-                        to="/custom-cake"
-                        className="text-[10px] font-black uppercase tracking-widest text-accent hover:underline shrink-0"
-                      >
-                        Edit
-                      </Link>
-                    </div>
-                    <pre className="text-[11px] text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">
-                      {formatCustomCakeNotes(customCakeRequest)}
-                    </pre>
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted font-medium leading-relaxed">
-                    Want lettering, tiers, or a theme?{' '}
-                    <Link to="/custom-cake" className="font-black text-primary hover:underline">
-                      Open the custom cake form
-                    </Link>{' '}
-                    — your choices auto-attach here when saved.
-                  </p>
-                )}
-                <div className="space-y-1.5 sm:space-y-2">
-                  <label className="block text-[10px] font-black text-muted uppercase tracking-widest ml-1">
-                    Extra notes for bakery (optional)
-                  </label>
-                  <textarea
-                    className="input-field min-h-[80px] resize-y text-sm"
-                    placeholder="Gate code, allergy info, special instructions…"
-                    value={orderNotesExtra}
-                    onChange={(e) => setOrderNotesExtra(e.target.value)}
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ── STEP 3: PAYMENT METHOD ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden"
-            >
-              <StepBadge n="3" label="Payment Method" />
-              <div className="p-4 sm:p-5 space-y-4">
-
-                {/* Razorpay banner */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <div className="w-8 h-8 rounded-xl bg-[#072654] flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-                      <path d="M5 12L12 5L19 12L12 19L5 12Z" fill="#3395FF" />
-                      <path d="M9 12L12 9L15 12L12 15L9 12Z" fill="white" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-800 uppercase tracking-widest">Powered by Razorpay</p>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
-                      PCI DSS Compliant · 256-bit SSL Encryption
-                    </p>
-                  </div>
-                  <Lock size={14} className="text-slate-400 shrink-0" />
-                </div>
-
-                {/* Method Cards — 1 col on mobile, 2 on sm+ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
-                  {PAYMENT_METHODS.map((method) => {
-                    const Icon = method.icon;
-                    const selected = selectedPayMethod === method.id;
-                    return (
-                      <button
-                        key={method.id}
-                        onClick={() => setSelectedPayMethod(selected ? null : method.id)}
-                        className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
-                            ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
-                            : `border-border/30 bg-surface/20 hover:bg-surface/40`
-                          }`}
-                      >
-                        {/* top row */}
-                        <div className="flex items-start justify-between mb-2 sm:mb-3">
-                          <div
-                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${method.gradient} flex items-center justify-center shadow-sm`}
-                          >
-                            <Icon size={17} className="text-white" />
-                          </div>
-                          {selected && (
-                            <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center shrink-0">
-                              <CheckCircle2 size={12} className="text-white" />
-                            </div>
+                      {/* Date Selector */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            const d = new Date(deliveryDate);
+                            d.setDate(d.getDate() - 1);
+                            if (d >= new Date(new Date().setHours(0, 0, 0, 0))) setDeliveryDate(d);
+                          }}
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-muted/10 transition text-muted shrink-0"
+                        >
+                          <ChevronDown size={16} />
+                        </button>
+                        <div className="flex-1 text-center">
+                          <p className="font-black text-heading text-sm uppercase tracking-widest">{formatDate(deliveryDate)}</p>
+                          {isToday && (
+                            <p className="text-[10px] text-primary font-bold mt-0.5 uppercase tracking-widest">Today</p>
                           )}
                         </div>
+                        <button
+                          onClick={() => {
+                            const d = new Date(deliveryDate);
+                            d.setDate(d.getDate() + 1);
+                            setDeliveryDate(d);
+                          }}
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-muted/10 transition text-muted shrink-0"
+                        >
+                          <ChevronUp size={16} />
+                        </button>
+                      </div>
 
-                        {/* label */}
-                        <p className="font-black text-heading text-[10px] sm:text-xs uppercase tracking-wide truncate">{method.label}</p>
-                        <p className="text-[8px] sm:text-[9px] text-muted font-bold mt-0.5 uppercase tracking-widest truncate">{method.sub}</p>
+                      {/* Slot Grid — 2 cols on mobile, 4 on md+ */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                        {availableSlots.map((slot) => (
+                          <button
+                            key={slot.value}
+                            onClick={() => slot.available && setDeliverySlot(slot.value)}
+                            disabled={!slot.available}
+                            className={`relative p-3 sm:p-4 rounded-2xl border-2 transition-all text-center ${!slot.available
+                              ? 'opacity-30 cursor-not-allowed border-border/10 bg-muted/5'
+                              : deliverySlot === slot.value
+                                ? 'border-primary bg-primary/5 shadow-md'
+                                : 'border-border/40 hover:border-primary/40 bg-surface/30'
+                              }`}
+                          >
+                            <span className="text-lg sm:text-xl block mb-1">{slot.emoji}</span>
+                            <p className="text-[9px] sm:text-[10px] font-black text-heading uppercase tracking-wide leading-tight">
+                              {slot.label}
+                            </p>
+                            {!slot.available && (
+                              <span className="text-[8px] text-muted font-bold uppercase tracking-widest mt-1 block">
+                                Unavailable
+                              </span>
+                            )}
+                            {deliverySlot === slot.value && (
+                              <div className="absolute top-2 right-2 w-4 h-4 bg-primary rounded-full flex items-center justify-center border border-primary/20">
+                                <CheckCircle2 size={10} className="text-button-text" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="pt-4 flex justify-between gap-3">
+                        <Button onClick={() => setActiveStep(1)} className="btn-secondary px-6">Back</Button>
+                        <Button
+                          onClick={handleSlotConfirmed}
+                          disabled={!deliverySlot}
+                          className="btn-primary px-8"
+                        >
+                          Continue
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-                        {/* logo row */}
-                        <div className="flex items-center gap-1.5 mt-2 sm:mt-3 flex-wrap">
-                          {method.logos.map((logo) => (
-                            <div
-                              key={logo.name}
-                              className="flex items-center justify-center bg-white rounded px-1.5 py-1 border border-slate-100 shadow-sm"
-                            >
-                              {logo.svg}
+            {/* ── STEP 3: ORDER SUMMARY (ITEMS) ── */}
+            <div data-step="3" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+              <StepBadge
+                n="3"
+                label="Order Summary"
+                isActive={activeStep === 3}
+                isCompleted={activeStep > 3}
+                onEdit={() => setActiveStep(3)}
+                summary={`${cartItems.length} ${cartItems.length === 1 ? 'Item' : 'Items'}`}
+              />
+              <AnimatePresence>
+                {activeStep === 3 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="divide-y divide-border/20">
+                      {cartItems.map((item) => (
+                        <div key={`${item.productId}-${item.selectedFlavor}-${item.selectedWeight}`} className="flex gap-4 p-4 sm:p-5">
+                          <img src={item.image} className="w-16 h-16 rounded-2xl object-cover border border-border/10 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {item.selectedFlavor && <span className="text-[9px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.selectedFlavor}</span>}
+                              {item.selectedWeight && <span className="text-[9px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
                             </div>
-                          ))}
+                            <p className="text-[10px] text-muted/60 font-black mt-2 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-black text-heading text-sm">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
+                          </div>
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      ))}
+                      <div className="p-4 sm:p-5 space-y-4">
+                        {/* Custom Cake & Notes inside Summary */}
+                        {customCakeRequest ? (
+                          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-primary">From custom cake builder</p>
+                              <Link to="/custom-cake" className="text-[10px] font-black uppercase tracking-widest text-accent hover:underline">Edit</Link>
+                            </div>
+                            <pre className="text-[11px] text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">{formatCustomCakeNotes(customCakeRequest)}</pre>
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-muted font-bold uppercase tracking-widest text-center opacity-40">No custom notes added</p>
+                        )}
 
-                <p className="text-[9px] text-muted/50 text-center font-bold uppercase tracking-widest italic">
-                  Selecting a method pre-fills its tab in Razorpay checkout
-                </p>
-              </div>
-            </motion.div>
+                        <div className="pt-4 flex justify-between items-center border-t border-border/20 pt-5">
+                          <p className="text-[10px] text-muted font-bold uppercase tracking-widest">Review items before payment</p>
+                          <div className="flex gap-3">
+                            <Button onClick={() => setActiveStep(2)} className="btn-secondary px-6">Back</Button>
+                            <Button onClick={() => setActiveStep(4)} className="btn-primary px-8">Confirm Order</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+
+
+            {/* ── STEP 4: PAYMENT METHOD ── */}
+            <div data-step="4" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+              <StepBadge
+                n="4"
+                label="Payment Method"
+                isActive={activeStep === 4}
+                isCompleted={!!selectedPayMethod}
+                onEdit={() => setActiveStep(4)}
+                summary={selectedPayMethod ? PAYMENT_METHODS.find(m => m.id === selectedPayMethod)?.label : null}
+              />
+              <AnimatePresence>
+                {activeStep === 4 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="p-4 sm:p-5 space-y-4">
+
+                      {/* Razorpay banner */}
+                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card-soft/80 border border-border/20 backdrop-blur-sm">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="var(--primary)" fillOpacity="0.3" />
+                            <path d="M12 12L2 17L12 22L22 17L12 12Z" fill="var(--primary)" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-black text-heading uppercase tracking-widest leading-none mb-1">Secure Payment via Razorpay</p>
+                          <p className="text-[8px] text-muted font-bold uppercase tracking-widest opacity-60 leading-none">
+                            PCI DSS Compliant · 256-bit SSL Encryption
+                          </p>
+                        </div>
+                        <Lock size={13} className="text-muted/40 shrink-0" />
+                      </div>
+
+                      {/* Method Cards — 1 col on mobile, 2 on sm+ */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                        {PAYMENT_METHODS.map((method) => {
+                          const Icon = method.icon;
+                          const selected = selectedPayMethod === method.id;
+                          return (
+                            <button
+                              key={method.id}
+                              onClick={() => setSelectedPayMethod(selected ? null : method.id)}
+                              className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
+                                ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
+                                : `border-border/30 bg-surface/20 hover:bg-surface/40`
+                                }`}
+                            >
+                              {/* top row */}
+                              <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                <div
+                                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${method.gradient} flex items-center justify-center shadow-sm`}
+                                >
+                                  <Icon size={17} className="text-white" />
+                                </div>
+                                {selected && (
+                                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center shrink-0 shadow-sm border border-primary/20">
+                                    <CheckCircle2 size={12} className="text-button-text" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* label */}
+                              <p className="font-black text-heading text-[10px] sm:text-xs uppercase tracking-wide truncate">{method.label}</p>
+                              <p className="text-[8px] sm:text-[9px] text-muted font-bold mt-0.5 uppercase tracking-widest truncate">{method.sub}</p>
+
+                              <div className="flex items-center gap-2 mt-3 sm:mt-4 flex-wrap">
+                                {method.logos.map((logo) => (
+                                  <div
+                                    key={logo.name}
+                                    className="flex items-center justify-center rounded-lg shadow-sm overflow-hidden h-8 sm:h-9 px-1.5 bg-white/10 backdrop-blur-sm border border-white/5"
+                                  >
+                                    <img
+                                      src={logo.url}
+                                      alt={logo.name}
+                                      className="h-4 sm:h-5 object-contain"
+                                      onError={(e) => (e.target.style.display = 'none')}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <p className="text-[9px] text-muted/50 text-center font-bold uppercase tracking-widest italic">
+                        Selecting a method pre-fills its tab in Razorpay checkout
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
           </div>{/* end LEFT COLUMN */}
 
@@ -1148,13 +1288,13 @@ const Checkout = () => {
                     <span className="text-heading">{formatCurrency(originalTotal)}</span>
                   </div>
                   {offerDiscount > 0 && (
-                    <div className="flex justify-between text-emerald-600 font-black text-[11px] uppercase tracking-widest">
+                    <div className="flex justify-between text-success-text font-black text-[11px] uppercase tracking-widest">
                       <span>Offer Discount</span>
                       <span>− {formatCurrency(offerDiscount)}</span>
                     </div>
                   )}
                   {couponDiscount > 0 && (
-                    <div className="flex justify-between text-emerald-600 font-black text-[11px] uppercase tracking-widest">
+                    <div className="flex justify-between text-success-text font-black text-[11px] uppercase tracking-widest">
                       <span>Coupon ({appliedCouponDisplay})</span>
                       <span>− {formatCurrency(couponDiscount)}</span>
                     </div>
@@ -1183,7 +1323,7 @@ const Checkout = () => {
                   </div>
 
                   {(offerDiscount + couponDiscount) > 0 && (
-                    <div className="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-emerald-700 font-black text-xs uppercase tracking-widest w-full min-w-0">
+                    <div className="flex items-center justify-between bg-success-light border border-success/20 rounded-xl px-3 py-2 text-success-text font-black text-xs uppercase tracking-widest w-full min-w-0">
                       <div className="flex items-center gap-1.5">
                         <Star size={11} /> You Save
                       </div>
@@ -1200,14 +1340,14 @@ const Checkout = () => {
                         </span>
                         {/* Show "confirmed by server" label once backend total is available */}
                         {backendTotal !== null && (
-                          <p className="text-[9px] text-emerald-600 font-black uppercase tracking-widest mt-0.5">
+                          <p className="text-[9px] text-success-text font-black uppercase tracking-widest mt-0.5">
                             ✓ Confirmed by server
                           </p>
                         )}
                       </div>
                     </div>
                     {!isAddressSelected && (
-                      <p className="text-[10px] text-amber-600 mt-2 text-center font-bold">
+                      <p className="text-[10px] text-warning-text mt-2 text-center font-bold">
                         Select delivery address to see total
                       </p>
                     )}
@@ -1233,14 +1373,14 @@ const Checkout = () => {
                         type="button"
                         onClick={() => handleApplyCoupon()}
                         disabled={couponBusy || hasAppliedCoupon}
-                        className="bg-primary text-white hover:brightness-110 px-4 sm:px-5 h-10 sm:h-11 shrink-0 text-[10px] uppercase tracking-widest"
+                        className="bg-primary text-button-text hover:brightness-110 px-4 sm:px-5 h-10 sm:h-11 shrink-0 text-[10px] uppercase tracking-widest"
                       >
                         {couponBusy ? '…' : 'Apply'}
                       </Button>
                     </div>
                     {availableCoupons.length > 0 && (
                       <>
-                        <p className="text-[10px] text-muted font-bold uppercase tracking-widest">
+                        <p className="text-[10px] text-heading font-black uppercase tracking-widest opacity-80">
                           Available on this order
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -1250,7 +1390,7 @@ const Checkout = () => {
                               type="button"
                               disabled={couponBusy}
                               onClick={() => handleApplyCoupon(code)}
-                              className="px-3 py-1.5 rounded-lg text-[10px] font-black text-heading font-mono hover:bg-primary/10 transition-colors border border-border/20 bg-surface/20 uppercase tracking-widest"
+                              className="px-3 py-1.5 rounded-lg text-[10px] font-black text-heading font-mono hover:bg-primary/10 transition-colors border border-border/30 bg-card-soft/60 uppercase tracking-widest"
                             >
                               {code}
                             </button>
@@ -1262,19 +1402,19 @@ const Checkout = () => {
                 )}
 
                 {hasAppliedCoupon && (
-                  <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 p-3 sm:p-3.5 bg-emerald-50 rounded-2xl flex justify-between items-center border border-emerald-100">
+                  <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 p-3 sm:p-3.5 bg-success-light rounded-2xl flex justify-between items-center border border-success/20">
                     <div>
-                      <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest opacity-70">
+                      <span className="text-[9px] font-black text-success-text uppercase tracking-widest opacity-70">
                         Coupon Applied
                       </span>
-                      <p className="text-sm font-mono font-black text-emerald-700 tracking-widest">
+                      <p className="text-sm font-mono font-black text-success-text tracking-widest">
                         {appliedCouponDisplay}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={handleRemoveCoupon}
-                      className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
+                      className="p-2 hover:bg-error-light rounded-xl text-error-text transition-colors"
                     >
                       Remove
                     </button>

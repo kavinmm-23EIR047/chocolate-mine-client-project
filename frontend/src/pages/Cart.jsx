@@ -93,10 +93,6 @@ const Cart = () => {
   const hasApplicableCoupons = cartItems.some((item) => item.coupon?.enabled);
 
   const handleApplyCoupon = async () => {
-    if (hasAppliedCoupon) {
-      toast.error("Remove the applied coupon before entering another code.");
-      return;
-    }
     const code = couponInput.trim().toUpperCase();
     if (!code) {
       toast.error("Enter coupon code");

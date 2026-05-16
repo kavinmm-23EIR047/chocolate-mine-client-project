@@ -246,11 +246,6 @@ const ProductDetails = () => {
       toast.error('No coupon available for this product');
       return;
     }
-    if (otherCouponBlocksApply) {
-      toast.error('Remove the active coupon from your cart to use this code.');
-      return;
-    }
-
     setApplyingCoupon(true);
 
     try {
@@ -290,14 +285,9 @@ const ProductDetails = () => {
     }
   };
 
-  const handleRemoveCoupon = async () => {
-    try {
-      await removeCoupon();
-      toast.success('Coupon removed');
-      await fetchCart();
-    } catch (err) {
-      toast.error('Failed to remove coupon');
-    }
+  const handleRemoveCoupon = () => {
+    dispatch(setCoupon(null));
+    toast.success('Coupon removed');
   };
 
   // ─── CART QUANTITY UPDATES ──────────────────────────
@@ -741,14 +731,9 @@ const ProductDetails = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
-                    {otherCouponBlocksApply && (
-                      <p className="text-[10px] text-muted font-bold uppercase tracking-wider text-center sm:text-right max-w-[220px] sm:max-w-[200px]">
-                        Cart already has <span className="font-mono text-heading">{appliedCoupon}</span>. Remove it in the cart to use this code.
-                      </p>
-                    )}
                     <button
                       type="button"
-                      disabled={applyingCoupon || (otherCouponBlocksApply && !isCouponApplied)}
+                      disabled={applyingCoupon}
                       onClick={isCouponApplied ? handleRemoveCoupon : handleApplyCoupon}
                       className={`text-[11px] font-black px-6 py-3 rounded-xl transition-all uppercase tracking-widest shadow-sm disabled:opacity-50 disabled:pointer-events-none ${isCouponApplied ? 'bg-card text-error border border-error/20 hover:bg-error-light' : 'bg-primary text-button-text hover:bg-primary-hover shadow-primary/20'}`}
                     >

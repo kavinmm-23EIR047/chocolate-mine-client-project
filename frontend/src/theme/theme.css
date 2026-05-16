@@ -258,7 +258,8 @@
    /* ── Semantic: Success ── */
    --success: #66BB6A;
    --success-rgb: 102 187 106;
-   --success-light: #1A381E; /* Dark green for dark mode backgrounds */
+   --success-light: #1A381E;
+   /* Dark green for dark mode backgrounds */
    --success-light-rgb: 26 56 30;
    --success-text: #4ADE80;
    --success-text-rgb: 74 222 128;
@@ -266,7 +267,8 @@
    /* ── Semantic: Error ── */
    --error: #EF5350;
    --error-rgb: 239 83 80;
-   --error-light: #4A1A1A; /* Dark red for dark mode backgrounds */
+   --error-light: #4A1A1A;
+   /* Dark red for dark mode backgrounds */
    --error-light-rgb: 74 26 26;
    --error-text: #EF9A9A;
    --error-text-rgb: 239 154 154;
@@ -274,7 +276,8 @@
    /* ── Semantic: Warning ── */
    --warning: #FFB74D;
    --warning-rgb: 255 183 77;
-   --warning-light: #4A3311; /* Dark orange/yellow for backgrounds */
+   --warning-light: #4A3311;
+   /* Dark orange/yellow for backgrounds */
    --warning-light-rgb: 74 51 17;
    --warning-text: #FFD54F;
    --warning-text-rgb: 255 213 79;
@@ -282,7 +285,8 @@
    /* ── Semantic: Info ── */
    --info: #4FC3F7;
    --info-rgb: 79 195 247;
-   --info-light: #0B334A; /* Dark blue for backgrounds */
+   --info-light: #0B334A;
+   /* Dark blue for backgrounds */
    --info-light-rgb: 11 51 74;
    --info-text: #81D4FA;
    --info-text-rgb: 129 212 250;

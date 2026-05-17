@@ -197,7 +197,8 @@ const ProductDetails = () => {
   };
 
   const currentPrice = getCurrentPrice();
-  const hasOffer = productOfferPrice > 0 && productOfferPrice < currentPrice;
+  const isCakeWithVariants = productCategory === 'cakes' && product?.hasVariants;
+  const hasOffer = !isCakeWithVariants && productOfferPrice > 0 && productOfferPrice < currentPrice;
   const basePrice = hasOffer ? productOfferPrice : currentPrice;
   const offerDiscount = currentPrice - basePrice;
   const offerPct = currentPrice > 0 ? Math.round((offerDiscount / currentPrice) * 100) : 0;
@@ -258,7 +259,9 @@ const ProductDetails = () => {
 
       if (!isInCart && quantity > 0) {
         const options = {};
+        let variantPrice = null;
         if (product?.category === 'cakes') {
+          variantPrice = showCustomFlavorInput || showCustomWeightInput ? selectedPrice : selectedPrice;
           if (showCustomFlavorInput && customFlavor) {
             options.flavor = customFlavor;
           } else if (selectedFlavor) {
@@ -270,7 +273,7 @@ const ProductDetails = () => {
             options.weight = selectedWeight;
           }
         }
-        dispatch(addToCart({ product, qty: quantity, options }));
+        dispatch(addToCart({ product, qty: quantity, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
         toast.success(`${quantity} item(s) added to cart`);
       }
 
@@ -325,7 +328,7 @@ const ProductDetails = () => {
       else { toast.error('Please select weight'); setAddingToCart(false); return; }
     }
 
-    dispatch(addToCart({ product, qty: 1, options }));
+    dispatch(addToCart({ product, qty: 1, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
     toast.success(`Item added to cart!`);
     setAddingToCart(false);
   };
@@ -349,6 +352,7 @@ const ProductDetails = () => {
       image: displayImage || product.image,
       price: productPrice,
       offerPrice: productOfferPrice,
+      variantPrice: isCakeWithVariants ? currentPrice : null,
       qty: 1,
       selectedFlavor: currentVariantFlavor,
       selectedWeight: currentVariantWeight,

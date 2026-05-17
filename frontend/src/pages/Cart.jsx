@@ -47,7 +47,11 @@ const Cart = () => {
     return hasOfferPrice ? Number(item.offerPrice) : Number(item.price);
   };
 
-  const getItemMrp = (item) => Number(item.price ?? 0);
+  const getItemMrp = (item) => {
+    const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
+    if (!Number.isNaN(vp) && vp > 0) return vp;
+    return Number(item.price ?? 0);
+  };
 
   const getItemCouponDiscount = (item) => {
     const applied = normalizeCartCoupon(appliedCoupon);

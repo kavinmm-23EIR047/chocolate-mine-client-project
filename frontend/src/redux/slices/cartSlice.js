@@ -10,7 +10,7 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const { product, qty, options } = action.payload;
+      const { product, qty, options, variantPrice } = action.payload;
       const existingItem = state.items.find(
         (item) =>
           item.productId === product._id &&
@@ -26,6 +26,7 @@ const cartSlice = createSlice({
           image: product.image,
           price: product.price,
           offerPrice: product.offerPrice,
+          variantPrice: variantPrice,
           qty,
           options,
           stock: product.stock, // Store initial stock for quick reference

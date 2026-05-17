@@ -29,9 +29,9 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
   const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
   const needsVariantSelection = hasVariants && product.variants?.length > 1;
 
-  const displayPrice = product.offerPrice || product.price;
+  const hasOffer = !hasVariants && product.offerPrice && product.offerPrice < product.price;
+  const displayPrice = hasOffer ? product.offerPrice : product.price;
   const mrp = product.price;
-  const hasOffer = product.offerPrice && product.offerPrice < product.price;
   const discountPct = hasOffer ? Math.round(((mrp - displayPrice) / mrp) * 100) : 0;
 
   // ─── COUPON DATA ───────────────────────────────────────────

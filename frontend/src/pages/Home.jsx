@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight, Star, Search, SlidersHorizontal,
   MapPin, Clock, Tag, Truck, ShieldCheck, Phone, ChevronLeft,
-  Zap, PackageCheck, ShoppingCart
+  Zap, PackageCheck, ShoppingCart, Sparkles
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -44,7 +44,7 @@ const MINI_ADS = [
 ];
 
 const TRUST = [
-  { icon: <Truck size={15} />, label: 'Free delivery above ₹699' },
+  { icon: <Sparkles size={15} />, label: '100% Handcrafted Artisanal Quality' },
   { icon: <MapPin size={15} />, label: 'Coimbatore only · Fresh & local' },
   { icon: <Clock size={15} />, label: 'Same-day delivery available' },
   { icon: <ShieldCheck size={15} />, label: 'RazorPay secure checkout' },

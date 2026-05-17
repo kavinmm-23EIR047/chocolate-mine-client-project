@@ -48,7 +48,7 @@ const ImageUpload = ({ value, onChange, label = 'Upload Image', accept = 'image/
             <p className="text-sm font-black text-heading">Click to upload</p>
             <p className="text-xs text-muted mt-1">PNG, JPG, WEBP up to 5MB</p>
           </div>
-          <div className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest group-hover:bg-primary group-hover:text-white transition-all">
+          <div className="flex items-center gap-2 bg-button-alt-bg text-button-alt-text border border-border px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest group-hover:bg-button-bg group-hover:text-button-text transition-all shadow-premium-sm">
             <Upload size={14} />
             Browse Files
           </div>

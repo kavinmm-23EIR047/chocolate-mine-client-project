@@ -55,15 +55,11 @@ export const ThemeProvider = ({ children }) => {
   }, [themeMode]);
 
   const toggleTheme = (newMode) => {
-    if (newMode) {
+    if (typeof newMode === 'string') {
       setThemeMode(newMode);
     } else {
-      // Cycle logic for simple toggle buttons: Light -> Dark -> System
-      setThemeMode(prev => {
-        if (prev === 'light') return 'dark';
-        if (prev === 'dark') return 'system';
-        return 'light';
-      });
+      // Safe toggle between light and dark directly based on resolvedTheme
+      setThemeMode(resolvedTheme === 'dark' ? 'light' : 'dark');
     }
   };
 

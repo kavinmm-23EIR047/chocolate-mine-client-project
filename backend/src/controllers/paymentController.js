@@ -300,7 +300,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     cartItems: cart.items,
     addressLat: Number(address?.lat),
     addressLng: Number(address?.lng),
-    discount: discount ?? 0,
+    discount: 0,
   });
 
   let razorpayOrder;
@@ -336,7 +336,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     convenienceFee,
     gst,
     total,
-    discount: discount ?? 0,
+    discount: 0,
     paymentMethod: 'ONLINE',
     paymentStatus: 'pending',
     orderStatus: 'confirmed',
@@ -451,7 +451,7 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
   order.razorpayPaymentId = razorpay_payment_id;
   order.razorpaySignature = razorpay_signature;
   order.trackingCode = trackingCode;
-  order.orderNumber = order.orderNumber || trackingCode;
+  order.orderNumber = trackingCode;
 
   await order.save();
 

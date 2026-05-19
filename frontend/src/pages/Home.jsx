@@ -22,6 +22,8 @@ import OccasionSection from '../components/home/OccasionSection';
 import { useDeliveryLocation } from '../context/LocationContext';
 import HomeBanner from '../components/home/HomeBanner';
 import api from '../utils/api';
+import HomeLoader from '../components/home/HomeLoader';
+
 
 
 const MINI_ADS = [
@@ -96,6 +98,23 @@ const fadeUp = {
 const Home = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('search') || '';
+
+  const [showHomeLoader, setShowHomeLoader] = useState(() => {
+    try {
+      return !localStorage.getItem('tcm_home_loader_done');
+    } catch {
+      return true;
+    }
+  });
+
+  const handleLoaderFinish = React.useCallback(() => {
+    try {
+      localStorage.setItem('tcm_home_loader_done', '1');
+    } catch {
+      /* ignore */
+    }
+    setShowHomeLoader(false);
+  }, []);
 
   const [sortBy, setSortBy] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -219,6 +238,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background text-body">
+      <HomeLoader show={showHomeLoader} onFinish={handleLoaderFinish} />
 
       {/* ── SEO HIDDEN H1 ─────────────────────────────────────────── */}
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore</h1>

@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, TrendingUp, Clock, ArrowRight, Sparkles, History, ShoppingBag, ChevronRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import productService from '../../services/productService';
+import LottieImport from 'lottie-react';
+import searchLoaderAnimation from '../../assets/search-loader.json';
+
+const Lottie = LottieImport.default || LottieImport;
 
 const SearchOverlay = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
@@ -172,15 +176,30 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                   {query.length > 0 ? (
                     <div className="space-y-6">
                       <div className="flex items-center justify-between border-b border-border/20 pb-4 mb-4">
-                        <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.4em]">Matching Delicacies ({results.length})</h2>
-                        {results.length > 0 && (
+                        <h2 className="text-[11px] font-black text-primary uppercase tracking-[0.4em]">
+                          {loading ? 'Searching...' : `Matching Delicacies (${results.length})`}
+                        </h2>
+                        {!loading && results.length > 0 && (
                           <button onClick={() => onSelect(query)} className="flex items-center gap-2 text-[10px] font-black text-muted hover:text-primary uppercase tracking-widest transition-all group">
                             View All Results <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                           </button>
                         )}
                       </div>
 
-                      {results.length > 0 ? (
+                      {loading ? (
+                        <div className="py-12 flex flex-col items-center justify-center">
+                          <div className="w-32 h-32 sm:w-40 sm:h-40">
+                            <Lottie
+                              animationData={searchLoaderAnimation}
+                              loop={true}
+                              autoplay={true}
+                            />
+                          </div>
+                          <p className="text-[10px] font-black text-muted uppercase tracking-[0.25em] mt-2 animate-pulse">
+                            Searching for premium delicacies...
+                          </p>
+                        </div>
+                      ) : results.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {results.map((p) => (
                             <div 

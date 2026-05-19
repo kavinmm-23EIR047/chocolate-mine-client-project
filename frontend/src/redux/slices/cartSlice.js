@@ -30,6 +30,7 @@ const cartSlice = createSlice({
           qty,
           options,
           stock: product.stock, // Store initial stock for quick reference
+          coupon: product.coupon, // Store coupon details
         });
       }
       localStorage.setItem('cartItems', JSON.stringify(state.items));

@@ -66,14 +66,10 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
     try {
       setAddingToCart(true);
       dispatch(addToCart({
-        _id: product._id,
-        name: product.name,
-        image: product.image,
-        price: displayPrice,
-        variantId: hasVariants && product.variants ? product.variants[0]._id : null,
-        variantName: hasVariants && product.variants ? product.variants[0].name : null,
-        quantity: 1,
-        stock: totalAvailableStock
+        product: product,
+        qty: 1,
+        options: hasVariants && product.variants ? { flavor: product.variants[0].flavor, weight: product.variants[0].weight } : null,
+        variantPrice: hasVariants && product.variants ? product.variants[0].price : null
       }));
       toast.success('Added to bag');
     } catch (err) {

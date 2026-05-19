@@ -303,7 +303,7 @@ const Checkout = () => {
 
   useEffect(() => {
     const validate = async () => {
-      if (!deliveryInfo.position) return;
+      if (!deliveryInfo.position || deliveryInfo.position.lat === undefined || deliveryInfo.position.lng === undefined) return;
       const dist = calculateDistance(
         SHOP_LAT,
         SHOP_LNG,

@@ -25,10 +25,10 @@ const ScooterLoader = ({ isVisible, text = 'Preparing your order…' }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            className="w-full max-w-[320px] rounded-2xl border border-border/50 bg-card/95 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.12)] px-8 py-8 text-center"
+            className="w-full max-w-[420px] rounded-[2.5rem] border border-border/50 bg-card/95 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.16)] px-10 py-10 text-center"
           >
             {/* Premium Lottie Loader */}
-            <div className="relative mx-auto mb-6 w-full max-w-[160px] aspect-square flex items-center justify-center overflow-hidden">
+            <div className="relative mx-auto mb-6 w-full max-w-[240px] aspect-square flex items-center justify-center overflow-hidden">
               <Lottie
                 animationData={brandAnimation}
                 loop={true}
@@ -36,7 +36,7 @@ const ScooterLoader = ({ isVisible, text = 'Preparing your order…' }) => {
               />
             </div>
 
-            <p className="text-[15px] font-semibold text-heading leading-snug tracking-tight">
+            <p className="text-[17px] font-semibold text-heading leading-snug tracking-tight">
               {text}
             </p>
             <p className="mt-2 text-xs text-muted font-medium">

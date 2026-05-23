@@ -155,10 +155,10 @@ export default function HomeLoader({ show = false, onFinish, durationMs = 3200 }
           </div>
 
           {/* Core Animation Card */}
-          <div className="relative flex flex-col items-center max-w-[340px] w-full z-10">
+          <div className="relative flex flex-col items-center max-w-[420px] w-full z-10">
             
             {/* Golden Elegant Loading Ring Container */}
-            <div className="relative w-44 h-44 sm:w-52 sm:h-52 mb-8 flex items-center justify-center">
+            <div className="relative w-56 h-56 sm:w-64 sm:h-64 mb-8 flex items-center justify-center">
               
               {/* Pulsing Outer Aura */}
               <motion.div
@@ -201,7 +201,7 @@ export default function HomeLoader({ show = false, onFinish, durationMs = 3200 }
               {/* Central Premium Cacao Pod & Lottie Player */}
               <div className="absolute inset-4 rounded-full flex items-center justify-center overflow-hidden bg-transparent">
                 {/* Lottie Animation (loads configuration) */}
-                <div className="absolute inset-0 w-full h-full max-w-[140px] flex items-center justify-center opacity-30">
+                <div className="absolute inset-0 w-full h-full max-w-[180px] flex items-center justify-center opacity-30">
                   {safeAnimationData && (
                     <Lottie
                       animationData={safeAnimationData}
@@ -228,13 +228,13 @@ export default function HomeLoader({ show = false, onFinish, durationMs = 3200 }
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="w-24 h-24 rounded-full flex items-center justify-center"
+                    className="w-32 h-32 rounded-full flex items-center justify-center"
                     style={{
                       background: `linear-gradient(135deg, ${isDark ? '#2A120F' : '#FDE8E4'} 0%, ${isDark ? '#150A08' : '#FAF8F5'} 100%)`,
                       border: `2px solid ${accentColor}44`,
                     }}
                   >
-                    <svg viewBox="0 0 64 64" className="w-14 h-14" style={{ color: accentColor }}>
+                    <svg viewBox="0 0 64 64" className="w-18 h-18" style={{ color: accentColor }}>
                       <defs>
                         <filter id="gold-glow" x="-10%" y="-10%" width="120%" height="120%">
                           <feGaussianBlur stdDeviation="2.5" result="blur" />

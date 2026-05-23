@@ -47,7 +47,7 @@ export default function BrandIntroLoader({ show = false, onFinish, logoHoldMs = 
             }}
           />
 
-          <div className="relative flex flex-col items-center max-w-[280px] sm:max-w-[340px] w-full">
+          <div className="relative flex flex-col items-center max-w-[360px] sm:max-w-[460px] w-full">
             {/* Play your custom Lottie .json animation */}
             <Lottie
               animationData={brandAnimation}

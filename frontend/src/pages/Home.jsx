@@ -2,9 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronRight, Star, Search, SlidersHorizontal,
-  MapPin, Clock, Tag, Truck, ShieldCheck, Phone, ChevronLeft,
-  Zap, PackageCheck, ShoppingCart, Sparkles
+  ChevronRight,
+  Star,
+  Search,
+  SlidersHorizontal,
+  MapPin,
+  Clock,
+  Tag,
+  Truck,
+  ShieldCheck,
+  Phone,
+  ChevronLeft,
+  Zap,
+  PackageCheck,
+  ShoppingCart,
+  Sparkles,
+  BadgeCheck
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -22,7 +35,9 @@ import { useDeliveryLocation } from '../context/LocationContext';
 import HomeBanner from '../components/home/HomeBanner';
 import api from '../utils/api';
 import HomeLoader from '../components/home/HomeLoader';
-
+import ScooterLightImg from '../assets/scooter-light.png';
+import ScooterDarkImg from '../assets/scooter-dark.png';
+import CakeImg from '../assets/cake.png';
 
 
 const MINI_ADS = [

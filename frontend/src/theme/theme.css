@@ -168,6 +168,10 @@
 
    /* ── Shadow tokens (used via box-shadow) ── */
    --shadow-color: 15deg 30% 20%;
+
+   /* ── Badge colors ── */
+   --badge-amber-bg: #fff4d1;
+   --badge-green-bg: #e7f9ec;
 }
 
 /* ───────────────────────────────────────────
@@ -218,6 +222,10 @@
    --navbar-text-rgb: 253 244 242;
    --sidebar: #1A0F0D;
    --sidebar-rgb: 26 15 13;
+
+   /* ── Badge colors ── */
+   --badge-amber-bg: #1f1200;
+   --badge-green-bg: #0a2218;
 
    /* ── Footer ── */
    --footer: #0D0504;

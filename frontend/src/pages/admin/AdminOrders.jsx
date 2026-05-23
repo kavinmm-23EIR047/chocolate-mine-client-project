@@ -24,14 +24,18 @@ const OrderDetailsModal = ({ order, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto p-4">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto p-4 cursor-pointer"
+    >
       <motion.div
+        onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-card text-foreground border border-border rounded-2xl shadow-2xl max-w-2xl w-full mx-auto overflow-hidden max-h-[90vh] flex flex-col cursor-default"
       >
-        <div className="p-6 border-b border-border sticky top-0 bg-white z-10">
+        <div className="p-6 border-b border-border sticky top-0 bg-card z-10">
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-black text-heading text-xl">Order Details</h3>
@@ -45,8 +49,8 @@ const OrderDetailsModal = ({ order, onClose }) => {
         
         <div className="p-6 overflow-y-auto flex-1">
           {/* Customer Info */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-            <h4 className="font-bold text-sm mb-2">Customer Details</h4>
+          <div className="mb-6 p-4 bg-card-soft border border-border/40 rounded-xl">
+            <h4 className="font-bold text-sm mb-2 text-heading">Customer Details</h4>
             <p className="text-sm">{order.address?.fullName}</p>
             <p className="text-sm text-muted">{order.address?.phone}</p>
             <p className="text-sm text-muted mt-1">{order.address?.houseNo}, {order.address?.street}</p>
@@ -58,24 +62,24 @@ const OrderDetailsModal = ({ order, onClose }) => {
           
           {/* Items List */}
           <div className="mb-6">
-            <h4 className="font-bold text-sm mb-3">Order Items</h4>
+            <h4 className="font-bold text-sm mb-3 text-heading">Order Items</h4>
             <div className="space-y-3">
               {order.items?.map((item, idx) => (
-                <div key={idx} className="border rounded-xl p-3">
+                <div key={idx} className="border border-border/50 rounded-xl p-3 bg-card-soft/30">
                   <div className="flex gap-3">
                     {item.image && (
-                      <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
+                      <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-border/20" />
                     )}
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-bold">{item.name}</p>
-                          <p className="text-xs text-muted">SKU: {item.sku || 'N/A'}</p>
+                          <p className="font-bold text-heading">{item.name}</p>
+                          <p className="text-xs text-muted font-mono">SKU: {item.sku || 'N/A'}</p>
                         </div>
-                        <p className="font-bold">{formatCurrency(item.price * item.qty)}</p>
+                        <p className="font-bold text-heading">{formatCurrency(item.price * item.qty)}</p>
                       </div>
                       <div className="flex justify-between text-sm mt-1">
-                        <span>Qty: {item.qty}</span>
+                        <span className="text-muted">Qty: {item.qty}</span>
                         <span className="text-muted">{formatCurrency(item.price)} each</span>
                       </div>
                       {(item.selectedFlavor || item.selectedWeight) && (
@@ -87,7 +91,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                       {item.customDetails && Object.keys(item.customDetails).length > 0 && (
                         <button 
                           onClick={() => toggleItemExpand(idx)}
-                          className="text-xs text-secondary flex items-center gap-1 mt-2"
+                          className="text-xs text-secondary flex items-center gap-1 mt-2 font-bold"
                         >
                           {expandedItems[idx] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                           Custom Details
@@ -96,15 +100,15 @@ const OrderDetailsModal = ({ order, onClose }) => {
                     </div>
                   </div>
                   {expandedItems[idx] && item.customDetails && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg text-xs">
-                      {item.customDetails.flavour && <p><span className="font-medium">Flavor:</span> {item.customDetails.flavour}</p>}
-                      {item.customDetails.shape && <p><span className="font-medium">Shape:</span> {item.customDetails.shape}</p>}
-                      {item.customDetails.tiers && <p><span className="font-medium">Tiers:</span> {item.customDetails.tiers}</p>}
-                      {item.customDetails.weight && <p><span className="font-medium">Weight:</span> {item.customDetails.weight}</p>}
-                      {item.customDetails.eggless && <p><span className="font-medium">Eggless:</span> Yes</p>}
-                      {item.customDetails.lessSugar && <p><span className="font-medium">Less Sugar:</span> Yes</p>}
-                      {item.customDetails.messageOnCake && <p><span className="font-medium">Message:</span> {item.customDetails.messageOnCake}</p>}
-                      {item.customDetails.notes && <p><span className="font-medium">Notes:</span> {item.customDetails.notes}</p>}
+                    <div className="mt-3 p-3 bg-card-soft border border-border/40 rounded-lg text-xs space-y-1">
+                      {item.customDetails.flavour && <p><span className="font-bold text-heading">Flavor:</span> {item.customDetails.flavour}</p>}
+                      {item.customDetails.shape && <p><span className="font-bold text-heading">Shape:</span> {item.customDetails.shape}</p>}
+                      {item.customDetails.tiers && <p><span className="font-bold text-heading">Tiers:</span> {item.customDetails.tiers}</p>}
+                      {item.customDetails.weight && <p><span className="font-bold text-heading">Weight:</span> {item.customDetails.weight}</p>}
+                      {item.customDetails.eggless && <p><span className="font-bold text-heading">Eggless:</span> Yes</p>}
+                      {item.customDetails.lessSugar && <p><span className="font-bold text-heading">Less Sugar:</span> Yes</p>}
+                      {item.customDetails.messageOnCake && <p><span className="font-bold text-heading">Message:</span> {item.customDetails.messageOnCake}</p>}
+                      {item.customDetails.notes && <p><span className="font-bold text-heading">Notes:</span> {item.customDetails.notes}</p>}
                     </div>
                   )}
                 </div>
@@ -113,39 +117,39 @@ const OrderDetailsModal = ({ order, onClose }) => {
           </div>
           
           {/* Payment Summary */}
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <h4 className="font-bold text-sm mb-2">Payment Summary</h4>
+          <div className="p-4 bg-card-soft border border-border/40 rounded-xl">
+            <h4 className="font-bold text-sm mb-2 text-heading">Payment Summary</h4>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted">Subtotal</span>
-                <span>{formatCurrency(order.subtotal)}</span>
+                <span className="font-semibold text-heading">{formatCurrency(order.subtotal)}</span>
               </div>
               {order.discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-success-text">
                   <span>Discount</span>
-                  <span>-{formatCurrency(order.discount)}</span>
+                  <span className="font-semibold">-{formatCurrency(order.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-muted">Delivery Charge</span>
-                <span>{formatCurrency(order.deliveryCharge)}</span>
+                <span className="font-semibold text-heading">{formatCurrency(order.deliveryCharge)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted">Convenience Fee</span>
-                <span>{formatCurrency(order.convenienceFee)}</span>
+                <span className="font-semibold text-heading">{formatCurrency(order.convenienceFee)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted">GST</span>
-                <span>{formatCurrency(order.gst)}</span>
+                <span className="font-semibold text-heading">{formatCurrency(order.gst)}</span>
               </div>
-              <div className="flex justify-between font-bold pt-2 border-t">
-                <span>Total</span>
+              <div className="flex justify-between font-bold pt-2 border-t border-border/40">
+                <span className="text-heading">Total</span>
                 <span className="text-primary">{formatCurrency(order.total)}</span>
               </div>
             </div>
-            <div className="mt-3 pt-2 border-t">
-              <p className="text-xs text-muted">Payment Method: {order.paymentMethod}</p>
-              <p className="text-xs text-muted">Payment Status: <span className={`font-bold ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>{order.paymentStatus?.toUpperCase()}</span></p>
+            <div className="mt-3 pt-2 border-t border-border/40">
+              <p className="text-xs text-muted">Payment Method: <span className="font-semibold text-heading">{order.paymentMethod}</span></p>
+              <p className="text-xs text-muted">Payment Status: <span className={`font-bold ${order.paymentStatus === 'paid' ? 'text-success' : 'text-warning'}`}>{order.paymentStatus?.toUpperCase()}</span></p>
             </div>
           </div>
         </div>
@@ -245,10 +249,15 @@ const AdminOrders = () => {
   return (
     <div className="space-y-6">
       {/* Order Details Modal */}
-      <OrderDetailsModal 
-        order={selectedOrderDetails}
-        onClose={() => setDetailsModalOpen(false)}
-      />
+      {detailsModalOpen && (
+        <OrderDetailsModal 
+          order={selectedOrderDetails}
+          onClose={() => {
+            setDetailsModalOpen(false);
+            setSelectedOrderDetails(null);
+          }}
+        />
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

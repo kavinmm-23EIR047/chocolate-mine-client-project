@@ -1,0 +1,98 @@
+{
+  "v": "5.4.3",
+  "fr": 30.0240020751953,
+  "ip": 0,
+  "op": 81.0000055985485,
+  "w": 320,
+  "h": 220,
+  "nm": "Chocolate Mine Loader",
+  "ddd": 0,
+  "assets": [],
+  "theme": {
+    "light": {
+      "background": "#FFF4F2",
+      "primary": "#3D1F1A",
+      "secondary": "#7A4A44",
+      "accent": "#D4A017",
+      "highlight": "#FDF4F2"
+    },
+    "dark": {
+      "background": "#150A08",
+      "primary": "#FDF4F2",
+      "secondary": "#E5D1CD",
+      "accent": "#E6C34A",
+      "highlight": "#FFFFFF"
+    }
+  },
+  "colorPalette": {
+    "mainBlob": {
+      "gradientStart": "#3D1F1A",
+      "gradientMiddle": "#7A4A44",
+      "gradientEnd": "#D4A017"
+    },
+    "secondaryBlob": {
+      "fill": "#7A4A44"
+    },
+    "spotAnimation": {
+      "start": "#3D1F1A",
+      "middle": "#7A4A44",
+      "end": "#D4A017"
+    },
+    "particles": {
+      "fill": "#D4A017"
+    },
+    "glow": {
+      "fill": "#FDF4F2"
+    }
+  },
+  "replaceColors": [
+    {
+      "from": "#4285F4",
+      "to": "#3D1F1A"
+    },
+    {
+      "from": "#DB4437",
+      "to": "#7A4A44"
+    },
+    {
+      "from": "#F4B400",
+      "to": "#D4A017"
+    },
+    {
+      "from": "#0F9D58",
+      "to": "#E6C34A"
+    },
+    {
+      "from": "#FFFFFF",
+      "to": "#FDF4F2"
+    },
+    {
+      "from": "#000000",
+      "to": "#150A08"
+    }
+  ],
+  "animationSettings": {
+    "speed": 1,
+    "loop": true,
+    "autoplay": true,
+    "rendererSettings": {
+      "preserveAspectRatio": "xMidYMid slice"
+    }
+  },
+  "customCSS": {
+    "lightMode": {
+      "background": "linear-gradient(135deg, #FFF4F2 0%, #FDF4F2 100%)"
+    },
+    "darkMode": {
+      "background": "linear-gradient(135deg, #150A08 0%, #2A120F 100%)"
+    }
+  },
+  "notes": {
+    "mainColor": "#3D1F1A",
+    "secondaryColor": "#7A4A44",
+    "goldAccent": "#D4A017",
+    "darkBackground": "#150A08",
+    "lightBackground": "#FFF4F2",
+    "textLight": "#FDF4F2"
+  }
+}

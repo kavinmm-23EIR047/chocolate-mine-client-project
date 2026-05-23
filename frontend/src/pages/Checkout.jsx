@@ -303,7 +303,7 @@ const Checkout = () => {
 
   useEffect(() => {
     const validate = async () => {
-      if (!deliveryInfo.position) return;
+      if (!deliveryInfo.position || deliveryInfo.position.lat === undefined || deliveryInfo.position.lng === undefined) return;
       const dist = calculateDistance(
         SHOP_LAT,
         SHOP_LNG,
@@ -338,7 +338,16 @@ const Checkout = () => {
 
   const cartItems = directItem ? [directItem] : cartItemsFromRedux;
 
+  const getItemOriginalPrice = (item) => {
+    const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
+    if (!Number.isNaN(vp) && vp > 0) return vp;
+    return Number(item.price);
+  };
+
   const getItemBasePrice = (item) => {
+    const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
+    if (!Number.isNaN(vp) && vp > 0) return vp;
+
     const hasOffer =
       item.offerPrice != null &&
       Number(item.offerPrice) > 0 &&
@@ -359,9 +368,9 @@ const Checkout = () => {
 
   /* ── client-side estimates for display only ── */
   const subtotal = cartItems.reduce((s, i) => s + getFinalItemPrice(i) * i.qty, 0);
-  const originalTotal = cartItems.reduce((s, i) => s + Number(i.price) * i.qty, 0);
+  const originalTotal = cartItems.reduce((s, i) => s + getItemOriginalPrice(i) * i.qty, 0);
   const offerDiscount = cartItems.reduce(
-    (s, i) => s + (Number(i.price) - getItemBasePrice(i)) * i.qty,
+    (s, i) => s + (getItemOriginalPrice(i) - getItemBasePrice(i)) * i.qty,
     0
   );
   const couponDiscount = cartItems.reduce((s, i) => s + getItemCouponDiscount(i) * i.qty, 0);

@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import {
@@ -12,40 +12,22 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import LottieImport from 'lottie-react';
+import brandAnimation from '../assets/brand-loader.json';
 import orderService from '../services/orderService';
 
-/** Calm, static illustration — no looping motion on a “done” screen */
+// Safely resolve the Lottie component function in both ESM and CJS bundling environments
+const Lottie = LottieImport.default || LottieImport;
+
+/** Premium brand Lottie animation instead of standard scooter illustration */
 const DeliveryIllustration = () => (
-  <svg
-    viewBox="0 0 120 72"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-40 sm:w-48 h-auto mx-auto text-primary"
-    aria-hidden="true"
-  >
-    <circle cx="28" cy="56" r="10" stroke="currentColor" strokeWidth="2" fill="var(--card)" />
-    <circle cx="28" cy="56" r="3" fill="currentColor" />
-    <circle cx="92" cy="56" r="10" stroke="currentColor" strokeWidth="2" fill="var(--card)" />
-    <circle cx="92" cy="56" r="3" fill="currentColor" />
-    <path
-      d="M34 52h52c4 0 7 2 8 6l2 6H36l-2-5z"
-      fill="var(--card)"
-      stroke="var(--border)"
-      strokeWidth="1.2"
-      strokeLinejoin="round"
+  <div className="w-40 sm:w-48 aspect-square mx-auto flex items-center justify-center overflow-hidden">
+    <Lottie
+      animationData={brandAnimation}
+      loop={true}
+      className="w-full h-full scale-110"
     />
-    <rect x="38" y="40" width="22" height="12" rx="2" fill="currentColor" opacity="0.85" />
-    <rect x="56" y="34" width="28" height="14" rx="3" fill="var(--secondary)" />
-    <circle cx="78" cy="24" r="9" fill="var(--accent)" opacity="0.9" />
-    <path d="M86 30h10" stroke="var(--foreground)" strokeWidth="2" strokeLinecap="round" />
-    <path
-      d="M0 62h120"
-      stroke="var(--border)"
-      strokeWidth="1"
-      strokeLinecap="round"
-      opacity="0.5"
-    />
-  </svg>
+  </div>
 );
 
 const formatOrderRef = (raw) => {
@@ -118,14 +100,26 @@ const OrderSuccess = () => {
   const navigate = useNavigate();
 
   const orderId = searchParams.get('id') || location.state?.orderId || null;
-  const orderNumber = location.state?.orderNumber || orderId;
+  const [fetchedOrderNumber, setFetchedOrderNumber] = useState(null);
 
+  const orderNumber = fetchedOrderNumber || location.state?.orderNumber;
   const displayRef = useMemo(() => formatOrderRef(orderNumber), [orderNumber]);
   const fullRef = orderNumber ? String(orderNumber).replace(/\s+/g, '') : '';
 
   useEffect(() => {
     fireSuccessCrackerBlast();
-  }, []);
+    if (orderId) {
+      orderService.getOrder(orderId)
+        .then((res) => {
+          if (res.data?.data?.orderNumber) {
+            setFetchedOrderNumber(res.data.data.orderNumber);
+          }
+        })
+        .catch((err) => {
+          console.error('Error fetching order details:', err);
+        });
+    }
+  }, [orderId]);
 
   const handleViewDetails = () => {
     if (orderId) navigate(`/account/orders/${orderId}`);
@@ -240,7 +234,7 @@ const OrderSuccess = () => {
                     className="font-mono text-sm font-semibold text-heading break-all leading-snug"
                     title={fullRef || undefined}
                   >
-                    {displayRef || '—'}
+                    {displayRef || 'Generating reference...'}
                   </p>
                 </div>
                 <button

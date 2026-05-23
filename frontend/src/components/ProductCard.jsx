@@ -29,9 +29,9 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
   const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
   const needsVariantSelection = hasVariants && product.variants?.length > 1;
 
-  const displayPrice = product.offerPrice || product.price;
+  const hasOffer = !hasVariants && product.offerPrice && product.offerPrice < product.price;
+  const displayPrice = hasOffer ? product.offerPrice : product.price;
   const mrp = product.price;
-  const hasOffer = product.offerPrice && product.offerPrice < product.price;
   const discountPct = hasOffer ? Math.round(((mrp - displayPrice) / mrp) * 100) : 0;
 
   // ─── COUPON DATA ───────────────────────────────────────────
@@ -66,14 +66,10 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
     try {
       setAddingToCart(true);
       dispatch(addToCart({
-        _id: product._id,
-        name: product.name,
-        image: product.image,
-        price: displayPrice,
-        variantId: hasVariants && product.variants ? product.variants[0]._id : null,
-        variantName: hasVariants && product.variants ? product.variants[0].name : null,
-        quantity: 1,
-        stock: totalAvailableStock
+        product: product,
+        qty: 1,
+        options: hasVariants && product.variants ? { flavor: product.variants[0].flavor, weight: product.variants[0].weight } : null,
+        variantPrice: hasVariants && product.variants ? product.variants[0].price : null
       }));
       toast.success('Added to bag');
     } catch (err) {

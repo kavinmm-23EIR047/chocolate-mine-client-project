@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight, Star, Search, SlidersHorizontal,
   MapPin, Clock, Tag, Truck, ShieldCheck, Phone, ChevronLeft,
-  Zap, PackageCheck, ShoppingCart, Timer, Bike, BadgeCheck, Sparkles
+  Zap, PackageCheck, ShoppingCart, Sparkles
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -21,9 +21,9 @@ import OccasionSection from '../components/home/OccasionSection';
 import { useDeliveryLocation } from '../context/LocationContext';
 import HomeBanner from '../components/home/HomeBanner';
 import api from '../utils/api';
-import ScooterLightImg from '../assets/scooter-light.png';
-import ScooterDarkImg from '../assets/scooter-dark.png';
-import CakeImg from '../assets/cake.png';
+import HomeLoader from '../components/home/HomeLoader';
+
+
 
 const MINI_ADS = [
   {
@@ -45,7 +45,7 @@ const MINI_ADS = [
 ];
 
 const TRUST = [
-  { icon: <Truck size={15} />, label: 'Free delivery above ₹699' },
+  { icon: <Sparkles size={15} />, label: '100% Handcrafted Artisanal Quality' },
   { icon: <MapPin size={15} />, label: 'Coimbatore only · Fresh & local' },
   { icon: <Clock size={15} />, label: 'Same-day delivery available' },
   { icon: <ShieldCheck size={15} />, label: 'RazorPay secure checkout' },
@@ -82,6 +82,23 @@ const STATS = [
 const Home = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('search') || '';
+
+  const [showHomeLoader, setShowHomeLoader] = useState(() => {
+    try {
+      return !localStorage.getItem('tcm_home_loader_done');
+    } catch {
+      return true;
+    }
+  });
+
+  const handleLoaderFinish = React.useCallback(() => {
+    try {
+      localStorage.setItem('tcm_home_loader_done', '1');
+    } catch {
+      /* ignore */
+    }
+    setShowHomeLoader(false);
+  }, []);
 
   const [sortBy, setSortBy] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -184,6 +201,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background text-body">
+      <HomeLoader show={showHomeLoader} onFinish={handleLoaderFinish} />
+
+      {/* ── SEO HIDDEN H1 ─────────────────────────────────────────── */}
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore</h1>
 
       <main className="w-full mx-auto px-4 sm:px-8 lg:px-16 py-6 pb-32 space-y-12 sm:space-y-16">

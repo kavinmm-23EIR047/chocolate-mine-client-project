@@ -34,7 +34,7 @@ import productService from '../services/productService';
 import reviewService from '../services/reviewService';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, updateCartQty, setCoupon } from '../redux/slices/cartSlice';
-import { useGetProductBySlugQuery } from '../services/api/productApi';
+import { useGetProductBySlugQuery, useGetProductsQuery } from '../services/api/productApi';
 import { useGetProductReviewsQuery } from '../services/api/reviewApi';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -60,6 +60,19 @@ const ProductDetails = () => {
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [relatedProducts, setRelatedProducts] = useState([]);
+
+  // Fetch similar products in the same category
+  const { data: relatedRes } = useGetProductsQuery({
+    category: product?.category,
+    limit: 10
+  }, { skip: !product?.category });
+
+  useEffect(() => {
+    if (relatedRes?.data && product) {
+      const filtered = relatedRes.data.filter(p => (p._id?.$oid || p._id) !== productId);
+      setRelatedProducts(filtered.slice(0, 4));
+    }
+  }, [relatedRes, product, productId]);
   const [activeTab, setActiveTab] = useState('description');
   const [imgZoom, setImgZoom] = useState(false);
   const [displayImage, setDisplayImage] = useState(null);
@@ -197,7 +210,8 @@ const ProductDetails = () => {
   };
 
   const currentPrice = getCurrentPrice();
-  const hasOffer = productOfferPrice > 0 && productOfferPrice < currentPrice;
+  const isCakeWithVariants = productCategory === 'cakes' && product?.hasVariants;
+  const hasOffer = !isCakeWithVariants && productOfferPrice > 0 && productOfferPrice < currentPrice;
   const basePrice = hasOffer ? productOfferPrice : currentPrice;
   const offerDiscount = currentPrice - basePrice;
   const offerPct = currentPrice > 0 ? Math.round((offerDiscount / currentPrice) * 100) : 0;
@@ -258,7 +272,9 @@ const ProductDetails = () => {
 
       if (!isInCart && quantity > 0) {
         const options = {};
+        let variantPrice = null;
         if (product?.category === 'cakes') {
+          variantPrice = showCustomFlavorInput || showCustomWeightInput ? selectedPrice : selectedPrice;
           if (showCustomFlavorInput && customFlavor) {
             options.flavor = customFlavor;
           } else if (selectedFlavor) {
@@ -270,7 +286,7 @@ const ProductDetails = () => {
             options.weight = selectedWeight;
           }
         }
-        dispatch(addToCart({ product, qty: quantity, options }));
+        dispatch(addToCart({ product, qty: quantity, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
         toast.success(`${quantity} item(s) added to cart`);
       }
 
@@ -325,7 +341,7 @@ const ProductDetails = () => {
       else { toast.error('Please select weight'); setAddingToCart(false); return; }
     }
 
-    dispatch(addToCart({ product, qty: 1, options }));
+    dispatch(addToCart({ product, qty: 1, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
     toast.success(`Item added to cart!`);
     setAddingToCart(false);
   };
@@ -349,6 +365,7 @@ const ProductDetails = () => {
       image: displayImage || product.image,
       price: productPrice,
       offerPrice: productOfferPrice,
+      variantPrice: isCakeWithVariants ? currentPrice : null,
       qty: 1,
       selectedFlavor: currentVariantFlavor,
       selectedWeight: currentVariantWeight,
@@ -470,7 +487,7 @@ const ProductDetails = () => {
             {/* Highlights Grid */}
             <div className="hidden lg:grid grid-cols-3 gap-6">
               {[
-                { icon: Truck, label: 'Free Delivery', sub: 'On all orders' },
+                { icon: Sparkles, label: 'Handcrafted', sub: '100% Artisanal' },
                 { icon: RotateCcw, label: 'Fresh Daily', sub: 'Baked today' },
                 { icon: ShieldCheck, label: 'Secure Pay', sub: '100% safe' },
               ].map(({ icon: Icon, label, sub }) => (
@@ -911,11 +928,11 @@ const ProductDetails = () => {
       {relatedProducts.length > 0 && (
         <div className="mt-20 lg:mt-24 px-5 lg:px-0">
           <div className="flex items-center justify-between mb-10">
-            <h2 className="text-2xl lg:text-3xl font-black text-heading uppercase tracking-tight">You might also love</h2>
+            <h2 className="text-2xl lg:text-3xl font-black text-heading uppercase tracking-tight">Similar Products</h2>
             <Link to="/shop" className="text-xs font-black text-primary uppercase tracking-[0.2em] border-b-2 border-primary/20 pb-1 hover:border-primary transition-all">View All Delights</Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10">
-            {relatedProducts.map(p => <ProductCard key={p._id} product={p} />)}
+            {relatedProducts.map(p => <ProductCard key={p._id?.$oid || p._id} product={p} />)}
           </div>
         </div>
       )}

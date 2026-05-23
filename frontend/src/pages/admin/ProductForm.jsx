@@ -496,7 +496,7 @@ const ProductForm = () => {
                             onClick={() => handleOccasionToggle(o.name)}
                             className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all border-2 ${
                               formData.occasion.includes(o.name)
-                                ? 'bg-primary border-primary text-white shadow-lift'
+                                ? 'bg-primary border-primary text-button-text shadow-lift'
                                 : 'bg-input border-input-border text-muted hover:border-primary/50'
                             }`}
                           >
@@ -546,7 +546,7 @@ const ProductForm = () => {
                   <h4 className="font-black text-sm">Flavors</h4>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {flavors.map((flavor, idx) => (
-                      <span key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl text-xs font-bold">
+                      <span key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-xl text-xs font-bold">
                         {flavor.name}
                         <button type="button" onClick={() => removeFlavor(idx)} className="hover:text-error">
                           <X size={12} />
@@ -638,7 +638,7 @@ const ProductForm = () => {
                   <h4 className="font-black text-sm">Weights</h4>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {weights.map((weight, idx) => (
-                      <span key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl text-xs font-bold">
+                      <span key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-xl text-xs font-bold">
                         {weight.value}
                         <button type="button" onClick={() => removeWeight(idx)} className="hover:text-error">
                           <X size={12} />

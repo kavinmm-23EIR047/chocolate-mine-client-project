@@ -168,20 +168,20 @@ const StepBadge = ({ n, label, isActive, isCompleted, onEdit, summary }) => (
 
     <div className="flex-1 min-w-0">
       <div className="flex items-center justify-between gap-2">
-        <h2 className={`font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? 'text-primary text-xs sm:text-sm' : 'text-muted text-[10px] sm:text-xs'
+        <h2 className={`font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? 'text-primary text-sm sm:text-base' : 'text-muted text-xs sm:text-sm'
           }`}>
           {label}
         </h2>
         {isCompleted && !isActive && (
           <button
-            className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline px-3 py-1 bg-primary/5 rounded-lg border border-primary/20"
+            className="text-xs font-black text-primary uppercase tracking-widest hover:underline px-3 py-1 bg-primary/5 rounded-lg border border-primary/20"
           >
             Change
           </button>
         )}
       </div>
       {isCompleted && !isActive && summary && (
-        <p className="text-[10px] text-muted font-bold mt-1 truncate uppercase tracking-tight">{summary}</p>
+        <p className="text-xs text-muted font-bold mt-1 truncate uppercase tracking-tight">{summary}</p>
       )}
     </div>
   </div>
@@ -805,7 +805,7 @@ const Checkout = () => {
                       {/* Saved addresses */}
                       {savedAddresses.length > 0 && (
                         <div className="space-y-3">
-                          <p className="text-[10px] text-heading font-black uppercase tracking-widest opacity-80">Saved Addresses</p>
+                          <p className="text-xs text-heading font-black uppercase tracking-widest opacity-80">Saved Addresses</p>
                           <div className="grid gap-3 w-full min-w-0">
                             {savedAddresses.map((addr) => (
                               <div
@@ -819,7 +819,7 @@ const Checkout = () => {
                                 <div className="flex justify-between items-start gap-2 min-w-0">
                                   <div className="min-w-0 flex-1">
                                     <span className="font-black text-heading text-sm break-words">{addr.fullName}</span>
-                                    <p className="text-[10px] text-muted font-bold mt-0.5">{addr.phone}</p>
+                                    <p className="text-xs text-muted font-bold mt-0.5">{addr.phone}</p>
                                   </div>
                                   <div className="flex items-center gap-2 shrink-0">
                                     <button
@@ -843,7 +843,7 @@ const Checkout = () => {
                                     )}
                                   </div>
                                 </div>
-                                <p className="text-[11px] sm:text-xs text-muted font-medium mt-2 break-all leading-relaxed pr-8">
+                                <p className="text-xs sm:text-sm text-muted font-medium mt-2 break-all leading-relaxed pr-8">
                                   {addr.houseNo}, {addr.street}
                                 </p>
                               </div>
@@ -853,7 +853,7 @@ const Checkout = () => {
                             <div className="absolute inset-0 flex items-center">
                               <div className="w-full border-t border-border/20" />
                             </div>
-                            <div className="relative flex justify-center text-[10px]">
+                            <div className="relative flex justify-center text-xs">
                               <span className="bg-card px-3 text-heading font-black uppercase tracking-widest">OR</span>
                             </div>
                           </div>
@@ -863,7 +863,7 @@ const Checkout = () => {
                       {/* Map picker */}
                       <button
                         onClick={() => setShowMap(true)}
-                        className="w-full p-3 sm:p-4 border-2 border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
+                        className="w-full p-3 sm:p-4 border-2 border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
                       >
                         <MapPin size={15} /> Add / Update Location on Map
                       </button>
@@ -883,19 +883,19 @@ const Checkout = () => {
                           />
                           <div className="min-w-0 flex-1">
                             <p
-                              className={`text-xs font-black uppercase tracking-widest ${locationValid ? 'text-success-text' : 'text-error-text'
+                              className={`text-sm font-black uppercase tracking-widest ${locationValid ? 'text-success-text' : 'text-error-text'
                                 }`}
                             >
                               {locationValid ? 'Delivery Location Set' : 'Outside Service Area'}
                             </p>
                             <p
-                              className={`text-[10px] sm:text-xs font-medium mt-0.5 leading-relaxed break-all ${locationValid ? 'text-success-text' : 'text-error-text'
+                              className={`text-xs sm:text-sm font-medium mt-0.5 leading-relaxed break-all ${locationValid ? 'text-success-text' : 'text-error-text'
                                 }`}
                             >
                               {locationValid ? deliveryInfo.address : locationError}
                             </p>
                             {locationValid && (
-                              <p className="text-[10px] text-success-text font-bold mt-1">
+                              <p className="text-xs text-success-text font-bold mt-1">
                                 {distance.toFixed(1)} km · Est. fee {formatCurrency(deliveryFee)}
                               </p>
                             )}
@@ -912,11 +912,11 @@ const Checkout = () => {
                           { label: 'Street / Landmark *', icon: MapPin, placeholder: 'Nearby building or area', key: 'street', onChange: (v) => setAddressDetails({ ...addressDetails, street: v }) },
                         ].map(({ label, icon: Icon, placeholder, key, onChange }) => (
                           <div key={key} className="space-y-1.5 sm:space-y-2">
-                            <label className="flex items-center gap-1.5 text-[10px] font-black text-muted uppercase tracking-widest ml-1">
-                              <Icon size={10} /> {label}
+                            <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
+                              <Icon size={12} /> {label}
                             </label>
                             <input
-                              className="input-field text-sm min-w-0"
+                              className="input-field text-sm sm:text-base min-w-0"
                               placeholder={placeholder}
                               value={addressDetails[key]}
                               onChange={key === 'phone' ? handlePhoneChange : (e) => onChange(e.target.value)}
@@ -1074,10 +1074,10 @@ const Checkout = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {item.selectedFlavor && <span className="text-[9px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.selectedFlavor}</span>}
-                              {item.selectedWeight && <span className="text-[9px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
+                              {item.selectedFlavor && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.selectedFlavor}</span>}
+                              {item.selectedWeight && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
                             </div>
-                            <p className="text-[10px] text-muted/60 font-black mt-2 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
+                            <p className="text-xs text-muted/60 font-black mt-2 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
                           </div>
                           <div className="text-right">
                             <p className="font-black text-heading text-sm">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
@@ -1089,17 +1089,17 @@ const Checkout = () => {
                         {customCakeRequest ? (
                           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-3">
                             <div className="flex items-start justify-between gap-3">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-primary">From custom cake builder</p>
-                              <Link to="/custom-cake" className="text-[10px] font-black uppercase tracking-widest text-accent hover:underline">Edit</Link>
+                              <p className="text-xs font-black uppercase tracking-widest text-primary">From custom cake builder</p>
+                              <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-accent hover:underline">Edit</Link>
                             </div>
-                            <pre className="text-[11px] text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">{formatCustomCakeNotes(customCakeRequest)}</pre>
+                            <pre className="text-xs text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">{formatCustomCakeNotes(customCakeRequest)}</pre>
                           </div>
                         ) : (
-                          <p className="text-[10px] text-muted font-bold uppercase tracking-widest text-center opacity-40">No custom notes added</p>
+                          <p className="text-xs text-muted font-bold uppercase tracking-widest text-center opacity-40">No custom notes added</p>
                         )}
 
                         <div className="pt-4 flex justify-between items-center border-t border-border/20 pt-5">
-                          <p className="text-[10px] text-muted font-bold uppercase tracking-widest">Review items before payment</p>
+                          <p className="text-xs text-muted font-bold uppercase tracking-widest">Review items before payment</p>
                           <div className="flex gap-3">
                             <Button onClick={() => setActiveStep(2)} className="btn-secondary px-6">Back</Button>
                             <Button onClick={() => setActiveStep(4)} className="btn-primary px-8">Confirm Order</Button>
@@ -1140,8 +1140,8 @@ const Checkout = () => {
                           <img src={paymentLogos.razorpay} alt="Razorpay" className="w-6 h-6 object-contain" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-black text-heading uppercase tracking-widest leading-none mb-1">Secure Payment via Razorpay</p>
-                          <p className="text-[8px] text-muted font-bold uppercase tracking-widest opacity-60 leading-none">
+                          <p className="text-xs font-black text-heading uppercase tracking-widest leading-none mb-1">Secure Payment via Razorpay</p>
+                          <p className="text-[10px] text-muted font-bold uppercase tracking-widest opacity-60 leading-none">
                             PCI DSS Compliant · 256-bit SSL Encryption
                           </p>
                         </div>
@@ -1177,8 +1177,8 @@ const Checkout = () => {
                               </div>
 
                               {/* label */}
-                              <p className="font-black text-heading text-[10px] sm:text-xs uppercase tracking-wide truncate">{method.label}</p>
-                              <p className="text-[8px] sm:text-[9px] text-muted font-bold mt-0.5 uppercase tracking-widest truncate">{method.sub}</p>
+                              <p className="font-black text-heading text-xs sm:text-sm uppercase tracking-wide truncate">{method.label}</p>
+                              <p className="text-[10px] text-muted font-bold mt-0.5 uppercase tracking-widest truncate">{method.sub}</p>
 
                               <div className="flex items-center gap-2 mt-3 sm:mt-4 flex-wrap">
                                 {method.logos.map((logo) => (
@@ -1229,8 +1229,8 @@ const Checkout = () => {
                 <div className="p-4 sm:p-5 border-b border-border/30 bg-gradient-to-r from-card-soft to-card">
                   <div className="flex items-center gap-2">
                     <Package size={15} className="text-primary" />
-                    <h3 className="font-black text-heading text-[9px] xs:text-xs uppercase tracking-widest truncate">Order Summary</h3>
-                    <span className="ml-auto text-[8px] xs:text-[10px] bg-primary/10 text-primary font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest shrink-0">
+                    <h3 className="font-black text-heading text-xs sm:text-sm uppercase tracking-widest truncate">Order Summary</h3>
+                    <span className="ml-auto text-xs bg-primary/10 text-primary font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest shrink-0">
                       {cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}
                     </span>
                   </div>
@@ -1251,12 +1251,12 @@ const Checkout = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
                         {item.selectedFlavor && (
-                          <p className="text-[9px] text-muted font-bold mt-0.5">Flavor: {item.selectedFlavor}</p>
+                          <p className="text-[11px] text-muted font-bold mt-0.5">Flavor: {item.selectedFlavor}</p>
                         )}
                         {item.selectedWeight && (
-                          <p className="text-[9px] text-muted font-bold">Weight: {item.selectedWeight}</p>
+                          <p className="text-[11px] text-muted font-bold">Weight: {item.selectedWeight}</p>
                         )}
-                        <p className="text-[9px] text-muted/60 font-black mt-1">QTY {item.qty}</p>
+                        <p className="text-xs text-muted/60 font-black mt-1">QTY {item.qty}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-black text-heading text-sm">
@@ -1273,40 +1273,40 @@ const Checkout = () => {
                 </div>
 
                 {/* Price breakdown */}
-                <div className="p-4 sm:p-5 space-y-2 sm:space-y-2.5 border-t border-border/30 text-sm">
-                  <div className="flex justify-between font-bold text-[11px] uppercase tracking-widest">
+                <div className="p-4 sm:p-5 space-y-2.5 sm:space-y-3 border-t border-border/30 text-sm">
+                  <div className="flex justify-between font-bold text-xs sm:text-sm uppercase tracking-widest">
                     <span className="text-muted">Total MRP</span>
                     <span className="text-heading">{formatCurrency(originalTotal)}</span>
                   </div>
                   {offerDiscount > 0 && (
-                    <div className="flex justify-between text-success-text font-black text-[11px] uppercase tracking-widest">
+                    <div className="flex justify-between text-success-text font-black text-xs sm:text-sm uppercase tracking-widest">
                       <span>Offer Discount</span>
                       <span>− {formatCurrency(offerDiscount)}</span>
                     </div>
                   )}
                   {couponDiscount > 0 && (
-                    <div className="flex justify-between text-success-text font-black text-[11px] uppercase tracking-widest">
+                    <div className="flex justify-between text-success-text font-black text-xs sm:text-sm uppercase tracking-widest">
                       <span>Coupon ({appliedCouponDisplay})</span>
                       <span>− {formatCurrency(couponDiscount)}</span>
                     </div>
                   )}
-                  <div className="border-t border-border/30 pt-2 flex justify-between font-black text-[11px] uppercase tracking-widest">
+                  <div className="border-t border-border/30 pt-2 flex justify-between font-black text-xs sm:text-sm uppercase tracking-widest">
                     <span className="text-muted">Subtotal</span>
                     <span className="text-heading">{formatCurrency(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted font-medium">Delivery Fee</span>
                     <span className="font-black text-heading">
                       {isAddressSelected ? formatCurrency(deliveryFee) : '—'}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted font-medium">GST (18%)</span>
                     <span className="font-black text-heading">
                       {isAddressSelected ? formatCurrency(gst) : '—'}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted font-medium">Convenience Fee</span>
                     <span className="font-black text-heading">
                       {isAddressSelected ? formatCurrency(convenienceFee) : '—'}
@@ -1353,7 +1353,7 @@ const Checkout = () => {
                     </div>
                     <div className="flex gap-2">
                       <input
-                        className="input-field font-black uppercase tracking-widest h-10 sm:h-11 flex-1 min-w-0 text-xs"
+                        className="input-field font-black uppercase tracking-widest h-10 sm:h-11 flex-1 min-w-0 text-sm"
                         placeholder="COUPON CODE"
                         value={couponInput}
                         disabled={couponBusy || hasAppliedCoupon}
@@ -1440,8 +1440,8 @@ const Checkout = () => {
                         key={label}
                         className="flex flex-col items-center gap-1 p-2 rounded-xl bg-surface/30 border border-border/20"
                       >
-                        <Icon size={11} className="text-primary/60 shrink-0" />
-                        <span className="text-[7px] xs:text-[8px] font-black text-muted/60 uppercase tracking-widest text-center leading-tight">{label}</span>
+                        <Icon size={13} className="text-primary/60 shrink-0" />
+                        <span className="text-[10px] font-black text-muted/60 uppercase tracking-widest text-center leading-tight">{label}</span>
                       </div>
                     ))}
                   </div>

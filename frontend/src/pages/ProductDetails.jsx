@@ -388,9 +388,9 @@ const ProductDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-muted font-black uppercase tracking-widest">Preparing your treats...</p>
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-20 h-20 border-[6px] border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-base text-muted font-black uppercase tracking-widest">Preparing your treats...</p>
         </div>
       </div>
     );

@@ -24,28 +24,23 @@ export function formatCustomCakeNotes(data) {
   if (!data || typeof data !== 'object') return '';
   const lines = [
     '[Custom cake — builder]',
-    data.shape && `Shape / style: ${data.shape}`,
-    data.tiers != null && data.tiers !== '' && `Tiers: ${data.tiers}`,
+    data.designTheme && `Theme: ${data.designTheme}`,
+    data.themeColor && `Theme color: ${data.themeColor}`,
     data.servingWeight && `Serving size: ${data.servingWeight}`,
     data.flavour && `Flavour: ${data.flavour}`,
     data.customFlavour && `Custom flavour note: ${data.customFlavour}`,
-    data.spongeType && `Sponge: ${data.spongeType}`,
     data.eggless != null && `Eggless: ${data.eggless ? 'Yes' : 'No'}`,
-    data.frostingNote && `Frosting / colour: ${data.frostingNote}`,
-    data.designTheme && `Design theme: ${data.designTheme}`,
     Array.isArray(data.toppings) &&
       data.toppings.length > 0 &&
       `Toppings: ${data.toppings.join(', ')}`,
+    Array.isArray(data.extras) &&
+      data.extras.length > 0 &&
+      `Extras: ${data.extras.join(', ')}`,
     data.messageOnCake?.trim() &&
       `Message on cake: ${data.messageOnCake.trim()}`,
-    data.candleRequired != null &&
-      `Candles: ${data.candleRequired ? 'Yes' : 'No'}`,
-    data.knifeIncluded != null &&
-      `Cake knife: ${data.knifeIncluded ? 'Yes' : 'No'}`,
-    data.lessSugar != null &&
-      `Less sugar: ${data.lessSugar ? 'Yes' : 'No'}`,
     data.preferredDate && `Preferred ready-by: ${data.preferredDate}`,
     data.extraNotes && `Extra: ${data.extraNotes}`,
+    data.estimatedPrice && `Estimated price: ₹${data.estimatedPrice}`,
   ].filter(Boolean);
   return lines.join('\n');
 }

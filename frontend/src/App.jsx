@@ -39,7 +39,7 @@ import OrderDetails from './pages/user/OrderDetails';
 import Wishlist from './pages/user/Wishlist';
 import MyReviews from './pages/user/Reviews';
 import Shop from './pages/Shop';
-import CustomCake from './pages/CustomCake';
+import CustomCake from './custom-cakes/CustomCake';
 import BrandIntroLoader from './components/BrandIntroLoader.jsx';
 
 import { useLocation } from 'react-router-dom';
@@ -51,7 +51,7 @@ import { useAuth } from './context/AuthContext';
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
   return null;
 };

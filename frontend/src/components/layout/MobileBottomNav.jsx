@@ -54,26 +54,25 @@ const MobileBottomNav = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={({ isActive }) => 
-                  `flex flex-col items-center justify-center gap-1 w-10 xs:w-11 sm:w-12 h-10 xs:h-11 sm:h-12 rounded-full transition-all duration-300 relative group ${
-                    isActive ? 'text-button-text border-2 border-primary ring-2 ring-primary/20' : 'text-heading hover:text-primary/70'
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center gap-1 w-10 xs:w-11 sm:w-12 h-10 xs:h-11 sm:h-12 rounded-full transition-all duration-300 relative group ${isActive ? 'text-button-text border-2 border-primary ring-2 ring-primary/20' : 'text-heading hover:text-primary/70'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     {isActive && (
-                      <motion.div 
+                      <motion.div
                         layoutId="activeTabHighlight"
                         className="absolute inset-0 bg-primary rounded-full -z-10 shadow-lg shadow-primary/30"
                         transition={{ type: "spring", stiffness: 500, damping: 35 }}
                       />
                     )}
-                    
+
                     <div className="relative">
-                      <item.icon 
-                        size={isActive ? 16 : 18} 
-                        className="transition-all duration-300" 
+                      <item.icon
+                        size={isActive ? 16 : 18}
+                        className="transition-all duration-300"
                         strokeWidth={isActive ? 3 : 2}
                       />
                       {item.badge > 0 && (
@@ -82,10 +81,9 @@ const MobileBottomNav = () => {
                         </span>
                       )}
                     </div>
-                    
-                    <span className={`text-[7px] font-black uppercase tracking-widest transition-all duration-300 ${
-                      isActive ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
-                    }`}>
+
+                    <span className={`text-[7px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
+                      }`}>
                       {item.label}
                     </span>
                   </>

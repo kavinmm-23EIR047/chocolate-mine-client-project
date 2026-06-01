@@ -2,9 +2,7 @@
    THE CHOCOLATE MINE — MASTER THEME FILE
    ─────────────────────────────────────────────────────────────
    SINGLE SOURCE OF TRUTH for all brand colors & design tokens.
-   To rebrand: change ONLY the values below.
-   Everything — Tailwind utilities, component classes, dark mode —
-   updates automatically.
+   Updated to perfectly match the logo's exact color values.
    ═══════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
@@ -14,89 +12,89 @@
    ─────────────────────────────────────────── */
 :root {
    /* ── Core Surfaces ── */
-   --background: #FFF4F2;
-   --background-rgb: 255 244 242;
+   --background: #FFFFFF;
+   /* Matched to logo background */
+   --background-rgb: 255 255 255;
    --surface: #FFFFFF;
    --surface-rgb: 255 255 255;
    --card: #FFFFFF;
    --card-rgb: 255 255 255;
-   --card-soft: #FFF9F8;
-   --card-soft-rgb: 255 249 248;
+   --card-soft: #F9F6F5;
+   /* 2% tint of primary for depth */
+   --card-soft-rgb: 249 246 245;
 
    /* ── Brand Colors ── */
-   --primary: #3D1F1A;
-   /* Primary Chocolate Brown */
-   --primary-rgb: 61 31 26;
-   --primary-hover: #5C3530;
-   /* Rich Cocoa Brown */
-   --primary-hover-rgb: 92 53 48;
-   --primary-active: #280F0B;
-   /* Deep Espresso */
-   --primary-active-rgb: 40 15 11;
-   --secondary: #7A4A44;
-   /* Warm Mocha */
-   --secondary-rgb: 122 74 68;
+   --primary: #381A14;
+   /* Exact logo brown */
+   --primary-rgb: 56 26 20;
+   --primary-hover: #52271E;
+   --primary-hover-rgb: 82 39 30;
+   --primary-active: #24110D;
+   --primary-active-rgb: 36 17 13;
+   --secondary: #7A4B43;
+   --secondary-rgb: 122 75 67;
    --accent: #D4A017;
-   /* Luxury Gold */
+   /* Retained luxury gold for UI contrast */
    --accent-rgb: 212 160 23;
    --accent-hover: #B8880F;
    --accent-hover-rgb: 184 136 15;
 
    /* ── Typography ── */
-   --foreground: #1A0F0D;
-   --foreground-rgb: 26 15 13;
-   --heading: #1A0F0D;
-   --heading-rgb: 26 15 13;
-   --body: #3D1F1A;
-   --body-rgb: 61 31 26;
-   --muted: #8C6A64;
-   --muted-rgb: 140 106 100;
-   --card-text: #1A0F0D;
-   --card-text-rgb: 26 15 13;
+   --foreground: #140907;
+   --foreground-rgb: 20 9 7;
+   --heading: #381A14;
+   /* Logo color for headings */
+   --heading-rgb: 56 26 20;
+   --body: #381A14;
+   --body-rgb: 56 26 20;
+   --muted: #8F736F;
+   --muted-rgb: 143 115 111;
+   --card-text: #140907;
+   --card-text-rgb: 20 9 7;
 
    /* ── Navigation ── */
-   --navbar: #FFF4F2;
-   --navbar-rgb: 255 244 242;
-   --navbar-text: #3D1F1A;
-   --navbar-text-rgb: 61 31 26;
+   --navbar: #FFFFFF;
+   --navbar-rgb: 255 255 255;
+   --navbar-text: #381A14;
+   --navbar-text-rgb: 56 26 20;
    --sidebar: #FFFFFF;
    --sidebar-rgb: 255 255 255;
 
    /* ── Footer ── */
-   --footer: #1A0F0D;
-   --footer-rgb: 26 15 13;
-   --footer-text: #FDF4F2;
-   --footer-text-rgb: 253 244 242;
+   --footer: #140907;
+   --footer-rgb: 20 9 7;
+   --footer-text: #FFFFFF;
+   --footer-text-rgb: 255 255 255;
 
    /* ── Borders & Inputs ── */
-   --border: #E5D1CD;
-   --border-rgb: 229 209 205;
-   --border-muted: #D9B9B3;
-   --border-muted-rgb: 217 185 179;
+   --border: #E8E0DF;
+   --border-rgb: 232 224 223;
+   --border-muted: #D1C5C3;
+   --border-muted-rgb: 209 197 195;
    --input: #FFFFFF;
    --input-rgb: 255 255 255;
-   --input-border: #D9B9B3;
-   --input-border-rgb: 217 185 179;
-   --input-focus: #3D1F1A;
-   --ring: rgba(61, 31, 26, 0.15);
+   --input-border: #D1C5C3;
+   --input-border-rgb: 209 197 195;
+   --input-focus: #381A14;
+   --ring: rgba(56, 26, 20, 0.15);
 
    /* ── Buttons ── */
-   --button-bg: #3D1F1A;
-   --button-bg-rgb: 61 31 26;
-   --button-text: #FFF4F2;
-   --button-text-rgb: 255 244 242;
-   --button-hover: #280F0B;
-   --button-hover-rgb: 40 15 11;
+   --button-bg: #381A14;
+   --button-bg-rgb: 56 26 20;
+   --button-text: #FFFFFF;
+   --button-text-rgb: 255 255 255;
+   --button-hover: #24110D;
+   --button-hover-rgb: 36 17 13;
    --button-alt-bg: #FFFFFF;
    --button-alt-bg-rgb: 255 255 255;
-   --button-alt-text: #3D1F1A;
-   --button-alt-text-rgb: 61 31 26;
-   --button-alt-hover: #FDE8E4;
-   --button-alt-hover-rgb: 253 232 228;
-   --button-buy: #3D1F1A;
-   --button-buy-rgb: 61 31 26;
-   --button-buy-text: #FFF4F2;
-   --button-buy-text-rgb: 255 244 242;
+   --button-alt-text: #381A14;
+   --button-alt-text-rgb: 56 26 20;
+   --button-alt-hover: #F9F6F5;
+   --button-alt-hover-rgb: 249 246 245;
+   --button-buy: #381A14;
+   --button-buy-rgb: 56 26 20;
+   --button-buy-text: #FFFFFF;
+   --button-buy-text-rgb: 255 255 255;
 
    /* ── Semantic: Success ── */
    --success: #2E7D32;
@@ -157,16 +155,16 @@
    --star-rgb: 251 192 45;
 
    /* ── Overlay ── */
-   --overlay: rgba(26, 15, 13, 0.5);
-   --backdrop: rgba(253, 244, 242, 0.85);
+   --overlay: rgba(20, 9, 7, 0.5);
+   --backdrop: rgba(255, 255, 255, 0.85);
 
    /* ── Skeleton ── */
-   --skeleton: #E5D1CD;
-   --skeleton-rgb: 229 209 205;
-   --skeleton-shine: #FDE8E4;
-   --skeleton-shine-rgb: 253 232 228;
+   --skeleton: #E8E0DF;
+   --skeleton-rgb: 232 224 223;
+   --skeleton-shine: #F9F6F5;
+   --skeleton-shine-rgb: 249 246 245;
 
-   /* ── Shadow tokens (used via box-shadow) ── */
+   /* ── Shadow tokens ── */
    --shadow-color: 15deg 30% 20%;
 
    /* ── Badge colors ── */
@@ -179,95 +177,96 @@
    ─────────────────────────────────────────── */
 .dark {
    /* ── Core Surfaces ── */
-   --background: #150A08;
-   --background-rgb: 21 10 8;
-   --surface: #1A0F0D;
-   --surface-rgb: 26 15 13;
-   --card: #1A0F0D;
-   --card-rgb: 26 15 13;
-   --card-soft: #221210;
-   --card-soft-rgb: 34 18 16;
+   --background: #120806;
+   /* Deepest shade of logo brown */
+   --background-rgb: 18 8 6;
+   --surface: #1C0D0A;
+   --surface-rgb: 28 13 10;
+   --card: #1C0D0A;
+   --card-rgb: 28 13 10;
+   --card-soft: #24110D;
+   --card-soft-rgb: 36 17 13;
 
    /* ── Brand Colors ── */
-   --primary: #FDF4F2;
-   --primary-rgb: 253 244 242;
-   --primary-hover: #FFFFFF;
-   --primary-hover-rgb: 255 255 255;
-   --primary-active: #E5D1CD;
-   --primary-active-rgb: 229 209 205;
-   --secondary: #D9B9B3;
-   --secondary-rgb: 217 185 179;
+   --primary: #FFFFFF;
+   /* Inverted to logo background */
+   --primary-rgb: 255 255 255;
+   --primary-hover: #F2EBEA;
+   --primary-hover-rgb: 242 235 234;
+   --primary-active: #D1C5C3;
+   --primary-active-rgb: 209 197 195;
+   --secondary: #D1C5C3;
+   --secondary-rgb: 209 197 195;
    --accent: #E6C34A;
    --accent-rgb: 230 195 74;
    --accent-hover: #FFD740;
    --accent-hover-rgb: 255 215 64;
 
    /* ── Typography ── */
-   --foreground: #FDF4F2;
-   --foreground-rgb: 253 244 242;
-   --heading: #FDF4F2;
-   --heading-rgb: 253 244 242;
-   --body: #E5D1CD;
-   --body-rgb: 229 209 205;
-   --muted: #B99E98;
-   /* Brightened for dark mode contrast */
-   --muted-rgb: 185 158 152;
-   --card-text: #FDF4F2;
-   --card-text-rgb: 253 244 242;
+   --foreground: #FFFFFF;
+   --foreground-rgb: 255 255 255;
+   --heading: #FFFFFF;
+   --heading-rgb: 255 255 255;
+   --body: #E8E0DF;
+   --body-rgb: 232 224 223;
+   --muted: #A38C88;
+   --muted-rgb: 163 140 136;
+   --card-text: #FFFFFF;
+   --card-text-rgb: 255 255 255;
 
    /* ── Navigation ── */
-   --navbar: #150A08;
-   --navbar-rgb: 21 10 8;
-   --navbar-text: #FDF4F2;
-   --navbar-text-rgb: 253 244 242;
-   --sidebar: #1A0F0D;
-   --sidebar-rgb: 26 15 13;
+   --navbar: #120806;
+   --navbar-rgb: 18 8 6;
+   --navbar-text: #FFFFFF;
+   --navbar-text-rgb: 255 255 255;
+   --sidebar: #1C0D0A;
+   --sidebar-rgb: 28 13 10;
 
    /* ── Badge colors ── */
    --badge-amber-bg: #1f1200;
    --badge-green-bg: #0a2218;
 
    /* ── Footer ── */
-   --footer: #0D0504;
-   --footer-rgb: 13 5 4;
-   --footer-text: #FDF4F2;
-   --footer-text-rgb: 253 244 242;
+   --footer: #0A0403;
+   --footer-rgb: 10 4 3;
+   --footer-text: #FFFFFF;
+   --footer-text-rgb: 255 255 255;
 
    /* ── Borders & Inputs ── */
-   --border: #3D1F1A;
-   --border-rgb: 61 31 26;
-   --border-muted: #5C3530;
-   --border-muted-rgb: 92 53 48;
-   --input: #1A0F0D;
-   --input-rgb: 26 15 13;
-   --input-border: #3D1F1A;
-   --input-border-rgb: 61 31 26;
-   --input-focus: #FDF4F2;
-   --ring: rgba(253, 244, 242, 0.15);
+   --border: #381A14;
+   /* Logo brown */
+   --border-rgb: 56 26 20;
+   --border-muted: #52271E;
+   --border-muted-rgb: 82 39 30;
+   --input: #1C0D0A;
+   --input-rgb: 28 13 10;
+   --input-border: #381A14;
+   --input-border-rgb: 56 26 20;
+   --input-focus: #FFFFFF;
+   --ring: rgba(255, 255, 255, 0.15);
 
    /* ── Buttons ── */
-   --button-bg: #FDF4F2;
-   --button-bg-rgb: 253 244 242;
-   --button-text: #1A0F0D;
-   --button-text-rgb: 26 15 13;
-   --button-hover: #FFFFFF;
-   --button-hover-rgb: 255 255 255;
-   --button-alt-bg: #1A0F0D;
-   --button-alt-bg-rgb: 26 15 13;
-   --button-alt-text: #FDF4F2;
-   --button-alt-text-rgb: 253 244 242;
-   --button-alt-hover: #3D1F1A;
-   --button-alt-hover-rgb: 61 31 26;
-   --button-buy: #FDF4F2;
-   --button-buy-rgb: 253 244 242;
-   --button-buy-text: #1A0F0D;
-   --button-buy-text-rgb: 26 15 13;
+   --button-bg: #FFFFFF;
+   --button-bg-rgb: 255 255 255;
+   --button-text: #120806;
+   --button-text-rgb: 18 8 6;
+   --button-hover: #F2EBEA;
+   --button-hover-rgb: 242 235 234;
+   --button-alt-bg: #1C0D0A;
+   --button-alt-bg-rgb: 28 13 10;
+   --button-alt-text: #FFFFFF;
+   --button-alt-text-rgb: 255 255 255;
+   --button-alt-hover: #381A14;
+   --button-alt-hover-rgb: 56 26 20;
+   --button-buy: #FFFFFF;
+   --button-buy-rgb: 255 255 255;
+   --button-buy-text: #120806;
+   --button-buy-text-rgb: 18 8 6;
 
    /* ── Semantic: Success ── */
    --success: #66BB6A;
    --success-rgb: 102 187 106;
    --success-light: #1A381E;
-   /* Dark green for dark mode backgrounds */
    --success-light-rgb: 26 56 30;
    --success-text: #4ADE80;
    --success-text-rgb: 74 222 128;
@@ -276,7 +275,6 @@
    --error: #EF5350;
    --error-rgb: 239 83 80;
    --error-light: #4A1A1A;
-   /* Dark red for dark mode backgrounds */
    --error-light-rgb: 74 26 26;
    --error-text: #EF9A9A;
    --error-text-rgb: 239 154 154;
@@ -285,7 +283,6 @@
    --warning: #FFB74D;
    --warning-rgb: 255 183 77;
    --warning-light: #4A3311;
-   /* Dark orange/yellow for backgrounds */
    --warning-light-rgb: 74 51 17;
    --warning-text: #FFD54F;
    --warning-text-rgb: 255 213 79;
@@ -294,7 +291,6 @@
    --info: #4FC3F7;
    --info-rgb: 79 195 247;
    --info-light: #0B334A;
-   /* Dark blue for backgrounds */
    --info-light-rgb: 11 51 74;
    --info-text: #81D4FA;
    --info-text-rgb: 129 212 250;
@@ -315,7 +311,6 @@
    --coupon-light: rgba(74, 222, 128, 0.15);
    --coupon-light-rgb: 74 222 128;
 
-
    /* ── Stock / Urgency ── */
    --urgency: #FFD740;
    --urgency-rgb: 255 215 64;
@@ -328,13 +323,13 @@
 
    /* ── Overlay ── */
    --overlay: rgba(0, 0, 0, 0.6);
-   --backdrop: rgba(21, 10, 8, 0.88);
+   --backdrop: rgba(18, 8, 6, 0.88);
 
    /* ── Skeleton ── */
-   --skeleton: #3D1F1A;
-   --skeleton-rgb: 61 31 26;
-   --skeleton-shine: #5C3530;
-   --skeleton-shine-rgb: 92 53 48;
+   --skeleton: #381A14;
+   --skeleton-rgb: 56 26 20;
+   --skeleton-shine: #52271E;
+   --skeleton-shine-rgb: 82 39 30;
 
    /* ── Shadow tokens ── */
    --shadow-color: 15deg 10% 5%;

@@ -35,7 +35,7 @@ const MobileBottomNav = () => {
     { label: 'Profile', icon: User, path: '/account/dashboard' },
   ];
 
-  // Hide on checkout and product details pages only
+  // Hide on checkout and product details pages
   const hideOn = ['/product', '/checkout'];
   if (hideOn.some(path => location.pathname.startsWith(path))) return null;
 
@@ -46,47 +46,66 @@ const MobileBottomNav = () => {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="lg:hidden fixed bottom-6 left-0 right-0 z-[100] px-2 sm:px-4 pointer-events-none"
+          transition={{ type: 'spring', stiffness: 260, damping: 25 }}
+          className="lg:hidden fixed bottom-5 left-0 right-0 z-[100] px-4 pointer-events-none"
         >
-          <nav className="rounded-full flex items-center justify-between p-1 px-1 sm:px-2 pointer-events-auto max-w-lg mx-auto cutting-edge-border">
+          <nav className="bg-surface/80 backdrop-blur-lg border border-border/40 rounded-2xl flex items-center justify-between p-1.5 pointer-events-auto max-w-md mx-auto shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)]">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={({ isActive }) =>
-                  `flex flex-col items-center justify-center gap-1 w-10 xs:w-11 sm:w-12 h-10 xs:h-11 sm:h-12 rounded-full transition-all duration-300 relative group ${isActive ? 'text-button-text border-2 border-primary ring-2 ring-primary/20' : 'text-heading hover:text-primary/70'
-                  }`
-                }
+                className="flex-1 my-0.5"
               >
                 {({ isActive }) => (
-                  <>
+                  <motion.div
+                    whileTap={{ scale: 0.92 }}
+                    className={`flex flex-col items-center justify-center py-2 rounded-xl relative transition-colors duration-300 ${isActive ? 'text-primary' : 'text-muted/80'
+                      }`}
+                  >
+                    {/* Sliding Glass Capsule Highlight Behind Active Item */}
                     {isActive && (
                       <motion.div
-                        layoutId="activeTabHighlight"
-                        className="absolute inset-0 bg-primary rounded-full -z-10 shadow-lg shadow-primary/30"
-                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                        layoutId="activeNavigationPill"
+                        className="absolute inset-0 bg-primary/8 dark:bg-primary/15 rounded-xl -z-10"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
 
-                    <div className="relative">
+                    {/* Icon Container */}
+                    <div className="relative flex items-center justify-center">
                       <item.icon
-                        size={isActive ? 16 : 18}
-                        className="transition-all duration-300"
-                        strokeWidth={isActive ? 3 : 2}
+                        size={19}
+                        className="transition-transform duration-200"
+                        strokeWidth={isActive ? 2.5 : 2}
                       />
+
+                      {/* Cart Notification Badge */}
                       {item.badge > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-accent text-primary text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-lg border-2 border-card">
+                        <span className="absolute -top-1.5 -right-2 bg-accent text-[#120807] text-[9px] font-black min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow-md border border-surface">
                           {item.badge}
                         </span>
                       )}
                     </div>
 
-                    <span className={`text-[7px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
-                      }`}>
+                    {/* Smooth Fade/Slide Label Text */}
+                    <span
+                      className={`text-[9px] font-bold tracking-wide mt-0.5 transition-all duration-200 origin-center ${isActive
+                          ? 'opacity-100 scale-100 max-h-3 dynamic-text'
+                          : 'opacity-0 scale-90 max-h-0 overflow-hidden pointer-events-none'
+                        }`}
+                    >
                       {item.label}
                     </span>
-                  </>
+
+                    {/* Small Premium Active Dot Dot Indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicatorDot"
+                        className="w-1 h-1 bg-primary rounded-full absolute bottom-1"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </motion.div>
                 )}
               </NavLink>
             ))}

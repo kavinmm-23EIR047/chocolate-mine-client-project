@@ -79,7 +79,16 @@ const adminService = {
     api.delete(`/banners/${id}`),
 
   toggleBanner: (id) =>
-    api.patch(`/banners/${id}/toggle`)
+    api.patch(`/banners/${id}/toggle`),
+
+  /* ----------------------------------------
+     Custom Cake Flavours
+  ---------------------------------------- */
+  getCustomCakeFlavours: () => api.get('/custom-cakes/flavours/admin'),
+  createCustomCakeFlavour: (data) => api.post('/custom-cakes/flavours', data),
+  updateCustomCakeFlavour: (id, data) => api.put(`/custom-cakes/flavours/${id}`, data),
+  deleteCustomCakeFlavour: (id) => api.delete(`/custom-cakes/flavours/${id}`),
+  seedCustomCakeFlavours: () => api.post('/custom-cakes/flavours/seed')
 };
 
 

@@ -12,6 +12,7 @@ import {
 import { addToCart } from '../redux/slices/cartSlice';
 import { saveCustomCakeRequest } from '../utils/customCake';
 import toast from 'react-hot-toast';
+import api from '../utils/api';
 
 // ── Import separated data ────────────────────────────────────────
 import {
@@ -36,6 +37,26 @@ export default function CustomCake() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileStep, setMobileStep] = useState(0); // 0 = tier, 1 = theme, …
   const [wishlisted, setWishlisted] = useState(false);
+  const [dbFlavors, setDbFlavors] = useState([]);
+  const [selectedDbFlavor, setSelectedDbFlavor] = useState(null);
+  const [flavorDropdownOpen, setFlavorDropdownOpen] = useState(false);
+  const [flavorSearch, setFlavorSearch] = useState('');
+
+  useEffect(() => {
+    const loadDbFlavors = async () => {
+      try {
+        const res = await api.get('/custom-cakes/flavours');
+        if (res.data && res.data.data) {
+          setDbFlavors(res.data.data);
+          const def = res.data.data.find(f => f.name === 'Classic Vanilla' && f.category === 'Vanilla Cakes') || res.data.data[0];
+          setSelectedDbFlavor(def);
+        }
+      } catch (err) {
+        console.error('Failed to load custom cake flavours:', err);
+      }
+    };
+    loadDbFlavors();
+  }, []);
 
   // ── DERIVED ────────────────────────────────────────────────
   const filteredThemes = useMemo(() => getThemesByTier(selectedTier), [selectedTier]);
@@ -64,11 +85,11 @@ export default function CustomCake() {
 
   // ── PRICE CALCULATION ──────────────────────────────────────
   const tierMultiplier = currentTier ? currentTier.priceMultiplier : 1;
-  const basePrice = selectedFlavor ? Math.round(selectedFlavor.pricePerKg * tierMultiplier) : Math.round(TEDDY_FLAVORS[0].pricePerKg * tierMultiplier);
+  const basePrice = selectedDbFlavor ? Math.round(selectedDbFlavor.pricePerKg * tierMultiplier) : Math.round(520 * tierMultiplier);
   const totalBeforeGst = basePrice + weight.extraPrice;
   const gst = Math.round(totalBeforeGst * 0.18);
   const grandTotal = totalBeforeGst + gst;
-  const chipTotal = (w) => Math.round((selectedFlavor ? selectedFlavor.pricePerKg : TEDDY_FLAVORS[0].pricePerKg) * tierMultiplier) + w.extraPrice;
+  const chipTotal = (w) => Math.round((selectedDbFlavor ? selectedDbFlavor.pricePerKg : 520) * tierMultiplier) + w.extraPrice;
 
   // ── ADD TO CART ────────────────────────────────────────────
   const handleAddToCart = async () => {
@@ -81,16 +102,29 @@ export default function CustomCake() {
       dispatch(addToCart({
         product: {
           _id: `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${Date.now()}`,
-          name: `${selectedFlavor.name} Cake — ${theme.name} (${tierLabel})`,
+          name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
           image: selectedFlavor.image,
           price: grandTotal, stock: 5, category: 'Custom Cakes',
         },
         qty: 1,
-        options: { theme: theme.name, tier: tierLabel, flavor: selectedFlavor.name, weight: weight.label, name: customerName, age, message: message || 'None' },
+        options: { 
+          theme: theme.name, 
+          tier: tierLabel, 
+          color: selectedFlavor.name, 
+          flavor: selectedDbFlavor?.name || 'Classic Vanilla', 
+          weight: weight.label, 
+          name: customerName, 
+          age, 
+          message: message || 'None' 
+        },
         variantPrice: grandTotal,
       }));
       saveCustomCakeRequest({
-        designTheme: theme.name, tier: tierLabel, servingWeight: weight.label, flavour: selectedFlavor.name,
+        designTheme: theme.name, 
+        tier: tierLabel, 
+        servingWeight: weight.label, 
+        themeColor: selectedFlavor.name,
+        flavour: selectedDbFlavor?.name || 'Classic Vanilla',
         messageOnCake: `Name: ${customerName}, Age: ${age}, Message: ${message || 'None'}`,
         estimatedPrice: grandTotal,
       });
@@ -115,6 +149,112 @@ export default function CustomCake() {
   // ── Personalize Form ──────────────────────────────────────
   const PersonalizeForm = ({ compact = false }) => (
     <div className={compact ? 'space-y-3' : 'space-y-4'}>
+      {/* 🎂 SEARCHABLE FLAVOR DROPDOWN */}
+      <div className="relative">
+        <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
+          Choose Your Flavour <span className="text-red-500">*</span>
+        </label>
+        
+        {/* Dropdown Button */}
+        <button
+          type="button"
+          onClick={() => setFlavorDropdownOpen(!flavorDropdownOpen)}
+          className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] flex items-center justify-between transition-all font-bold"
+        >
+          {selectedDbFlavor ? (
+            <span>
+              {selectedDbFlavor.name} <span className="text-[var(--primary)] ml-1">(₹{selectedDbFlavor.pricePerKg} Half Kg)</span>
+            </span>
+          ) : (
+            <span className="text-[var(--muted)]">Loading flavours...</span>
+          )}
+          <ChevronDown size={16} className={`transition-transform duration-200 ${flavorDropdownOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Dropdown Menu */}
+        <AnimatePresence>
+          {flavorDropdownOpen && (
+            <>
+              {/* Overlay to close on outside click */}
+              <div className="fixed inset-0 z-40 bg-black/0" onClick={() => setFlavorDropdownOpen(false)} />
+              
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl z-50 overflow-hidden max-h-[300px] flex flex-col"
+              >
+                {/* Search Bar */}
+                <div className="p-3 border-b border-[var(--border)] bg-[var(--card-soft)] flex-shrink-0 relative z-50">
+                  <input
+                    type="text"
+                    placeholder="Search flavours..."
+                    value={flavorSearch}
+                    onChange={(e) => setFlavorSearch(e.target.value)}
+                    className="w-full bg-[var(--input)] border border-[var(--input-border)] px-3 py-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-[var(--primary)] font-semibold text-[var(--foreground)]"
+                    onClick={(e) => e.stopPropagation()} // Prevent closing dropdown
+                  />
+                </div>
+
+                {/* List */}
+                <div className="overflow-y-auto flex-1 divide-y divide-[var(--border)] relative z-50">
+                  {['Vanilla Cakes', 'Chocolate Cakes', 'Red Velvet Cakes'].map(category => {
+                    const categoryFlavors = dbFlavors.filter(
+                      f => f.category === category && f.isActive && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
+                    );
+                    if (categoryFlavors.length === 0) return null;
+
+                    return (
+                      <div key={category} className="p-2">
+                        <div className="text-[10px] font-black text-[var(--muted)] uppercase tracking-wider px-2 py-1 select-none">
+                          {category}
+                        </div>
+                        <div className="space-y-0.5 mt-1">
+                          {categoryFlavors.map(flavor => {
+                            const isSelected = selectedDbFlavor?._id === flavor._id;
+                            return (
+                              <button
+                                key={flavor._id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedDbFlavor(flavor);
+                                  setFlavorDropdownOpen(false);
+                                  setFlavorSearch('');
+                                }}
+                                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between font-bold transition-all ${
+                                  isSelected
+                                    ? 'bg-[var(--primary)] text-[var(--button-text)]'
+                                    : 'text-[var(--foreground)] hover:bg-[var(--card-soft)]'
+                                }`}
+                              >
+                                <span>{flavor.name}</span>
+                                <span className={isSelected ? 'text-[var(--button-text)] opacity-90' : 'text-[var(--primary)]'}>
+                                  ₹{flavor.pricePerKg}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {dbFlavors.length > 0 &&
+                    ['Vanilla Cakes', 'Chocolate Cakes', 'Red Velvet Cakes'].every(category => {
+                      return dbFlavors.filter(
+                        f => f.category === category && f.isActive && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
+                      ).length === 0;
+                    }) && (
+                      <div className="text-center py-6 text-xs text-[var(--muted)] font-bold">
+                        No flavours found
+                      </div>
+                    )}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+
       <div className={compact ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-3'}>
         <div>
           <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
@@ -797,7 +937,7 @@ export default function CustomCake() {
                             </div>
                             <div className={`w-full px-2 py-2 text-center ${isSel ? 'bg-[var(--card-soft)]' : 'bg-[var(--card)]'}`}>
                               <p className="text-[11px] font-black text-[var(--heading)] leading-tight truncate">{flavor.name}</p>
-                              <p className="text-[11px] font-bold text-[var(--primary)] mt-0.5">₹{Math.round(flavor.pricePerKg * tierMultiplier)}</p>
+                              <p className="text-[9px] text-[var(--muted)] font-bold mt-0.5">Visual Color</p>
                             </div>
                           </button>
                         );

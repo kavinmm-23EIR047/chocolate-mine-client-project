@@ -94,6 +94,7 @@ import AdminAnalytics from './pages/admin/AdminAnalytics';
 import CategoryManager from './pages/admin/CategoryManager';
 import OccasionManager from './pages/admin/OccasionManager';
 import AdminBanner from './pages/admin/AdminBanner';
+import AdminCustomCakes from './pages/admin/AdminCustomCakes';
 import StaffDashboard from './pages/staff/StaffDashboard';
 
 /** Full-screen premium brand intro once per browser tab session */
@@ -199,6 +200,7 @@ function App() {
                   <Route path="categories" element={<CategoryManager />} />
                   <Route path="occasions" element={<OccasionManager />} />
                   <Route path="banners" element={<AdminBanner />} />
+                  <Route path="custom-cakes" element={<AdminCustomCakes />} />
                   <Route path="settings" element={<AdminDashboard />} />
                 </Route>
 

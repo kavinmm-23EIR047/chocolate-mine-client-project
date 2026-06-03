@@ -121,6 +121,7 @@ app.use('/api/v1/products', require('./src/routes/productRoutes'));
 app.use('/api/v1/categories', require('./src/routes/categoryRoutes'));
 app.use('/api/v1/occasions', require('./src/routes/occasionRoutes'));
 app.use('/api/v1/banners', require('./src/routes/bannerRoutes'));
+app.use('/api/v1/custom-cakes/flavours', require('./src/routes/customCakeFlavorRoutes'));
 
 
 // Protected routes

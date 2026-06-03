@@ -43,17 +43,24 @@ const flavors = [
   { name: 'Choco Pistachio', category: 'Chocolate Cakes', pricePerKg: 950 },
   
   // Red Velvet Cakes
-  { name: 'Red Velvet Classic', category: 'Red Velvet Cakes', pricePerKg: 870 }
+  { name: 'Red Velvet', category: 'Red Velvet Cakes', pricePerKg: 870 }
 ];
 
 const seedFlavors = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI);
     console.log('Connected to MongoDB');
     
     // Clear existing
     await CustomCakeFlavor.deleteMany();
     console.log('Cleared existing custom cake flavors');
+    
+    try {
+      await CustomCakeFlavor.collection.dropIndexes();
+      console.log('Dropped indexes');
+    } catch (e) {
+      console.log('No indexes to drop');
+    }
     
     // Insert new
     await CustomCakeFlavor.insertMany(flavors);

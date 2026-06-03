@@ -25,9 +25,9 @@ export function formatCustomCakeNotes(data) {
   const lines = [
     '[Custom cake — builder]',
     data.designTheme && `Theme: ${data.designTheme}`,
-    data.themeColor && `Theme color: ${data.themeColor}`,
+    data.themeColor && `Color: ${data.themeColor}`,
     data.servingWeight && `Serving size: ${data.servingWeight}`,
-    data.flavour && `Color: ${data.flavour}`,
+    data.flavour && `Flavour: ${data.flavour}`,
     data.customFlavour && `Custom flavour note: ${data.customFlavour}`,
     data.eggless != null && `Eggless: ${data.eggless ? 'Yes' : 'No'}`,
     Array.isArray(data.toppings) &&

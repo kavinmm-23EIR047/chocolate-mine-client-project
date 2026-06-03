@@ -17,6 +17,7 @@ import {
   Tag,
   Gift,
   Image as ImageIcon,
+  Cake,
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -32,8 +33,8 @@ const menuItems = [
   { path: '/admin/categories', label: 'Categories', icon: Tag },
   { path: '/admin/occasions', label: 'Occasions', icon: Gift },
   { path: '/admin/banners', label: 'Banners', icon: ImageIcon },
+  { path: '/admin/custom-cakes', label: 'Custom Cakes', icon: Cake },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
-
 ];
 
 import Logo from '../Logo';

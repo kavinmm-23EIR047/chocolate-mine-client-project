@@ -4,7 +4,8 @@ const {
   getAllFlavorsAdmin,
   createFlavor,
   updateFlavor,
-  deleteFlavor
+  deleteFlavor,
+  seedFlavors
 } = require('../controllers/customCakeFlavorController');
 const { protect, restrictTo } = require('../middleware/auth');
 
@@ -19,6 +20,7 @@ router.use(restrictTo('admin'));
 
 router.get('/admin', getAllFlavorsAdmin);
 router.post('/', createFlavor);
+router.post('/seed', seedFlavors);
 router.put('/:id', updateFlavor);
 router.delete('/:id', deleteFlavor);
 

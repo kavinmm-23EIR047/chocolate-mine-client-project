@@ -169,6 +169,22 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       }
     }
     
+    let isCustomCake = false;
+    let customDetails = null;
+    if (product.category === 'Custom Cakes' || (directItem.options && directItem.options.theme)) {
+      isCustomCake = true;
+      const tierNum = directItem.options.tier ? parseInt(directItem.options.tier.replace(/\D/g, '')) || 1 : 1;
+      customDetails = {
+        shape: 'round',
+        tiers: tierNum,
+        weight: directItem.options.weight || '0.5 kg',
+        flavour: `${directItem.options.color || ''} (Flavour: ${directItem.options.flavor || ''})`,
+        designTheme: directItem.options.theme || 'Teddy Theme',
+        messageOnCake: `Name: ${directItem.options.name || ''}, Age: ${directItem.options.age || ''}, Message: ${directItem.options.message || ''}`,
+        notes: directItem.options.notes || ''
+      };
+    }
+
     cart = {
       items: [{
         productId: product._id,
@@ -178,8 +194,10 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         image: product.image,
         finalPrice: finalPrice,
         activeCouponCode: activeCouponCode,
-        selectedFlavor: directItem.selectedFlavor,
-        selectedWeight: directItem.selectedWeight
+        selectedFlavor: directItem.selectedFlavor || (directItem.options && directItem.options.flavor),
+        selectedWeight: directItem.selectedWeight || (directItem.options && directItem.options.weight),
+        isCustomCake,
+        customDetails
       }],
       total: finalPrice * directItem.qty
     };
@@ -229,6 +247,22 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           }
         }
 
+        let isCustomCake = false;
+        let customDetails = null;
+        if (product.category === 'Custom Cakes' || (item.options && item.options.theme)) {
+          isCustomCake = true;
+          const tierNum = item.options.tier ? parseInt(item.options.tier.replace(/\D/g, '')) || 1 : 1;
+          customDetails = {
+            shape: 'round',
+            tiers: tierNum,
+            weight: item.options.weight || '0.5 kg',
+            flavour: `${item.options.color || ''} (Flavour: ${item.options.flavor || ''})`,
+            designTheme: item.options.theme || 'Teddy Theme',
+            messageOnCake: `Name: ${item.options.name || ''}, Age: ${item.options.age || ''}, Message: ${item.options.message || ''}`,
+            notes: item.options.notes || ''
+          };
+        }
+
         validatedItems.push({
           productId: product._id,
           name: product.name,
@@ -237,8 +271,10 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           image: product.image,
           finalPrice: finalPrice,
           activeCouponCode: activeCouponCode,
-          selectedFlavor: item.options?.flavor,
-          selectedWeight: item.options?.weight
+          selectedFlavor: item.options?.color || item.options?.flavor,
+          selectedWeight: item.options?.weight,
+          isCustomCake,
+          customDetails
         });
         total += finalPrice * item.qty;
       }
@@ -329,7 +365,9 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       couponCode: item.activeCouponCode,
       selectedFlavor: item.selectedFlavor,
       selectedWeight: item.selectedWeight,
-      discountAmount: ((item.price ?? 0) - (item.finalPrice ?? item.price ?? 0)) * item.qty
+      discountAmount: ((item.price ?? 0) - (item.finalPrice ?? item.price ?? 0)) * item.qty,
+      isCustomCake: item.isCustomCake || false,
+      customDetails: item.customDetails || null
     })),
     subtotal,
     deliveryCharge,

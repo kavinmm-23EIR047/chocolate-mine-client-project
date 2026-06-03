@@ -4,8 +4,7 @@ const customCakeFlavorSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true,
-    unique: true
+    trim: true
   },
   category: {
     type: String,
@@ -26,5 +25,7 @@ const customCakeFlavorSchema = new mongoose.Schema({
     default: true
   }
 }, { timestamps: true });
+
+customCakeFlavorSchema.index({ name: 1, category: 1 }, { unique: true });
 
 module.exports = mongoose.model('CustomCakeFlavor', customCakeFlavorSchema);

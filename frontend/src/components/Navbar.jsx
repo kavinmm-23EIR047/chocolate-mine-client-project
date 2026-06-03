@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, ShoppingCart, User, Menu, X, MapPin, Heart, ChevronDown, ShoppingBag, LogIn,
-  Cake, Leaf, Egg, Sun, Moon, Monitor, Mic
+  Cake, Leaf, Egg, Mic
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDeliveryLocation } from '../context/LocationContext';
 import SearchOverlay from './search/SearchOverlay';
-import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from './ui/ThemeToggle';
 
 const NAV_LINKS = [
   { label: 'HOME', path: '/' },
@@ -26,21 +26,14 @@ const NAV_LINKS = [
 const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const { user } = useAuth();
-  
-  // Destructure custom values from your theme state context
-  // Assumes setTheme accepts 'light' | 'dark' | 'system'
-  const { theme, setTheme } = useTheme(); 
-  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
   
   const { location: deliveryCity, setLocation: setDeliveryCity } = useDeliveryLocation();
   const location = useLocation();
   const locationDropdownRef = useRef(null);
-  const themeDropdownRef = useRef(null);
 
   const cartCount = cartItems ? cartItems.reduce((acc, item) => acc + item.qty, 0) : 0;
 
@@ -57,35 +50,17 @@ const Navbar = () => {
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(e.target)) {
         setIsLocationOpen(false);
       }
-      if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target)) {
-        setIsThemeDropdownOpen(false);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Helper helper to pull right icon active indicator configuration
-  const getThemeIcon = (currentTheme) => {
-    switch (currentTheme) {
-      case 'dark': return <DarkIcon className="w-5 h-5" />;
-      case 'light': return <Sun className="w-5 h-5" />;
-      default: return <Monitor className="w-5 h-5" />;
-    }
-  };
-
-  const themeOptions = [
-    { id: 'light', label: 'Light', icon: Sun },
-    { id: 'dark', label: 'Dark', icon: Moon },
-    { id: 'system', label: 'Device', icon: Monitor },
-  ];
 
   return (
     <>
       <nav className={`sticky top-0 left-0 right-0 z-[100] bg-navbar transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
         <div className="w-full px-4 sm:px-6 lg:px-10">
 
-          {/* ── MAIN ROW ── */}
+          {/* MAIN ROW */}
           <div className="relative flex items-center justify-between gap-4 py-3">
 
             {/* Mobile Hamburger */}
@@ -105,7 +80,7 @@ const Navbar = () => {
                 </div>
               </Link>
 
-              {/* Location Selector — Desktop */}
+              {/* Location Selector – Desktop */}
               <div className="hidden lg:block relative shrink-0" ref={locationDropdownRef}>
                 <button
                   onClick={() => setIsLocationOpen(!isLocationOpen)}
@@ -144,26 +119,26 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Compact Search Bar Container */}
+            {/* Search Bar – Desktop (fixed icon positions) */}
             <div
               className="hidden lg:flex flex-1 max-w-md xl:max-w-xl mx-auto cursor-pointer px-2"
               onClick={() => setIsSearchOverlayOpen(true)}
             >
-              <div className="relative w-full flex items-center">
-                <Search size={16} className="absolute left-4.5 text-heading/70 dark:text-foreground/80 z-10" />
+              <div className="relative w-full">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-heading/70 dark:text-foreground/80" />
                 <input
                   type="text"
                   readOnly
                   placeholder="Search for cakes, desserts and more..."
-                  className="w-full bg-surface border border-border/60 text-foreground pl-12 pr-12 py-2.5 rounded-full outline-none placeholder:text-muted/50 text-sm cursor-pointer hover:border-primary/40 transition-all duration-200"
+                  className="w-full bg-surface border border-border/60 text-foreground pl-10 pr-10 py-2.5 rounded-full outline-none placeholder:text-muted/50 text-sm cursor-pointer hover:border-primary/40 transition-all duration-200"
                 />
-                <button className="absolute right-4.5 text-heading/60 dark:text-foreground/70 hover:text-primary transition-colors flex items-center justify-center p-1 rounded-full hover:bg-primary/10 z-10">
+                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-heading/60 dark:text-foreground/70 hover:text-primary transition-colors">
                   <Mic size={15} />
                 </button>
               </div>
             </div>
 
-            {/* Right Action Icons Panel */}
+            {/* Right Action Icons Panel (Desktop) */}
             <div className="hidden lg:flex items-center gap-1 shrink-0">
               {[
                 user
@@ -189,88 +164,17 @@ const Navbar = () => {
                 <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
               </Link>
 
-              {/* 3-Way Theme Switch Dropdown Button */}
-              <div className="relative ml-1" ref={themeDropdownRef}>
-                <button
-                  onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
-                  className="p-2.5 rounded-xl hover:bg-primary/8 text-heading hover:text-primary transition-colors flex items-center justify-center h-10 w-10 shrink-0"
-                  aria-label="Change Display Theme Mode"
-                >
-                  {theme === 'dark' ? <Moon size={20} /> : theme === 'light' ? <Sun size={20} /> : <Monitor size={20} />}
-                </button>
-
-                <AnimatePresence>
-                  {isThemeDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.12 }}
-                      className="absolute top-full right-0 mt-1.5 w-32 bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden z-50 py-1"
-                    >
-                      {themeOptions.map((opt) => {
-                        const IconComponent = opt.icon;
-                        return (
-                          <button
-                            key={opt.id}
-                            onClick={() => {
-                              setTheme(opt.id);
-                              setIsThemeDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 text-[11px] font-black uppercase tracking-wider transition-colors hover:bg-primary/8 text-heading ${theme === opt.id ? 'text-primary bg-primary/4' : ''}`}
-                          >
-                            <IconComponent size={14} className={theme === opt.id ? 'text-primary' : 'text-heading/70'} />
-                            <span>{opt.label}</span>
-                          </button>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              {/* Theme Toggle – Desktop */}
+              <ThemeToggle />
             </div>
 
-            {/* Mobile View Placeholder Toggle Actions */}
-            <div className="lg:hidden ml-auto flex items-center gap-1" ref={themeDropdownRef}>
-              <button
-                onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
-                className="p-2 rounded-lg hover:bg-primary/8 text-heading transition-colors shrink-0 flex items-center justify-center"
-              >
-                {theme === 'dark' ? <Moon size={20} /> : theme === 'light' ? <Sun size={20} /> : <Monitor size={20} />}
-              </button>
-              
-              <AnimatePresence>
-                {isThemeDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="absolute top-14 right-4 w-32 bg-card rounded-xl shadow-xl border border-border/50 z-50 py-1"
-                  >
-                    {themeOptions.map((opt) => {
-                      const IconComp = opt.icon;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => {
-                            setTheme(opt.id);
-                            setIsThemeDropdownOpen(false);
-                          }}
-                          className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-heading ${theme === opt.id ? 'text-primary bg-primary/5' : ''}`}
-                        >
-                          <IconComp size={13} />
-                          <span>{opt.label}</span>
-                        </button>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Mobile View – Right Side Icons */}
+            <div className="lg:hidden ml-auto flex items-center gap-1">
+              <ThemeToggle />
             </div>
-
           </div>
 
-          {/* ── BADGES + NAV ROW ── */}
+          {/* BADGES + NAV ROW (Desktop) */}
           <div className={`hidden lg:flex items-center justify-between border-t border-border/20 transition-all duration-300 ${isScrolled ? 'h-0 opacity-0 overflow-hidden pointer-events-none py-0' : 'py-2 opacity-100'}`}>
             <div className="flex items-center gap-2 shrink-0 mr-6">
               <div className="flex items-center gap-1.5 bg-[var(--badge-green-bg)] border border-green-200/60 dark:border-green-800/40 px-2.5 py-1 rounded-full">
@@ -300,7 +204,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Search Bar + Configuration Rows */}
+          {/* Mobile Search Bar + Extra Info */}
           <div className="lg:hidden pb-3 space-y-2">
             <div className="flex justify-center" ref={locationDropdownRef}>
               <button
@@ -315,16 +219,16 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Mobile Search bar */}
-            <div className="relative flex items-center mx-auto max-w-sm" onClick={() => setIsSearchOverlayOpen(true)}>
-              <Search size={15} className="absolute left-4.5 text-heading/70 dark:text-foreground/80 z-10" />
+            {/* Mobile Search Bar – fixed icon alignment */}
+            <div className="relative mx-auto max-w-sm" onClick={() => setIsSearchOverlayOpen(true)}>
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-heading/70 dark:text-foreground/80" />
               <input
                 type="text"
                 readOnly
                 placeholder="Search cakes, desserts and more..."
-                className="w-full bg-surface border border-border/60 text-foreground pl-11 pr-11 py-2.5 rounded-full outline-none placeholder:text-muted/50 text-sm cursor-pointer"
+                className="w-full bg-surface border border-border/60 text-foreground pl-9 pr-9 py-2.5 rounded-full outline-none placeholder:text-muted/50 text-sm cursor-pointer"
               />
-              <button className="absolute right-4.5 text-heading/60 dark:text-foreground/70 flex items-center justify-center">
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-heading/60 dark:text-foreground/70">
                 <Mic size={15} />
               </button>
             </div>
@@ -344,7 +248,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* ── MOBILE SIDEBAR ── */}
+      {/* Mobile Sidebar (unchanged) */}
       <AnimatePresence>
         {isMenuOpen && (
           <>

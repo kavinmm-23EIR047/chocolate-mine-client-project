@@ -1,6 +1,7 @@
+// src/components/ui/ThemeToggle.jsx
 import React, { useState } from 'react';
 import { Sun, Moon, Monitor, Check } from 'lucide-react';
-import useTheme from '../../hooks/useTheme';
+import { useTheme } from '../../context/ThemeContext';  // ✅ fixed path
 
 const ThemeToggle = () => {
   const { themeMode, toggleTheme } = useTheme();
@@ -18,7 +19,7 @@ const ThemeToggle = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-center w-10 h-10 rounded-xl bg-card-soft border border-border 
                    text-foreground hover:bg-background transition-all active:scale-95"
-        title="Change theme"
+        aria-label="Change theme"
       >
         {themeMode === 'light' && <Sun size={20} />}
         {themeMode === 'dark' && <Moon size={20} />}
@@ -27,10 +28,7 @@ const ThemeToggle = () => {
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setIsOpen(false)} 
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-40 z-50 bg-card border border-border rounded-2xl shadow-premium overflow-hidden animate-in fade-in zoom-in duration-200">
             {modes.map((mode) => (
               <button

@@ -28,22 +28,13 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
 
 const ImagePlaceholder = () => (
-  <div className="w-full aspect-square flex items-center justify-center bg-card relative overflow-hidden group-hover:scale-105 transition-transform duration-500" style={{ background: 'var(--primary)' }}>
-    <div className="absolute inset-0 opacity-10 flex flex-wrap items-center justify-center gap-6 p-4 transform -rotate-12 scale-[1.5]">
-      {[...Array(15)].map((_, i) => (
-        <React.Fragment key={i}>
-          <Cake size={32} className="text-white" />
-          <Cookie size={32} className="text-white" />
-          <Croissant size={32} className="text-white" />
-        </React.Fragment>
-      ))}
+  <div className="w-full h-full flex flex-col items-center justify-center bg-card-soft group-hover:bg-muted/10 transition-colors duration-500 rounded-3xl">
+    <div className="w-20 h-20 sm:w-24 sm:h-24 border-2 border-border/50 rounded-full flex items-center justify-center mb-4 bg-card shadow-sm">
+      <Cake size={40} className="text-muted group-hover:text-primary transition-colors duration-300" />
     </div>
-    <div className="z-10 flex flex-col items-center justify-center text-center">
-      <div className="w-16 h-16 border-2 border-dashed border-white/40 rounded-full flex items-center justify-center mb-3 bg-white/10 backdrop-blur-sm">
-        <Cake size={32} className="text-white" />
-      </div>
-      <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white/80 leading-tight">Artisan<br/>Delight</span>
-    </div>
+    <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-muted group-hover:text-primary transition-colors duration-300 text-center leading-relaxed">
+      Artisan<br/>Delight
+    </span>
   </div>
 );
 

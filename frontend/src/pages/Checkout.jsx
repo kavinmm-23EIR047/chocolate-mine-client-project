@@ -1074,7 +1074,7 @@ const Checkout = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {item.selectedFlavor && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.selectedFlavor}</span>}
+                              {item.selectedFlavor && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">{(item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-')) ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
                               {item.selectedWeight && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
                             </div>
                             <p className="text-xs text-muted/60 font-black mt-2 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
@@ -1251,7 +1251,7 @@ const Checkout = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
                         {item.selectedFlavor && (
-                          <p className="text-[11px] text-muted font-bold mt-0.5">Flavor: {item.selectedFlavor}</p>
+                          <p className="text-[11px] text-muted font-bold mt-0.5">{(item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-')) ? 'Color' : 'Flavor'}: {item.selectedFlavor}</p>
                         )}
                         {item.selectedWeight && (
                           <p className="text-[11px] text-muted font-bold">Weight: {item.selectedWeight}</p>

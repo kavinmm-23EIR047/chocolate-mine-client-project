@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Star, Clock,
   ArrowRight, Flame, Tag, Check, Info, ShoppingBag,
-  Eye, MapPin, Cake, Cookie, Croissant
+  Eye, MapPin, Cake, Cookie, Croissant, CheckCircle2, XCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -13,22 +13,13 @@ import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 
 const ImagePlaceholder = () => (
-  <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden group-hover:scale-105 transition-transform duration-500" style={{ background: 'var(--primary)' }}>
-    <div className="absolute inset-0 opacity-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 p-2 transform -rotate-12 scale-[1.5]">
-      {[...Array(15)].map((_, i) => (
-        <React.Fragment key={i}>
-          <Cake size={20} className="text-white" />
-          <Cookie size={20} className="text-white" />
-          <Croissant size={20} className="text-white" />
-        </React.Fragment>
-      ))}
+  <div className="w-full h-full flex flex-col items-center justify-center bg-card-soft group-hover:bg-muted/10 transition-colors duration-500">
+    <div className="w-12 h-12 sm:w-14 sm:h-14 border border-border/50 rounded-full flex items-center justify-center mb-2 sm:mb-3 bg-card shadow-sm">
+      <Cake size={24} className="text-muted group-hover:text-primary transition-colors duration-300" />
     </div>
-    <div className="z-10 flex flex-col items-center justify-center text-center">
-      <div className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-dashed border-white/40 rounded-full flex items-center justify-center mb-1.5 sm:mb-2 bg-white/10 backdrop-blur-sm">
-        <Cake size={20} className="text-white sm:w-6 sm:h-6" />
-      </div>
-      <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white/80 leading-tight">Artisan<br/>Delight</span>
-    </div>
+    <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-muted group-hover:text-primary transition-colors duration-300 text-center leading-tight">
+      Artisan<br/>Delight
+    </span>
   </div>
 );
 
@@ -205,8 +196,17 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
 
             {/* Stock & Location */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${totalAvailableStock < 10 ? 'animate-pulse bg-orange-500' : 'bg-green-500'}`} />
-              <span className="text-[9px] font-black uppercase tracking-widest text-heading/80">{totalAvailableStock} Left</span>
+              {isOutOfStock ? (
+                <>
+                  <XCircle size={10} className="text-error" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-error">Not Available</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={10} className="text-success" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-success">Available</span>
+                </>
+              )}
               {product.location && (
                 <>
                   <span className="text-heading/20">·</span>
@@ -326,15 +326,24 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             </p>
           )}
 
-          <div className="flex items-center gap-2 mt-2 sm:mt-4">
-            <div className={`w-1.5 h-1.5 rounded-full ${totalAvailableStock < 10 ? 'animate-pulse bg-orange-500' : 'bg-green-500'}`} />
-            <span className="text-[8px] sm:text-[13px] font-black uppercase tracking-widest text-heading/80">{totalAvailableStock} Left</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
+            {isOutOfStock ? (
+              <>
+                <XCircle size={12} className="text-error sm:w-3.5 sm:h-3.5" />
+                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-error">Not Available</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 size={12} className="text-success sm:w-3.5 sm:h-3.5" />
+                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-success">Available</span>
+              </>
+            )}
             {product.location && (
               <>
-                <span className="text-heading/30">|</span>
+                <span className="text-heading/30 mx-0.5">|</span>
                 <div className="flex items-center gap-1 text-heading/80">
-                  <MapPin size={10} className="text-primary sm:w-4 sm:h-4" />
-                  <span className="text-[8px] sm:text-[13px] font-black uppercase tracking-widest capitalize">{product.location}</span>
+                  <MapPin size={10} className="text-primary sm:w-3.5 sm:h-3.5" />
+                  <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest capitalize">{product.location}</span>
                 </div>
               </>
             )}

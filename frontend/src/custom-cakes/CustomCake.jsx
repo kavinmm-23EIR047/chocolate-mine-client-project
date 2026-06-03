@@ -456,11 +456,11 @@ export default function CustomCake() {
           </div>
         );
 
-      // STEP 2 — Flavor
+      // STEP 2 — Color
       case 2:
         return (
           <div className="space-y-4">
-            <p className="text-xs font-black text-[var(--muted)] uppercase tracking-wider">Choose Your Flavor</p>
+            <p className="text-xs font-black text-[var(--muted)] uppercase tracking-wider">Choose Your Color</p>
             {!theme?.enabled ? (
               <div className="text-center py-8 text-[var(--muted)]">
                 <span className="text-4xl">{theme?.emoji}</span>
@@ -582,7 +582,7 @@ export default function CustomCake() {
               {[
                 { label: 'Tier', value: currentTier?.name || 'Tier 1' },
                 { label: 'Theme', value: theme?.name || '—' },
-                { label: 'Flavor', value: selectedFlavor?.name },
+                { label: 'Color', value: selectedFlavor?.name },
                 { label: 'Weight', value: weight.label },
                 { label: 'Name on Cake', value: customerName || '—' },
                 { label: 'Age', value: `${age} ${age === '1' ? 'Year' : 'Years'}` },
@@ -762,11 +762,11 @@ export default function CustomCake() {
                   </div>
                 </div>
 
-                {/* Flavor strip (desktop) */}
+                {/* Color strip (desktop) */}
                 {theme.enabled && (
                   <div>
                     <div className="flex items-center justify-between mb-2.5">
-                      <p className="text-sm font-black text-[var(--heading)]">Choose Your Flavor</p>
+                      <p className="text-sm font-black text-[var(--heading)]">Choose Your Color</p>
                       <button className="text-xs font-bold text-[var(--primary)] hover:underline flex items-center gap-0.5">
                         View All <ChevronRight size={13} />
                       </button>
@@ -979,7 +979,7 @@ export default function CustomCake() {
                         {[
                           { label: 'Tier', value: currentTier?.shortName || 'T1' },
                           { label: 'Theme', value: theme.shortName },
-                          { label: 'Flavor', value: selectedFlavor?.name },
+                          { label: 'Color', value: selectedFlavor?.name },
                           { label: 'Weight', value: weight.label },
                           { label: 'Price', value: `₹${grandTotal}` },
                         ].map(({ label, value }) => (

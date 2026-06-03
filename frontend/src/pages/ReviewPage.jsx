@@ -194,7 +194,7 @@ const ReviewPage = () => {
                     <div>
                       <h3 className="text-lg font-black text-heading uppercase tracking-tighter">{item.name}</h3>
                       {item.selectedFlavor && (
-                        <p className="text-[10px] text-muted font-black uppercase tracking-widest mt-1">Flavor: {item.selectedFlavor}</p>
+                        <p className="text-[10px] text-muted font-black uppercase tracking-widest mt-1">{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</p>
                       )}
                       {item.selectedWeight && (
                         <p className="text-[10px] text-muted font-black uppercase tracking-widest">Weight: {item.selectedWeight}</p>

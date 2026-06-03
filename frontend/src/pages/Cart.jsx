@@ -23,20 +23,9 @@ import { formatCurrency, getCouponUnitDiscount, normalizeCartCoupon } from "../u
 import toast from "react-hot-toast";
 
 const ImagePlaceholder = () => (
-  <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden" style={{ background: 'var(--primary)' }}>
-    <div className="absolute inset-0 opacity-10 flex flex-wrap items-center justify-center gap-2 p-1 transform -rotate-12 scale-[1.5]">
-      {[...Array(6)].map((_, i) => (
-        <React.Fragment key={i}>
-          <Cake size={16} className="text-white" />
-          <Cookie size={16} className="text-white" />
-          <Croissant size={16} className="text-white" />
-        </React.Fragment>
-      ))}
-    </div>
-    <div className="z-10 flex flex-col items-center justify-center text-center">
-      <div className="w-8 h-8 border-2 border-dashed border-white/40 rounded-full flex items-center justify-center mb-1 bg-white/10 backdrop-blur-sm">
-        <Cake size={16} className="text-white" />
-      </div>
+  <div className="w-full h-full flex flex-col items-center justify-center bg-card-soft transition-colors duration-500">
+    <div className="w-8 h-8 sm:w-10 sm:h-10 border border-border/50 rounded-full flex items-center justify-center mb-1 bg-card shadow-sm">
+      <Cake size={16} className="text-muted transition-colors duration-300" />
     </div>
   </div>
 );
@@ -250,7 +239,7 @@ const Cart = () => {
                           </h3>
                           {item.selectedFlavor && (
                             <p className="text-xs text-muted font-medium">
-                              Flavor: {item.selectedFlavor}
+                              {item.category === 'Custom Cakes' ? 'Color' : 'Flavor'}: {item.selectedFlavor}
                             </p>
                           )}
                           {item.selectedWeight && (

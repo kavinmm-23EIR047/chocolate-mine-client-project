@@ -197,7 +197,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                       </div>
                       {(item.selectedFlavor || item.selectedWeight) && (
                         <div className="text-xs text-muted mt-1">
-                          {item.selectedFlavor && <span>Flavor: {item.selectedFlavor}</span>}
+                          {item.selectedFlavor && <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
                           {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
                         </div>
                       )}
@@ -214,7 +214,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                   </div>
                   {expandedItems[idx] && item.customDetails && (
                     <div className="mt-3 p-3 bg-card-soft border border-border/40 rounded-lg text-xs space-y-1">
-                      {item.customDetails.flavour && <p><span className="font-bold text-heading">Flavor:</span> {item.customDetails.flavour}</p>}
+                      {item.customDetails.flavour && <p><span className="font-bold text-heading">Color:</span> {item.customDetails.flavour}</p>}
                       {item.customDetails.shape && <p><span className="font-bold text-heading">Shape:</span> {item.customDetails.shape}</p>}
                       {item.customDetails.tiers && <p><span className="font-bold text-heading">Tiers:</span> {item.customDetails.tiers}</p>}
                       {item.customDetails.eggless && <p><span className="font-bold text-heading">Eggless:</span> Yes</p>}

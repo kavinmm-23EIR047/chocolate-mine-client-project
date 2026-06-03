@@ -121,7 +121,7 @@ export const TRUST = [
 export const STEPS = [
   { id: 0, label: 'Tier', icon: Layers },
   { id: 1, label: 'Theme', icon: Palette },
-  { id: 2, label: 'Flavor', icon: Cake },
+  { id: 2, label: 'Color', icon: Cake },
   { id: 3, label: 'Weight', icon: Weight },
   { id: 4, label: 'Message', icon: UserCircle },
   { id: 5, label: 'Summary', icon: ReceiptText },

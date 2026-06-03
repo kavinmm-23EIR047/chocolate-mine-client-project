@@ -27,7 +27,7 @@ export function formatCustomCakeNotes(data) {
     data.designTheme && `Theme: ${data.designTheme}`,
     data.themeColor && `Theme color: ${data.themeColor}`,
     data.servingWeight && `Serving size: ${data.servingWeight}`,
-    data.flavour && `Flavour: ${data.flavour}`,
+    data.flavour && `Color: ${data.flavour}`,
     data.customFlavour && `Custom flavour note: ${data.customFlavour}`,
     data.eggless != null && `Eggless: ${data.eggless ? 'Yes' : 'No'}`,
     Array.isArray(data.toppings) &&

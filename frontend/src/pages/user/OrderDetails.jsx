@@ -355,7 +355,7 @@ const OrderDetails = () => {
                       </div>
                       {(item.selectedFlavor || item.selectedWeight) && (
                         <div className="text-xs text-muted mt-1">
-                          {item.selectedFlavor && <span>Flavor: {item.selectedFlavor}</span>}
+                          {item.selectedFlavor && <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
                           {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
                         </div>
                       )}
@@ -374,7 +374,7 @@ const OrderDetails = () => {
                     <div className="mt-3 p-4 bg-card-soft rounded-xl text-xs border border-border/30">
                       {Object.entries(item.customDetails).map(([k, v]) => {
                         if (v === false || v === null || v === undefined || v === '') return null;
-                        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        const label = k === 'flavour' ? 'Color' : k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
                         const displayVal = v === true ? 'Yes' : v;
                         return (
                           <p key={k}><span className="font-medium">{label}:</span> {displayVal}</p>

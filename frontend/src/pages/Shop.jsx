@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,84 +10,166 @@ import { useGetProductsQuery } from '../services/api/productApi';
 import api from '../utils/api';
 import ProductCard from '../components/ProductCard';
 
-// Removed local ProductCard definition - now using global component from ../components/ProductCard
-
 /* ═══════════════════════════════════════════════════════
    MAIN SHOP PAGE
    ═══════════════════════════════════════════════════════ */
 const Shop = () => {
   const [searchParams] = useSearchParams();
-  const [isFilterOpen,  setIsFilterOpen]  = useState(false);
-  const [categories,    setCategories]    = useState([]);
-  const [occasions,     setOccasions]     = useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [occasions, setOccasions] = useState([]);
 
-  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'All');
-  const [activeOccasion, setActiveOccasion] = useState(searchParams.get('occasion')  || 'All');
-  const [activeRating,   setActiveRating]   = useState(Number(searchParams.get('rating')) || 0);
-  const [priceRange,     setPriceRange]     = useState([0, 5000]);
-  const [sortBy,         setSortBy]         = useState(searchParams.get('sort')  || 'newest');
-  const [searchQuery,    setSearchQuery]    = useState(searchParams.get('search') || '');
-  const [isBestseller,   setIsBestseller]   = useState(searchParams.get('bestseller') === 'true');
+  // Extract unique cake types from actual product data structure
+  const cakeTypeOptions = useMemo(() => {
+    return [
+      { value: 'all', label: 'All' },
+      { value: 'bento', label: 'Bento Cakes' },
+      { value: 'vanilla', label: 'Vanilla Cakes' },
+      { value: 'chocolate', label: 'Chocolate Cakes' },
+      { value: 'red velvet', label: 'Red Velvet Cakes' }
+    ];
+  }, []);
+
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
+  const [activeCakeType, setActiveCakeType] = useState(searchParams.get('cakeType') || 'all');
+  const [activeOccasion, setActiveOccasion] = useState(searchParams.get('occasion') || 'all');
+  const [activeRating, setActiveRating] = useState(Number(searchParams.get('rating')) || 0);
+  const [priceRange, setPriceRange] = useState([10, 10000]); // Updated: ₹10 to ₹10,000
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [isBestseller, setIsBestseller] = useState(searchParams.get('bestseller') === 'true');
 
   /* Sync URL → state on navigation */
   useEffect(() => {
     setIsBestseller(searchParams.get('bestseller') === 'true');
-    setSearchQuery(searchParams.get('search')   || '');
-    setActiveCategory(searchParams.get('category') || 'All');
-    setActiveOccasion(searchParams.get('occasion')  || 'All');
+    setSearchQuery(searchParams.get('search') || '');
+    setActiveCategory(searchParams.get('category') || 'all');
+    setActiveCakeType(searchParams.get('cakeType') || 'all');
+    setActiveOccasion(searchParams.get('occasion') || 'all');
   }, [searchParams]);
 
-  /* Load filter options */
+  /* Load filter options - dynamically from products */
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const [catRes, occRes] = await Promise.all([
-          api.get('/categories'),
-          api.get('/occasions'),
-        ]);
-        setCategories([{ name: 'All' }, ...(catRes.data?.data || [])]);
-        setOccasions([{ name: 'All' },  ...(occRes.data?.data || [])]);
+        const productsRes = await api.get('/products?limit=1000');
+        const allProducts = productsRes.data?.data || [];
+        
+        const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
+        setCategories([{ name: 'all', label: 'All' }, ...uniqueCategories.map(c => ({ name: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))]);
+        
+        const allOccasions = allProducts.flatMap(p => p.occasion || []);
+        const uniqueOccasions = [...new Set(allOccasions)];
+        setOccasions([{ name: 'all', label: 'All' }, ...uniqueOccasions.map(o => ({ name: o, label: o }))]);
+        
       } catch (err) {
         console.error('Failed to fetch filters:', err);
+        setCategories([
+          { name: 'all', label: 'All' },
+          { name: 'bento cakes', label: 'Bento Cakes' },
+          { name: 'vanilla cakes', label: 'Vanilla Cakes' },
+          { name: 'chocolate cakes', label: 'Chocolate Cakes' },
+          { name: 'red velvet cakes', label: 'Red Velvet Cakes' }
+        ]);
+        setOccasions([{ name: 'all', label: 'All' }]);
       }
     };
     fetchFilters();
   }, []);
 
   /* RTK Query */
-  const { data: productRes, isLoading: loading } = useGetProductsQuery({
-    category:   activeCategory !== 'All' ? activeCategory : '',
-    occasion:   activeOccasion !== 'All' ? activeOccasion : '',
-    rating:     activeRating > 0 ? activeRating : '',
-    minPrice:   priceRange[0],
-    maxPrice:   priceRange[1],
-    sort:       sortBy,
-    q:          searchQuery,
-    bestseller: isBestseller ? true : '',
-    limit:      20,
-  });
+  const { data: productRes, isLoading: loading } = useGetProductsQuery({ page: 1, limit: 1000 });
 
-  const products = productRes?.data || [];
+  // FIXED: Create a new array copy before filtering and sorting
+  const filteredProducts = useMemo(() => {
+    // Get products array and create a COPY to avoid read-only issues
+    let products = productRes?.data ? [...productRes.data] : [];
+    
+    // Filter by cake type
+    if (activeCakeType !== 'all') {
+      products = products.filter(p => p.cakeType === activeCakeType);
+    }
+    
+    // Filter by category
+    if (activeCategory !== 'all') {
+      products = products.filter(p => p.category === activeCategory);
+    }
+    
+    // Filter by occasion
+    if (activeOccasion !== 'all') {
+      products = products.filter(p => p.occasion?.includes(activeOccasion));
+    }
+    
+    // Filter by rating
+    if (activeRating > 0) {
+      products = products.filter(p => p.ratingsAverage >= activeRating);
+    }
+    
+    // Filter by price - Updated range
+    products = products.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      products = products.filter(p => 
+        p.name?.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.shortDescription?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filter by bestseller
+    if (isBestseller) {
+      products = products.filter(p => p.bestseller === true);
+    }
+    
+    // FIXED: Sort on a COPY of the array (not the original read-only array)
+    const sortedProducts = [...products];
+    
+    if (sortBy === 'price-low') {
+      sortedProducts.sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'price-high') {
+      sortedProducts.sort((a, b) => b.price - a.price);
+    } else if (sortBy === 'rating') {
+      sortedProducts.sort((a, b) => b.ratingsAverage - a.ratingsAverage);
+    } else if (sortBy === 'newest') {
+      sortedProducts.sort((a, b) => {
+        const dateA = a.createdAt?.$date ? new Date(a.createdAt.$date) : new Date(0);
+        const dateB = b.createdAt?.$date ? new Date(b.createdAt.$date) : new Date(0);
+        return dateB - dateA;
+      });
+    }
+    
+    return sortedProducts;
+  }, [productRes?.data, activeCategory, activeCakeType, activeOccasion, activeRating, priceRange, searchQuery, isBestseller, sortBy]);
 
   const clearFilters = () => {
-    setActiveCategory('All');
-    setActiveOccasion('All');
+    setActiveCategory('all');
+    setActiveCakeType('all');
+    setActiveOccasion('all');
     setActiveRating(0);
-    setPriceRange([0, 5000]);
+    setPriceRange([10, 10000]); // Updated
     setSortBy('newest');
     setSearchQuery('');
     setIsBestseller(false);
   };
 
   const getPageTitle = () => {
-    if (isBestseller)           return 'Best Sellers';
-    if (searchQuery)            return `"${searchQuery}"`;
-    if (activeCategory !== 'All') return activeCategory;
-    if (activeOccasion !== 'All') return `${activeOccasion} Special`;
+    if (isBestseller) return 'Best Sellers';
+    if (searchQuery) return `"${searchQuery}"`;
+    if (activeCakeType !== 'all') {
+      const selected = cakeTypeOptions.find(t => t.value === activeCakeType);
+      return selected ? selected.label : activeCakeType;
+    }
+    if (activeCategory !== 'all') {
+      const selected = categories.find(c => c.name === activeCategory);
+      return selected ? selected.label : activeCategory;
+    }
+    if (activeOccasion !== 'all') return `${activeOccasion} Special`;
     return 'The Shop';
   };
 
-  /* ── Reusable filter panel (desktop sidebar + mobile drawer) ── */
+  /* ── Reusable filter panel ── */
   const FilterPanel = () => (
     <div className="space-y-7">
 
@@ -105,31 +187,53 @@ const Shop = () => {
                   : 'bg-heading/5 text-heading/80 border border-heading/10 hover:border-primary/40 hover:text-primary'
               }`}
             >
-              {cat.name}
+              {cat.label || cat.name}
             </button>
           ))}
         </div>
       </section>
 
-      {/* Occasion */}
+      {/* Cake Types */}
       <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-heading/80 mb-3">Occasions</h3>
-        <div className="grid grid-cols-2 gap-1.5">
-          {occasions.map((occ) => (
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-heading/80 mb-3">Cake Types</h3>
+        <div className="flex flex-wrap gap-2">
+          {cakeTypeOptions.map((type) => (
             <button
-              key={occ.name}
-              onClick={() => setActiveOccasion(occ.name)}
-              className={`px-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-left transition-all ${
-                activeOccasion === occ.name
-                  ? 'bg-primary text-button-text shadow-md shadow-primary/20'
-                  : 'bg-heading/5 text-heading/80 border border-heading/10 hover:border-primary/40 hover:text-primary'
+              key={type.value}
+              onClick={() => setActiveCakeType(type.value)}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeCakeType === type.value
+                  ? 'bg-secondary text-button-text shadow-lg shadow-secondary/20'
+                  : 'bg-heading/5 text-heading/80 border border-heading/10 hover:border-secondary/40 hover:text-secondary'
               }`}
             >
-              {occ.name}
+              {type.label}
             </button>
           ))}
         </div>
       </section>
+
+      {/* Occasions */}
+      {occasions.length > 1 && (
+        <section>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-heading/80 mb-3">Occasions</h3>
+          <div className="grid grid-cols-2 gap-1.5">
+            {occasions.map((occ) => (
+              <button
+                key={occ.name}
+                onClick={() => setActiveOccasion(occ.name)}
+                className={`px-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-left transition-all ${
+                  activeOccasion === occ.name
+                    ? 'bg-primary text-button-text shadow-md shadow-primary/20'
+                    : 'bg-heading/5 text-heading/80 border border-heading/10 hover:border-primary/40 hover:text-primary'
+                }`}
+              >
+                {occ.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Rating */}
       <section>
@@ -157,19 +261,44 @@ const Shop = () => {
         </div>
       </section>
 
-      {/* Price */}
+      {/* Price - Updated Range */}
       <section>
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-heading/80 mb-3">
-          Price — up to <span className="text-heading">₹{priceRange[1].toLocaleString()}</span>
+          Price Range — ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
         </h3>
-        <input
-          type="range" min={0} max={5000} step={100}
-          value={priceRange[1]}
-          onChange={(e) => setPriceRange([0, Number(e.target.value)])}
-          className="w-full accent-primary cursor-pointer"
-        />
-        <div className="flex justify-between text-[9px] font-bold text-heading/60 mt-1">
-          <span>₹0</span><span>₹5,000</span>
+        
+        {/* Min Price Slider */}
+        <div className="mb-4">
+          <label className="text-[9px] font-bold text-heading/60 mb-1 block">Min Price: ₹{priceRange[0]}</label>
+          <input
+            type="range" 
+            min={10} 
+            max={10000} 
+            step={50}
+            value={priceRange[0]}
+            onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+            className="w-full accent-primary cursor-pointer"
+          />
+        </div>
+        
+        {/* Max Price Slider */}
+        <div>
+          <label className="text-[9px] font-bold text-heading/60 mb-1 block">Max Price: ₹{priceRange[1]}</label>
+          <input
+            type="range" 
+            min={10} 
+            max={10000} 
+            step={50}
+            value={priceRange[1]}
+            onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+            className="w-full accent-primary cursor-pointer"
+          />
+        </div>
+        
+        <div className="flex justify-between text-[9px] font-bold text-heading/60 mt-2">
+          <span>₹10</span>
+          <span>₹5,000</span>
+          <span>₹10,000</span>
         </div>
       </section>
 
@@ -203,7 +332,6 @@ const Shop = () => {
 
   /* ── RENDER ── */
   return (
-    /* pt-16 → tighter gap below navbar (was pt-28) */
     <div className="min-h-screen bg-background pt-16 pb-20">
       <div className="w-full mx-auto px-4 sm:px-8 lg:px-14">
 
@@ -214,7 +342,6 @@ const Shop = () => {
           <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-accent/10 rounded-full blur-[70px] pointer-events-none" />
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            {/* Breadcrumb + title */}
             <div>
               <nav className="flex items-center gap-2 mb-2.5">
                 <Link to="/"
@@ -234,7 +361,6 @@ const Shop = () => {
               </p>
             </div>
 
-            {/* Search + meta */}
             <div className="flex flex-col items-start sm:items-end gap-3 w-full sm:w-auto">
               <div className="relative w-full sm:w-72 group">
                 <input
@@ -259,9 +385,8 @@ const Shop = () => {
               <div className="flex items-center gap-2.5">
                 <span className="text-[10px] font-black text-white/70 uppercase tracking-[0.2em]
                                  bg-white/5 px-4 py-2 rounded-xl border border-white/10 shadow-inner">
-                  {products.length} {products.length === 1 ? 'Delicacy' : 'Delicacies'}
+                  {filteredProducts.length} {filteredProducts.length === 1 ? 'Delicacy' : 'Delicacies'}
                 </span>
-                {/* Mobile filter button */}
                 <button
                   onClick={() => setIsFilterOpen(true)}
                   className="lg:hidden p-3 bg-primary text-button-text rounded-xl
@@ -284,24 +409,21 @@ const Shop = () => {
             </div>
           </aside>
 
-          {/* Product grid — Mobile: 1 col (horizontal), Tablet: 2 col (vertical), Desktop: 3 col (vertical) */}
+          {/* Product grid */}
           <main className="flex-1 min-w-0">
             {loading ? (
               <>
-                {/* Mobile skeleton */}
                 <div className="grid sm:hidden grid-cols-1 gap-4">
                   {[...Array(4)].map((_, i) => <CardSkeleton key={`mob-${i}`} />)}
                 </div>
-                {/* Tablet/Desktop skeleton */}
                 <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
                   {[...Array(6)].map((_, i) => <CardSkeleton key={`desk-${i}`} />)}
                 </div>
               </>
-            ) : products.length > 0 ? (
+            ) : filteredProducts.length > 0 ? (
               <>
-                {/* Mobile grid (Horizontal cards) */}
                 <div className="grid sm:hidden grid-cols-1 gap-4">
-                  {products.map((product, i) => (
+                  {filteredProducts.map((product, i) => (
                     <motion.div
                       key={product._id?.$oid || product._id}
                       initial={{ opacity: 0, y: 14 }}
@@ -313,9 +435,8 @@ const Shop = () => {
                   ))}
                 </div>
 
-                {/* Tablet/Desktop grid (Vertical cards) */}
                 <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
-                  {products.map((product, i) => (
+                  {filteredProducts.map((product, i) => (
                     <motion.div
                       key={product._id?.$oid || product._id}
                       initial={{ opacity: 0, y: 14 }}

@@ -101,7 +101,8 @@ const ProductDetails = () => {
           const initialFlavor = product.flavors?.find(f => f.name === initialVariant.flavor) || { name: initialVariant.flavor };
           setSelectedFlavor(initialFlavor);
           setSelectedWeight(initialVariant.weight);
-          setSelectedPrice(initialVariant.price);
+          const priceFromWeights = getPriceForWeight(product, initialVariant.weight);
+          setSelectedPrice(priceFromWeights !== null ? priceFromWeights : initialVariant.price);
           setSelectedStock(initialVariant.stock);
           
           if (initialFlavor.images && initialFlavor.images.length > 0) {
@@ -123,12 +124,23 @@ const ProductDetails = () => {
 
   // Handle quantity change - removed as per requirements
 
+  const getPriceForWeight = (prod, weightStr) => {
+    if (!prod) return null;
+    const num = parseFloat(String(weightStr || '').replace(/[^0-9.]/g, ''));
+    if (!isNaN(num) && prod.weightPrices && Array.isArray(prod.weightPrices)) {
+      const found = prod.weightPrices.find(wp => Number(wp.weight) === num);
+      if (found) return found.price;
+    }
+    // fallback: try to find in variants
+    const variantFallback = prod.variants?.find(v => v.weight === weightStr);
+    return variantFallback ? variantFallback.price : null;
+  };
+
   // Handle flavor change
   const handleFlavorChange = (flavor) => {
     setSelectedFlavor(flavor);
     setShowCustomFlavorInput(false);
     setCustomFlavor('');
-
 
     let variant = product.variants?.find(v => v.flavor === flavor.name && v.weight === selectedWeight);
     if (!variant && product.variants) {
@@ -137,8 +149,13 @@ const ProductDetails = () => {
 
     if (variant) {
       setSelectedWeight(variant.weight);
-      setSelectedPrice(variant.price);
+      const priceFromWeights = getPriceForWeight(product, variant.weight);
+      setSelectedPrice(priceFromWeights !== null ? priceFromWeights : variant.price);
       setSelectedStock(variant.stock);
+    } else {
+      // Try weightPrices
+      const priceFromWeights = getPriceForWeight(product, selectedWeight);
+      if (priceFromWeights !== null) setSelectedPrice(priceFromWeights);
     }
 
     if (flavor.images && flavor.images.length > 0) {
@@ -152,11 +169,17 @@ const ProductDetails = () => {
     setShowCustomWeightInput(false);
     setCustomWeight('');
 
-
     const variant = product.variants?.find(v => v.flavor === selectedFlavor?.name && v.weight === weight);
     if (variant) {
-      setSelectedPrice(variant.price);
+      const priceFromWeights = getPriceForWeight(product, weight);
+      setSelectedPrice(priceFromWeights !== null ? priceFromWeights : variant.price);
       setSelectedStock(variant.stock);
+    } else {
+      const priceFromWeights = getPriceForWeight(product, weight);
+      if (priceFromWeights !== null) {
+        setSelectedPrice(priceFromWeights);
+        setSelectedStock(product.stock || 0);
+      }
     }
   };
 

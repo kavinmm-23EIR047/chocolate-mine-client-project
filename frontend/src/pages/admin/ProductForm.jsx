@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Upload, X, Star, Award, CheckCircle, Plus, Trash2, Image, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Star, Award, CheckCircle, Plus, Trash2, Image, Settings, Package } from 'lucide-react';
 import productService from '../../services/productService';
 import adminService from '../../services/adminService';
 import Button from '../../components/ui/Button';
@@ -31,9 +31,10 @@ const ProductForm = () => {
     price: '',
     offerPrice: '',
     category: '',
+    cakeType: '',
     location: 'coimbatore',
     occasion: [],
-    stock: 0,
+    stock: true, // Changed to boolean (true = in stock, false = out of stock)
     featured: false,
     bestseller: false,
     isActive: true,
@@ -52,6 +53,7 @@ const ProductForm = () => {
   const [flavors, setFlavors] = useState([]);
   const [weights, setWeights] = useState([]);
   const [variants, setVariants] = useState([]);
+  const [weightPrices, setWeightPrices] = useState([]);
   
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState('');
@@ -61,6 +63,8 @@ const ProductForm = () => {
   const [isCustomWeight, setIsCustomWeight] = useState(false);
   const [customWeightValue, setCustomWeightValue] = useState('');
   const [selectedDefaultWeight, setSelectedDefaultWeight] = useState('');
+  
+  const [basePrice, setBasePrice] = useState('');
   
   const blobUrlsRef = useRef([]);
 
@@ -93,10 +97,11 @@ const ProductForm = () => {
             shortDescription: p.shortDescription || '',
             price: p.price || '',
             offerPrice: p.offerPrice || '',
-            category: p.category,
+            category: p.category ? p.category.toLowerCase() : '',
+            cakeType: p.cakeType || '',
             location: p.location || 'coimbatore',
             occasion: Array.isArray(p.occasion) ? p.occasion : (p.occasion ? [p.occasion] : []),
-            stock: p.stock || 0,
+            stock: p.stock === true || p.stock === 'true' || p.stock > 0, // Convert to boolean
             featured: p.featured || false,
             bestseller: p.bestseller || false,
             isActive: p.isActive !== false,
@@ -111,10 +116,15 @@ const ProductForm = () => {
             }
           });
           setPreview(p.image);
-          if (p.category === 'cakes') {
+          if ((p.category || '').toLowerCase() === 'cakes') {
             setFlavors(p.flavors || []);
             setWeights(p.weights || []);
             setVariants(p.variants || []);
+            setWeightPrices(p.weightPrices || []);
+            if (p.weightPrices && p.weightPrices.length > 0) {
+              const base = p.weightPrices[0];
+              setBasePrice(base.price || '');
+            }
           }
         } catch (err) {
           toast.error('Failed to load product');
@@ -300,6 +310,43 @@ const ProductForm = () => {
     toast.success(`Generated ${newVariants.length} variants`);
   };
 
+  // Compute weight prices based on cakeType and basePrice
+  const computeWeightPrices = (type, base) => {
+    const b = Number(base) || 0;
+    if ((type || '').toLowerCase() === 'bento-cakes') {
+      return [
+        { weight: '0.25', price: Math.round(b) },
+        { weight: '0.5', price: Math.round(b * 2) }
+      ];
+    }
+    return [
+      { weight: '0.5', price: Math.round(b) },
+      { weight: '1', price: Math.round(b * 2) },
+      { weight: '1.5', price: Math.round(b * 3) },
+      { weight: '2', price: Math.round(b * 4) },
+      { weight: '3', price: Math.round(b * 6) }
+    ];
+  };
+
+  // When basePrice or cakeType changes, regenerate weights and variants
+  useEffect(() => {
+    if (!basePrice) return;
+    const wp = computeWeightPrices(formData.cakeType, basePrice);
+    setWeightPrices(wp);
+    setWeights(wp.map(w => ({ value: `${w.weight} kg` })));
+
+    // Auto-generate variants with these prices
+    const generatedVariants = [];
+    const flavorList = flavors.length > 0 ? flavors : [{ name: '' }];
+    flavorList.forEach(fl => {
+      wp.forEach(w => {
+        generatedVariants.push({ flavor: fl.name, weight: `${w.weight} kg`, price: w.price, stock: 0 });
+      });
+    });
+    setVariants(generatedVariants);
+    setFormData(prev => ({ ...prev, hasVariants: generatedVariants.length > 0 }));
+  }, [basePrice, formData.cakeType]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -314,6 +361,9 @@ const ProductForm = () => {
           });
         } else if (key === 'occasion') {
           data.append('occasion', JSON.stringify(formData.occasion));
+        } else if (key === 'stock') {
+          // Send stock as boolean
+          data.append('stock', formData.stock ? 'true' : 'false');
         } else if (key === 'hasVariants' || key === 'allowCustomFlavor' || key === 'allowCustomWeight') {
           // Skip these boolean fields here - they will be handled in cake section
           return;
@@ -323,7 +373,7 @@ const ProductForm = () => {
       });
       
       // Add variant data for cake category
-      if (formData.category === 'cakes') {
+      if ((formData.category || '').toLowerCase() === 'cakes') {
         // Prepare flavors with images array
         const flavorsForSubmit = flavors.map(flavor => ({
           name: flavor.name,
@@ -331,9 +381,19 @@ const ProductForm = () => {
         }));
         data.append('flavors', JSON.stringify(flavorsForSubmit));
         data.append('weights', JSON.stringify(weights));
-        data.append('variants', JSON.stringify(variants));
+        const variantsForSubmit = variants.map(v => ({
+          ...v,
+          price: Number(v.price) || 0,
+          stock: Number(v.stock) || 0
+        }));
+        data.append('variants', JSON.stringify(variantsForSubmit));
+
+        // Append cakeType, basePrice and weightPrices for server-side storage/generation
+        if (formData.cakeType) data.append('cakeType', formData.cakeType);
+        if (basePrice !== undefined && basePrice !== null && basePrice !== '') data.append('basePrice', basePrice);
+        if (weightPrices && weightPrices.length > 0) data.append('weightPrices', JSON.stringify(weightPrices));
         
-        // FIX: Use set() instead of append() to prevent duplicate boolean values
+        // Use set() instead of append() to prevent duplicate boolean values
         data.set('hasVariants', variants.length > 0 ? 'true' : 'false');
         data.set('allowCustomFlavor', formData.allowCustomFlavor ? 'true' : 'false');
         data.set('allowCustomWeight', formData.allowCustomWeight ? 'true' : 'false');
@@ -397,8 +457,10 @@ const ProductForm = () => {
                     name="category" 
                     value={formData.category} 
                     onChange={(e) => {
-                      handleChange(e);
-                      if (e.target.value !== 'cakes') {
+                      const raw = e.target.value || '';
+                      const normalized = typeof raw === 'string' ? raw.trim().toLowerCase() : raw;
+                      setFormData(prev => ({ ...prev, category: normalized }));
+                      if (normalized !== 'cakes') {
                         setFlavors([]);
                         setWeights([]);
                         setVariants([]);
@@ -409,7 +471,7 @@ const ProductForm = () => {
                   >
                     <option value="">Select Category</option>
                     {categories.length > 0
-                      ? categories.map(c => <option key={c._id} value={c.name}>{c.label || c.name}</option>)
+                      ? categories.map(c => <option key={c._id} value={(c.name || '').toLowerCase()}>{c.label || c.name}</option>)
                       : <option disabled>Loading categories...</option>
                     }
                   </select>
@@ -442,7 +504,7 @@ const ProductForm = () => {
               </div>
 
               {/* Regular price fields (for non-cake or simple products) */}
-              {formData.category !== 'cakes' && (
+              {(formData.category || '').toLowerCase() !== 'cakes' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-black text-muted uppercase tracking-widest">Original Price (₹)</label>
@@ -511,7 +573,7 @@ const ProductForm = () => {
             </div>
 
             {/* Cake-specific Variant Section with Multiple Images */}
-            {formData.category === 'cakes' && (
+            {(formData.category || '').toLowerCase() === 'cakes' && (
               <div className="card-premium p-6 space-y-6">
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <h3 className="font-black text-heading uppercase tracking-widest text-sm">
@@ -538,6 +600,42 @@ const ProductForm = () => {
                       />
                       Allow Custom Weight
                     </label>
+                  </div>
+                </div>
+
+                {/* Cake Type and Base Price */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-muted uppercase tracking-widest">Cake Type</label>
+                    <select
+                      name="cakeType"
+                      value={formData.cakeType}
+                      onChange={(e) => {
+                        const val = (e.target.value || '').toLowerCase();
+                        setFormData(prev => ({ ...prev, cakeType: val }));
+                      }}
+                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="bento-cakes">Bento Cakes</option>
+                      <option value="vanilla-cakes">Vanilla Cakes</option>
+                      <option value="chocolate-cakes">Chocolate Cakes</option>
+                      <option value="red-velvet-cakes">Red Velvet Cakes</option>
+                      <option value="tcm-special">TCM Special</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-muted uppercase tracking-widest">Base Price</label>
+                    <input
+                      name="basePrice"
+                      type="number"
+                      value={basePrice}
+                      onChange={(e) => setBasePrice(e.target.value)}
+                      placeholder={formData.cakeType === 'bento-cakes' ? 'Quarter KG Price (₹)' : 'Half KG Price (₹)'}
+                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
+                    />
+                    <p className="text-[10px] text-muted">Enter base price for {formData.cakeType === 'bento-cakes' ? '0.25 kg' : '0.5 kg'}. Other weights will be calculated automatically.</p>
                   </div>
                 </div>
                 
@@ -705,7 +803,7 @@ const ProductForm = () => {
                             <th className="p-2 text-left text-xs font-black">Price (₹)</th>
                             <th className="p-2 text-left text-xs font-black">Stock</th>
                             <th className="p-2 text-left text-xs font-black">Actions</th>
-                          </tr>
+                           </tr>
                         </thead>
                         <tbody>
                           {variants.length > 0 ? (
@@ -720,7 +818,7 @@ const ProductForm = () => {
                                     <option value="">Select</option>
                                     {flavors.map(f => <option key={f.name} value={f.name}>{f.name}</option>)}
                                   </select>
-                                </td>
+                                 </td>
                                 <td className="p-2">
                                   <select
                                     value={variant.weight}
@@ -730,7 +828,7 @@ const ProductForm = () => {
                                     <option value="">Select</option>
                                     {weights.map(w => <option key={w.value} value={w.value}>{w.value}</option>)}
                                   </select>
-                                </td>
+                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
@@ -739,7 +837,7 @@ const ProductForm = () => {
                                     placeholder="Price"
                                     className="w-28 bg-input border border-input-border px-2 py-1 rounded-lg text-sm"
                                   />
-                                </td>
+                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
@@ -747,19 +845,19 @@ const ProductForm = () => {
                                     onChange={(e) => updateVariant(idx, 'stock', parseInt(e.target.value) || 0)}
                                     className="w-20 bg-input border border-input-border px-2 py-1 rounded-lg text-sm"
                                   />
-                                </td>
+                                 </td>
                                 <td className="p-2">
                                   <button type="button" onClick={() => removeVariant(idx)} className="text-error">
                                     <Trash2 size={16} />
                                   </button>
-                                </td>
-                              </tr>
+                                 </td>
+                               </tr>
                             ))
                           ) : (
                             <tr>
                               <td colSpan="5" className="text-center py-8 text-muted text-sm">
                                 No variants defined. Add flavors and weights, then click "Generate All Combinations" or "Add Row" manually.
-                              </td>
+                               </td>
                             </tr>
                           )}
                         </tbody>
@@ -771,39 +869,52 @@ const ProductForm = () => {
             )}
 
             <div className="card-premium p-6 space-y-6">
-               <h3 className="font-black text-heading uppercase tracking-widest text-sm border-b border-border pb-4">Inventory & Promotions</h3>
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-muted uppercase tracking-widest">Stock Quantity</label>
-                    <input 
-                      name="stock" 
-                      type="number" 
-                      value={formData.stock} 
-                      onChange={handleChange} 
-                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
-                    />
-                    <p className="text-[10px] text-muted">For variant products, stock is managed per variant</p>
+              <h3 className="font-black text-heading uppercase tracking-widest text-sm border-b border-border pb-4">Inventory & Promotions</h3>
+              
+              {/* Stock Management - Simple Boolean */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-muted uppercase tracking-widest">Stock Status</label>
+                <label className="flex items-center gap-3 p-3 bg-input border border-input-border rounded-xl cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="stock"
+                    checked={formData.stock === true}
+                    onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.checked }))}
+                    className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Package size={16} className={formData.stock ? 'text-success' : 'text-error'} />
+                    <span className="text-sm font-bold text-heading">
+                      {formData.stock ? '✓ In Stock' : '✗ Out of Stock'}
+                    </span>
                   </div>
-                  <div className="space-y-2 flex flex-col justify-end">
-                     <label className="flex items-center gap-3 cursor-pointer p-3 bg-border/20 rounded-xl">
-                        <input 
-                          type="checkbox" 
-                          name="coupon.enabled" 
-                          checked={formData.coupon.enabled} 
-                          onChange={handleChange} 
-                          className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary"
-                        />
-                        <span className="text-xs font-black text-heading uppercase tracking-widest">Enable Coupon</span>
-                     </label>
-                  </div>
-               </div>
+                </label>
+                <p className="text-[10px] text-muted">
+                  {formData.stock 
+                    ? 'Product is available for purchase' 
+                    : 'Product is currently out of stock'}
+                </p>
+              </div>
 
-               {formData.coupon.enabled && (
-                 <motion.div 
-                   initial={{ opacity: 0, height: 0 }}
-                   animate={{ opacity: 1, height: 'auto' }}
-                   className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-border"
-                 >
+              {/* Coupon Section */}
+              <div className="border-t border-border pt-4">
+                <label className="flex items-center gap-3 cursor-pointer p-3 bg-border/20 rounded-xl">
+                  <input 
+                    type="checkbox" 
+                    name="coupon.enabled" 
+                    checked={formData.coupon.enabled} 
+                    onChange={handleChange} 
+                    className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary"
+                  />
+                  <span className="text-xs font-black text-heading uppercase tracking-widest">Enable Coupon</span>
+                </label>
+
+                {formData.coupon.enabled && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 mt-4 border-t border-border"
+                  >
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-muted uppercase tracking-widest">Code</label>
                       <input 
@@ -837,8 +948,9 @@ const ProductForm = () => {
                         className="w-full bg-input border border-input-border px-3 py-2 rounded-lg outline-none font-bold text-sm"
                       />
                     </div>
-                 </motion.div>
-               )}
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -874,30 +986,30 @@ const ProductForm = () => {
             </div>
 
             <div className="card-premium p-6 space-y-6">
-               <h3 className="font-black text-heading uppercase tracking-widest text-sm border-b border-border pb-4">Badges</h3>
-               <div className="space-y-4">
-                  <label className="flex items-center justify-between cursor-pointer group">
-                     <span className="flex items-center gap-2 font-bold text-sm">
-                        <Star size={16} className={formData.featured ? 'text-yellow-500 fill-current' : 'text-muted'} />
-                        Featured
-                     </span>
-                     <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary" />
-                  </label>
-                  <label className="flex items-center justify-between cursor-pointer group">
-                     <span className="flex items-center gap-2 font-bold text-sm">
-                        <Award size={16} className={formData.bestseller ? 'text-orange-500' : 'text-muted'} />
-                        Bestseller
-                     </span>
-                     <input type="checkbox" name="bestseller" checked={formData.bestseller} onChange={handleChange} className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary" />
-                  </label>
-                  <label className="flex items-center justify-between cursor-pointer group">
-                     <span className="flex items-center gap-2 font-bold text-sm">
-                        <CheckCircle size={16} className={formData.isActive ? 'text-success' : 'text-muted'} />
-                        Visible
-                     </span>
-                     <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary" />
-                  </label>
-               </div>
+              <h3 className="font-black text-heading uppercase tracking-widest text-sm border-b border-border pb-4">Badges</h3>
+              <div className="space-y-4">
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="flex items-center gap-2 font-bold text-sm">
+                    <Star size={16} className={formData.featured ? 'text-yellow-500 fill-current' : 'text-muted'} />
+                    Featured
+                  </span>
+                  <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary" />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="flex items-center gap-2 font-bold text-sm">
+                    <Award size={16} className={formData.bestseller ? 'text-orange-500' : 'text-muted'} />
+                    Bestseller
+                  </span>
+                  <input type="checkbox" name="bestseller" checked={formData.bestseller} onChange={handleChange} className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary" />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="flex items-center gap-2 font-bold text-sm">
+                    <CheckCircle size={16} className={formData.isActive ? 'text-success' : 'text-muted'} />
+                    Visible
+                  </span>
+                  <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} className="w-5 h-5 rounded border-border text-secondary focus:ring-secondary" />
+                </label>
+              </div>
             </div>
 
             <Button 

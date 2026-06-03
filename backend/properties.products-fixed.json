@@ -1,0 +1,3202 @@
+[
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6483a2504778126db0a"
+                },
+        "name":  "Black Forest Bento Cake",
+        "slug":  "black-forest-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  380,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  380,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6483a2504778126db0b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Layer of dark chocolate with cherries. 100% Eggless, Purely Veg, made with fresh cream. Pure Buttercream Frosting available on pre-order.",
+        "shortDescription":  "Dark chocolate \u0026 cherries bento cake (0.25kg)",
+        "image":  "https://example.com/images/bento/black-forest.jpg",
+        "gallery":  [
+                        "https://example.com/images/bento/black-forest-side.jpg"
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:04.931Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:04.931Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6493a2504778126db0c"
+                },
+        "name":  "White Forest Bento Cake",
+        "slug":  "white-forest-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  380,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  380,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6493a2504778126db0d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Layer of white chocolate with cherries. 100% Eggless, Purely Veg. Pure Buttercream Frosting available on pre-order.",
+        "shortDescription":  "White chocolate \u0026 cherries bento cake (0.25kg)",
+        "image":  "https://example.com/images/bento/white-forest.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:05.472Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:05.472Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6493a2504778126db0e"
+                },
+        "name":  "Choco Fudge Bento Cake",
+        "slug":  "choco-fudge-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  390,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  390,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6493a2504778126db0f"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Delicious chocolate layer with rich fresh cream. 100% Eggless, Purely Veg. Pure Buttercream Frosting available on pre-order.",
+        "shortDescription":  "Chocolate layer with fresh cream bento (0.25kg)",
+        "image":  "https://example.com/images/bento/choco-fudge.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:05.984Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:05.984Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64a3a2504778126db10"
+                },
+        "name":  "Butterscotch Bento Cake",
+        "slug":  "butterscotch-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  390,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  390,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64a3a2504778126db11"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich butterscotch flavor packed with crunchy nuts. 100% Eggless, Purely Veg. Pure Buttercream Frosting available on pre-order.",
+        "shortDescription":  "Rich butterscotch \u0026 nuts bento cake (0.25kg)",
+        "image":  "https://example.com/images/bento/butterscotch.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:06.589Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:06.589Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64b3a2504778126db12"
+                },
+        "name":  "Honey \u0026 Almond Bento Cake",
+        "slug":  "honey-and-almond-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  410,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  410,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64b3a2504778126db13"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Crunchy roasted almonds paired seamlessly with sweet honey and fresh cream. 100% Eggless, Purely Veg.",
+        "shortDescription":  "Almond with honey and cream bento (0.25kg)",
+        "image":  "https://example.com/images/bento/honey-almond.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:07.278Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:07.278Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64b3a2504778126db14"
+                },
+        "name":  "Rose Milk Bento Cake",
+        "slug":  "rose-milk-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  410,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  410,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64b3a2504778126db15"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Infused with thick traditional rose milk extract and topped with select nuts. 100% Eggless, Purely Veg.",
+        "shortDescription":  "Thick rose milk cake with nuts bento (0.25kg)",
+        "image":  "https://example.com/images/bento/rose-milk.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:07.761Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:07.761Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64c3a2504778126db16"
+                },
+        "name":  "Choco Truffle Bento Cake",
+        "slug":  "choco-truffle-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  410,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  410,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64c3a2504778126db17"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "A dense, luxurious layer of premium chocolate truffle. 100% Eggless, Purely Veg.",
+        "shortDescription":  "Layer of premium chocolate truffle bento (0.25kg)",
+        "image":  "https://example.com/images/bento/choco-truffle.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:08.257Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:08.257Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64c3a2504778126db18"
+                },
+        "name":  "Choco Oreo Bento Cake",
+        "slug":  "choco-oreo-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  410,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  410,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64c3a2504778126db19"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Crunchy Oreo cookie pieces blended perfectly into rich chocolate and fresh cream. 100% Eggless.",
+        "shortDescription":  "Oreo cookie with chocolate fresh cream bento (0.25kg)",
+        "image":  "https://example.com/images/bento/choco-oreo.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:08.822Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:08.822Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64d3a2504778126db1a"
+                },
+        "name":  "Choco Caramel Bento Cake",
+        "slug":  "choco-caramel-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  420,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  420,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64d3a2504778126db1b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Sweet golden caramel layers mixed perfectly with smooth chocolate cream. 100% Eggless, Purely Veg.",
+        "shortDescription":  "Caramel with chocolate and cream bento (0.25kg)",
+        "image":  "https://example.com/images/bento/choco-caramel.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:09.397Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:09.397Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64e3a2504778126db1c"
+                },
+        "name":  "Death By Chocolate Bento Cake",
+        "slug":  "death-by-chocolate-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  450,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  450,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64e3a2504778126db1d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "An intense double layer of premium dark chocolate studded generously with chocolate chips.",
+        "shortDescription":  "Double chocolate and chips bento (0.25kg)",
+        "image":  "https://example.com/images/bento/death-by-chocolate.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:10.130Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:10.130Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64e3a2504778126db1e"
+                },
+        "name":  "Red Velvet Bento Cake",
+        "slug":  "red-velvet-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  470,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  470,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64e3a2504778126db1f"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich layers of premium cream cheese frosting spread over a vibrant red velvet base.",
+        "shortDescription":  "Cream cheese layer over red velvet bento (0.25kg)",
+        "image":  "https://example.com/images/bento/red-velvet.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:10.765Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:10.765Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64f3a2504778126db20"
+                },
+        "name":  "Lotus Biscoff Bento Cake",
+        "slug":  "lotus-biscoff-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  480,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  480,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64f3a2504778126db21"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Creamy authentic Biscoff spread layered delicately with fresh cream. 100% Eggless.",
+        "shortDescription":  "Creamy authentic biscoff spread bento (0.25kg)",
+        "image":  "https://example.com/images/bento/lotus-biscoff.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:11.291Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:11.291Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef64f3a2504778126db22"
+                },
+        "name":  "Choco Pistachio Bento Cake",
+        "slug":  "choco-pistachio-bento-cake",
+        "category":  "bento-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  480,
+        "cakeType":  "bento-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.25kg",
+                                 "price":  480,
+                                 "_id":  {
+                                             "$oid":  "6a1ef64f3a2504778126db23"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Premium pistachio base combined with white chocolate and smooth cream. 100% Eggless.",
+        "shortDescription":  "Pistachio with cream \u0026 white chocolate bento (0.25kg)",
+        "image":  "https://example.com/images/bento/choco-pistachio.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:11.802Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:11.802Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6503a2504778126db24"
+                },
+        "name":  "Classic Vanilla Cake",
+        "slug":  "classic-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  520,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  520,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6503a2504778126db25"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Simple, lightweight, and fluffy layers of classic vanilla sponge with rich fresh cream.",
+        "shortDescription":  "Layers of vanilla cake with cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/classic-vanilla.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:12.285Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:12.285Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6503a2504778126db26"
+                },
+        "name":  "White Forest Vanilla Cake",
+        "slug":  "white-forest-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  560,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  560,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6503a2504778126db27"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Luxurious white chocolate shavings spread over layers of vanilla cream and maraschino cherries.",
+        "shortDescription":  "Layer of white chocolate with cherries (0.5kg)",
+        "image":  "https://example.com/images/vanilla/white-forest.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:12.822Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:12.822Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6513a2504778126db28"
+                },
+        "name":  "Butterscotch Vanilla Cake",
+        "slug":  "butterscotch-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  610,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  610,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6513a2504778126db29"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich butterscotch praline and premium nuts layered between vanilla sponge bases.",
+        "shortDescription":  "Rich butterscotch \u0026 nuts premium cake (0.5kg)",
+        "image":  "https://example.com/images/vanilla/butterscotch.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:13.342Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:13.342Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6513a2504778126db2a"
+                },
+        "name":  "Fresh Pineapple Vanilla Cake",
+        "slug":  "fresh-pineapple-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  650,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  650,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6513a2504778126db2b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Tangy and sweet tropical pineapple slices cooked down and layered with fresh whipped cream.",
+        "shortDescription":  "Tropical pineapple slices with cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/fresh-pineapple.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:13.822Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:13.822Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6523a2504778126db2c"
+                },
+        "name":  "Fruits \u0026 Nuts Vanilla Cake",
+        "slug":  "fruits-and-nuts-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  690,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  690,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6523a2504778126db2d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Healthy, crunchy assortment of premium mixed fruits and nuts layered into smooth dairy cream.",
+        "shortDescription":  "Fruits \u0026 nuts layer with cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/fruits-nuts.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:14.404Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:14.404Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6523a2504778126db2e"
+                },
+        "name":  "Honey \u0026 Almond Vanilla Cake",
+        "slug":  "honey-and-almond-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  690,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  690,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6523a2504778126db2f"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Toasted almond nibs drenched in organic honey over a velvety vanilla backdrop.",
+        "shortDescription":  "Almond with honey and cream premium cake (0.5kg)",
+        "image":  "https://example.com/images/vanilla/honey-almond.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:14.867Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:14.867Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6533a2504778126db30"
+                },
+        "name":  "Rose Milk Vanilla Cake",
+        "slug":  "rose-milk-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  690,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  690,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6533a2504778126db31"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Sponge completely soaked in thick, signature rose milk solution and finished with crushed nuts.",
+        "shortDescription":  "Thick rose milk with roasted nuts (0.5kg)",
+        "image":  "https://example.com/images/vanilla/rose-milk.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:15.345Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:15.345Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6533a2504778126db32"
+                },
+        "name":  "Filter Coffee Vanilla Cake",
+        "slug":  "filter-coffee-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  730,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  730,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6533a2504778126db33"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "For coffee purists. Strong, authentic South Indian filter coffee decoction whipped beautifully into cream layers.",
+        "shortDescription":  "Rich filter coffee layered with cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/filter-coffee.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:15.868Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:15.868Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6543a2504778126db34"
+                },
+        "name":  "Gulab Jamun Vanilla Cake",
+        "slug":  "gulab-jamun-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  770,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  770,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6543a2504778126db35"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Fusion excellence featuring a layer of structural sweet gulab jamun segments garnished with premium nuts.",
+        "shortDescription":  "Layer of gulab jamun topped with nuts (0.5kg)",
+        "image":  "https://example.com/images/vanilla/gulab-jamun.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:16.391Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:16.391Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6553a2504778126db36"
+                },
+        "name":  "Rose \u0026 Lychee Vanilla Cake",
+        "slug":  "rose-and-lychee-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  780,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  780,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6553a2504778126db37"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Fragrant floral rose infusion combined with the delicate bite of sweet chopped lychee fruit and cream.",
+        "shortDescription":  "Lychee fruit with aromatic rose \u0026 cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/rose-lychee.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:17.071Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:17.071Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6553a2504778126db38"
+                },
+        "name":  "Honey \u0026 Lychee Vanilla Cake",
+        "slug":  "honey-and-lychee-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  780,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  780,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6553a2504778126db39"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Succulent chunks of lychee fruit drizzled with golden sweet honey and fluffy dairy frosting.",
+        "shortDescription":  "Lychee fruit with raw honey \u0026 cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/honey-lychee.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:17.591Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:17.591Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6563a2504778126db3a"
+                },
+        "name":  "Vancho Vanilla Cake",
+        "slug":  "vancho-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  830,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  830,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6563a2504778126db3b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "The best of both worlds. Alternating structural layers of premium vanilla and chocolate cake mix.",
+        "shortDescription":  "Layers of vanilla \u0026 chocolate mixed (0.5kg)",
+        "image":  "https://example.com/images/vanilla/vancho.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:18.088Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:18.088Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6563a2504778126db3c"
+                },
+        "name":  "Royal Gulkand Vanilla Cake",
+        "slug":  "royal-gulkand-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  830,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  830,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6563a2504778126db3d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Premium slow-cooked sweet rose petal preserve (Gulkand) mixed smoothly with aromatic rose cream layers.",
+        "shortDescription":  "Gulkand mix with rose \u0026 rich cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/royal-gulkand.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:18.600Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:18.600Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6573a2504778126db3e"
+                },
+        "name":  "Rasmalai Vanilla Cake",
+        "slug":  "rasmalai-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  850,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  850,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6573a2504778126db3f"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Authentic, milk-soaked cardamon rasmalai disc pieces embedded inside rich cream and finished with chopped pistachios.",
+        "shortDescription":  "Layer of authentic rasmalai topped with nuts (0.5kg)",
+        "image":  "https://example.com/images/vanilla/rasmalai.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:19.334Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:19.334Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6573a2504778126db40"
+                },
+        "name":  "English Toffee Vanilla Cake",
+        "slug":  "english-toffee-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  870,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  870,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6573a2504778126db41"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Decadent and heavy layers of sticky hot-house English toffee sauce spread over soft cake crumbs.",
+        "shortDescription":  "Premium layer of sticky English toffee (0.5kg)",
+        "image":  "https://example.com/images/vanilla/english-toffee.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:19.825Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:19.825Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6583a2504778126db42"
+                },
+        "name":  "Fresh Strawberry Vanilla Cake",
+        "slug":  "fresh-strawberry-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  870,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  870,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6583a2504778126db43"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Seasonal premium farm-fresh strawberries mashed and layered inside luxurious white cream.",
+        "shortDescription":  "Fresh handpicked strawberries with cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/fresh-strawberry.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:20.321Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:20.321Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6583a2504778126db44"
+                },
+        "name":  "Lotus Biscoff Vanilla Cake",
+        "slug":  "lotus-biscoff-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  890,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  890,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6583a2504778126db45"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Thick caramelized Speculoos cookie butter spread layered with premium artisan whip.",
+        "shortDescription":  "Layer of creamy authentic biscoff spread (0.5kg)",
+        "image":  "https://example.com/images/vanilla/lotus-biscoff.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:20.827Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:20.827Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6593a2504778126db46"
+                },
+        "name":  "Fresh Blueberry Vanilla Cake",
+        "slug":  "fresh-blueberry-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  890,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  890,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6593a2504778126db47"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Whole wild fresh blueberries folded gently into heavy vanilla whipping cream.",
+        "shortDescription":  "Fresh wild blueberries with velvet cream (0.5kg)",
+        "image":  "https://example.com/images/vanilla/fresh-blueberry.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:21.352Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:21.352Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65a3a2504778126db48"
+                },
+        "name":  "Very Berry Vanilla Cake",
+        "slug":  "very-berry-vanilla-cake",
+        "category":  "vanilla-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  950,
+        "cakeType":  "vanilla-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  950,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65a3a2504778126db49"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "An opulent mixture of forest berries including raspberries, strawberries, and blueberries spread across multiple cake tiers.",
+        "shortDescription":  "Premium structural layer of mixed berries (0.5kg)",
+        "image":  "https://example.com/images/vanilla/very-berry.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  20,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:22.729Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:22.729Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65b3a2504778126db4a"
+                },
+        "name":  "Black Forest Chocolate Cake",
+        "slug":  "black-forest-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  560,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  560,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65b3a2504778126db4b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Classic combination of deep chocolate mud layers infused with fresh dark cherries and cream shavings.",
+        "shortDescription":  "Layer of cream \u0026 chocolate with cherries (0.5kg)",
+        "image":  "https://example.com/images/chocolate/black-forest.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:23.494Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:23.494Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65c3a2504778126db4c"
+                },
+        "name":  "Choco Fudge Chocolate Cake",
+        "slug":  "choco-fudge-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  610,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  610,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65c3a2504778126db4d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Thick premium chocolate fudge poured over layers of soft dark chocolate crumb sponge.",
+        "shortDescription":  "Rich chocolate layer with fresh fudge cream (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-fudge.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:24.399Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:24.399Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65d3a2504778126db4e"
+                },
+        "name":  "Choco Truffle Chocolate Cake",
+        "slug":  "choco-truffle-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  670,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  670,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65d3a2504778126db4f"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich ganache formulation made from premium cocoa butter solids layered directly into a dense profile.",
+        "shortDescription":  "Layer of premium dark chocolate truffle (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-truffle.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:25.118Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:25.118Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65d3a2504778126db50"
+                },
+        "name":  "Choco Oreo Chocolate Cake",
+        "slug":  "choco-oreo-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  670,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  670,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65d3a2504778126db51"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Blended oreo cookie layers offset with premium dark chocolate ganache mixes.",
+        "shortDescription":  "Oreo with dark chocolate \u0026 fresh cream (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-oreo.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:25.686Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:25.686Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65e3a2504778126db52"
+                },
+        "name":  "Choco Caramel Chocolate Cake",
+        "slug":  "choco-caramel-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  690,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  690,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65e3a2504778126db53"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich buttery liquid caramel intertwined seamlessly within chocolate whipped layers.",
+        "shortDescription":  "Caramel with gourmet chocolate \u0026 cream (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-caramel.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:26.466Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:26.466Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65f3a2504778126db54"
+                },
+        "name":  "Mocha Walnut Chocolate Cake",
+        "slug":  "mocha-walnut-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  690,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  690,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65f3a2504778126db55"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Artisanal espresso reduction paired with earthy, crunchy toasted walnuts over a dark chocolate sponge base.",
+        "shortDescription":  "Mocha coffee \u0026 walnut layer with cream (0.5kg)",
+        "image":  "https://example.com/images/chocolate/mocha-walnut.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:27.101Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:27.101Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef65f3a2504778126db56"
+                },
+        "name":  "Death By Chocolate Cake",
+        "slug":  "death-by-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  750,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  750,
+                                 "_id":  {
+                                             "$oid":  "6a1ef65f3a2504778126db57"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "The ultimate indulgence. Multiple dense chocolate profiles layered with semi-sweet chocolate chips.",
+        "shortDescription":  "Layer of double premium chocolate and chips (0.5kg)",
+        "image":  "https://example.com/images/chocolate/death-by-chocolate.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:27.706Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:27.706Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6603a2504778126db58"
+                },
+        "name":  "Choco Bounty Cake",
+        "slug":  "choco-bounty-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  750,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  750,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6603a2504778126db59"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Desiccated tropical coconut shreds sweetened down and balanced against fluid white chocolate structures.",
+        "shortDescription":  "Creamy coconut with smooth white chocolate (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-bounty.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:28.338Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:28.338Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6603a2504778126db5a"
+                },
+        "name":  "Choco Orange Cake",
+        "slug":  "choco-orange-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  770,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  770,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6603a2504778126db5b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Zesty bitter orange reductions combined skillfully inside classic chocolate and truffle frameworks.",
+        "shortDescription":  "Orange with premium chocolate \u0026 truffle (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-orange.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:28.810Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:28.810Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6613a2504778126db5c"
+                },
+        "name":  "Choco Hazelnut Cake",
+        "slug":  "choco-hazelnut-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  780,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  780,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6613a2504778126db5d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich roasted European hazelnut paste churned inside premium dark chocolate truffle profiles.",
+        "shortDescription":  "Gourmet chocolate hazelnut with truffle (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-hazelnut.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:29.330Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:29.330Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6613a2504778126db5e"
+                },
+        "name":  "Nutty Truffle Chocolate Cake",
+        "slug":  "nutty-truffle-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  780,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  780,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6613a2504778126db5f"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "A dense combination of premium almonds, cashews, and walnuts enveloped within a thick truffle core.",
+        "shortDescription":  "Assorted mixed nuts with heavy truffle (0.5kg)",
+        "image":  "https://example.com/images/chocolate/nutty-truffle.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:29.776Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:29.776Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6623a2504778126db60"
+                },
+        "name":  "Choco Strawberry Cake",
+        "slug":  "choco-strawberry-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  870,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  870,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6623a2504778126db61"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Juicy sweet strawberry compote sitting between heavy layers of structural cocoa cream blocks.",
+        "shortDescription":  "Fresh strawberries, rich chocolate \u0026 cream (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-strawberry.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:30.339Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:30.339Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6623a2504778126db62"
+                },
+        "name":  "Kinder Bueno Chocolate Cake",
+        "slug":  "kinder-bueno-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  890,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  890,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6623a2504778126db63"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Rich creamy hazelnut milk cream layers built up with standard structural white chocolate profiles.",
+        "shortDescription":  "White chocolate variant with hazelnut blend (0.5kg)",
+        "image":  "https://example.com/images/chocolate/kinder-bueno.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:30.820Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:30.820Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6633a2504778126db64"
+                },
+        "name":  "Choco Biscoff Cake",
+        "slug":  "choco-biscoff-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  890,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  890,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6633a2504778126db65"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Gourmet Lotus Biscoff speculoos spread integrated directly between dense cocoa cream lines.",
+        "shortDescription":  "Layer of creamy biscoff spread with chocolate (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-biscoff.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:31.312Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:31.312Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6633a2504778126db66"
+                },
+        "name":  "Choco Blueberry Cake",
+        "slug":  "choco-blueberry-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  890,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  890,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6633a2504778126db67"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Tangy deep-forest whole blueberries combined masterfully inside a luxury cocoa cream spread.",
+        "shortDescription":  "Fresh blueberries, chocolate \u0026 fresh cream (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-blueberry.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:31.808Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:31.808Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6643a2504778126db68"
+                },
+        "name":  "Choco Ferrero Cake",
+        "slug":  "choco-ferrero-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  930,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  930,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6643a2504778126db69"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Luxury chocolate hazelnut cream whipped together with real textured Ferrero Rocher fragments.",
+        "shortDescription":  "Chocolate cream with real crushed ferrero rocher (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-ferrero.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:32.613Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:32.613Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6653a2504778126db6a"
+                },
+        "name":  "Choco Pistachio Chocolate Cake",
+        "slug":  "choco-pistachio-chocolate-cake",
+        "category":  "chocolate-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  950,
+        "cakeType":  "chocolate-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  950,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6653a2504778126db6b"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "High-end pistachio nut compound layer structuralized inside rich white chocolate cream components.",
+        "shortDescription":  "Pistachio with premium cream \u0026 white chocolate (0.5kg)",
+        "image":  "https://example.com/images/chocolate/choco-pistachio.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  25,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:33.216Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:33.216Z"
+                      },
+        "__v":  0
+    },
+    {
+        "_id":  {
+                    "$oid":  "6a1ef6663a2504778126db6c"
+                },
+        "name":  "Red Velvet Premium Cake",
+        "slug":  "red-velvet-premium-cake",
+        "category":  "red velvet-cakes",
+        "location":  "coimbatore",
+        "occasion":  [
+
+                     ],
+        "occasionIds":  [
+
+                        ],
+        "price":  870,
+        "cakeType":  "red-velvet-cakes",
+        "weightPrices":  [
+                             {
+                                 "weight":  "0.5kg",
+                                 "price":  870,
+                                 "_id":  {
+                                             "$oid":  "6a1ef6663a2504778126db6d"
+                                         }
+                             }
+                         ],
+        "hasVariants":  false,
+        "allowCustomFlavor":  false,
+        "allowCustomWeight":  false,
+        "description":  "Vibrant and dense crimson cocoa sponge base layered luxuriously with signature whipped cream cheese frosting.",
+        "shortDescription":  "Layer of authentic cream cheese over red velvet (0.5kg)",
+        "image":  "https://example.com/images/red-velvet/premium-red-velvet.jpg",
+        "gallery":  [
+
+                    ],
+        "stock":  15,
+        "featured":  false,
+        "bestseller":  false,
+        "isActive":  true,
+        "ratingsAverage":  0,
+        "ratingsCount":  0,
+        "coupon":  {
+                       "enabled":  false,
+                       "usedCount":  0
+                   },
+        "createdBy":  {
+                          "$oid":  "69e9c1ab766ae41a5f9612cd"
+                      },
+        "flavors":  [
+
+                    ],
+        "weights":  [
+
+                    ],
+        "variants":  [
+
+                     ],
+        "createdAt":  {
+                          "$date":  "2026-06-02T15:27:34.252Z"
+                      },
+        "updatedAt":  {
+                          "$date":  "2026-06-02T15:27:34.252Z"
+                      },
+        "__v":  0
+    }
+]

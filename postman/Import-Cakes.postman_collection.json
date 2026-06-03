@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "Chocolate Mine - Import Cakes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Imports cake products via POST /api/admin/products. Set {{BASE_URL}} and {{ADMIN_TOKEN}} in environment. Duplicate the request or create more items as needed."
+  },
+  "item": [
+    {
+      "name": "Choco truffle",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}", "type": "text" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Choco truffle", "type": "text" },
+            { "key": "category", "value": "cakes", "type": "text" },
+            { "key": "shortDescription", "value": "Layer of premium chocolate truffle", "type": "text" },
+            { "key": "description", "value": "Choco truffle — premium chocolate truffle cake. Update details in admin.", "type": "text" },
+            { "key": "price", "value": "410", "type": "text" },
+            { "key": "isActive", "value": "true", "type": "text" }
+          ]
+        },
+        "url": "{{BASE_URL}}/api/admin/products"
+      }
+    },
+    {
+      "name": "Choco fudge",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}", "type": "text" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Choco fudge", "type": "text" },
+            { "key": "category", "value": "cakes", "type": "text" },
+            { "key": "shortDescription", "value": "Chocolate layer with fresh cream", "type": "text" },
+            { "key": "description", "value": "Choco fudge — chocolate layer with fresh cream. Update details in admin.", "type": "text" },
+            { "key": "price", "value": "390", "type": "text" },
+            { "key": "isActive", "value": "true", "type": "text" }
+          ]
+        },
+        "url": "{{BASE_URL}}/api/admin/products"
+      }
+    },
+    {
+      "name": "Black FOREST",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}", "type": "text" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Black FOREST", "type": "text" },
+            { "key": "category", "value": "cakes", "type": "text" },
+            { "key": "shortDescription", "value": "Layer of dark chocolate with cherries", "type": "text" },
+            { "key": "description", "value": "Black Forest — dark chocolate with cherries. Update details in admin.", "type": "text" },
+            { "key": "price", "value": "380", "type": "text" },
+            { "key": "isActive", "value": "true", "type": "text" }
+          ]
+        },
+        "url": "{{BASE_URL}}/api/admin/products"
+      }
+    }
+  ]
+}

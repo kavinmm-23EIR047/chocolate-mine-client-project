@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "Chocolate Mine - Cake Product Examples",
+    "_postman_id": "c0a1b2c3-d4e5-6789-abcd-ef0123456789",
+    "description": "Examples for creating cake products (multipart/form-data)\n- Bento cakes: quarter-kg base (0.25) and 0.5kg generated\n- Half-kg cakes: 0.5kg base and larger weights generated\nBackend assigns default cake image when `image` is omitted for category 'cakes'.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "<ADMIN_OR_STAFF_JWT>" }
+  ],
+  "item": [
+    {
+      "name": "Create Bento Cake - Honey & Almond (no image)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Honey & Almond", "type": "text" },
+            { "key": "description", "value": "Almond with honey and cream", "type": "text" },
+            { "key": "shortDescription", "value": "Almond with honey", "type": "text" },
+            { "key": "category", "value": "cakes", "type": "text" },
+            { "key": "cakeType", "value": "bento-cakes", "type": "text" },
+            { "key": "basePrice", "value": "410", "type": "text" },
+            { "key": "price", "value": "410", "type": "text" },
+            { "key": "location", "value": "coimbatore", "type": "text" },
+            { "key": "hasVariants", "value": "true", "type": "text" },
+            { "key": "allowCustomFlavor", "value": "false", "type": "text" },
+            { "key": "allowCustomWeight", "value": "false", "type": "text" },
+            { "key": "flavors", "value": "[{\"name\":\"Honey & Almond\",\"images\": []}]", "type": "text" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Vanilla Cake - Fruits & Nuts (with image)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "name", "value": "Fruits & Nuts", "type": "text" },
+            { "key": "description", "value": "Fruits & nuts layer with cream", "type": "text" },
+            { "key": "shortDescription", "value": "Fruits & nuts", "type": "text" },
+            { "key": "category", "value": "cakes", "type": "text" },
+            { "key": "cakeType", "value": "vanilla-cakes", "type": "text" },
+            { "key": "basePrice", "value": "690", "type": "text" },
+            { "key": "price", "value": "690", "type": "text" },
+            { "key": "location", "value": "coimbatore", "type": "text" },
+            { "key": "hasVariants", "value": "true", "type": "text" },
+            { "key": "allowCustomFlavor", "value": "false", "type": "text" },
+            { "key": "allowCustomWeight", "value": "false", "type": "text" },
+            { "key": "flavors", "value": "[{\"name\":\"Fruits & Nuts\",\"images\": []}]", "type": "text" },
+            { "key": "image", "type": "file", "src": "<path-to-image-file>" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["api","products"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

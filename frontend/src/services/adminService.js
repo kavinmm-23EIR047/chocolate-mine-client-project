@@ -65,24 +65,6 @@ const adminService = {
     api.delete(`/occasions/${id}`),
 
   /* ----------------------------------------
-     Product Management
-  ---------------------------------------- */
-  getProducts: (params) =>
-    api.get('/admin/products', { params }),
-
-  getProduct: (id) =>
-    api.get(`/admin/products/${id}`),
-
-  createProduct: (formData) =>
-    api.post('/admin/products', formData),
-
-  updateProduct: (id, formData) =>
-    api.put(`/admin/products/${id}`, formData),
-
-  deleteProduct: (id) =>
-    api.delete(`/admin/products/${id}`),
-
-  /* ----------------------------------------
      Banner Management
   ---------------------------------------- */
   getBanners: () => api.get('/banners'),

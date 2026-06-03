@@ -5,6 +5,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const slugify = require('slugify');
 const cloudinaryService = require('../services/cloudinaryService');
 
+const DEFAULT_CAKE_IMAGE_URL = 'https://via.placeholder.com/800x600.png?text=Chocolate+Mine+Cake+Background';
+
 // Helper function to safely normalize boolean values from FormData
 const normalizeBoolean = (value) => {
   if (value === 'true' || value === true) return true;
@@ -51,6 +53,7 @@ exports.getProducts = asyncHandler(async (req, res) => {
     featured, 
     bestseller, 
     category, 
+    cakeType,
     location, 
     occasion,
     rating,
@@ -64,6 +67,7 @@ exports.getProducts = asyncHandler(async (req, res) => {
   if (featured) query.featured = featured === 'true';
   if (bestseller) query.bestseller = bestseller === 'true';
   if (category) query.category = category;
+  if (cakeType) query.cakeType = cakeType;
   if (location) query.location = location.toLowerCase();
   
   if (occasion) {
@@ -382,11 +386,17 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     imageInput = `data:${req.file.mimetype};base64,${b64}`;
   }
 
+  if (!imageInput && body.category === 'cakes') {
+    imageInput = DEFAULT_CAKE_IMAGE_URL;
+  }
+
   if (imageInput) {
     const uploadResult = await cloudinaryService.uploadImage(imageInput, body.category || 'general');
     if (uploadResult) {
       body.image = uploadResult.secure_url;
       body.imagePublicId = uploadResult.public_id;
+    } else if (!body.image) {
+      body.image = DEFAULT_CAKE_IMAGE_URL;
     }
   }
 

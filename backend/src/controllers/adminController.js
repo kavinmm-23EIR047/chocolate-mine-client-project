@@ -2,6 +2,16 @@ const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const Product = require('../models/Product');
+const slugify = require('slugify');
+const cloudinaryService = require('../services/cloudinaryService');
+const DEFAULT_CAKE_IMAGE_URL = 'https://via.placeholder.com/800x600.png?text=Chocolate+Mine+Cake+Background';
+
+const normalizeStockValue = (value) => {
+  if (value === true || value === 'true') return 1;
+  if (value === false || value === 'false') return 0;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 // @desc    Create Staff Member
 // @route   POST /api/admin/staff/create
@@ -170,7 +180,26 @@ exports.resendInvoice = asyncHandler(async (req, res, next) => {
 // @desc    Create Product (with variant support and multiple images per flavor)
 // @route   POST /api/admin/products
 exports.createProduct = asyncHandler(async (req, res, next) => {
-  const { category, occasion, flavors, weights, variants, hasVariants, allowCustomFlavor, allowCustomWeight, ...productData } = req.body;
+  const { category, occasion, flavors, weights, variants, hasVariants, allowCustomFlavor, allowCustomWeight, cakeType, basePrice, ...productData } = req.body;
+
+  // Helper to compute weightPrices based on cakeType and base price
+  const computeWeightPrices = (type, base) => {
+    const b = Number(base) || 0;
+    if ((type || '').toLowerCase() === 'bento-cakes') {
+      return [
+        { weight: '0.25', price: Math.round(b) },
+        { weight: '0.5', price: Math.round(b * 2) }
+      ];
+    }
+    // Default: half-kg base calculates 1kg = 2x and 1.5kg = 3x
+    return [
+      { weight: '0.5', price: Math.round(b) },
+      { weight: '1', price: Math.round(b * 2) },
+      { weight: '1.5', price: Math.round(b * 3) },
+      { weight: '2', price: Math.round(b * 4) },
+      { weight: '3', price: Math.round(b * 6) }
+    ];
+  };
 
   // Handle occasion array
   if (occasion !== undefined) {
@@ -230,6 +259,40 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     productData.hasVariants = hasVariants === 'true' || hasVariants === true;
     productData.allowCustomFlavor = allowCustomFlavor === 'true' || allowCustomFlavor === true;
     productData.allowCustomWeight = allowCustomWeight === 'true' || allowCustomWeight === true;
+
+    // Set cakeType if provided
+    if (cakeType) productData.cakeType = (cakeType || '').toLowerCase();
+
+    // If basePrice provided, compute weightPrices, weights and auto-generate variants prices
+    if (basePrice !== undefined && basePrice !== null && basePrice !== '') {
+      const weightPrices = computeWeightPrices(productData.cakeType, basePrice);
+      productData.weightPrices = weightPrices;
+      // Populate weights array used by frontend (e.g., '0.5 kg')
+      productData.weights = weightPrices.map(w => ({ value: `${w.weight} kg` }));
+
+      // Auto-generate variants using flavors if available
+      const flavorList = productData.flavors || [];
+      const generatedVariants = [];
+      flavorList.forEach(fl => {
+        weightPrices.forEach(wp => {
+          generatedVariants.push({
+            flavor: fl.name,
+            weight: `${wp.weight} kg`,
+            price: wp.price,
+            stock: 0
+          });
+        });
+      });
+      // If there are no flavors, create generic variants (no flavor)
+      if (flavorList.length === 0) {
+        weightPrices.forEach(wp => {
+          generatedVariants.push({ flavor: '', weight: `${wp.weight} kg`, price: wp.price, stock: 0 });
+        });
+      }
+      productData.variants = generatedVariants;
+      productData.hasVariants = generatedVariants.length > 0;
+    }
+
   } else {
     // Non-cake products don't have variants
     productData.hasVariants = false;
@@ -241,6 +304,9 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   }
 
   productData.category = category;
+  if (productData.stock !== undefined) {
+    productData.stock = normalizeStockValue(productData.stock);
+  }
   
   const product = await Product.create(productData);
 
@@ -253,7 +319,7 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
 // @desc    Update Product (with variant support and multiple images per flavor)
 // @route   PATCH /api/admin/products/:id
 exports.updateProduct = asyncHandler(async (req, res, next) => {
-  const { category, occasion, flavors, weights, variants, hasVariants, allowCustomFlavor, allowCustomWeight, ...updateData } = req.body;
+  const { category, occasion, flavors, weights, variants, hasVariants, allowCustomFlavor, allowCustomWeight, cakeType, basePrice, ...updateData } = req.body;
 
   const product = await Product.findById(req.params.id);
   if (!product) {
@@ -321,6 +387,52 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         product.variants = variants;
       }
     }
+
+    // Update cakeType if provided
+    if (cakeType !== undefined) {
+      product.cakeType = (cakeType || '').toLowerCase();
+    }
+
+    // If basePrice provided, recompute weightPrices, weights and auto-generate variant prices
+    if (basePrice !== undefined && basePrice !== null && basePrice !== '') {
+      const computeWeightPrices = (type, base) => {
+        const b = Number(base) || 0;
+        if ((type || '').toLowerCase() === 'bento-cakes') {
+          return [
+            { weight: '0.25', price: Math.round(b) },
+            { weight: '0.5', price: Math.round(b * 2) }
+          ];
+        }
+        return [
+          { weight: '0.5', price: Math.round(b) },
+          { weight: '1', price: Math.round(b * 2) },
+          { weight: '1.5', price: Math.round(b * 3) },
+          { weight: '2', price: Math.round(b * 4) },
+          { weight: '3', price: Math.round(b * 6) }
+        ];
+      };
+
+      const weightPrices = computeWeightPrices(product.cakeType, basePrice);
+      product.weightPrices = weightPrices;
+      product.weights = weightPrices.map(w => ({ value: `${w.weight} kg` }));
+
+      // Regenerate variants
+      const flavorList = product.flavors || [];
+      const generatedVariants = [];
+      flavorList.forEach(fl => {
+        weightPrices.forEach(wp => {
+          generatedVariants.push({ flavor: fl.name, weight: `${wp.weight} kg`, price: wp.price, stock: 0 });
+        });
+      });
+      if (flavorList.length === 0) {
+        weightPrices.forEach(wp => {
+          generatedVariants.push({ flavor: '', weight: `${wp.weight} kg`, price: wp.price, stock: 0 });
+        });
+      }
+      product.variants = generatedVariants;
+      product.hasVariants = generatedVariants.length > 0;
+    }
+
     if (hasVariants !== undefined) {
       product.hasVariants = hasVariants === 'true' || hasVariants === true;
     }
@@ -338,6 +450,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     product.variants = undefined;
     product.allowCustomFlavor = false;
     product.allowCustomWeight = false;
+  }
+
+  if (updateData.stock !== undefined) {
+    updateData.stock = normalizeStockValue(updateData.stock);
   }
 
   // Update other fields

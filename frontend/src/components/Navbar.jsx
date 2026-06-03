@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, ShoppingCart, User, Menu, X, MapPin, Heart, ChevronDown, ShoppingBag, LogIn,
-  Box, Cake, Leaf, Egg, Sun, Moon, Mic
+  Cake, Leaf, Egg, Sun, Moon, Monitor, Mic
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
@@ -26,14 +26,21 @@ const NAV_LINKS = [
 const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  
+  // Destructure custom values from your theme state context
+  // Assumes setTheme accepts 'light' | 'dark' | 'system'
+  const { theme, setTheme } = useTheme(); 
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  
   const { location: deliveryCity, setLocation: setDeliveryCity } = useDeliveryLocation();
   const location = useLocation();
   const locationDropdownRef = useRef(null);
+  const themeDropdownRef = useRef(null);
 
   const cartCount = cartItems ? cartItems.reduce((acc, item) => acc + item.qty, 0) : 0;
 
@@ -50,10 +57,28 @@ const Navbar = () => {
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(e.target)) {
         setIsLocationOpen(false);
       }
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target)) {
+        setIsThemeDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Helper helper to pull right icon active indicator configuration
+  const getThemeIcon = (currentTheme) => {
+    switch (currentTheme) {
+      case 'dark': return <DarkIcon className="w-5 h-5" />;
+      case 'light': return <Sun className="w-5 h-5" />;
+      default: return <Monitor className="w-5 h-5" />;
+    }
+  };
+
+  const themeOptions = [
+    { id: 'light', label: 'Light', icon: Sun },
+    { id: 'dark', label: 'Dark', icon: Moon },
+    { id: 'system', label: 'Device', icon: Monitor },
+  ];
 
   return (
     <>
@@ -61,7 +86,7 @@ const Navbar = () => {
         <div className="w-full px-4 sm:px-6 lg:px-10">
 
           {/* ── MAIN ROW ── */}
-          <div className="relative flex items-center gap-3 lg:gap-5 py-3">
+          <div className="relative flex items-center justify-between gap-4 py-3">
 
             {/* Mobile Hamburger */}
             <button
@@ -71,73 +96,75 @@ const Navbar = () => {
               <Menu size={22} className="text-heading" />
             </button>
 
-            {/* Logo — centered on mobile, left on desktop */}
-            <Link to="/" className="shrink-0 lg:shrink-0 absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
-              <div className="font-black uppercase leading-none tracking-tight text-heading text-center lg:text-left">
-                <div className="text-[9px] sm:text-[10px] lg:text-[11px] tracking-[0.2em]">THE CHOCOLATE</div>
-                <div className="text-2xl sm:text-3xl lg:text-4xl tracking-tight -mt-0.5">MINE</div>
-              </div>
-            </Link>
-
-            {/* Location Selector — Desktop */}
-            <div className="hidden lg:block relative shrink-0" ref={locationDropdownRef}>
-              <button
-                onClick={() => setIsLocationOpen(!isLocationOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[150px]"
-              >
-                <MapPin size={15} className="text-primary shrink-0" />
-                <div className="flex flex-col items-start">
-                  <span className="text-[9px] font-bold text-muted uppercase tracking-widest leading-none">Deliver to</span>
-                  <span className="text-[11px] font-black text-heading uppercase tracking-wide flex items-center gap-1 leading-tight mt-0.5">
-                    {deliveryCity === 'pan india' ? 'PAN INDIA' : (deliveryCity?.toUpperCase() || 'SELECT CITY')}
-                    <ChevronDown size={11} className={`transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`} />
-                  </span>
+            {/* Left Block: Logo + Location Selector */}
+            <div className="flex items-center gap-4 lg:gap-6 shrink-0 absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">
+              <Link to="/" className="shrink-0">
+                <div className="font-black uppercase leading-none tracking-tight text-heading text-center lg:text-left">
+                  <div className="text-[9px] sm:text-[10px] lg:text-[11px] tracking-[0.2em]">THE CHOCOLATE</div>
+                  <div className="text-2xl sm:text-3xl lg:text-4xl tracking-tight -mt-0.5">MINE</div>
                 </div>
-              </button>
-              <AnimatePresence>
-                {isLocationOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 mt-1.5 w-44 bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden z-50"
-                  >
-                    {['coimbatore', 'pan india'].map((city, i) => (
-                      <button
-                        key={city}
-                        onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors ${i > 0 ? 'border-t border-border/30' : ''} ${deliveryCity === city ? 'bg-primary/8 text-primary' : ''}`}
-                      >
-                        {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              </Link>
+
+              {/* Location Selector — Desktop */}
+              <div className="hidden lg:block relative shrink-0" ref={locationDropdownRef}>
+                <button
+                  onClick={() => setIsLocationOpen(!isLocationOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[150px]"
+                >
+                  <MapPin size={15} className="text-primary shrink-0" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-[9px] font-bold text-muted uppercase tracking-widest leading-none">Deliver to</span>
+                    <span className="text-[11px] font-black text-heading uppercase tracking-wide flex items-center gap-1 leading-tight mt-0.5">
+                      {deliveryCity === 'pan india' ? 'PAN INDIA' : (deliveryCity?.toUpperCase() || 'SELECT CITY')}
+                      <ChevronDown size={11} className={`transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`} />
+                    </span>
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {isLocationOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 mt-1.5 w-44 bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden z-50"
+                    >
+                      {['coimbatore', 'pan india'].map((city, i) => (
+                        <button
+                          key={city}
+                          onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors ${i > 0 ? 'border-t border-border/30' : ''} ${deliveryCity === city ? 'bg-primary/8 text-primary' : ''}`}
+                        >
+                          {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
-            {/* Search Bar — desktop only */}
+            {/* Compact Search Bar Container */}
             <div
-              className="hidden lg:flex flex-1 cursor-pointer"
+              className="hidden lg:flex flex-1 max-w-md xl:max-w-xl mx-auto cursor-pointer px-2"
               onClick={() => setIsSearchOverlayOpen(true)}
             >
-              <div className="relative w-full">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted/60" />
+              <div className="relative w-full flex items-center">
+                <Search size={16} className="absolute left-4.5 text-heading/70 dark:text-foreground/80 z-10" />
                 <input
                   type="text"
                   readOnly
                   placeholder="Search for cakes, desserts and more..."
-                  className="w-full bg-surface border border-border/60 text-foreground pl-9 pr-10 py-2.5 rounded-xl outline-none placeholder:text-muted/50 text-sm cursor-pointer hover:border-primary/30 transition-colors"
+                  className="w-full bg-surface border border-border/60 text-foreground pl-12 pr-12 py-2.5 rounded-full outline-none placeholder:text-muted/50 text-sm cursor-pointer hover:border-primary/40 transition-all duration-200"
                 />
-                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors">
+                <button className="absolute right-4.5 text-heading/60 dark:text-foreground/70 hover:text-primary transition-colors flex items-center justify-center p-1 rounded-full hover:bg-primary/10 z-10">
                   <Mic size={15} />
                 </button>
               </div>
             </div>
 
-            {/* Action Icons — Desktop only */}
-            <div className="hidden lg:flex items-center gap-1">
+            {/* Right Action Icons Panel */}
+            <div className="hidden lg:flex items-center gap-1 shrink-0">
               {[
                 user
                   ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' }
@@ -162,51 +189,89 @@ const Navbar = () => {
                 <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
               </Link>
 
-              {/* Theme toggle — Icon Only with smooth rotation/scale transition */}
-              <button
-                onClick={toggleTheme}
-                className="p-2.5 rounded-xl hover:bg-primary/8 text-heading hover:text-primary transition-colors ml-1 flex items-center justify-center h-10 w-10 shrink-0"
-                aria-label="Toggle theme"
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={theme}
-                    initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
-                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                    exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
-                  >
-                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                  </motion.div>
+              {/* 3-Way Theme Switch Dropdown Button */}
+              <div className="relative ml-1" ref={themeDropdownRef}>
+                <button
+                  onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
+                  className="p-2.5 rounded-xl hover:bg-primary/8 text-heading hover:text-primary transition-colors flex items-center justify-center h-10 w-10 shrink-0"
+                  aria-label="Change Display Theme Mode"
+                >
+                  {theme === 'dark' ? <Moon size={20} /> : theme === 'light' ? <Sun size={20} /> : <Monitor size={20} />}
+                </button>
+
+                <AnimatePresence>
+                  {isThemeDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute top-full right-0 mt-1.5 w-32 bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden z-50 py-1"
+                    >
+                      {themeOptions.map((opt) => {
+                        const IconComponent = opt.icon;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => {
+                              setTheme(opt.id);
+                              setIsThemeDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 text-[11px] font-black uppercase tracking-wider transition-colors hover:bg-primary/8 text-heading ${theme === opt.id ? 'text-primary bg-primary/4' : ''}`}
+                          >
+                            <IconComponent size={14} className={theme === opt.id ? 'text-primary' : 'text-heading/70'} />
+                            <span>{opt.label}</span>
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
                 </AnimatePresence>
-              </button>
+              </div>
             </div>
 
-            {/* Mobile Theme Toggle — Far Right Corner */}
-            <button
-              onClick={toggleTheme}
-              className="lg:hidden ml-auto p-2 rounded-lg hover:bg-primary/8 text-heading transition-colors shrink-0 z-10 flex items-center justify-center"
-              aria-label="Toggle theme"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={theme}
-                  initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                >
-                  {theme === 'dark' ? <Sun size={22} /> : <Moon size={22} />}
-                </motion.div>
+            {/* Mobile View Placeholder Toggle Actions */}
+            <div className="lg:hidden ml-auto flex items-center gap-1" ref={themeDropdownRef}>
+              <button
+                onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
+                className="p-2 rounded-lg hover:bg-primary/8 text-heading transition-colors shrink-0 flex items-center justify-center"
+              >
+                {theme === 'dark' ? <Moon size={20} /> : theme === 'light' ? <Sun size={20} /> : <Monitor size={20} />}
+              </button>
+              
+              <AnimatePresence>
+                {isThemeDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute top-14 right-4 w-32 bg-card rounded-xl shadow-xl border border-border/50 z-50 py-1"
+                  >
+                    {themeOptions.map((opt) => {
+                      const IconComp = opt.icon;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => {
+                            setTheme(opt.id);
+                            setIsThemeDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-heading ${theme === opt.id ? 'text-primary bg-primary/5' : ''}`}
+                        >
+                          <IconComp size={13} />
+                          <span>{opt.label}</span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
               </AnimatePresence>
-            </button>
+            </div>
 
           </div>
 
           {/* ── BADGES + NAV ROW ── */}
           <div className={`hidden lg:flex items-center justify-between border-t border-border/20 transition-all duration-300 ${isScrolled ? 'h-0 opacity-0 overflow-hidden pointer-events-none py-0' : 'py-2 opacity-100'}`}>
-
-            {/* Badges left */}
             <div className="flex items-center gap-2 shrink-0 mr-6">
               <div className="flex items-center gap-1.5 bg-[var(--badge-green-bg)] border border-green-200/60 dark:border-green-800/40 px-2.5 py-1 rounded-full">
                 <Leaf size={11} className="text-green-600 dark:text-green-400" />
@@ -218,7 +283,6 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Nav links */}
             <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
               {NAV_LINKS.map(({ label, path }) => {
                 const isActive = location.pathname === path || (path !== '/' && location.pathname + location.search === path);
@@ -236,10 +300,8 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile rows below top bar */}
+          {/* Mobile Search Bar + Configuration Rows */}
           <div className="lg:hidden pb-3 space-y-2">
-
-            {/* Location pill — centered */}
             <div className="flex justify-center" ref={locationDropdownRef}>
               <button
                 onClick={() => setIsLocationOpen(!isLocationOpen)}
@@ -253,47 +315,21 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Location dropdown */}
-            <AnimatePresence>
-              {isLocationOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="overflow-hidden"
-                >
-                  <div className="bg-card rounded-xl border border-border/50 overflow-hidden mx-2">
-                    {['coimbatore', 'pan india'].map((city, i) => (
-                      <button
-                        key={city}
-                        onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors ${i > 0 ? 'border-t border-border/30' : ''} ${deliveryCity === city ? 'text-primary' : ''}`}
-                      >
-                        {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Search bar */}
-            <div className="relative" onClick={() => setIsSearchOverlayOpen(true)}>
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted/60" />
+            {/* Mobile Search bar */}
+            <div className="relative flex items-center mx-auto max-w-sm" onClick={() => setIsSearchOverlayOpen(true)}>
+              <Search size={15} className="absolute left-4.5 text-heading/70 dark:text-foreground/80 z-10" />
               <input
                 type="text"
                 readOnly
                 placeholder="Search cakes, desserts and more..."
-                className="w-full bg-surface border border-border/60 text-foreground pl-9 pr-10 py-2.5 rounded-xl outline-none placeholder:text-muted/50 text-sm cursor-pointer"
+                className="w-full bg-surface border border-border/60 text-foreground pl-11 pr-11 py-2.5 rounded-full outline-none placeholder:text-muted/50 text-sm cursor-pointer"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50">
+              <button className="absolute right-4.5 text-heading/60 dark:text-foreground/70 flex items-center justify-center">
                 <Mic size={15} />
               </button>
             </div>
 
-            {/* Pure Veg + Eggless badges */}
-            <div className="flex items-center gap-2 pt-0.5">
+            <div className="flex items-center justify-center gap-2 pt-0.5">
               <div className="flex items-center gap-1.5 bg-[var(--badge-green-bg)] border border-green-200/60 dark:border-green-800/40 px-3 py-1.5 rounded-full">
                 <Leaf size={11} className="text-green-600 dark:text-green-400" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-green-700 dark:text-green-400">Pure Veg</span>
@@ -353,41 +389,13 @@ const Navbar = () => {
                       <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
                         <item.icon size={15} className="text-primary" />
                       </div>
-                      <span className="font-bold text-[11px] uppercase tracking-wide text-heading">item.label</span>
+                      <span className="font-bold text-[11px] uppercase tracking-wide text-heading">{item.label}</span>
                     </div>
                     {item.badge > 0 && (
                       <span className="bg-accent text-[#120807] text-[9px] font-black px-1.5 py-0.5 rounded-md">{item.badge}</span>
                     )}
                   </Link>
                 ))}
-              </div>
-
-              <div className="p-4 border-t border-border/15">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 bg-[var(--badge-green-bg)] px-2.5 py-1 rounded-full">
-                      <Leaf size={11} className="text-green-600 dark:text-green-400" />
-                      <span className="text-[9px] font-black text-green-700 dark:text-green-400 uppercase tracking-wide">Pure Veg</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[var(--badge-amber-bg)] px-2.5 py-1 rounded-full">
-                      <Egg size={11} className="text-amber-600 dark:text-amber-400" />
-                      <span className="text-[9px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-wide">Eggless</span>
-                    </div>
-                  </div>
-                  <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-primary/8 transition-colors flex items-center justify-center">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.div
-                        key={theme}
-                        initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
-                        animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                        exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        {theme === 'dark' ? <Sun size={16} className="text-primary" /> : <Moon size={16} className="text-primary" />}
-                      </motion.div>
-                    </AnimatePresence>
-                  </button>
-                </div>
               </div>
             </motion.div>
           </>

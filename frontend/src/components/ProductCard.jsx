@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Star, Clock,
   ArrowRight, Flame, Tag, Check, Info, ShoppingBag,
-  Eye, MapPin
+  Eye, MapPin, Cake, Cookie, Croissant
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -11,6 +11,26 @@ import { addToCart } from '../redux/slices/cartSlice';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
+
+const ImagePlaceholder = () => (
+  <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden group-hover:scale-105 transition-transform duration-500" style={{ background: 'var(--primary)' }}>
+    <div className="absolute inset-0 opacity-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 p-2 transform -rotate-12 scale-[1.5]">
+      {[...Array(15)].map((_, i) => (
+        <React.Fragment key={i}>
+          <Cake size={20} className="text-white" />
+          <Cookie size={20} className="text-white" />
+          <Croissant size={20} className="text-white" />
+        </React.Fragment>
+      ))}
+    </div>
+    <div className="z-10 flex flex-col items-center justify-center text-center">
+      <div className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-dashed border-white/40 rounded-full flex items-center justify-center mb-1.5 sm:mb-2 bg-white/10 backdrop-blur-sm">
+        <Cake size={20} className="text-white sm:w-6 sm:h-6" />
+      </div>
+      <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white/80 leading-tight">Artisan<br/>Delight</span>
+    </div>
+  </div>
+);
 
 /**
  * Premium ProductCard - Unifies high-contrast artisan aesthetic with rich backend data.
@@ -87,6 +107,8 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
 
   const productName = product.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
+  const hasValidImage = product.image && product.image !== 'none' && product.image.trim() !== '';
+
   // ─── HORIZONTAL LAYOUT (Swiggy-style) ──────────────────────────
   if (layout === 'horizontal') {
     return (
@@ -99,13 +121,19 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       >
         {/* LEFT — Square Image (fixed 130px) */}
         <div className="relative w-[130px] sm:w-[160px] shrink-0 overflow-hidden bg-surface">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            style={{ aspectRatio: '1/1' }}
-            loading="lazy"
-          />
+          {hasValidImage ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              style={{ aspectRatio: '1/1' }}
+              loading="lazy"
+            />
+          ) : (
+            <div style={{ aspectRatio: '1/1' }} className="w-full h-full">
+              <ImagePlaceholder />
+            </div>
+          )}
           {/* Rating pill on image */}
           {rating > 0 && (
             <div className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 bg-green-600 text-white rounded-md text-[9px] font-black shadow">
@@ -242,7 +270,11 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
     >
       {/* Image Area */}
       <div className="relative aspect-[1/1] sm:aspect-[1.5/1] overflow-hidden bg-surface">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+        {hasValidImage ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+        ) : (
+          <ImagePlaceholder />
+        )}
         {/* Badges on image — removed, now in content area */}
 
         {isOutOfStock && (

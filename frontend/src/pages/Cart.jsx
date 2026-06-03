@@ -14,12 +14,32 @@ import {
   ChevronDown,
   Truck,
   Shield,
+  Cake, Cookie, Croissant
 } from "lucide-react";
 
 import EmptyState from "../components/ui/EmptyState";
 import Button from "../components/ui/Button";
 import { formatCurrency, getCouponUnitDiscount, normalizeCartCoupon } from "../utils/helpers";
 import toast from "react-hot-toast";
+
+const ImagePlaceholder = () => (
+  <div className="w-full h-full flex items-center justify-center bg-card relative overflow-hidden" style={{ background: 'var(--primary)' }}>
+    <div className="absolute inset-0 opacity-10 flex flex-wrap items-center justify-center gap-2 p-1 transform -rotate-12 scale-[1.5]">
+      {[...Array(6)].map((_, i) => (
+        <React.Fragment key={i}>
+          <Cake size={16} className="text-white" />
+          <Cookie size={16} className="text-white" />
+          <Croissant size={16} className="text-white" />
+        </React.Fragment>
+      ))}
+    </div>
+    <div className="z-10 flex flex-col items-center justify-center text-center">
+      <div className="w-8 h-8 border-2 border-dashed border-white/40 rounded-full flex items-center justify-center mb-1 bg-white/10 backdrop-blur-sm">
+        <Cake size={16} className="text-white" />
+      </div>
+    </div>
+  </div>
+);
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -207,12 +227,16 @@ const Cart = () => {
                   className="bg-card rounded-2xl shadow-card border border-border/50 p-3 sm:p-6"
                 >
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
-                    <div className="w-full sm:w-32 h-40 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-full sm:w-32 h-40 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40 relative">
+                      {(!item.image || item.image === 'none' || item.image.trim() === '') ? (
+                        <ImagePlaceholder />
+                      ) : (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">

@@ -185,13 +185,13 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             </span>
 
             {/* Name */}
-            <h3 className="text-[13px] sm:text-[15px] font-black text-heading leading-snug line-clamp-2 uppercase italic tracking-tight group-hover:text-primary transition-colors">
+            <h3 className="text-[13px] sm:text-[15px] font-bold text-heading leading-snug line-clamp-2 uppercase tracking-tight group-hover:text-primary transition-colors">
               {productName}
             </h3>
 
             {/* Short description */}
             {product.shortDescription && (
-              <p className="text-[10px] text-heading/70 line-clamp-1 italic leading-tight">
+              <p className="text-[10px] text-heading/70 line-clamp-1 leading-tight">
                 {product.shortDescription}
               </p>
             )}
@@ -271,7 +271,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       className="group relative flex flex-col h-full bg-card border border-border/30 rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/8 transition-all duration-300 cursor-pointer"
     >
       {/* Image Area */}
-      <div className="relative aspect-[1/1] sm:aspect-[1.5/1] overflow-hidden bg-surface">
+      <div className="relative aspect-[4/3] sm:aspect-[2/1] overflow-hidden bg-surface">
         {hasValidImage ? (
           <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
         ) : (
@@ -295,7 +295,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex flex-col flex-1 p-3 sm:p-6 gap-2 sm:gap-4 justify-between">
+      <div className="flex flex-col flex-1 p-3 sm:p-4 gap-1.5 sm:gap-2.5 justify-between">
         <div>
           {/* Badges row in content area — visible on ALL screens */}
           <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-2">
@@ -326,15 +326,15 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             )}
           </div>
           <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.18em] text-primary block mb-1 capitalize">{product.category}</span>
-          <h3 className="text-[12px] sm:text-[17px] font-black text-heading leading-tight uppercase italic tracking-tight line-clamp-2 group-hover:text-primary transition-colors">{productName}</h3>
+          <h3 className="text-[12px] sm:text-[16px] font-bold text-heading leading-tight uppercase tracking-tight line-clamp-2 group-hover:text-primary transition-colors">{productName}</h3>
 
           {product.shortDescription && (
-            <p className="text-[9px] sm:text-[13px] text-heading/85 line-clamp-2 mt-2 leading-relaxed italic">
+            <p className="text-[9px] sm:text-[12px] text-heading/85 line-clamp-2 mt-1 leading-relaxed">
               {product.shortDescription}
             </p>
           )}
 
-          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2.5">
             {isOutOfStock ? (
               <>
                 <XCircle size={12} className="text-error sm:w-3.5 sm:h-3.5" />

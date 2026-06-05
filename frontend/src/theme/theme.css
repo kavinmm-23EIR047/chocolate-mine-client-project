@@ -8,24 +8,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 /* ───────────────────────────────────────────
-   LIGHT THEME
+   LIGHT THEME — RGB(232, 220, 216) Background
    ─────────────────────────────────────────── */
 :root {
    /* ── Core Surfaces ── */
-   --background: #FFFFFF;
-   /* Matched to logo background */
-   --background-rgb: 255 255 255;
-   --surface: #FFFFFF;
-   --surface-rgb: 255 255 255;
-   --card: #FFFFFF;
-   --card-rgb: 255 255 255;
-   --card-soft: #F9F6F5;
-   /* 2% tint of primary for depth */
-   --card-soft-rgb: 249 246 245;
+   --background: #E8DCD8;
+   /* RGB 232, 220, 216 */
+   --background-rgb: 232 220 216;
+   --surface: #E8DCD8;
+   --surface-rgb: 232 220 216;
+   --card: #E8DCD8;
+   --card-rgb: 232 220 216;
+   --card-soft: #DED0CC;
+   /* Slightly darker for depth */
+   --card-soft-rgb: 222 208 204;
 
-   /* ── Brand Colors ── */
+   /* ── Brand Colors (unchanged) ── */
    --primary: #381A14;
-   /* Exact logo brown */
    --primary-rgb: 56 26 20;
    --primary-hover: #52271E;
    --primary-hover-rgb: 82 39 30;
@@ -34,7 +33,6 @@
    --secondary: #7A4B43;
    --secondary-rgb: 122 75 67;
    --accent: #D4A017;
-   /* Retained luxury gold for UI contrast */
    --accent-rgb: 212 160 23;
    --accent-hover: #B8880F;
    --accent-hover-rgb: 184 136 15;
@@ -43,7 +41,6 @@
    --foreground: #140907;
    --foreground-rgb: 20 9 7;
    --heading: #381A14;
-   /* Logo color for headings */
    --heading-rgb: 56 26 20;
    --body: #381A14;
    --body-rgb: 56 26 20;
@@ -53,12 +50,12 @@
    --card-text-rgb: 20 9 7;
 
    /* ── Navigation ── */
-   --navbar: #FFFFFF;
-   --navbar-rgb: 255 255 255;
+   --navbar: #E8DCD8;
+   --navbar-rgb: 232 220 216;
    --navbar-text: #381A14;
    --navbar-text-rgb: 56 26 20;
-   --sidebar: #FFFFFF;
-   --sidebar-rgb: 255 255 255;
+   --sidebar: #E8DCD8;
+   --sidebar-rgb: 232 220 216;
 
    /* ── Footer ── */
    --footer: #140907;
@@ -71,8 +68,8 @@
    --border-rgb: 232 224 223;
    --border-muted: #D1C5C3;
    --border-muted-rgb: 209 197 195;
-   --input: #FFFFFF;
-   --input-rgb: 255 255 255;
+   --input: #E8DCD8;
+   --input-rgb: 232 220 216;
    --input-border: #D1C5C3;
    --input-border-rgb: 209 197 195;
    --input-focus: #381A14;
@@ -85,12 +82,12 @@
    --button-text-rgb: 255 255 255;
    --button-hover: #24110D;
    --button-hover-rgb: 36 17 13;
-   --button-alt-bg: #FFFFFF;
-   --button-alt-bg-rgb: 255 255 255;
+   --button-alt-bg: #E8DCD8;
+   --button-alt-bg-rgb: 232 220 216;
    --button-alt-text: #381A14;
    --button-alt-text-rgb: 56 26 20;
-   --button-alt-hover: #F9F6F5;
-   --button-alt-hover-rgb: 249 246 245;
+   --button-alt-hover: #DED0CC;
+   --button-alt-hover-rgb: 222 208 204;
    --button-buy: #381A14;
    --button-buy-rgb: 56 26 20;
    --button-buy-text: #FFFFFF;
@@ -156,13 +153,14 @@
 
    /* ── Overlay ── */
    --overlay: rgba(20, 9, 7, 0.5);
-   --backdrop: rgba(255, 255, 255, 0.85);
+   --backdrop: rgba(232, 220, 216, 0.85);
+   /* matches new background */
 
    /* ── Skeleton ── */
    --skeleton: #E8E0DF;
    --skeleton-rgb: 232 224 223;
-   --skeleton-shine: #F9F6F5;
-   --skeleton-shine-rgb: 249 246 245;
+   --skeleton-shine: #DED0CC;
+   --skeleton-shine-rgb: 222 208 204;
 
    /* ── Shadow tokens ── */
    --shadow-color: 15deg 30% 20%;
@@ -173,7 +171,7 @@
 }
 
 /* ───────────────────────────────────────────
-   DARK THEME
+   DARK THEME (Brown-based, unchanged)
    ─────────────────────────────────────────── */
 .dark {
    /* ─────────────────────────────
@@ -194,13 +192,13 @@
    /* ─────────────────────────────
      BRAND COLORS
   ───────────────────────────── */
-   --primary: #F4E8DA;
+   --primary: #DED0CC;
    --primary-rgb: 244 232 218;
 
-   --primary-hover: #FAF1E7;
+   --primary-hover: #DED0CC;
    --primary-hover-rgb: 250 241 231;
 
-   --primary-active: #E8D8C7;
+   --primary-active: #DED0CC;
    --primary-active-rgb: 232 216 199;
 
    --secondary: #DCC7AF;
@@ -215,19 +213,19 @@
    /* ─────────────────────────────
      TYPOGRAPHY
   ───────────────────────────── */
-   --foreground: #F4E8DA;
+   --foreground: #DED0CC;
    --foreground-rgb: 244 232 218;
 
-   --heading: #F4E8DA;
+   --heading: #DED0CC;
    --heading-rgb: 244 232 218;
 
-   --body: #E8D8C7;
+   --body: #DED0CC;
    --body-rgb: 232 216 199;
 
    --muted: #B89F8A;
    --muted-rgb: 184 159 138;
 
-   --card-text: #F4E8DA;
+   --card-text: #DED0CC;
    --card-text-rgb: 244 232 218;
 
    /* ─────────────────────────────
@@ -236,7 +234,7 @@
    --navbar: #120806;
    --navbar-rgb: 18 8 6;
 
-   --navbar-text: #F4E8DA;
+   --navbar-text: #DED0CC;
    --navbar-text-rgb: 244 232 218;
 
    --sidebar: #1C0D0A;
@@ -254,7 +252,7 @@
    --footer: #0A0403;
    --footer-rgb: 10 4 3;
 
-   --footer-text: #F4E8DA;
+   --footer-text: #DED0CC;
    --footer-text-rgb: 244 232 218;
 
    /* ─────────────────────────────
@@ -272,32 +270,32 @@
    --input-border: #381A14;
    --input-border-rgb: 56 26 20;
 
-   --input-focus: #F4E8DA;
+   --input-focus: #DED0CC;
 
    --ring: rgba(244, 232, 218, 0.15);
 
    /* ─────────────────────────────
      BUTTONS
   ───────────────────────────── */
-   --button-bg: #F4E8DA;
+   --button-bg: #DED0CC;
    --button-bg-rgb: 244 232 218;
 
    --button-text: #120806;
    --button-text-rgb: 18 8 6;
 
-   --button-hover: #FAF1E7;
+   --button-hover: #DED0CC;
    --button-hover-rgb: 250 241 231;
 
    --button-alt-bg: #1C0D0A;
    --button-alt-bg-rgb: 28 13 10;
 
-   --button-alt-text: #F4E8DA;
+   --button-alt-text: #DED0CC;
    --button-alt-text-rgb: 244 232 218;
 
    --button-alt-hover: #381A14;
    --button-alt-hover-rgb: 56 26 20;
 
-   --button-buy: #F4E8DA;
+   --button-buy: #DED0CC;
    --button-buy-rgb: 244 232 218;
 
    --button-buy-text: #120806;

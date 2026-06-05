@@ -16,7 +16,7 @@ const AdminCustomCakes = () => {
   const [showGlobalColors, setShowGlobalColors] = useState(false);
   const [showGlobalFlavours, setShowGlobalFlavours] = useState(false);
 
-  
+
   // Sync state with URL params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -61,6 +61,7 @@ const AdminCustomCakes = () => {
       setLoading(false);
     }
   };
+  
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this theme? It will delete related color mappings and pricing.')) return;

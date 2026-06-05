@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Cake, Plus, Edit2, Trash2, X, Palette, Coffee } from 'lucide-react';
 import adminService from '../../services/adminService';
 import toast from 'react-hot-toast';
-import ThemeBuilder from '../../components/Admin/CustomCakes/ThemeBuilder';
-import ColorManager from '../../components/Admin/CustomCakes/ColorManager';
-import FlavourManager from '../../components/Admin/CustomCakes/FlavourManager';
+import ThemeBuilder from '../../components/admin/CustomCakes/ThemeBuilder';
+import ColorManager from '../../components/admin/CustomCakes/ColorManager';
+import FlavourManager from '../../components/admin/CustomCakes/FlavourManager';
 
 const AdminCustomCakes = () => {
   const [themes, setThemes] = useState([]);

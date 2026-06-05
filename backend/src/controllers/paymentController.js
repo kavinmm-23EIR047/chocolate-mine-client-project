@@ -124,7 +124,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
   let cart;
 
   if (directItem) {
-    const product = await Product.findById(directItem.productId);
+    let dbProductId = directItem.productId;
+    if (typeof dbProductId === 'string' && dbProductId.startsWith('custom-')) {
+      const parts = dbProductId.split('-');
+      dbProductId = parts[parts.length - 1];
+    }
+    const product = await Product.findById(dbProductId);
     if (!product || product.stock < directItem.qty) {
       throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
     }
@@ -177,7 +182,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       customDetails = {
         shape: 'round',
         tiers: tierNum,
-        weight: directItem.options.weight || '0.5 kg',
+        weight: directItem.options.weight || '1 kg',
         flavour: `${directItem.options.color || ''} (Flavour: ${directItem.options.flavor || ''})`,
         designTheme: directItem.options.theme || 'Teddy Theme',
         messageOnCake: `Name: ${directItem.options.name || ''}, Age: ${directItem.options.age || ''}, Message: ${directItem.options.message || ''}`,
@@ -208,7 +213,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       let total = 0;
 
       for (const item of req.body.items) {
-        const product = await Product.findById(item.productId);
+        let dbProductId = item.productId;
+        if (typeof dbProductId === 'string' && dbProductId.startsWith('custom-')) {
+          const parts = dbProductId.split('-');
+          dbProductId = parts[parts.length - 1];
+        }
+        const product = await Product.findById(dbProductId);
         if (!product || product.stock < item.qty) {
           throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
         }
@@ -255,7 +265,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           customDetails = {
             shape: 'round',
             tiers: tierNum,
-            weight: item.options.weight || '0.5 kg',
+            weight: item.options.weight || '1 kg',
             flavour: `${item.options.color || ''} (Flavour: ${item.options.flavor || ''})`,
             designTheme: item.options.theme || 'Teddy Theme',
             messageOnCake: `Name: ${item.options.name || ''}, Age: ${item.options.age || ''}, Message: ${item.options.message || ''}`,
@@ -324,7 +334,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
 
   if (!directItem) {
     for (const item of cart.items) {
-      const product = await Product.findById(item.productId);
+      let dbProductId = item.productId;
+      if (typeof dbProductId === 'string' && dbProductId.startsWith('custom-')) {
+        const parts = dbProductId.split('-');
+        dbProductId = parts[parts.length - 1];
+      }
+      const product = await Product.findById(dbProductId);
 
       if (!product || product.stock < item.qty) {
         throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);

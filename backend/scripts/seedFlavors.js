@@ -2,6 +2,16 @@ const mongoose = require('mongoose');
 const CustomCakeFlavor = require('../src/models/CustomCakeFlavor');
 require('dotenv').config();
 
+const calculateWeights = (basePrice) => {
+  return [
+    { kg: 1, price: basePrice },
+    { kg: 1.5, price: basePrice + (basePrice / 2) },
+    { kg: 2, price: basePrice * 2 },
+    { kg: 2.5, price: basePrice * 2.5 },
+    { kg: 3, price: basePrice * 3 }
+  ];
+};
+
 const flavors = [
   // Vanilla Cakes
   { name: 'Classic Vanilla', category: 'Vanilla Cakes', pricePerKg: 520 },
@@ -63,7 +73,12 @@ const seedFlavors = async () => {
     }
     
     // Insert new
-    await CustomCakeFlavor.insertMany(flavors);
+    const flavorsWithWeights = flavors.map(f => ({
+      name: f.name,
+      category: f.category,
+      weights: calculateWeights(f.pricePerKg)
+    }));
+    await CustomCakeFlavor.insertMany(flavorsWithWeights);
     console.log('Successfully seeded flavors');
     
     process.exit(0);

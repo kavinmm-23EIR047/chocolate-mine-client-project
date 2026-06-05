@@ -84,12 +84,55 @@ const adminService = {
   /* ----------------------------------------
      Custom Cake Flavours
   ---------------------------------------- */
-  getCustomCakeFlavours: () => api.get('/custom-cakes/flavours/admin'),
+  createCustomCakeFlavour: (data) => api.post('/custom-cakes/flavours', data),
+  updateCustomCakeFlavour: (id, data) => api.put(`/custom-cakes/flavours/${id}`, data),
+  seedCustomCakeFlavours: () => api.post('/custom-cakes/flavours/seed'),
+  
+  /* ----------------------------------------
+     Custom Cake Themes
+  ---------------------------------------- */
+  getCustomCakeThemes: () => api.get('/custom-cakes/themes'),
+  createCustomCakeTheme: (data) => api.post('/custom-cakes/themes', data),
+  updateCustomCakeTheme: (id, data) => api.put(`/custom-cakes/themes/${id}`, data),
+  deleteCustomCakeTheme: (id) => api.delete(`/custom-cakes/themes/${id}`),
+
+  // --- Theme Flavours (Isolated) ---
+  addCustomCakeThemeFlavour: (themeId, data) => api.post(`/custom-cakes/themes/${themeId}/flavours`, data),
+  updateCustomCakeThemeFlavour: (themeId, flavourId, data) => api.put(`/custom-cakes/themes/${themeId}/flavours/${flavourId}`, data),
+  deleteCustomCakeThemeFlavour: (themeId, flavourId) => api.delete(`/custom-cakes/themes/${themeId}/flavours/${flavourId}`),
+
+  addCustomCakeThemeColor: (themeId, data) => api.post(`/custom-cakes/themes/${themeId}/colors`, data),
+  updateCustomCakeThemeColor: (themeId, colorId, data) => api.put(`/custom-cakes/themes/${themeId}/colors/${colorId}`, data),
+  deleteCustomCakeThemeColor: (themeId, colorId) => api.delete(`/custom-cakes/themes/${themeId}/colors/${colorId}`),
+  uploadCustomCakeThemeColorImages: (themeId, colorId, formData) => api.post(`/custom-cakes/themes/${themeId}/colors/${colorId}/images`, formData),
+
+  /* ----------------------------------------
+     Custom Cake Colors
+  ---------------------------------------- */
+  getCustomCakeColors: () => api.get('/custom-cakes/colors'),
+  createCustomCakeColor: (data) => api.post('/custom-cakes/colors', data),
+  updateCustomCakeColor: (id, data) => api.put(`/custom-cakes/colors/${id}`, data),
+  deleteCustomCakeColor: (id) => api.delete(`/custom-cakes/colors/${id}`),
+
+  /* ----------------------------------------
+     Custom Cake Theme Colors (Images)
+  ---------------------------------------- */
+  getCustomCakeThemeColors: () => api.get('/custom-cakes/theme-colors'),
+  createCustomCakeThemeColor: (formData) => api.post('/custom-cakes/theme-colors', formData),
+  deleteCustomCakeThemeColor: (id) => api.delete(`/custom-cakes/theme-colors/${id}`),
+
+  /* ----------------------------------------
+     Custom Cake Flavours
+  ---------------------------------------- */
+  getCustomCakeFlavours: () => api.get('/custom-cakes/flavours'),
   createCustomCakeFlavour: (data) => api.post('/custom-cakes/flavours', data),
   updateCustomCakeFlavour: (id, data) => api.put(`/custom-cakes/flavours/${id}`, data),
   deleteCustomCakeFlavour: (id) => api.delete(`/custom-cakes/flavours/${id}`),
-  seedCustomCakeFlavours: () => api.post('/custom-cakes/flavours/seed')
-};
 
+  /* ----------------------------------------
+     Seed Defaults
+  ---------------------------------------- */
+  seedCustomCakeDefaults: () => api.post('/custom-cakes/seed-defaults')
+};
 
 export default adminService;

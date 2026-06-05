@@ -11,11 +11,10 @@ const customCakeFlavorSchema = new mongoose.Schema({
     required: true,
     enum: ['Vanilla Cakes', 'Chocolate Cakes', 'Red Velvet Cakes', 'Other']
   },
-  pricePerKg: {
-    type: Number,
-    required: true,
-    min: 0
-  },
+  weights: [{
+    kg: { type: Number, required: true },
+    price: { type: Number, required: true }
+  }],
   image: {
     type: String,
     default: null

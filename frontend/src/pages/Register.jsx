@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, UserPlus, ArrowRight, Phone, ChevronRight } from 'lucide-react';
+import { Mail, Lock, User, UserPlus, ArrowRight, Phone, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import api from '../utils/api';
 import Button from '../components/ui/Button';
 
@@ -23,6 +23,8 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -183,13 +185,21 @@ const Register = () => {
                     <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-primary transition-colors" size={18} />
                     <input
                       name="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       required
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full bg-surface/5 border border-border text-heading pl-16 pr-6 py-4 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-sm placeholder:text-muted/30"
+                      className="w-full bg-surface/5 border border-border text-heading pl-16 pr-14 py-4 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-sm placeholder:text-muted/30"
                       placeholder="••••••••"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -198,13 +208,21 @@ const Register = () => {
                     <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-primary transition-colors" size={18} />
                     <input
                       name="confirmPassword"
-                      type="password"
+                      type={showConfirmPassword ? 'text' : 'password'}
                       required
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="w-full bg-surface/5 border border-border text-heading pl-16 pr-6 py-4 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-sm placeholder:text-muted/30"
+                      className="w-full bg-surface/5 border border-border text-heading pl-16 pr-14 py-4 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-sm placeholder:text-muted/30"
                       placeholder="••••••••"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors"
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
               </div>

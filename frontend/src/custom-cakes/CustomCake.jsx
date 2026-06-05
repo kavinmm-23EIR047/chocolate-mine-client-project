@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, Check, ShoppingCart, ChevronLeft, ChevronRight,
+  ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
   Star, Shield, Leaf, Clock, Heart, Share2, ChevronDown, X,
   ChevronUp, Sparkles, BadgeCheck, ChevronRight as Next,
   Cake, Palette, Weight, UserCircle, ReceiptText, Layers,
@@ -13,23 +13,29 @@ import { addToCart } from '../redux/slices/cartSlice';
 import { saveCustomCakeRequest } from '../utils/customCake';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import PureVegIcon from '../assets/pure veg.webp';
 
-// ── Import separated data ────────────────────────────────────────
+// ── Import separated data ────────────────────────────────────────────────
 import {
-  TIERS, THEMES, TEDDY_FLAVORS, WEIGHTS, TRUST, STEPS,
-  getThemesByTier, getTierById, calculateTierPrice,
+  TIERS, WEIGHTS, TRUST, STEPS, getTierById
 } from './customCakeData';
+
+// ─── SVG ICONS ────────────────────────────────────────────────
+const VegIcon = () => (
+  <img src={PureVegIcon} alt="Pure Veg" className="inline-block flex-shrink-0 w-4 h-4" style={{ marginTop: '-1px' }} />
+);
 
 // ─── COMPONENT ────────────────────────────────────────────────
 export default function CustomCake() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
 
   // ── STATE ──────────────────────────────────────────────────
   const [selectedTier, setSelectedTier] = useState(null);   // null = all, 1/2/3
   const [themeIdx, setThemeIdx] = useState(null);            // null = browse mode (no theme picked)
-  const [selectedFlavor, setSelectedFlavor] = useState(TEDDY_FLAVORS[0]);
-  const [weightIdx, setWeightIdx] = useState(1);
+  const [selectedFlavor, setSelectedFlavor] = useState(null);
+  const [weightIdx, setWeightIdx] = useState(0);
   const [customerName, setCustomerName] = useState('');
   const [age, setAge] = useState('1');
   const [message, setMessage] = useState('');
@@ -42,36 +48,118 @@ export default function CustomCake() {
   const [flavorDropdownOpen, setFlavorDropdownOpen] = useState(false);
   const [flavorSearch, setFlavorSearch] = useState('');
 
+  const [dbThemes, setDbThemes] = useState([]);
+  const [dbThemeColors, setDbThemeColors] = useState([]);
+
   useEffect(() => {
-    const loadDbFlavors = async () => {
+    const loadDbData = async () => {
       try {
-        const res = await api.get('/custom-cakes/flavours');
-        if (res.data && res.data.data) {
-          setDbFlavors(res.data.data);
-          const def = res.data.data.find(f => f.name === 'Classic Vanilla' && f.category === 'Vanilla Cakes') || res.data.data[0];
-          setSelectedDbFlavor(def);
+        const [themesRes] = await Promise.all([
+          api.get('/custom-cakes/themes')
+        ]);
+        
+        if (themesRes.data?.data) {
+          setDbThemes(themesRes.data.data);
         }
       } catch (err) {
-        console.error('Failed to load custom cake flavours:', err);
+        console.error('Failed to load custom cake data:', err);
       }
     };
-    loadDbFlavors();
+    loadDbData();
   }, []);
 
+  // ── HANDLE URL PARAMETERS FOR TIER & THEME ────────────────
+  useEffect(() => {
+    const tierParam = searchParams.get('tier');
+    const themeParam = searchParams.get('theme');
+    
+    if (tierParam) {
+      const tierNum = parseInt(tierParam, 10);
+      if ([1, 2, 3].includes(tierNum)) {
+        setSelectedTier(tierNum);
+      }
+    }
+    
+    if (themeParam && dbThemes.length > 0) {
+      const themeIndex = dbThemes.findIndex(t => t._id === themeParam);
+      if (themeIndex >= 0) {
+        setThemeIdx(themeIndex);
+      }
+    }
+  }, [searchParams, dbThemes]);
+
   // ── DERIVED ────────────────────────────────────────────────
-  const filteredThemes = useMemo(() => getThemesByTier(selectedTier), [selectedTier]);
+  const filteredThemes = useMemo(() => {
+    return dbThemes
+      .filter(t => !selectedTier || (t.tiers && t.tiers[`tier${selectedTier}`]?.isActive))
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .map(t => {
+        // Map embedded colors (design flavors)
+        const mappedFlavors = (t.colors || []).filter(c => c.isActive).map(c => {
+          let imgUrl = c.images?.[`tier${selectedTier || 1}`] || c.images?.tier1;
+          if (!imgUrl) imgUrl = c.images?.tier2 || c.images?.tier3;
+          return {
+            id: c._id,
+            name: c.name,
+            hexCode: c.hexCode || '#fff',
+            image: imgUrl,
+            price: c.price || 0,
+            bg: c.hexCode || '#fff'
+          };
+        });
+        
+        return {
+          id: t._id,
+          name: t.name,
+          shortName: t.name,
+          description: t.description,
+          enabled: t.isActive,
+          badge: t.isActive ? 'Available' : 'Coming Soon',
+          rating: 5.0, reviews: 0,
+          flavors: mappedFlavors, // design colors
+          dbFlavors: (t.flavors || []).filter(f => f.isActive), // cake sponge flavors
+          bg: mappedFlavors[0]?.bg || '#fefefe',
+          tiers: selectedTier ? [selectedTier] : [1, 2, 3].filter(num => t.tiers && t.tiers[`tier${num}`]?.isActive),
+          emoji: '🎂',
+          tierPricing: t.tiers
+        };
+      });
+  }, [dbThemes, selectedTier]);
+
   const theme = themeIdx !== null ? filteredThemes[themeIdx] : null;
   const weight = WEIGHTS[weightIdx];
   const currentTier = getTierById(selectedTier || 1);
-
+  
+  // Update color when theme changes
   useEffect(() => {
-    if (theme && theme.flavors.length) setSelectedFlavor(theme.flavors[0]);
-  }, [themeIdx, selectedTier]);
+    if (theme && theme.flavors?.length) {
+      // Keep selected color if available in new theme, else pick first
+      const existing = theme.flavors.find(f => f.name === selectedFlavor?.name);
+      setSelectedFlavor(existing || theme.flavors[0]);
+    } else {
+      setSelectedFlavor(null);
+    }
 
-  // When tier changes, reset theme selection
+    if (theme && theme.dbFlavors?.length) {
+      const existing = theme.dbFlavors.find(f => f.name === selectedDbFlavor?.name);
+      setSelectedDbFlavor(existing || theme.dbFlavors[0]);
+    } else {
+      setSelectedDbFlavor(null);
+    }
+  }, [themeIdx, selectedTier, theme]);
+
+  const themeIdToKeep = useRef(null);
+
+  // When tier changes, reset theme selection unless explicitly keeping it
   useEffect(() => {
-    setThemeIdx(null);
-  }, [selectedTier]);
+    if (themeIdToKeep.current && filteredThemes.length > 0) {
+      const newIdx = filteredThemes.findIndex(t => t.id === themeIdToKeep.current);
+      setThemeIdx(newIdx !== -1 ? newIdx : null);
+      themeIdToKeep.current = null;
+    } else if (!themeIdToKeep.current) {
+      setThemeIdx(null);
+    }
+  }, [selectedTier, filteredThemes]);
 
   const prevTheme = useCallback(() => {
     if (!filteredThemes.length) return;
@@ -84,12 +172,32 @@ export default function CustomCake() {
   }, [filteredThemes]);
 
   // ── PRICE CALCULATION ──────────────────────────────────────
-  const tierMultiplier = currentTier ? currentTier.priceMultiplier : 1;
-  const basePrice = selectedDbFlavor ? Math.round(selectedDbFlavor.pricePerKg * tierMultiplier) : Math.round(520 * tierMultiplier);
-  const totalBeforeGst = basePrice + weight.extraPrice;
-  const gst = Math.round(totalBeforeGst * 0.18);
-  const grandTotal = totalBeforeGst + gst;
-  const chipTotal = (w) => Math.round((selectedDbFlavor ? selectedDbFlavor.pricePerKg : 520) * tierMultiplier) + w.extraPrice;
+  const getFlavorWeightPrice = (w) => {
+    if (!selectedDbFlavor || !selectedDbFlavor.weights) return 1120; // fallback
+    const weightVal = parseFloat(w.label);
+    const weightObj = selectedDbFlavor.weights.find(x => x.kg === weightVal);
+    if (weightObj) return weightObj.price;
+    // Fallback to 1KG price if not found
+    const baseObj = selectedDbFlavor.weights.find(x => x.kg === 1);
+    return baseObj ? baseObj.price : 1120;
+  };
+
+  const getTierPrice = () => {
+    if (!theme || !selectedTier) return 0;
+    return theme.tierPricing?.[`tier${selectedTier}`]?.price || 0;
+  };
+  
+  const getThemeColorPrice = () => {
+    return selectedFlavor?.price || 0;
+  };
+
+  const basePrice = getFlavorWeightPrice(weight);
+  const themePrice = getThemeColorPrice();
+  const tierPrice = getTierPrice();
+  
+  const grandTotal = basePrice + themePrice + tierPrice;
+  
+  const chipTotal = (w) => getFlavorWeightPrice(w) + themePrice + tierPrice;
 
   // ── ADD TO CART ────────────────────────────────────────────
   const handleAddToCart = async () => {
@@ -99,9 +207,10 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
+      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}`;
       dispatch(addToCart({
         product: {
-          _id: `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${Date.now()}`,
+          _id: baseCakeId,
           name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
           image: selectedFlavor.image,
           price: grandTotal, stock: 5, category: 'Custom Cakes',
@@ -129,8 +238,55 @@ export default function CustomCake() {
         estimatedPrice: grandTotal,
       });
       toast.success('🎂 Dream cake added to bag!');
-      setTimeout(() => navigate('/checkout'), 800);
     } catch { toast.error('Failed to add. Please try again.'); }
+    finally { setIsAdding(false); }
+  };
+
+  // ── BUY NOW (Add to Cart + Redirect to Checkout) ──────────
+  const handleBuyNow = async () => {
+    if (!theme) { toast.error('Please select a theme first'); return; }
+    if (!theme.enabled) { toast.error('This theme is coming soon!'); return; }
+    if (!customerName.trim()) { toast.error('Please enter the name for the cake'); setDrawerOpen(true); setMobileStep(4); return; }
+    try {
+      setIsAdding(true);
+      const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
+      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}`;
+      
+      const directItem = {
+        productId: baseCakeId,
+        name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+        image: selectedFlavor.image,
+        category: 'Custom Cakes',
+        price: grandTotal,
+        variantPrice: grandTotal,
+        qty: 1,
+        selectedFlavor: selectedFlavor.name,
+        selectedWeight: weight.label,
+        options: { 
+          theme: theme.name, 
+          tier: tierLabel, 
+          color: selectedFlavor.name, 
+          flavor: selectedDbFlavor?.name || 'Classic Vanilla', 
+          weight: weight.label, 
+          name: customerName, 
+          age, 
+          message: message || 'None' 
+        },
+      };
+
+      saveCustomCakeRequest({
+        designTheme: theme.name, 
+        tier: tierLabel, 
+        servingWeight: weight.label, 
+        themeColor: selectedFlavor.name,
+        flavour: selectedDbFlavor?.name || 'Classic Vanilla',
+        messageOnCake: `Name: ${customerName}, Age: ${age}, Message: ${message || 'None'}`,
+        estimatedPrice: grandTotal,
+      });
+
+      toast.success('🎂 Dream cake ready for checkout!');
+      setTimeout(() => navigate('/checkout', { state: { directItem } }), 800);
+    } catch { toast.error('Failed to proceed. Please try again.'); }
     finally { setIsAdding(false); }
   };
 
@@ -144,18 +300,24 @@ export default function CustomCake() {
     setThemeIdx(idx);
     const t = filteredThemes[idx];
     if (t && t.flavors.length) setSelectedFlavor(t.flavors[0]);
+    if (t && t.dbFlavors?.length) setSelectedDbFlavor(t.dbFlavors[0]);
   };
 
   // ── Personalize Form ──────────────────────────────────────
-  const PersonalizeForm = ({ compact = false }) => (
+  const renderPersonalizeForm = (compact = false) => (
     <div className={compact ? 'space-y-3' : 'space-y-4'}>
+      {/* VEG BADGE */}
+      <div className="flex items-center gap-2 bg-emerald-50/50 border border-emerald-100 rounded-xl px-3 py-2">
+        <VegIcon />
+        <span className="text-[11px] font-black text-emerald-700 uppercase tracking-wider">100% Pure Veg & Eggless</span>
+      </div>
+
       {/* 🎂 SEARCHABLE FLAVOR DROPDOWN */}
       <div className="relative">
         <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
           Choose Your Flavour <span className="text-red-500">*</span>
         </label>
         
-        {/* Dropdown Button */}
         <button
           type="button"
           onClick={() => setFlavorDropdownOpen(!flavorDropdownOpen)}
@@ -163,10 +325,10 @@ export default function CustomCake() {
         >
           {selectedDbFlavor ? (
             <span>
-              {selectedDbFlavor.name} <span className="text-[var(--primary)] ml-1">(₹{selectedDbFlavor.pricePerKg} Half Kg)</span>
+              {selectedDbFlavor.name}
             </span>
           ) : (
-            <span className="text-[var(--muted)]">Loading flavours...</span>
+            <span className="text-[var(--muted)]">No flavours mapped</span>
           )}
           <ChevronDown size={16} className={`transition-transform duration-200 ${flavorDropdownOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -198,9 +360,9 @@ export default function CustomCake() {
 
                 {/* List */}
                 <div className="overflow-y-auto flex-1 divide-y divide-[var(--border)] relative z-50">
-                  {['Vanilla Cakes', 'Chocolate Cakes', 'Red Velvet Cakes'].map(category => {
-                    const categoryFlavors = dbFlavors.filter(
-                      f => f.category === category && f.isActive && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
+                  {theme && Array.from(new Set(theme.dbFlavors.map(f => f.category))).map(category => {
+                    const categoryFlavors = theme.dbFlavors.filter(
+                      f => f.category === category && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
                     );
                     if (categoryFlavors.length === 0) return null;
 
@@ -222,15 +384,10 @@ export default function CustomCake() {
                                   setFlavorSearch('');
                                 }}
                                 className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between font-bold transition-all ${
-                                  isSelected
-                                    ? 'bg-[var(--primary)] text-[var(--button-text)]'
-                                    : 'text-[var(--foreground)] hover:bg-[var(--card-soft)]'
+                                  isSelected ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'hover:bg-[var(--input-hover)] text-[var(--foreground)]'
                                 }`}
                               >
                                 <span>{flavor.name}</span>
-                                <span className={isSelected ? 'text-[var(--button-text)] opacity-90' : 'text-[var(--primary)]'}>
-                                  ₹{flavor.pricePerKg}
-                                </span>
                               </button>
                             );
                           })}
@@ -382,10 +539,6 @@ export default function CustomCake() {
             <p className="font-black text-sm text-[var(--heading)]">{currentTier.name}</p>
             <p className="text-xs text-[var(--muted)] mt-0.5">{currentTier.description}</p>
           </div>
-          <div className="ml-auto text-right shrink-0">
-            <p className="text-[9px] text-[var(--muted)] uppercase tracking-wider font-bold">Price Factor</p>
-            <p className="text-sm font-black text-[var(--primary)]">{currentTier.priceMultiplier}×</p>
-          </div>
         </motion.div>
       )}
 
@@ -393,7 +546,7 @@ export default function CustomCake() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <AnimatePresence mode="popLayout">
           {filteredThemes.map((t, i) => (
-            <motion.button
+            <motion.div
               key={t.id}
               layout
               initial={{ opacity: 0, scale: 0.9 }}
@@ -401,7 +554,7 @@ export default function CustomCake() {
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3, delay: i * 0.05 }}
               onClick={() => selectTheme(i)}
-              className="relative group flex flex-col rounded-3xl border-2 border-[var(--border)] overflow-hidden transition-all duration-300 hover:border-[var(--primary)] hover:shadow-xl hover:shadow-[var(--primary)]/5 hover:scale-[1.02] active:scale-[0.98] text-left bg-[var(--card)]"
+              className="relative group flex flex-col rounded-3xl border-2 border-[var(--border)] overflow-hidden transition-all duration-300 hover:border-[var(--primary)] hover:shadow-xl hover:shadow-[var(--primary)]/5 hover:scale-[1.02] active:scale-[0.98] text-left bg-[var(--card)] cursor-pointer"
             >
               {/* Image area */}
               <div className="relative w-full overflow-hidden" style={{ paddingBottom: '85%', background: t.bg }}>
@@ -422,18 +575,26 @@ export default function CustomCake() {
                   }
                 </div>
 
-                {/* Tier badges */}
+                {/* Tier badges - clickable to view cake at that tier */}
                 <div className="absolute top-3 right-3 z-10 flex gap-1">
                   {t.tiers.map(tid => (
-                    <span
+                    <button
                       key={tid}
-                      className={`text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm ${selectedTier === tid
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (t.enabled) {
+                          navigate(`/custom-cake?tier=${tid}&theme=${t.id}`);
+                        }
+                      }}
+                      disabled={!t.enabled}
+                      className={`text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm transition-all hover:scale-110 active:scale-95 ${selectedTier === tid
                         ? 'bg-[var(--primary)] text-[var(--button-text)]'
-                        : 'bg-white/80 text-[var(--heading)] backdrop-blur-sm'
+                        : 'bg-white/80 text-[var(--heading)] backdrop-blur-sm hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed'
                         }`}
+                      title={t.enabled ? `View ${t.name} at Tier ${tid}` : 'This theme is coming soon'}
                     >
                       T{tid}
-                    </span>
+                    </button>
                   ))}
                 </div>
 
@@ -463,7 +624,7 @@ export default function CustomCake() {
                 <div className="mt-auto pt-3 flex items-center justify-between">
                   {t.enabled && t.flavors[0] ? (
                     <span className="text-sm font-black text-[var(--primary)]">
-                      From ₹{Math.round(t.flavors[0].pricePerKg * tierMultiplier)}
+                      From ₹{Math.round((selectedDbFlavor?.weights?.find(x => x.kg === 1)?.price || 1120) + (t.flavors[0]?.price || 0) + (t.tierPricing?.tier1?.price || 0))}
                     </span>
                   ) : (
                     <span className="text-xs font-bold text-[var(--muted)]">Price TBD</span>
@@ -473,7 +634,7 @@ export default function CustomCake() {
                   </span>
                 </div>
               </div>
-            </motion.button>
+            </motion.div>
           ))}
         </AnimatePresence>
       </div>
@@ -534,7 +695,6 @@ export default function CustomCake() {
                         <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]">
                           {tier.layers} {tier.layers === 1 ? 'Layer' : 'Layers'}
                         </span>
-                        <span className="text-xs font-bold text-[var(--primary)]">{tier.priceMultiplier}× pricing</span>
                       </div>
                     </div>
                   </button>
@@ -584,7 +744,7 @@ export default function CustomCake() {
                         ? <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{t.badge}</span>
                         : <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Coming Soon</span>
                       }
-                      {t.enabled && <span className="text-xs font-bold text-[var(--primary)]">From ₹{Math.round(t.flavors[0]?.pricePerKg * tierMultiplier)}</span>}
+                      {t.enabled && <span className="text-xs font-bold text-[var(--primary)]">From ₹{Math.round((selectedDbFlavor?.weights?.find(x => x.kg === 1)?.price || 1120) + (t.flavors[0]?.price || 0) + (t.tierPricing?.tier1?.price || 0))}</span>}
                     </div>
                   </div>
                   {!t.enabled && (
@@ -634,7 +794,7 @@ export default function CustomCake() {
                       </div>
                       <div className={`w-full px-2 py-2.5 text-center ${isSel ? 'bg-[var(--card-soft)]' : 'bg-[var(--card)]'}`}>
                         <p className="text-xs font-black text-[var(--heading)] leading-tight">{flavor.name}</p>
-                        <p className="text-xs font-bold text-[var(--primary)] mt-0.5">₹{Math.round(flavor.pricePerKg * tierMultiplier)}/kg</p>
+                        <p className="text-xs font-bold text-[var(--primary)] mt-0.5">+₹{flavor.price || 0}</p>
                       </div>
                     </button>
                   );
@@ -678,9 +838,6 @@ export default function CustomCake() {
                       <p className={`font-black text-sm ${isSel ? 'text-[var(--primary)]' : 'text-[var(--heading)]'}`}>
                         ₹{chipTotal(w)}
                       </p>
-                      {w.extraPrice > 0 && (
-                        <p className="text-[10px] text-[var(--muted)]">+₹{w.extraPrice} extra</p>
-                      )}
                     </div>
                   </button>
                 );
@@ -694,7 +851,7 @@ export default function CustomCake() {
         return (
           <div className="space-y-4">
             <p className="text-xs font-black text-[var(--muted)] uppercase tracking-wider">Personalize Your Cake</p>
-            <PersonalizeForm compact />
+            {renderPersonalizeForm(true)}
           </div>
         );
 
@@ -738,9 +895,8 @@ export default function CustomCake() {
             {/* Price breakdown */}
             <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] divide-y divide-[var(--border)]">
               {[
-                { label: 'Base Price', value: `₹${basePrice}` },
-                { label: 'Weight Extra', value: `+₹${weight.extraPrice}` },
-                { label: 'GST (18%)', value: `+₹${gst}` },
+                { label: 'Weight Price', value: `₹${basePrice}` },
+                { label: 'Theme & Tier Price', value: `+₹${themePrice + tierPrice}` },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-4 py-2.5">
                   <span className="text-xs text-[var(--muted)]">{label}</span>
@@ -1001,7 +1157,13 @@ export default function CustomCake() {
                 {/* Title */}
                 <div>
                   <div className="flex items-start justify-between gap-3">
-                    <h1 className="font-black text-2xl text-[var(--heading)] leading-tight">{theme.name} Cake</h1>
+                    <div>
+                      <h1 className="font-black text-2xl text-[var(--heading)] leading-tight">{theme.name} Cake</h1>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <VegIcon />
+                        <span className="text-[11px] font-black text-emerald-600 uppercase tracking-wider">100% Pure Veg & Eggless</span>
+                      </div>
+                    </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center hover:bg-[var(--card-soft)] transition-colors">
                         <Share2 size={14} className="text-[var(--muted)]" />
@@ -1037,8 +1199,10 @@ export default function CustomCake() {
                   <div className="mt-3 flex gap-2">
                     {TIERS.map(tier => (
                       <button
-                        key={tier.id}
-                        onClick={() => setSelectedTier(tier.id)}
+                        onClick={() => {
+                          if (theme) themeIdToKeep.current = theme.id;
+                          setSelectedTier(tier.id);
+                        }}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 text-[10px] font-black uppercase tracking-wider transition-all ${(selectedTier || 1) === tier.id
                           ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                           : 'border-[var(--border)] text-[var(--heading)] hover:border-[var(--primary)]'
@@ -1104,7 +1268,7 @@ export default function CustomCake() {
                 {theme.enabled && (
                   <div>
                     <p className="font-black text-sm text-[var(--heading)] mb-3">Personalize Your Cake</p>
-                    <PersonalizeForm />
+                    {renderPersonalizeForm(false)}
                   </div>
                 )}
 
@@ -1132,9 +1296,9 @@ export default function CustomCake() {
                     </div>
                     <div className="mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-3 gap-2 text-center">
                       {[
-                        { label: 'Base Price', value: `₹${basePrice}` },
-                        { label: 'Customization', value: weight.extraPrice > 0 ? `+₹${weight.extraPrice}` : '+₹0' },
-                        { label: 'Total (incl GST)', value: `₹${grandTotal}`, bold: true },
+                        { label: 'Weight Price', value: `₹${basePrice}` },
+                        { label: 'Customization', value: `+₹${themePrice + tierPrice}` },
+                        { label: 'Total', value: `₹${grandTotal}`, bold: true },
                       ].map(({ label, value, bold }) => (
                         <div key={label}>
                           <p className="text-[9px] uppercase tracking-wider text-[var(--muted)] font-bold">{label}</p>
@@ -1145,15 +1309,27 @@ export default function CustomCake() {
                   </div>
                 )}
 
-                {/* Add to cart */}
-                <button
-                  onClick={handleAddToCart}
-                  disabled={isAdding || !theme.enabled}
-                  className="w-full flex items-center justify-center gap-2.5 py-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--button-text)] rounded-2xl font-black text-base tracking-wide transition-all hover:scale-[1.015] active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-lg"
-                >
-                  <ShoppingCart size={18} />
-                  {isAdding ? 'Adding...' : theme.enabled ? 'Add to Cart' : 'Notify Me When Ready'}
-                </button>
+                {/* Buy Now & Add to Cart buttons */}
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isAdding || !theme.enabled}
+                    className={`h-16 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl transition flex items-center justify-center gap-3 ${!theme.enabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--primary)]/5'}`}
+                  >
+                    {isAdding ? <div className="w-5 h-5 border-2 border-[var(--primary)]/30 border-t-[var(--primary)] rounded-full animate-spin" /> : <ShoppingCart size={20} />}
+                    {isAdding ? 'ADDING...' : 'ADD TO CART'}
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={isAdding || !theme.enabled}
+                    className={`h-16 font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl transition shadow-xl flex items-center justify-center gap-3 ${theme.enabled
+                      ? 'bg-[var(--secondary)] text-[var(--button-text)] shadow-[var(--secondary)]/20 hover:brightness-110 cursor-pointer'
+                      : 'bg-[var(--muted)]/40 text-[var(--muted)]/60 cursor-not-allowed shadow-none'
+                      }`}
+                  >
+                    {isAdding ? 'PROCESSING...' : theme.enabled ? 'BUY NOW' : 'NOTIFY ME'} <ArrowRight size={20} />
+                  </button>
+                </div>
 
                 {theme.enabled && (
                   <p className="text-center text-[11px] text-[var(--muted)]">
@@ -1349,14 +1525,24 @@ export default function CustomCake() {
                     <ChevronRight size={16} />
                   </button>
                 ) : (
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={isAdding || !theme?.enabled}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-xl font-black text-sm tracking-wide shadow-md active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    <ShoppingCart size={16} />
-                    {isAdding ? 'Adding...' : 'Add to Cart'}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={isAdding || !theme?.enabled}
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-xl font-black text-sm tracking-wide shadow-md active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      <Sparkles size={16} />
+                      {isAdding ? 'Processing...' : 'Buy Now'}
+                    </button>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={isAdding || !theme?.enabled}
+                      className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-[var(--card)] border-2 border-[var(--primary)] text-[var(--primary)] rounded-xl font-black text-sm tracking-wide active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      <ShoppingCart size={16} />
+                      {isAdding ? 'Adding...' : 'Cart'}
+                    </button>
+                  </div>
                 )}
 
                 {/* Mini summary row */}

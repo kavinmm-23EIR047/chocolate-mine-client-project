@@ -5,6 +5,8 @@ import {
   ArrowRight, Flame, Tag, Check, Info, ShoppingBag,
   Eye, MapPin, Cake, Cookie, Croissant, CheckCircle2, XCircle
 } from 'lucide-react';
+import EgglessBadge from './ui/EgglessBadge';
+import PureVegBadge from './ui/PureVegBadge';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/slices/cartSlice';
@@ -315,6 +317,12 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
               >
                 <Tag size={8} /> {couponLabel}
               </span>
+            )}
+            {String(product.category || '').toLowerCase().includes('cake') && (
+              <PureVegBadge className="text-[8px] sm:text-[9px]" />
+            )}
+            {String(product.category || '').toLowerCase().includes('cake') && (
+              <EgglessBadge className="text-[8px] sm:text-[9px]" />
             )}
           </div>
           <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.18em] text-primary block mb-1 capitalize">{product.category}</span>

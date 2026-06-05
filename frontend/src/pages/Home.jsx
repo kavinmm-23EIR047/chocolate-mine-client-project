@@ -37,6 +37,7 @@ import { useDeliveryLocation } from '../context/LocationContext';
 import HomeBanner from '../components/home/HomeBanner';
 import api from '../utils/api';
 import HomeLoader from '../components/home/HomeLoader';
+import WhatsAppButton from '../components/WhatsAppButton';
 import ScooterLightImg from '../assets/scooter-light.png';
 import ScooterDarkImg from '../assets/scooter-dark.png';
 import CakeImg from '../assets/cake.png';
@@ -791,6 +792,7 @@ const Home = () => {
           )}
         </div>
       </main>
+      <WhatsAppButton />
     </div>
   );
 };

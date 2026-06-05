@@ -13,6 +13,8 @@ import {
 } from 'react-icons/fa';
 import Button from './ui/Button';
 import Logo from './Logo';
+import EgglessBadge from './ui/EgglessBadge';
+import PureVegBadge from './ui/PureVegBadge';
 
 const Footer = () => {
   return (
@@ -36,6 +38,11 @@ const Footer = () => {
             <p className="text-xl font-bold text-footer-text/60 max-w-md leading-relaxed italic">
               "Handcrafting premium moments of joy. From artisanal truffles to bespoke celebration cakes, we redefine the luxury of desserts."
             </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <PureVegBadge className="bg-success/5 border-success/20 text-success" />
+              <EgglessBadge className="bg-success/5 border-success/20 text-success" />
+              <span className="text-xs font-bold uppercase tracking-widest text-footer-text/50">Delicious Pure Veg & Eggless cakes made for every celebration.</span>
+            </div>
             <div className="flex gap-6">
                {[InstagramIcon, Facebook, Twitter, Youtube].map((Icon, i) => (
                  <a key={i} href="#" className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-secondary hover:text-button-text transition-all hover:-translate-y-1 shadow-lg border border-white/5">

@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDeliveryLocation } from '../context/LocationContext';
 import SearchOverlay from './search/SearchOverlay';
 import ThemeToggle from './ui/ThemeToggle';
+import EgglessBadge from './ui/EgglessBadge';
+import PureVegBadge from './ui/PureVegBadge';
 
 const NAV_LINKS = [
   { label: 'HOME', path: '/' },
@@ -177,14 +179,8 @@ const Navbar = () => {
           {/* BADGES + NAV ROW (Desktop) */}
           <div className={`hidden lg:flex items-center justify-between border-t border-border/20 transition-all duration-300 ${isScrolled ? 'h-0 opacity-0 overflow-hidden pointer-events-none py-0' : 'py-2 opacity-100'}`}>
             <div className="flex items-center gap-2 shrink-0 mr-6">
-              <div className="flex items-center gap-1.5 bg-[var(--badge-green-bg)] border border-green-200/60 dark:border-green-800/40 px-2.5 py-1 rounded-full">
-                <Leaf size={11} className="text-green-600 dark:text-green-400" />
-                <span className="text-[9px] font-black uppercase tracking-wider text-green-700 dark:text-green-400">Pure Veg</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-[var(--badge-amber-bg)] border border-amber-200/60 dark:border-amber-800/40 px-2.5 py-1 rounded-full">
-                <Egg size={11} className="text-amber-600 dark:text-amber-400" />
-                <span className="text-[9px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Eggless</span>
-              </div>
+              <PureVegBadge className="px-2.5 py-1 rounded-full" />
+              <EgglessBadge className="px-2.5 py-1 rounded-full" />
             </div>
 
             <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
@@ -234,14 +230,10 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center justify-center gap-2 pt-0.5">
-              <div className="flex items-center gap-1.5 bg-[var(--badge-green-bg)] border border-green-200/60 dark:border-green-800/40 px-3 py-1.5 rounded-full">
-                <Leaf size={11} className="text-green-600 dark:text-green-400" />
-                <span className="text-[10px] font-black uppercase tracking-wider text-green-700 dark:text-green-400">Pure Veg</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-[var(--badge-amber-bg)] border border-amber-200/60 dark:border-amber-800/40 px-3 py-1.5 rounded-full">
-                <Egg size={11} className="text-amber-600 dark:text-amber-400" />
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Eggless</span>
-              </div>
+              <div className="flex items-center gap-1.5">
+              <PureVegBadge className="px-3 py-1.5 rounded-full" />
+              <EgglessBadge className="px-3 py-1.5 rounded-full" />
+            </div>
             </div>
           </div>
 

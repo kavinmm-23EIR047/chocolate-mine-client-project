@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, LogIn, ArrowRight, ChevronRight } from 'lucide-react';
+import { Mail, Lock, LogIn, ArrowRight, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/ui/Button';
 
 const GoogleIcon = ({ size = 20 }) => (
@@ -18,6 +18,7 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -149,13 +150,21 @@ const Login = () => {
                 <div className="relative group">
                   <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-primary transition-colors" size={20} />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-surface/5 border border-border text-heading pl-16 pr-6 py-5 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-sm placeholder:text-muted/30"
+                    className="w-full bg-surface/5 border border-border text-heading pl-16 pr-14 py-5 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-sm placeholder:text-muted/30"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 

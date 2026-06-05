@@ -146,10 +146,12 @@ const PAYMENT_METHODS = [
    SLOT CONFIG
 ───────────────────────────────────────────── */
 const slots = [
-  { value: '10am-1pm', label: '10 AM – 1 PM', emoji: '🌅', endHour: 13, endMinute: 0 },
-  { value: '1pm-4pm', label: '1 PM – 4 PM', emoji: '☀️', endHour: 16, endMinute: 0 },
-  { value: '4pm-7pm', label: '4 PM – 7 PM', emoji: '🌇', endHour: 19, endMinute: 0 },
-  { value: '7pm-10pm', label: '7 PM – 10 PM', emoji: '🌙', endHour: 22, endMinute: 0 },
+  { value: '10:00 AM – 12:00 PM', label: '10:00 AM – 12:00 PM', emoji: '🌅', startHour: 10, startMinute: 0, endHour: 12, endMinute: 0 },
+  { value: '12:00 PM – 2:00 PM', label: '12:00 PM – 2:00 PM', emoji: '☀️', startHour: 12, startMinute: 0, endHour: 14, endMinute: 0 },
+  { value: '2:00 PM – 4:00 PM', label: '2:00 PM – 4:00 PM', emoji: '🌤️', startHour: 14, startMinute: 0, endHour: 16, endMinute: 0 },
+  { value: '4:00 PM – 6:00 PM', label: '4:00 PM – 6:00 PM', emoji: '🌇', startHour: 16, startMinute: 0, endHour: 18, endMinute: 0 },
+  { value: '6:00 PM – 8:00 PM', label: '6:00 PM – 8:00 PM', emoji: '🌆', startHour: 18, startMinute: 0, endHour: 20, endMinute: 0 },
+  { value: '8:00 PM – 10:00 PM', label: '8:00 PM – 10:00 PM', emoji: '🌙', startHour: 20, startMinute: 0, endHour: 22, endMinute: 0 },
 ];
 
 /* ─────────────────────────────────────────────
@@ -249,6 +251,7 @@ const Checkout = () => {
   const [deliverySlot, setDeliverySlot] = useState(null);
   const [customCakeRequest, setCustomCakeRequest] = useState(null);
   const [orderNotesExtra, setOrderNotesExtra] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   /* ── backend confirmed total (avoids client-side drift) ── */
   const [backendTotal, setBackendTotal] = useState(null);
@@ -258,36 +261,40 @@ const Checkout = () => {
     if (saved && typeof saved === 'object') setCustomCakeRequest(saved);
   }, []);
 
-  const isSlotAvailableForDate = (slot, date) => {
-    const now = new Date();
-    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const isSlotAvailableForDate = (slot, date, now) => {
+    const current = now || new Date();
+    const currentDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
     const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    if (selectedDate > currentDate) return true;
-    const currentTimeDecimal = now.getHours() + now.getMinutes() / 60;
-    return currentTimeDecimal < slot.endHour - 1;
+    if (selectedDate.getTime() !== currentDate.getTime()) return false;
+
+    const slotStartMinutes = slot.startHour * 60 + slot.startMinute;
+    const currentMinutes = current.getHours() * 60 + current.getMinutes();
+
+    return slotStartMinutes - currentMinutes >= 120;
   };
 
   const getSlotsWithAvailability = () => {
-    const todaySlots = slots.map((slot) => ({
+    return slots.map((slot) => ({
       ...slot,
-      available: isSlotAvailableForDate(slot, deliveryDate),
+      available: isSlotAvailableForDate(slot, deliveryDate, currentTime),
     }));
-    const hasAvailable = todaySlots.some((s) => s.available);
-    if (!hasAvailable && deliveryDate.toDateString() === new Date().toDateString()) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      setDeliveryDate(tomorrow);
-      return slots.map((slot) => ({ ...slot, available: true }));
-    }
-    return todaySlots;
   };
 
   const availableSlots = getSlotsWithAvailability();
+  const noSlotsAvailable = availableSlots.every((slot) => !slot.available);
 
   useEffect(() => {
-    const first = availableSlots.find((s) => s.available);
-    setDeliverySlot(first ? first.value : null);
-  }, [deliveryDate]);
+    const selectedSlot = availableSlots.find((s) => s.value === deliverySlot && s.available);
+    if (!selectedSlot) {
+      const first = availableSlots.find((s) => s.available);
+      setDeliverySlot(first ? first.value : null);
+    }
+  }, [deliveryDate, currentTime]);
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
@@ -479,6 +486,10 @@ const Checkout = () => {
 
   const handleSlotConfirmed = () => {
     if (!deliverySlot) return toast.error('Please select a delivery slot');
+    const sel = slots.find((s) => s.value === deliverySlot);
+    if (sel && !isSlotAvailableForDate(sel, deliveryDate, currentTime)) {
+      return toast.error('Selected slot is no longer available. Please choose another slot.');
+    }
     setActiveStep(3);
   };
 
@@ -490,7 +501,7 @@ const Checkout = () => {
     if (!deliveryInfo.position) { toast.error('Please select delivery location on map'); return false; }
     if (!deliverySlot) { toast.error('Please select a delivery slot'); return false; }
     const sel = slots.find((s) => s.value === deliverySlot);
-    if (sel && !isSlotAvailableForDate(sel, deliveryDate)) { toast.error('Selected slot is no longer available.'); return false; }
+    if (sel && !isSlotAvailableForDate(sel, deliveryDate, currentTime)) { toast.error('Selected slot is no longer available.'); return false; }
     if (!locationValid) { toast.error(locationError || 'Location outside service area'); return false; }
     return true;
   };
@@ -975,12 +986,8 @@ const Checkout = () => {
                       {/* Date Selector */}
                       <div className="flex items-center gap-3">
                         <button
-                          onClick={() => {
-                            const d = new Date(deliveryDate);
-                            d.setDate(d.getDate() - 1);
-                            if (d >= new Date(new Date().setHours(0, 0, 0, 0))) setDeliveryDate(d);
-                          }}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-muted/10 transition text-muted shrink-0"
+                          disabled
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface opacity-40 cursor-not-allowed transition text-muted shrink-0"
                         >
                           <ChevronDown size={16} />
                         </button>
@@ -991,12 +998,8 @@ const Checkout = () => {
                           )}
                         </div>
                         <button
-                          onClick={() => {
-                            const d = new Date(deliveryDate);
-                            d.setDate(d.getDate() + 1);
-                            setDeliveryDate(d);
-                          }}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-muted/10 transition text-muted shrink-0"
+                          disabled
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface opacity-40 cursor-not-allowed transition text-muted shrink-0"
                         >
                           <ChevronUp size={16} />
                         </button>
@@ -1033,11 +1036,16 @@ const Checkout = () => {
                           </button>
                         ))}
                       </div>
+                      {noSlotsAvailable && (
+                        <p className="text-sm text-red-500 font-bold mt-3">
+                          No delivery slots are available for today. Please try again earlier or contact support.
+                        </p>
+                      )}
                       <div className="pt-4 flex justify-between gap-3">
                         <Button onClick={() => setActiveStep(1)} className="btn-secondary px-6">Back</Button>
                         <Button
                           onClick={handleSlotConfirmed}
-                          disabled={!deliverySlot}
+                          disabled={!deliverySlot || !availableSlots.some((s) => s.value === deliverySlot && s.available)}
                           className="btn-primary px-8"
                         >
                           Continue

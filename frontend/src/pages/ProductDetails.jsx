@@ -52,6 +52,8 @@ import { useGetProductReviewsQuery } from '../services/api/reviewApi';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/ProductCard';
+import EgglessBadge from '../components/ui/EgglessBadge';
+import PureVegBadge from '../components/ui/PureVegBadge';
 import { formatCurrency, getCouponUnitDiscount, idsMatch } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
@@ -584,6 +586,13 @@ const ProductDetails = () => {
 
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{productName}</h1>
 
+              {String(productCategory || '').toLowerCase().includes('cake') && (
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <PureVegBadge className="px-3 py-2 rounded-full" />
+                  <EgglessBadge className="px-3 py-2 rounded-full" />
+                </div>
+              )}
+
               <div className="flex items-center gap-4 mb-8">
                 <div className="flex items-center gap-1.5 bg-success text-button-text px-3 py-1 rounded-xl text-xs font-black shadow-sm">
                   {product?.ratingsAverage || 0} <Star size={12} fill="currentColor" />
@@ -813,9 +822,7 @@ const ProductDetails = () => {
               <div className="col-span-2 mb-2 flex items-center gap-3 bg-muted/5 p-4 rounded-2xl border border-border/20">
                 <div className={`w-2.5 h-2.5 rounded-full ${isInStock ? 'bg-success animate-pulse' : 'bg-error'}`} />
                 <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${isInStock ? 'text-success-text' : 'text-error-text'}`}>
-                  {isInStock 
-                    ? `${productCategory === 'cakes' ? selectedStock : productStock} UNITS AVAILABLE & READY TO SHIP` 
-                    : 'CURRENTLY OUT OF STOCK'}
+                  {isInStock ? 'Available' : 'Not Available'}
                 </span>
               </div>
 

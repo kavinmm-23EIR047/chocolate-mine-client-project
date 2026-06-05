@@ -1461,7 +1461,7 @@ const Checkout = () => {
                     <span className="truncate">{`Pay Securely ${isAddressSelected ? formatCurrency(displayTotal) : ''}`}</span>
                   </Button>
                 </div>
-                
+
 
                 {/* Trust badges */}
                 <div className="px-4 sm:px-5 pb-4 sm:pb-5">
@@ -1513,5 +1513,6 @@ const Checkout = () => {
     </div>
   );
 };
+
 
 export default Checkout;

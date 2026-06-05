@@ -16,6 +16,7 @@ const AdminCustomCakes = () => {
   const [showGlobalColors, setShowGlobalColors] = useState(false);
   const [showGlobalFlavours, setShowGlobalFlavours] = useState(false);
 
+  
   // Sync state with URL params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

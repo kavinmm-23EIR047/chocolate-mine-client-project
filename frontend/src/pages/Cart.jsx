@@ -237,15 +237,42 @@ const Cart = () => {
                           <h3 className="font-black text-heading text-lg capitalize mb-2">
                             {item.name}
                           </h3>
-                          {item.selectedFlavor && (
-                            <p className="text-xs text-muted font-medium">
-                              {item.category === 'Custom Cakes' ? 'Color' : 'Flavor'}: {item.selectedFlavor}
-                            </p>
-                          )}
-                          {item.selectedWeight && (
-                            <p className="text-xs text-muted font-medium">
-                              Weight: {item.selectedWeight}
-                            </p>
+                          {item.category === 'Custom Cakes' ? (
+                            <>
+                              {item.options?.color && (
+                                <p className="text-xs text-muted font-medium">
+                                  Color: {item.options.color}
+                                </p>
+                              )}
+                              {item.options?.flavor && (
+                                <p className="text-xs text-muted font-medium">
+                                  Flavor: {item.options.flavor}
+                                </p>
+                              )}
+                              {item.options?.weight && (
+                                <p className="text-xs text-muted font-medium">
+                                  Weight: {item.options.weight}
+                                </p>
+                              )}
+                              {item.options?.name && (
+                                <p className="text-xs text-muted font-medium">
+                                  Name: {item.options.name}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {item.selectedFlavor && (
+                                <p className="text-xs text-muted font-medium">
+                                  Flavor: {item.selectedFlavor}
+                                </p>
+                              )}
+                              {item.selectedWeight && (
+                                <p className="text-xs text-muted font-medium">
+                                  Weight: {item.selectedWeight}
+                                </p>
+                              )}
+                            </>
                           )}
 
                           <div className="mt-3 space-y-1.5 text-xs font-medium text-muted">

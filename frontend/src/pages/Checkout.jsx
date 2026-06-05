@@ -1077,13 +1077,23 @@ const Checkout = () => {
                   >
                     <div className="divide-y divide-border/20">
                       {cartItems.map((item) => (
-                        <div key={`${item.productId}-${item.selectedFlavor}-${item.selectedWeight}`} className="flex gap-4 p-4 sm:p-5">
+                        <div key={`${item.productId}-${item.options?.color || item.selectedFlavor}-${item.options?.weight || item.selectedWeight}`} className="flex gap-4 p-4 sm:p-5">
                           <img src={item.image} className="w-16 h-16 rounded-2xl object-cover border border-border/10 shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {item.selectedFlavor && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">{(item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-')) ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
-                              {item.selectedWeight && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
+                              {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
+                                <>
+                                  {(item.options?.color || item.selectedFlavor) && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Color: {item.options?.color || item.selectedFlavor}</span>}
+                                  {(item.options?.flavor || item.selectedFlavor) && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.options?.flavor || item.selectedFlavor}</span>}
+                                  {(item.options?.weight || item.selectedWeight) && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.options?.weight || item.selectedWeight}</span>}
+                                </>
+                              ) : (
+                                <>
+                                  {item.selectedFlavor && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.selectedFlavor}</span>}
+                                  {item.selectedWeight && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
+                                </>
+                              )}
                             </div>
                             <p className="text-xs text-muted/60 font-black mt-2 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
                           </div>
@@ -1248,7 +1258,7 @@ const Checkout = () => {
                 <div className="max-h-48 sm:max-h-56 overflow-y-auto divide-y divide-border/20 custom-scrollbar">
                   {cartItems.map((item) => (
                     <div
-                      key={`${item.productId}-${item.selectedFlavor || ''}-${item.selectedWeight || ''}`}
+                      key={`${item.productId}-${item.options?.color || item.selectedFlavor || ''}-${item.options?.weight || item.selectedWeight || ''}`}
                       className="flex gap-3 p-3 sm:p-4 w-full min-w-0"
                     >
                       <img
@@ -1258,11 +1268,27 @@ const Checkout = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
-                        {item.selectedFlavor && (
-                          <p className="text-[11px] text-muted font-bold mt-0.5">{(item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-')) ? 'Color' : 'Flavor'}: {item.selectedFlavor}</p>
-                        )}
-                        {item.selectedWeight && (
-                          <p className="text-[11px] text-muted font-bold">Weight: {item.selectedWeight}</p>
+                        {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
+                          <>
+                            {(item.options?.color || item.selectedFlavor) && (
+                              <p className="text-[11px] text-muted font-bold mt-0.5">Color: {item.options?.color || item.selectedFlavor}</p>
+                            )}
+                            {(item.options?.flavor || item.selectedFlavor) && (
+                              <p className="text-[11px] text-muted font-bold">Flavor: {item.options?.flavor || item.selectedFlavor}</p>
+                            )}
+                            {(item.options?.weight || item.selectedWeight) && (
+                              <p className="text-[11px] text-muted font-bold">Weight: {item.options?.weight || item.selectedWeight}</p>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {item.selectedFlavor && (
+                              <p className="text-[11px] text-muted font-bold mt-0.5">Flavor: {item.selectedFlavor}</p>
+                            )}
+                            {item.selectedWeight && (
+                              <p className="text-[11px] text-muted font-bold">Weight: {item.selectedWeight}</p>
+                            )}
+                          </>
                         )}
                         <p className="text-xs text-muted/60 font-black mt-1">QTY {item.qty}</p>
                       </div>

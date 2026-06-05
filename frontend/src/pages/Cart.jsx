@@ -14,7 +14,7 @@ import {
   ChevronDown,
   Truck,
   Shield,
-  Cake, Cookie, Croissant
+  Cake
 } from "lucide-react";
 
 import EmptyState from "../components/ui/EmptyState";
@@ -42,7 +42,6 @@ const Cart = () => {
   const [priceDetailsOpen, setPriceDetailsOpen] = useState(true);
 
   // ==================== PRICE CALCULATION LOGIC ====================
-  /** Cake variants: backend sends variantPrice as the effective sale unit price before coupon */
   const getItemBasePrice = (item) => {
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
     if (!Number.isNaN(vp) && vp > 0) return vp;
@@ -78,8 +77,7 @@ const Cart = () => {
     return basePrice - couponDiscount;
   };
 
-  // ==================== CART CALCULATIONS (bag only — no delivery/taxes) ====================
-
+  // ==================== CART CALCULATIONS ====================
   const appliedCouponDisplay = normalizeCartCoupon(appliedCoupon);
   const hasAppliedCoupon = appliedCouponDisplay !== "";
 
@@ -113,8 +111,6 @@ const Cart = () => {
     }
     setCouponBusy(true);
     try {
-      // In a real production app, you'd verify the coupon with an API call here.
-      // For this implementation, we'll assume valid if it matches any item's coupon.
       const isValid = cartItems.some(i => normalizeCartCoupon(i.coupon?.code) === code);
       if (isValid) {
         dispatch(setCoupon(code));
@@ -147,7 +143,6 @@ const Cart = () => {
       dispatch(removeFromCart(productId));
       toast.success("Item removed");
     } else {
-      // Stock Validation
       if (newQty > item.stock) {
         toast.error(`Only ${item.stock} units available`);
         return;
@@ -204,9 +199,7 @@ const Cart = () => {
               const finalPrice = getFinalItemPrice(item);
               const originalPrice = getItemMrp(item);
               const hasOfferOnly = originalPrice > baseAfterOffer;
-              const showStrike =
-                originalPrice > finalPrice &&
-                (hasOfferOnly || couponOff > 0);
+              const showStrike = originalPrice > finalPrice && (hasOfferOnly || couponOff > 0);
 
               return (
                 <motion.div
@@ -240,37 +233,25 @@ const Cart = () => {
                           {item.category === 'Custom Cakes' ? (
                             <>
                               {item.options?.color && (
-                                <p className="text-xs text-muted font-medium">
-                                  Color: {item.options.color}
-                                </p>
+                                <p className="text-xs text-muted font-medium">Color: {item.options.color}</p>
                               )}
                               {item.options?.flavor && (
-                                <p className="text-xs text-muted font-medium">
-                                  Flavor: {item.options.flavor}
-                                </p>
+                                <p className="text-xs text-muted font-medium">Flavor: {item.options.flavor}</p>
                               )}
                               {item.options?.weight && (
-                                <p className="text-xs text-muted font-medium">
-                                  Weight: {item.options.weight}
-                                </p>
+                                <p className="text-xs text-muted font-medium">Weight: {item.options.weight}</p>
                               )}
                               {item.options?.name && (
-                                <p className="text-xs text-muted font-medium">
-                                  Name: {item.options.name}
-                                </p>
+                                <p className="text-xs text-muted font-medium">Name: {item.options.name}</p>
                               )}
                             </>
                           ) : (
                             <>
                               {item.selectedFlavor && (
-                                <p className="text-xs text-muted font-medium">
-                                  Flavor: {item.selectedFlavor}
-                                </p>
+                                <p className="text-xs text-muted font-medium">Flavor: {item.selectedFlavor}</p>
                               )}
                               {item.selectedWeight && (
-                                <p className="text-xs text-muted font-medium">
-                                  Weight: {item.selectedWeight}
-                                </p>
+                                <p className="text-xs text-muted font-medium">Weight: {item.selectedWeight}</p>
                               )}
                             </>
                           )}
@@ -288,11 +269,7 @@ const Cart = () => {
                                 <span className="font-black tabular-nums">
                                   {formatCurrency(baseAfterOffer)} / unit
                                   <span className="text-[10px] ml-1 opacity-80">
-                                    (−
-                                    {formatCurrency(
-                                      (originalPrice - baseAfterOffer) * item.qty
-                                    )}
-                                    )
+                                    (−{formatCurrency((originalPrice - baseAfterOffer) * item.qty)})
                                   </span>
                                 </span>
                               </div>
@@ -311,9 +288,7 @@ const Cart = () => {
                             <span className="text-2xl font-bold text-primary tabular-nums">
                               {formatCurrency(finalPrice)}
                             </span>
-                            <span className="text-[11px] text-muted uppercase tracking-wider">
-                              / unit
-                            </span>
+                            <span className="text-[11px] text-muted uppercase tracking-wider">/ unit</span>
                             {showStrike && (
                               <span className="line-through text-muted/60 text-sm font-medium tabular-nums">
                                 {formatCurrency(originalPrice)}
@@ -323,8 +298,7 @@ const Cart = () => {
 
                           {hasAppliedCoupon &&
                             item.coupon?.enabled &&
-                            appliedCouponDisplay ===
-                              normalizeCartCoupon(item.coupon.code) && (
+                            appliedCouponDisplay === normalizeCartCoupon(item.coupon.code) && (
                               <div className="inline-flex items-center gap-1 px-2 py-1 mt-2 bg-success-light rounded text-xs text-success-text border border-success/10">
                                 <Tag size={12} />
                                 <span>{item.coupon.code} applied</span>
@@ -332,15 +306,13 @@ const Cart = () => {
                             )}
                         </div>
 
+                        {/* FIXED: Added dispatch wrapper to action trigger */}
                         <button
                           type="button"
-                          onClick={() =>
-                            removeFromCart(
-                              item.productId,
-                              item.selectedFlavor,
-                              item.selectedWeight
-                            )
-                          }
+                          onClick={() => {
+                            dispatch(removeFromCart(item.productId));
+                            toast.success("Item removed");
+                          }}
                           className="text-muted/40 hover:text-error transition-colors p-2 hover:bg-error-light rounded-full shrink-0"
                         >
                           <Trash2 size={20} />
@@ -351,29 +323,15 @@ const Cart = () => {
                         <div className="flex items-center gap-3 border border-border rounded-xl bg-surface shadow-soft">
                           <button
                             type="button"
-                            onClick={() =>
-                              handleQuantityUpdate(
-                                item.productId,
-                                item.qty - 1,
-                                item
-                              )
-                            }
+                            onClick={() => handleQuantityUpdate(item.productId, item.qty - 1, item)}
                             className="p-2 hover:bg-card-soft transition rounded-l-xl text-foreground"
                           >
                             <Minus size={16} />
                           </button>
-                          <span className="w-12 text-center font-black text-foreground">
-                            {item.qty}
-                          </span>
+                          <span className="w-12 text-center font-black text-foreground">{item.qty}</span>
                           <button
                             type="button"
-                            onClick={() =>
-                              handleQuantityUpdate(
-                                item.productId,
-                                item.qty + 1,
-                                item
-                              )
-                            }
+                            onClick={() => handleQuantityUpdate(item.productId, item.qty + 1, item)}
                             className="p-2 hover:bg-card-soft transition rounded-r-xl text-foreground"
                           >
                             <Plus size={16} />
@@ -381,9 +339,7 @@ const Cart = () => {
                         </div>
 
                         <div className="text-right">
-                          <p className="text-[10px] text-muted font-black uppercase tracking-widest">
-                            Line total
-                          </p>
+                          <p className="text-[10px] text-muted font-black uppercase tracking-widest">Line total</p>
                           <p className="font-black text-heading text-lg tabular-nums">
                             {formatCurrency(finalPrice * item.qty)}
                           </p>
@@ -404,7 +360,7 @@ const Cart = () => {
             </Link>
           </div>
 
-          {/* Summary: MRP, offer, coupon, bag subtotal only */}
+          {/* Summary Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
@@ -416,9 +372,7 @@ const Cart = () => {
                     {formatCurrency(subtotal)}
                   </p>
                   <p className="text-xs text-muted mt-2 font-medium leading-relaxed">
-                    Product prices with offers & coupons. Delivery, GST and fees
-                    are added at checkout after you choose your address on the
-                    map.
+                    Product prices with offers & coupons. Delivery, GST and fees are added at checkout.
                   </p>
                 </div>
 
@@ -449,12 +403,8 @@ const Cart = () => {
                         >
                           <div className="p-4 space-y-3 text-sm">
                             <div className="flex justify-between font-bold">
-                              <span className="text-muted text-[11px] uppercase tracking-widest">
-                                Total MRP
-                              </span>
-                              <span className="text-heading tabular-nums">
-                                {formatCurrency(originalTotal)}
-                              </span>
+                              <span className="text-muted text-[11px] uppercase tracking-widest">Total MRP</span>
+                              <span className="text-heading tabular-nums">{formatCurrency(originalTotal)}</span>
                             </div>
                             {offerDiscount > 0 && (
                               <div className="flex justify-between text-success font-black text-[11px] uppercase tracking-widest">
@@ -471,21 +421,14 @@ const Cart = () => {
                             {(offerDiscount + couponDiscount) > 0 && (
                               <div className="bg-success-light rounded-xl px-3 py-2.5 flex justify-between text-success-text font-black text-[10px] uppercase tracking-widest border border-success/10">
                                 <span>You save</span>
-                                <span>
-                                  -{" "}
-                                  {formatCurrency(
-                                    offerDiscount + couponDiscount
-                                  )}
-                                </span>
+                                <span>- {formatCurrency(offerDiscount + couponDiscount)}</span>
                               </div>
                             )}
                             <div className="border-t border-border/30 pt-3 flex justify-between font-black text-lg">
                               <span className="text-muted text-[11px] uppercase tracking-widest self-center">
                                 Bag total
                               </span>
-                              <span className="text-primary tabular-nums">
-                                {formatCurrency(subtotal)}
-                              </span>
+                              <span className="text-primary tabular-nums">{formatCurrency(subtotal)}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -523,12 +466,8 @@ const Cart = () => {
                           placeholder="CODE"
                           value={couponInput}
                           disabled={couponBusy || hasAppliedCoupon}
-                          onChange={(e) =>
-                            setCouponInput(e.target.value.toUpperCase())
-                          }
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleApplyCoupon()
-                          }
+                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                          onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
                         />
                         <Button
                           type="button"
@@ -541,13 +480,7 @@ const Cart = () => {
                       </div>
                       {hasApplicableCoupons && !hasAppliedCoupon && (
                         <div className="flex flex-wrap gap-2">
-                          {[
-                            ...new Set(
-                              cartItems
-                                .filter((i) => i.coupon?.enabled)
-                                .map((i) => i.coupon.code)
-                            ),
-                          ].map((code) => (
+                          {[...new Set(cartItems.filter((i) => i.coupon?.enabled).map((i) => i.coupon.code))].map((code) => (
                             <button
                               key={code}
                               type="button"
@@ -563,48 +496,15 @@ const Cart = () => {
                     </div>
                   )}
 
-                  <Button
-                    onClick={() => navigate("/checkout")}
-                    className="w-full mt-2"
-                  >
+                  <Button onClick={() => navigate("/checkout")} className="w-full mt-2">
                     PROCEED TO CHECKOUT
                     <ArrowRight size={16} className="ml-2" />
                   </Button>
-
-                  <div className="flex items-center justify-center gap-4 pt-4 text-[10px] text-muted font-black uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5 opacity-60">
-                      <Shield size={14} /> Secure
-                    </span>
-                    <span className="flex items-center gap-1.5 opacity-60">
-                      <Truck size={14} /> Fresh
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[110] bg-card border-t border-border p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex items-center justify-between shadow-premium">
-        <div>
-          <p className="text-xs text-muted font-black uppercase tracking-widest">
-            Bag subtotal
-          </p>
-          <p className="text-xl font-black text-primary tabular-nums">
-            {formatCurrency(subtotal)}
-          </p>
-          <p className="text-[10px] text-muted font-bold mt-1 uppercase tracking-widest">
-            Taxes & delivery at checkout
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/checkout")}
-          className="px-8 h-14 rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-premium active:scale-95 transition-all flex items-center gap-2 bg-secondary text-button-text hover:brightness-110"
-        >
-          CHECKOUT <ArrowRight size={18} />
-        </button>
       </div>
     </div>
   );

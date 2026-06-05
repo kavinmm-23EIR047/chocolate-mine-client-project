@@ -77,7 +77,6 @@ const fadeUp = {
   }),
 };
 
-// ✅ FIX 1: Clean delivery features - no duplicate
 const DELIVERY_FEATURES = [
   { icon: <Clock size={20} />, label: 'Same-Day', sub: 'Delivery' },
   { icon: <Star size={20} />, label: 'Fresh Baked', sub: 'Everyday' },
@@ -341,7 +340,6 @@ const Home = () => {
                     <div className="absolute right-1/4 bottom-0 w-64 h-64 rounded-full blur-[80px] opacity-[0.03]" style={{ background: 'var(--accent)' }} />
                   </div>
 
-                  {/* ✅ FIX: Better grid ratio for merging content + scooter */}
                   <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] items-center">
 
                     {/* LEFT TEXT CONTENT */}
@@ -407,7 +405,6 @@ const Home = () => {
                         ))}
                       </motion.div>
 
-                      {/* ✅ FIX: Simplified CTAs */}
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -436,7 +433,7 @@ const Home = () => {
                       </motion.div>
                     </div>
 
-                    {/* ✅ FIX: Scooter image - larger, overlapping layout */}
+                    {/* Scooter image */}
                     <div className="relative order-1 lg:order-2 flex items-center justify-center 
                                   min-h-[320px] sm:min-h-[420px] lg:min-h-0 lg:h-full
                                   py-4 lg:py-0 px-4 lg:-ml-12 xl:-ml-20 z-20">
@@ -511,7 +508,6 @@ const Home = () => {
                       </div>
                     </div>
 
-                    {/* ✅ FIX: Visual separator for STATS */}
                     <div className="border-t border-border/20" />
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-border/20 bg-primary/5">
                       {STATS.map(({ icon, stat, label }) => (
@@ -556,7 +552,6 @@ const Home = () => {
                     </p>
                   </div>
 
-                  {/* Cake Image */}
                   <div className="flex justify-center px-5 py-2">
                     <div className="shrink-0 w-[150px] sm:w-[170px] lg:w-[190px]">
                       <img
@@ -568,7 +563,6 @@ const Home = () => {
                     </div>
                   </div>
 
-                  {/* Custom Cake Features */}
                   <div className="flex flex-col gap-2.5 px-5 py-3 flex-1">
                     {[
                       { icon: <Sparkles size={14} />, label: 'Custom Flavors', sub: 'Choose your favorite flavors' },
@@ -792,6 +786,8 @@ const Home = () => {
           )}
         </div>
       </main>
+
+      {/* WhatsApp button now visible on all devices */}
       <WhatsAppButton />
     </div>
   );

@@ -17,56 +17,99 @@ const isUserOnline = async (userId) => {
 };
 
 /**
- * Saves a notification to MongoDB using the strict schema.
- * Extra metadata is serialized into the message string after '|||' to avoid changing the schema.
+ * Saves a notification to MongoDB and triggers FCM push notifications to the user.
  */
-const saveWebNotification = async (userId, title, message, orderId = null, role = 'user', metadata = {}) => {
+const saveWebNotification = async (userId, title, message, type = 'general', metadata = {}) => {
   try {
-    const formattedMessage = metadata && Object.keys(metadata).length > 0
-      ? `${message}|||${JSON.stringify(metadata)}`
-      : message;
+    const orderId = metadata.orderId || null;
 
+    // Create DB notification
     await Notification.create({
       userId,
       orderId,
-      recipientRole: role,
-      type: title, // Stores the title in the required 'type' field
+      recipientRole: 'user',
+      title,
+      type,
       channel: 'WEB',
-      message: formattedMessage,
+      message,
+      data: metadata,
+      isRead: false,
+      opened: false,
       status: 'SENT',
       delivered: true,
       sentAt: new Date()
     });
+
+    // Send FCM push notification
+    await firebaseService.sendToUser(userId, title, message, metadata);
   } catch (err) {
-    logger.error('Failed to save WEB notification:', err.message);
+    logger.error('Failed to save/send WEB notification:', err.message);
   }
 };
 
 /**
- * Saves a notification to all admin users.
+ * Saves a notification to all admin users in MongoDB and sends FCM to all admin devices.
  */
-const saveAdminWebNotification = async (title, message, orderId = null, metadata = {}) => {
+const saveAdminWebNotification = async (title, message, type = 'admin_general', metadata = {}) => {
   try {
+    const orderId = metadata.orderId || null;
     const admins = await User.find({ role: 'admin' }, '_id');
+    
+    // Save DB records for each admin (so they have individual read status)
     for (const admin of admins) {
-      await saveWebNotification(admin._id, title, message, orderId, 'admin', metadata);
+      await Notification.create({
+        userId: admin._id,
+        orderId,
+        recipientRole: 'admin',
+        title,
+        type,
+        channel: 'WEB',
+        message,
+        data: metadata,
+        isRead: false,
+        opened: false,
+        status: 'SENT',
+        delivered: true,
+        sentAt: new Date()
+      });
     }
+
+    // Send FCM multicast to all admin devices
+    await firebaseService.sendToAdmin(title, message, metadata);
   } catch (err) {
-    logger.error('Failed to save admin WEB notification:', err.message);
+    logger.error('Failed to save/send admin WEB notification:', err.message);
   }
 };
 
 /**
- * Saves a notification to all active users (broadcast).
+ * Saves a notification to all active users in MongoDB (broadcast) and sends FCM broadcast.
  */
-const saveBroadcastWebNotification = async (title, message, orderId = null, metadata = {}) => {
+const saveBroadcastWebNotification = async (title, message, type = 'broadcast', metadata = {}) => {
   try {
     const users = await User.find({ role: 'user', active: true }, '_id');
+    
+    // Save DB record for each user
     for (const user of users) {
-      await saveWebNotification(user._id, title, message, orderId, 'user', metadata);
+      await Notification.create({
+        userId: user._id,
+        recipientRole: 'user',
+        title,
+        type,
+        channel: 'WEB',
+        message,
+        data: metadata,
+        isRead: false,
+        opened: false,
+        status: 'SENT',
+        delivered: true,
+        sentAt: new Date()
+      });
     }
+
+    // Send FCM broadcast
+    await firebaseService.sendBroadcast(title, message, metadata);
   } catch (err) {
-    logger.error('Failed to save broadcast WEB notification:', err.message);
+    logger.error('Failed to save/send broadcast WEB notification:', err.message);
   }
 };
 
@@ -77,10 +120,9 @@ const saveBroadcastWebNotification = async (title, message, orderId = null, meta
 exports.notifyOrderSuccess = async (order) => {
   try {
     const populatedOrder = await order.populate('userId');
-
     const trackingNumber = populatedOrder.orderNumber || populatedOrder._id.toString();
 
-    // 1. NOTIFY USER
+    // 1. NOTIFY USER (SOCKET, EMAIL, WHATSAPP)
     socketService.emitToUser(populatedOrder.userId._id, 'order_confirmed', { orderNumber: trackingNumber });
     
     if (populatedOrder.userId.email) {
@@ -101,10 +143,7 @@ exports.notifyOrderSuccess = async (order) => {
     };
 
     // Save history & send FCM to User
-    await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, populatedOrder._id, 'user', userMetadata);
-    if (populatedOrder.userId.fcmTokens && populatedOrder.userId.fcmTokens.length > 0) {
-      await firebaseService.sendToUser(populatedOrder.userId._id, userTitle, userMsg, userMetadata);
-    }
+    await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, 'order_confirmed', userMetadata);
 
     // 2. NOTIFY ADMINS (Telegram Group Alert)
     const alertLockKey = `alert_lock:order:${populatedOrder._id}`;
@@ -129,8 +168,8 @@ exports.notifyOrderSuccess = async (order) => {
       url: '/admin/orders'
     };
 
-    // Save notification for each admin in MongoDB
-    await saveAdminWebNotification(adminTitle, adminMsg, populatedOrder._id, adminMetadata);
+    // Save history and send FCM to Admins
+    await saveAdminWebNotification(adminTitle, adminMsg, 'new_order', adminMetadata);
 
     for (const admin of admins) {
       socketService.emitToAdmin('new_order_alert', { 
@@ -140,9 +179,6 @@ exports.notifyOrderSuccess = async (order) => {
         customer: populatedOrder.address.fullName 
       });
     }
-
-    // Send push notification to admins
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
 
     // 4. Trigger Custom Cake request alert if order contains custom cake
     const hasCustomCake = populatedOrder.items.some(item => item.isCustomCake);
@@ -168,7 +204,7 @@ exports.handleStatusChange = async (order, status) => {
     const trackingNumber = populatedOrder.orderNumber || populatedOrder._id.toString();
     const trackingLink = `${process.env.FRONTEND_URL}/account/orders/${populatedOrder._id}`;
     
-    // WEB UPDATE
+    // WEB UPDATE (SOCKET)
     socketService.emitToUser(populatedOrder.userId._id, 'status_changed', { orderId: populatedOrder._id, status });
 
     // EMAIL & TELEGRAM PRESERVED FLOWS
@@ -184,7 +220,7 @@ exports.handleStatusChange = async (order, status) => {
       await telegramService.sendDelivered(populatedOrder.userId.phone, trackingNumber, `${process.env.FRONTEND_URL}/review`, populatedOrder.userId._id);
     }
 
-    // WHATSAPP & PUSH NOTIFICATIONS FOR USER
+    // WHATSAPP & PUSH/DB NOTIFICATIONS FOR USER
     let title = '';
     let msg = '';
     let type = 'status_changed';
@@ -212,8 +248,7 @@ exports.handleStatusChange = async (order, status) => {
         orderId: populatedOrder._id.toString(),
         url: `/account/orders/${populatedOrder._id}`
       };
-      await saveWebNotification(populatedOrder.userId._id, title, msg, populatedOrder._id, 'user', userMetadata);
-      await firebaseService.sendToUser(populatedOrder.userId._id, title, msg, userMetadata);
+      await saveWebNotification(populatedOrder.userId._id, title, msg, type, userMetadata);
     }
   } catch (err) {
     logger.error('Status Notification Error (handleStatusChange):', err.message);
@@ -234,8 +269,7 @@ exports.notifyOrderCancelled = async (order) => {
       url: `/account/orders/${populatedOrder._id}`
     };
 
-    await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, populatedOrder._id, 'user', userMetadata);
-    await firebaseService.sendToUser(populatedOrder.userId._id, userTitle, userMsg, userMetadata);
+    await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, 'order_cancelled', userMetadata);
 
     // 2. Notify Admins
     const adminTitle = '❌ Order Cancelled';
@@ -246,8 +280,7 @@ exports.notifyOrderCancelled = async (order) => {
       url: '/admin/orders'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, populatedOrder._id, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'admin_order_cancelled', adminMetadata);
 
   } catch (err) {
     logger.error('Error in notifyOrderCancelled:', err.message);
@@ -282,8 +315,7 @@ exports.notifyPaymentFailure = async (order, reason) => {
         url: `/account/orders/${populatedOrder._id}`
       };
 
-      await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, populatedOrder._id, 'user', userMetadata);
-      await firebaseService.sendToUser(populatedOrder.userId._id, userTitle, userMsg, userMetadata);
+      await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, 'payment_failed', userMetadata);
     }
 
     // 2. NOTIFY ADMINS (Preserve Telegram and Email)
@@ -311,8 +343,7 @@ exports.notifyPaymentFailure = async (order, reason) => {
       url: '/admin/orders'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, populatedOrder._id, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'admin_payment_failed', adminMetadata);
 
   } catch (err) {
     logger.error('Payment Failure Notification Error:', err.message);
@@ -332,8 +363,7 @@ exports.notifyPaymentPending = async (order) => {
       url: '/admin/orders'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, populatedOrder._id, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'admin_payment_pending', adminMetadata);
   } catch (err) {
     logger.error('Payment Pending Notification Error:', err.message);
   }
@@ -352,8 +382,7 @@ exports.notifyRefundRequested = async (order) => {
       url: '/admin/orders'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, order._id, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'admin_refund_requested', adminMetadata);
   } catch (err) {
     logger.error('Refund Request Notification Error:', err.message);
   }
@@ -369,8 +398,7 @@ exports.notifyNewUserRegistration = async (user) => {
       url: '/admin/users'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, null, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'new_user_registration', adminMetadata);
   } catch (err) {
     logger.error('New User Registration Notification Error:', err.message);
   }
@@ -385,8 +413,7 @@ exports.notifyContactFormSubmitted = async (customerName) => {
       url: '/admin/enquiries'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, null, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'contact_form_submitted', adminMetadata);
   } catch (err) {
     logger.error('Contact Form Notification Error:', err.message);
   }
@@ -401,8 +428,7 @@ exports.notifyCustomCakeRequest = async (customerName) => {
       url: '/admin/orders'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, null, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'custom_cake_request', adminMetadata);
   } catch (err) {
     logger.error('Custom Cake Notification Error:', err.message);
   }
@@ -417,8 +443,7 @@ exports.notifyLowStockAlert = async (productName, quantity) => {
       url: '/admin/products'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, null, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'low_stock_alert', adminMetadata);
   } catch (err) {
     logger.error('Low Stock Notification Error:', err.message);
   }
@@ -433,8 +458,7 @@ exports.notifyOutOfStockAlert = async (productName) => {
       url: '/admin/products'
     };
 
-    await saveAdminWebNotification(adminTitle, adminMsg, null, adminMetadata);
-    await firebaseService.sendToAdmin(adminTitle, adminMsg, adminMetadata);
+    await saveAdminWebNotification(adminTitle, adminMsg, 'out_of_stock_alert', adminMetadata);
   } catch (err) {
     logger.error('Out of Stock Notification Error:', err.message);
   }
@@ -457,8 +481,7 @@ exports.notifyNewProduct = async (product) => {
     };
 
     // Save in DB for all active users & send FCM broadcast
-    await saveBroadcastWebNotification(title, msg, null, metadata);
-    await firebaseService.sendBroadcast(title, msg, metadata);
+    await saveBroadcastWebNotification(title, msg, 'new_product', metadata);
 
     // Also check stock immediately in case of low stock
     if (product.stock === false || product.stock === 0) {
@@ -490,8 +513,7 @@ exports.notifyProductUpdated = async (product) => {
       url: `/product/${product.slug || product._id}`
     };
 
-    await saveBroadcastWebNotification(title, msg, null, metadata);
-    await firebaseService.sendBroadcast(title, msg, metadata);
+    await saveBroadcastWebNotification(title, msg, 'product_updated', metadata);
 
     // Also check stock update alerts
     if (product.stock === false || product.stock === 0) {
@@ -515,8 +537,7 @@ exports.notifyOfferAdded = async (banner) => {
       url: banner.link || '/offers'
     };
 
-    await saveBroadcastWebNotification(title, msg, null, metadata);
-    await firebaseService.sendBroadcast(title, msg, metadata);
+    await saveBroadcastWebNotification(title, msg, 'new_offer', metadata);
   } catch (err) {
     logger.error('Offer Added Notification Error:', err.message);
   }
@@ -536,8 +557,7 @@ exports.notifyCouponAdded = async (product) => {
       url: `/product/${product.slug || product._id}`
     };
 
-    await saveBroadcastWebNotification(title, msg, null, metadata);
-    await firebaseService.sendBroadcast(title, msg, metadata);
+    await saveBroadcastWebNotification(title, msg, 'coupon_added', metadata);
   } catch (err) {
     logger.error('Coupon Added Notification Error:', err.message);
   }
@@ -549,8 +569,7 @@ exports.notifyCouponAdded = async (product) => {
 
 exports.notifyAdminGeneric = async (title, body, payload = {}) => {
   try {
-    await saveAdminWebNotification(title, body, null, payload);
-    await firebaseService.sendToAdmin(title, body, payload);
+    await saveAdminWebNotification(title, body, payload.type || 'admin_generic', payload);
   } catch (err) {
     logger.error('Admin Generic Notification Error:', err.message);
   }
@@ -559,8 +578,7 @@ exports.notifyAdminGeneric = async (title, body, payload = {}) => {
 exports.notifyAdminError = async (title, errorMessage, payload = {}) => {
   try {
     const finalPayload = { ...payload, type: 'system_error' };
-    await saveAdminWebNotification(`⚠️ System Error: ${title}`, errorMessage, null, finalPayload);
-    await firebaseService.sendToAdmin(`⚠️ System Error: ${title}`, errorMessage, finalPayload);
+    await saveAdminWebNotification(`⚠️ System Error: ${title}`, errorMessage, 'system_error', finalPayload);
   } catch (err) {
     logger.error('Admin Error Notification Failed:', err.message);
   }

@@ -15,26 +15,32 @@ exports.getMyNotifications = asyncHandler(async (req, res, next) => {
 
   const formattedNotifications = notifications.map(n => {
     let msgText = n.message || '';
-    let metadata = {};
+    let metadata = n.data || {};
+    let title = n.title || n.type || '';
+    let type = n.type || 'general';
+
+    // Parse legacy format with split-serialised string
     if (msgText.includes('|||')) {
       const parts = msgText.split('|||');
       msgText = parts[0];
       try {
         metadata = JSON.parse(parts[1]);
       } catch (err) {}
+      title = n.type; // legacy schema used n.type for title
+      type = metadata.type || (n.orderId ? 'order' : 'general');
     }
 
     return {
       _id: n._id,
       userId: n.userId,
-      title: n.type, // type schema field holds the Title
+      title: title,
       message: msgText,
-      type: metadata.type || (n.orderId ? 'order' : 'general'),
+      type: type,
       data: {
         orderId: n.orderId || metadata.orderId,
         ...metadata
       },
-      isRead: n.opened,
+      isRead: n.isRead !== undefined ? n.isRead : n.opened,
       createdAt: n.createdAt
     };
   });
@@ -53,7 +59,10 @@ exports.getUnreadCount = asyncHandler(async (req, res, next) => {
   const count = await Notification.countDocuments({
     userId: req.user._id,
     channel: 'WEB',
-    opened: false
+    $or: [
+      { isRead: false },
+      { opened: false }
+    ]
   });
 
   res.status(200).json({
@@ -68,7 +77,7 @@ exports.getUnreadCount = asyncHandler(async (req, res, next) => {
 exports.markAsRead = asyncHandler(async (req, res, next) => {
   const notification = await Notification.findOneAndUpdate(
     { _id: req.params.id, userId: req.user._id },
-    { $set: { opened: true } },
+    { $set: { isRead: true, opened: true } },
     { new: true }
   );
 
@@ -87,8 +96,8 @@ exports.markAsRead = asyncHandler(async (req, res, next) => {
 // @access  Private
 exports.markAllAsRead = asyncHandler(async (req, res, next) => {
   await Notification.updateMany(
-    { userId: req.user._id, channel: 'WEB', opened: false },
-    { $set: { opened: true } }
+    { userId: req.user._id, channel: 'WEB', $or: [{ isRead: false }, { opened: false }] },
+    { $set: { isRead: true, opened: true } }
   );
 
   res.status(200).json({

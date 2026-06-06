@@ -175,15 +175,29 @@ exports.updateFcmToken = asyncHandler(async (req, res, next) => {
   }
 
   const user = await User.findById(req.user._id);
-  
-  if (!user.fcmTokens) {
-    user.fcmTokens = [];
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
   
-  // Only add if not already present
-  if (!user.fcmTokens.includes(fcmToken)) {
-    user.fcmTokens.push(fcmToken);
-    await user.save({ validateBeforeSave: false });
+  if (user.role === 'admin') {
+    // Store admin FCM tokens separately
+    const AdminFcmToken = require('../models/AdminFcmToken');
+    await AdminFcmToken.findOneAndUpdate(
+      { token: fcmToken },
+      { userId: user._id, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+  } else {
+    // Store user FCM tokens
+    if (!user.fcmTokens) {
+      user.fcmTokens = [];
+    }
+    
+    // Only add if not already present
+    if (!user.fcmTokens.includes(fcmToken)) {
+      user.fcmTokens.push(fcmToken);
+      await user.save({ validateBeforeSave: false });
+    }
   }
 
   res.status(200).json({

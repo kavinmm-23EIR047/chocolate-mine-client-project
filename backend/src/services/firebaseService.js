@@ -27,17 +27,25 @@ try {
 }
 
 /**
- * Helper to clean up invalid registration tokens from User models
+ * Helper to clean up invalid registration tokens from User models and AdminFcmToken collection
  * @param {string[]} failedTokens - Array of invalid tokens to remove.
  */
 const removeInvalidTokens = async (failedTokens) => {
   if (!failedTokens || failedTokens.length === 0) return;
   try {
-    const result = await User.updateMany(
+    // Clean from regular users
+    const userResult = await User.updateMany(
       { fcmTokens: { $in: failedTokens } },
       { $pull: { fcmTokens: { $in: failedTokens } } }
     );
-    logger.info(`Cleaned up ${failedTokens.length} invalid FCM tokens. MongoDB ModifiedCount: ${result.modifiedCount}`);
+    
+    // Clean from admin tokens collection
+    const AdminFcmToken = require('../models/AdminFcmToken');
+    const adminResult = await AdminFcmToken.deleteMany(
+      { token: { $in: failedTokens } }
+    );
+
+    logger.info(`Cleaned up invalid FCM tokens. Users modified: ${userResult.modifiedCount}, Admin tokens deleted: ${adminResult.deletedCount}`);
   } catch (error) {
     logger.error('Error cleaning up invalid FCM tokens:', error.message);
   }
@@ -123,14 +131,16 @@ const sendToUser = async (userId, title, body, data = {}) => {
 };
 
 /**
- * Sends notification to all admin users.
+ * Sends notification to all admin devices.
  */
 const sendToAdmin = async (title, body, data = {}) => {
   try {
-    const admins = await User.find({ role: 'admin', active: true }, 'fcmTokens');
-    const tokens = admins.flatMap(admin => admin.fcmTokens || []);
+    const AdminFcmToken = require('../models/AdminFcmToken');
+    const adminDocs = await AdminFcmToken.find({});
+    const tokens = adminDocs.map(doc => doc.token).filter(Boolean);
+    
     if (tokens.length === 0) {
-      logger.info('Skipped sendToAdmin: No active admins with FCM tokens');
+      logger.info('Skipped sendToAdmin: No admin devices registered with FCM tokens');
       return;
     }
     return await sendPushNotification(tokens, title, body, data);

@@ -34,17 +34,74 @@ const cartSlice = createSlice({
           coupon: product.coupon, // Store coupon details
         });
       }
+
+      // Automatically apply the coupon to the cart if the product has one and no other coupon is currently applied
+      if (product.coupon && product.coupon.code) {
+        if (!state.appliedCoupon) {
+          state.appliedCoupon = product.coupon;
+          localStorage.setItem('appliedCoupon', JSON.stringify(product.coupon));
+        }
+      }
+
       localStorage.setItem('cartItems', JSON.stringify(state.items));
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter((item) => item.productId !== action.payload);
+      
+      // Auto-remove applied coupon if no remaining items support it
+      if (state.appliedCoupon) {
+        const appliedCode = typeof state.appliedCoupon === 'string'
+          ? state.appliedCoupon.trim().toUpperCase()
+          : state.appliedCoupon.code?.trim().toUpperCase();
+
+        const isCouponStillValid = state.items.some(item => {
+          const itemCode = typeof item.coupon === 'string'
+            ? item.coupon.trim().toUpperCase()
+            : item.coupon?.code?.trim().toUpperCase();
+          
+          // Must match code AND be enabled on this product
+          return itemCode && itemCode === appliedCode && item.coupon?.enabled;
+        });
+
+        if (!isCouponStillValid) {
+          state.appliedCoupon = null;
+          localStorage.removeItem('appliedCoupon');
+        }
+      }
+
       localStorage.setItem('cartItems', JSON.stringify(state.items));
     },
     updateCartQty: (state, action) => {
       const { productId, qty } = action.payload;
       const item = state.items.find((i) => i.productId === productId);
       if (item) {
-        item.qty = qty;
+        if (qty === 0) {
+          // If qty is 0, remove the item
+          state.items = state.items.filter((i) => i.productId !== productId);
+          
+          // Auto-remove applied coupon if no remaining items support it
+          if (state.appliedCoupon) {
+            const appliedCode = typeof state.appliedCoupon === 'string'
+              ? state.appliedCoupon.trim().toUpperCase()
+              : state.appliedCoupon.code?.trim().toUpperCase();
+
+            const isCouponStillValid = state.items.some(item => {
+              const itemCode = typeof item.coupon === 'string'
+                ? item.coupon.trim().toUpperCase()
+                : item.coupon?.code?.trim().toUpperCase();
+              
+              // Must match code AND be enabled on this product
+              return itemCode && itemCode === appliedCode && item.coupon?.enabled;
+            });
+
+            if (!isCouponStillValid) {
+              state.appliedCoupon = null;
+              localStorage.removeItem('appliedCoupon');
+            }
+          }
+        } else {
+          item.qty = qty;
+        }
       }
       localStorage.setItem('cartItems', JSON.stringify(state.items));
     },

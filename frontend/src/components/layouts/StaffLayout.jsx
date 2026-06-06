@@ -15,6 +15,8 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { getInitials } from '../../utils/helpers';
+import Logo from '../Logo';
+import NotificationDropdown from '../ui/NotificationDropdown';
 
 const menuItems = [
   { path: '/staff/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,9 +25,6 @@ const menuItems = [
   { path: '/staff/orders/history', label: 'Order History', icon: History },
 ];
 
-
-import Logo from '../Logo';
-
 const StaffLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
@@ -33,7 +32,7 @@ const StaffLayout = () => {
   const location = useLocation();
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden text-heading">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border flex-shrink-0">
         <div className="px-5 py-6 border-b border-border">
@@ -50,17 +49,18 @@ const StaffLayout = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-300 group ${
-                  isActive
-                    ? 'bg-secondary text-white shadow-lg translate-x-2'
-                    : 'text-muted hover:bg-secondary/5 hover:text-heading border border-transparent hover:border-border/30'
-                }`}
+                className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-300 group ${isActive
+                    ? 'bg-secondary text-background shadow-lg translate-x-2'
+                    : 'text-heading hover:bg-secondary/10 border border-transparent hover:border-border/30'
+                  }`}
               >
-                <item.icon size={16} className={isActive ? 'text-white' : 'text-secondary/60 group-hover:text-secondary transition-colors'} />
+                <item.icon
+                  size={16}
+                  className={isActive ? 'text-background' : 'text-secondary/80 group-hover:text-secondary transition-colors'}
+                />
                 <span>{item.label}</span>
-                {isActive && <ChevronRight size={14} className="ml-auto opacity-50" />}
+                {isActive && <ChevronRight size={14} className="ml-auto opacity-60" />}
               </Link>
-
             );
           })}
         </nav>
@@ -68,9 +68,9 @@ const StaffLayout = () => {
         <div className="p-4 border-t border-border space-y-3">
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-muted hover:bg-border/50 transition-all"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-heading hover:bg-border/50 transition-all"
           >
-            {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} />}
+            {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-heading" />}
             <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
           <div className="flex items-center gap-3 px-4 py-2">
@@ -92,7 +92,7 @@ const StaffLayout = () => {
         </div>
       </aside>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Sidebar */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -108,12 +108,13 @@ const StaffLayout = () => {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25 }}
-              className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 lg:hidden"
+              className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 lg:hidden flex flex-col"
             >
-              <div className="px-5 py-6 border-b border-border">
-                <span className="text-lg font-black text-heading">🍫 Kitchen Panel</span>
+              <div className="px-5 py-6 border-b border-border flex items-center gap-2">
+                <Logo className="w-7 h-7" />
+                <span className="text-base font-black text-heading">Kitchen Panel</span>
               </div>
-              <nav className="p-3 space-y-1">
+              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                 {menuItems.map((item) => {
                   const isActive = location.pathname === item.path;
                   return (
@@ -121,18 +122,22 @@ const StaffLayout = () => {
                       key={item.path}
                       to={item.path}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-                        isActive ? 'bg-secondary/15 text-secondary' : 'text-muted hover:bg-border/50'
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${isActive
+                          ? 'bg-secondary text-background'
+                          : 'text-heading hover:bg-secondary/10'
+                        }`}
                     >
-                      <item.icon size={20} />
+                      <item.icon size={20} className={isActive ? 'text-background' : ''} />
                       <span>{item.label}</span>
                     </Link>
                   );
                 })}
               </nav>
-              <div className="absolute bottom-4 left-0 right-0 px-4">
-                <button onClick={logout} className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-error hover:bg-error/10 transition-all">
+              <div className="p-4 border-t border-border">
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-error hover:bg-error/10 transition-all"
+                >
                   <LogOut size={18} /><span>Logout</span>
                 </button>
               </div>
@@ -141,7 +146,7 @@ const StaffLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Main */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -149,11 +154,14 @@ const StaffLayout = () => {
               onClick={() => setMobileOpen(!mobileOpen)}
               className="p-2 hover:bg-border rounded-xl transition-colors lg:hidden"
             >
-              <Menu size={20} />
+              <Menu size={20} className="text-heading" />
             </button>
             <h1 className="text-lg font-bold text-heading">
               {menuItems.find((m) => location.pathname === m.path)?.label || 'Staff'}
             </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <NotificationDropdown />
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">

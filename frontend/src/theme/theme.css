@@ -1,29 +1,41 @@
-/* ═══════════════════════════════════════════════════════════════
+/* /* ═══════════════════════════════════════════════════════════════
    THE CHOCOLATE MINE — MASTER THEME FILE
    ─────────────────────────────────────────────────────────────
    SINGLE SOURCE OF TRUTH for all brand colors & design tokens.
    Updated to perfectly match the logo's exact color values.
    ═══════════════════════════════════════════════════════════════ */
 
+
+/* ═══════════════════════════════════════════════════════════════
+   THE CHOCOLATE MINE — MASTER THEME FILE (v2 - Conflict‑Free)
+   ─────────────────────────────────────────────────────────────
+   Usage: 
+     - Light theme is default (no extra class)
+     - Apply class "dark" to <html> or <body> for dark mode
+   ───────────────────────────────────────────────────────────── */
+
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
+/* Base reset & smooth transitions */
+* {
+   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
 /* ───────────────────────────────────────────
-   LIGHT THEME — RGB(232, 220, 216) Background
+   LIGHT THEME (default)
    ─────────────────────────────────────────── */
 :root {
-   /* ── Core Surfaces ── */
+   /* Core Surfaces */
    --background: #E8DCD8;
-   /* RGB 232, 220, 216 */
    --background-rgb: 232 220 216;
    --surface: #E8DCD8;
    --surface-rgb: 232 220 216;
    --card: #E8DCD8;
    --card-rgb: 232 220 216;
    --card-soft: #DED0CC;
-   /* Slightly darker for depth */
    --card-soft-rgb: 222 208 204;
 
-   /* ── Brand Colors (unchanged) ── */
+   /* Brand Colors */
    --primary: #381A14;
    --primary-rgb: 56 26 20;
    --primary-hover: #52271E;
@@ -37,7 +49,7 @@
    --accent-hover: #B8880F;
    --accent-hover-rgb: 184 136 15;
 
-   /* ── Typography ── */
+   /* Typography */
    --foreground: #140907;
    --foreground-rgb: 20 9 7;
    --heading: #381A14;
@@ -49,7 +61,7 @@
    --card-text: #140907;
    --card-text-rgb: 20 9 7;
 
-   /* ── Navigation ── */
+   /* Navigation */
    --navbar: #E8DCD8;
    --navbar-rgb: 232 220 216;
    --navbar-text: #381A14;
@@ -57,13 +69,13 @@
    --sidebar: #E8DCD8;
    --sidebar-rgb: 232 220 216;
 
-   /* ── Footer ── */
+   /* Footer */
    --footer: #140907;
    --footer-rgb: 20 9 7;
    --footer-text: #FFFFFF;
    --footer-text-rgb: 255 255 255;
 
-   /* ── Borders & Inputs ── */
+   /* Borders & Inputs */
    --border: #E8E0DF;
    --border-rgb: 232 224 223;
    --border-muted: #D1C5C3;
@@ -75,7 +87,7 @@
    --input-focus: #381A14;
    --ring: rgba(56, 26, 20, 0.15);
 
-   /* ── Buttons ── */
+   /* Buttons */
    --button-bg: #381A14;
    --button-bg-rgb: 56 26 20;
    --button-text: #FFFFFF;
@@ -93,7 +105,7 @@
    --button-buy-text: #FFFFFF;
    --button-buy-text-rgb: 255 255 255;
 
-   /* ── Semantic: Success ── */
+   /* Semantic: Success */
    --success: #2E7D32;
    --success-rgb: 46 125 50;
    --success-light: #E8F5E9;
@@ -101,7 +113,7 @@
    --success-text: #1B5E20;
    --success-text-rgb: 27 94 32;
 
-   /* ── Semantic: Error ── */
+   /* Semantic: Error */
    --error: #D32F2F;
    --error-rgb: 211 47 47;
    --error-light: #FFEBEE;
@@ -109,7 +121,7 @@
    --error-text: #B71C1C;
    --error-text-rgb: 183 28 28;
 
-   /* ── Semantic: Warning ── */
+   /* Semantic: Warning */
    --warning: #F9A825;
    --warning-rgb: 249 168 37;
    --warning-light: #FFF8E1;
@@ -117,7 +129,7 @@
    --warning-text: #E65100;
    --warning-text-rgb: 230 81 0;
 
-   /* ── Semantic: Info ── */
+   /* Semantic: Info */
    --info: #0288D1;
    --info-rgb: 2 136 209;
    --info-light: #E1F5FE;
@@ -125,7 +137,7 @@
    --info-text: #01579B;
    --info-text-rgb: 1 87 155;
 
-   /* ── Sale / Discount ── */
+   /* Sale / Discount */
    --sale: #E53935;
    --sale-rgb: 229 57 53;
    --sale-dark: #D32F2F;
@@ -133,7 +145,7 @@
    --sale-flash: #FF6F00;
    --sale-flash-rgb: 255 111 0;
 
-   /* ── Coupon / Savings ── */
+   /* Coupon / Savings */
    --coupon: #2E7D32;
    --coupon-rgb: 46 125 50;
    --coupon-mid: #43A047;
@@ -141,260 +153,217 @@
    --coupon-light: #66BB6A;
    --coupon-light-rgb: 102 187 106;
 
-   /* ── Stock / Urgency ── */
+   /* Stock / Urgency */
    --urgency: #F9A825;
    --urgency-rgb: 249 168 37;
    --urgency-dark: #FFB300;
    --urgency-dark-rgb: 255 179 0;
 
-   /* ── Ratings ── */
+   /* Ratings */
    --star: #FBC02D;
    --star-rgb: 251 192 45;
 
-   /* ── Overlay ── */
+   /* Overlay */
    --overlay: rgba(20, 9, 7, 0.5);
    --backdrop: rgba(232, 220, 216, 0.85);
-   /* matches new background */
 
-   /* ── Skeleton ── */
+   /* Skeleton */
    --skeleton: #E8E0DF;
    --skeleton-rgb: 232 224 223;
    --skeleton-shine: #DED0CC;
    --skeleton-shine-rgb: 222 208 204;
 
-   /* ── Shadow tokens ── */
+   /* Shadow */
    --shadow-color: 15deg 30% 20%;
 
-   /* ── Badge colors ── */
+   /* Badges */
    --badge-amber-bg: #fff4d1;
    --badge-green-bg: #e7f9ec;
 }
 
 /* ───────────────────────────────────────────
-   DARK THEME (Brown-based, unchanged)
+   DARK THEME
    ─────────────────────────────────────────── */
 .dark {
-   /* ─────────────────────────────
-     CORE SURFACES
-  ───────────────────────────── */
+   /* Core Surfaces */
    --background: #120806;
    --background-rgb: 18 8 6;
-
    --surface: #1C0D0A;
    --surface-rgb: 28 13 10;
-
    --card: #1C0D0A;
    --card-rgb: 28 13 10;
-
    --card-soft: #24110D;
    --card-soft-rgb: 36 17 13;
 
-   /* ─────────────────────────────
-     BRAND COLORS
-  ───────────────────────────── */
+   /* Brand Colors */
    --primary: #DED0CC;
    --primary-rgb: 244 232 218;
-
    --primary-hover: #DED0CC;
    --primary-hover-rgb: 250 241 231;
-
    --primary-active: #DED0CC;
    --primary-active-rgb: 232 216 199;
-
    --secondary: #DCC7AF;
    --secondary-rgb: 220 199 175;
-
    --accent: #E6C34A;
    --accent-rgb: 230 195 74;
-
    --accent-hover: #FFD740;
    --accent-hover-rgb: 255 215 64;
 
-   /* ─────────────────────────────
-     TYPOGRAPHY
-  ───────────────────────────── */
+   /* Typography */
    --foreground: #DED0CC;
    --foreground-rgb: 244 232 218;
-
    --heading: #DED0CC;
    --heading-rgb: 244 232 218;
-
    --body: #DED0CC;
    --body-rgb: 232 216 199;
-
    --muted: #B89F8A;
    --muted-rgb: 184 159 138;
-
    --card-text: #DED0CC;
    --card-text-rgb: 244 232 218;
 
-   /* ─────────────────────────────
-     NAVIGATION
-  ───────────────────────────── */
+   /* Navigation */
    --navbar: #120806;
    --navbar-rgb: 18 8 6;
-
    --navbar-text: #DED0CC;
    --navbar-text-rgb: 244 232 218;
-
    --sidebar: #1C0D0A;
    --sidebar-rgb: 28 13 10;
 
-   /* ─────────────────────────────
-     BADGES
-  ───────────────────────────── */
-   --badge-amber-bg: #2B1A05;
-   --badge-green-bg: #10261C;
-
-   /* ─────────────────────────────
-     FOOTER
-  ───────────────────────────── */
+   /* Footer */
    --footer: #0A0403;
    --footer-rgb: 10 4 3;
-
    --footer-text: #DED0CC;
    --footer-text-rgb: 244 232 218;
 
-   /* ─────────────────────────────
-     BORDERS / INPUTS
-  ───────────────────────────── */
+   /* Borders & Inputs */
    --border: #381A14;
    --border-rgb: 56 26 20;
-
    --border-muted: #52271E;
    --border-muted-rgb: 82 39 30;
-
    --input: #1C0D0A;
    --input-rgb: 28 13 10;
-
    --input-border: #381A14;
    --input-border-rgb: 56 26 20;
-
    --input-focus: #DED0CC;
-
    --ring: rgba(244, 232, 218, 0.15);
 
-   /* ─────────────────────────────
-     BUTTONS
-  ───────────────────────────── */
+   /* Buttons */
    --button-bg: #DED0CC;
    --button-bg-rgb: 244 232 218;
-
    --button-text: #120806;
    --button-text-rgb: 18 8 6;
-
    --button-hover: #DED0CC;
    --button-hover-rgb: 250 241 231;
-
    --button-alt-bg: #1C0D0A;
    --button-alt-bg-rgb: 28 13 10;
-
    --button-alt-text: #DED0CC;
    --button-alt-text-rgb: 244 232 218;
-
    --button-alt-hover: #381A14;
    --button-alt-hover-rgb: 56 26 20;
-
    --button-buy: #DED0CC;
    --button-buy-rgb: 244 232 218;
-
    --button-buy-text: #120806;
    --button-buy-text-rgb: 18 8 6;
 
-   /* ─────────────────────────────
-     SUCCESS
-  ───────────────────────────── */
+   /* Semantic: Success */
    --success: #66BB6A;
    --success-rgb: 102 187 106;
-
    --success-light: #1A381E;
    --success-light-rgb: 26 56 30;
-
    --success-text: #4ADE80;
    --success-text-rgb: 74 222 128;
 
-   /* ─────────────────────────────
-     ERROR
-  ───────────────────────────── */
+   /* Semantic: Error */
    --error: #EF5350;
    --error-rgb: 239 83 80;
-
    --error-light: #4A1A1A;
    --error-light-rgb: 74 26 26;
-
    --error-text: #EF9A9A;
    --error-text-rgb: 239 154 154;
 
-   /* ─────────────────────────────
-     WARNING
-  ───────────────────────────── */
+   /* Semantic: Warning */
    --warning: #FFB74D;
    --warning-rgb: 255 183 77;
-
    --warning-light: #4A3311;
    --warning-light-rgb: 74 51 17;
-
    --warning-text: #FFD54F;
    --warning-text-rgb: 255 213 79;
 
-   /* ─────────────────────────────
-     INFO
-  ───────────────────────────── */
+   /* Semantic: Info */
    --info: #4FC3F7;
    --info-rgb: 79 195 247;
-
    --info-light: #0B334A;
    --info-light-rgb: 11 51 74;
-
    --info-text: #81D4FA;
    --info-text-rgb: 129 212 250;
 
-   /* ─────────────────────────────
-     SALE / DISCOUNT
-  ───────────────────────────── */
+   /* Sale / Discount */
    --sale: #FF5252;
    --sale-rgb: 255 82 82;
-
    --sale-dark: #FF1744;
    --sale-dark-rgb: 255 23 68;
-
    --sale-flash: #FF9100;
    --sale-flash-rgb: 255 145 0;
 
-   /* ─────────────────────────────
-     COUPON
-  ───────────────────────────── */
+   /* Coupon / Savings */
    --coupon: #4ADE80;
    --coupon-rgb: 74 222 128;
-
    --coupon-mid: #22C55E;
    --coupon-mid-rgb: 34 197 94;
-
    --coupon-light: rgba(74, 222, 128, 0.15);
 
-   /* ─────────────────────────────
-     RATINGS
-  ───────────────────────────── */
+   /* Stock / Urgency */
+   --urgency: #FFB74D;
+   --urgency-rgb: 255 183 77;
+   --urgency-dark: #FFA726;
+   --urgency-dark-rgb: 255 167 38;
+
+   /* Ratings */
    --star: #FFD740;
    --star-rgb: 255 215 64;
 
-   /* ─────────────────────────────
-     OVERLAYS
-  ───────────────────────────── */
-   --overlay: rgba(0, 0, 0, .6);
-   --backdrop: rgba(18, 8, 6, .88);
+   /* Overlays */
+   --overlay: rgba(0, 0, 0, 0.6);
+   --backdrop: rgba(18, 8, 6, 0.88);
 
-   /* ─────────────────────────────
-     SKELETON
-  ───────────────────────────── */
+   /* Skeleton */
    --skeleton: #381A14;
    --skeleton-rgb: 56 26 20;
-
    --skeleton-shine: #52271E;
    --skeleton-shine-rgb: 82 39 30;
 
-   /* ─────────────────────────────
-     SHADOWS
-  ───────────────────────────── */
+   /* Shadow */
    --shadow-color: 15deg 10% 5%;
+
+   /* Badges */
+   --badge-amber-bg: #2B1A05;
+   --badge-green-bg: #10261C;
+}
+
+/* ───────────────────────────────────────────
+   GLOBAL STYLES (using the custom properties)
+   ─────────────────────────────────────────── */
+html,
+body {
+   background-color: var(--background);
+   color: var(--foreground);
+   font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+}
+
+/* Ensure all elements inherit background properly */
+* {
+   background-color: transparent;
+}
+
+/* Example utility classes (optional) */
+.bg-card {
+   background-color: var(--card);
+}
+
+.text-primary {
+   color: var(--primary);
+}
+
+.border-border {
+   border-color: var(--border);
 }

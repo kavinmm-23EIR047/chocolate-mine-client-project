@@ -139,7 +139,7 @@ exports.googleSuccess = asyncHandler(async (req, res) => {
 
     const frontendUrl =
       process.env.FRONTEND_URL ||
-      'http://localhost:5173';
+      'https://chocolate-mine-client-project.vercel.app';
 
     res.redirect(
       `${frontendUrl}/oauth-callback?token=${token}`
@@ -147,7 +147,7 @@ exports.googleSuccess = asyncHandler(async (req, res) => {
   } else {
     const frontendUrl =
       process.env.FRONTEND_URL ||
-      'http://localhost:5173';
+      'https://chocolate-mine-client-project.vercel.app';
 
     res.redirect(
       `${frontendUrl}/login?error=GoogleAuthFailed`

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChefHat, ShoppingBag, Clock, CheckCircle, Printer, RefreshCw, Eye, Flame, Truck, Package, X, KeyRound, Phone, ChevronDown, ChevronUp, LayoutDashboard, History, ClipboardList } from 'lucide-react';
+import { ChefHat, ShoppingBag, Clock, CheckCircle, Printer, RefreshCw, Eye, Flame, Truck, Package, X, KeyRound, Phone, ChevronDown, ChevronUp, LayoutDashboard, History, ClipboardList, MapPin, CreditCard, Calendar, Hash } from 'lucide-react';
 import staffService from '../../services/staffService';
 import { OrderStatusBadge } from '../../components/ui/StatusBadge';
 import Button from '../../components/ui/Button';
@@ -13,8 +13,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import io from 'socket.io-client';
 import orderService from '../../services/orderService';
 
-
-// OTP Modal Component
+// OTP Modal Component – updated to use theme variables
 const OtpModal = ({ isOpen, onClose, onVerify, order, loading, onRegenerateOtp }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = [];
@@ -22,21 +21,14 @@ const OtpModal = ({ isOpen, onClose, onVerify, order, loading, onRegenerateOtp }
   const handleOtpChange = (index, value) => {
     if (value.length > 1) value = value[0];
     if (!/^\d*$/.test(value)) return;
-    
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-    
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs[index + 1]?.focus();
-    }
+    if (value && index < 5) inputRefs[index + 1]?.focus();
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs[index - 1]?.focus();
-    }
+    if (e.key === 'Backspace' && !otp[index] && index > 0) inputRefs[index - 1]?.focus();
   };
 
   const handleSubmit = () => {
@@ -71,26 +63,21 @@ const OtpModal = ({ isOpen, onClose, onVerify, order, loading, onRegenerateOtp }
               </div>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-border/20 rounded-full transition-colors">
-              <X size={20} />
+              <X size={20} className="text-heading" />
             </button>
           </div>
         </div>
-        
         <div className="p-6 space-y-6">
           <div className="text-center">
             <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3">
               <Phone size={28} className="text-secondary" />
             </div>
-            <p className="text-sm text-muted">
-              Please ask the customer for the 6-digit OTP sent to their mobile number.
-            </p>
+            <p className="text-sm text-muted">Please ask the customer for the 6-digit OTP sent to their mobile number.</p>
             <p className="text-xs text-muted mt-2">
-              Customer: <span className="font-bold text-heading">{order?.address?.fullName}</span>
-              <br />
+              Customer: <span className="font-bold text-heading">{order?.address?.fullName}</span><br />
               Phone: <span className="font-bold text-heading">{order?.address?.phone}</span>
             </p>
           </div>
-          
           <div className="flex justify-center gap-3">
             {otp.map((digit, index) => (
               <input
@@ -106,41 +93,91 @@ const OtpModal = ({ isOpen, onClose, onVerify, order, loading, onRegenerateOtp }
               />
             ))}
           </div>
-          
-          <Button 
-            onClick={handleSubmit} 
-            className="w-full" 
-            icon={CheckCircle}
-            loading={loading}
-          >
+          <Button onClick={handleSubmit} className="w-full" icon={CheckCircle} loading={loading}>
             VERIFY & COMPLETE DELIVERY
           </Button>
-          
-          <button 
-            onClick={onRegenerateOtp}
-            className="w-full text-center text-xs text-secondary hover:underline"
-          >
+          <button onClick={onRegenerateOtp} className="w-full text-center text-xs text-secondary hover:underline">
             Resend OTP
           </button>
-          
-          <p className="text-[10px] text-center text-muted">
-            OTP expires in 10 minutes.
-          </p>
+          <p className="text-[10px] text-center text-muted">OTP expires in 10 minutes.</p>
         </div>
       </motion.div>
     </div>
   );
 };
 
-// Order Details Modal Component
+// Order Status Dropdown – fully theme-aware
+const OrderStatusDropdown = ({ order, onUpdate }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const actions = [];
+  if (order.orderStatus === 'confirmed') {
+    actions.push({ id: 'out_for_delivery', label: 'Out For Delivery', icon: Truck, color: 'text-primary', hover: 'hover:bg-primary/10' });
+  } else if (order.orderStatus === 'out_for_delivery') {
+    actions.push({ id: 'delivered', label: 'Verify & Deliver', icon: CheckCircle, color: 'text-success', hover: 'hover:bg-success/10' });
+  }
+
+  if (actions.length === 0) {
+    return (
+      <Button disabled className="flex-1 rounded-2xl py-3 text-xs opacity-50 cursor-not-allowed bg-card-soft text-muted">
+        COMPLETED
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex-1 relative" ref={dropdownRef}>
+      <Button
+        className="w-full rounded-2xl py-3 text-xs flex justify-center items-center gap-2"
+        onClick={() => setIsOpen(!isOpen)}
+        variant="outline"
+      >
+        <span>UPDATE STATUS</span>
+        <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </Button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute bottom-full left-0 right-0 mb-2 bg-card border border-border shadow-xl rounded-xl overflow-hidden z-20"
+          >
+            {actions.map(action => (
+              <button
+                key={action.id}
+                onClick={() => {
+                  setIsOpen(false);
+                  onUpdate(order._id, action.id);
+                }}
+                className={`w-full text-left px-4 py-3 text-xs font-bold flex items-center gap-3 transition-colors ${action.color} ${action.hover}`}
+              >
+                <action.icon size={16} />
+                {action.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Order Details Modal – theme-aware
 const OrderDetailsModal = ({ order, onClose }) => {
   const [expandedItems, setExpandedItems] = useState({});
-  
   if (!order) return null;
 
-  const toggleItemExpand = (index) => {
-    setExpandedItems(prev => ({ ...prev, [index]: !prev[index] }));
-  };
+  const toggleItemExpand = (index) => setExpandedItems(prev => ({ ...prev, [index]: !prev[index] }));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto p-4 cursor-pointer" onClick={onClose}>
@@ -155,104 +192,95 @@ const OrderDetailsModal = ({ order, onClose }) => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-black text-heading text-xl">Order Details</h3>
-              <p className="text-xs text-muted">#{order.orderNumber}</p>
+              <p className="text-xs text-muted">#{order.orderNumber} | {order.trackingCode}</p>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-border/20 rounded-full transition-colors">
-              <X size={20} />
+              <X size={20} className="text-heading" />
             </button>
           </div>
         </div>
-        
         <div className="p-6 overflow-y-auto flex-1">
           {/* Customer Info */}
           <div className="mb-6 p-4 bg-card-soft border border-border/40 rounded-xl">
-            <h4 className="font-bold text-sm mb-2 text-heading">Customer Details</h4>
-            <p className="text-sm">{order.address?.fullName}</p>
+            <h4 className="font-bold text-sm mb-2 text-heading">Customer & Delivery</h4>
+            <p className="text-sm font-semibold text-heading">{order.address?.fullName}</p>
             <p className="text-sm text-muted">{order.address?.phone}</p>
-            <p className="text-sm text-muted mt-1">{order.address?.houseNo}, {order.address?.street}</p>
-            <p className="text-sm text-muted">{order.address?.city}, {order.address?.pincode}</p>
+            <div className="flex items-start gap-2 mt-2">
+              <MapPin size={14} className="text-muted mt-0.5 shrink-0" />
+              <p className="text-xs text-muted">{order.address?.houseNo}, {order.address?.street}, {order.address?.city} - {order.address?.pincode}</p>
+            </div>
+            <div className="flex items-center gap-3 mt-3 text-xs">
+              <div className="flex items-center gap-1 text-muted">
+                <Calendar size={12} />
+                <span>{new Date(order.deliveryDate).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center gap-1 text-muted">
+                <Clock size={12} />
+                <span>{order.deliverySlot}</span>
+              </div>
+            </div>
           </div>
-          
           {/* Items List */}
           <div className="mb-6">
             <h4 className="font-bold text-sm mb-3 text-heading">Order Items</h4>
             <div className="space-y-3">
-              {order.formattedItems?.map((item, idx) => (
-                <div key={idx} className="border border-border/50 rounded-xl p-3 bg-card-soft/30">
-                  <div className="flex gap-3">
-                    {item.image && (
-                      <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-border/20" />
+              {order.items?.map((item, idx) => {
+                const itemPrice = item.price || item.originalPrice;
+                const total = itemPrice * item.qty;
+                return (
+                  <div key={idx} className="border border-border/50 rounded-xl p-3 bg-card-soft/30">
+                    <div className="flex gap-3">
+                      {item.image && <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-border/20" />}
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-bold text-heading">{item.name}</p>
+                            <p className="text-xs text-muted font-mono">{item.sku}</p>
+                          </div>
+                          <p className="font-bold text-heading">{formatCurrency(total)}</p>
+                        </div>
+                        <div className="flex justify-between text-sm mt-1">
+                          <span className="text-muted">Qty: {item.qty}</span>
+                          <span className="text-muted">{formatCurrency(itemPrice)} each</span>
+                        </div>
+                        {(item.selectedFlavor || item.selectedWeight) && (
+                          <div className="text-xs text-muted mt-1">
+                            {item.selectedFlavor && <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
+                            {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
+                          </div>
+                        )}
+                        {item.customDetails && (
+                          <button onClick={() => toggleItemExpand(idx)} className="text-xs text-secondary flex items-center gap-1 mt-2 font-bold">
+                            {expandedItems[idx] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            Custom Details
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {expandedItems[idx] && item.customDetails && (
+                      <div className="mt-3 p-3 bg-card-soft border border-border/40 rounded-lg text-xs space-y-1">
+                        {item.customDetails.flavour && <p><span className="font-bold text-heading">Color:</span> {item.customDetails.flavour}</p>}
+                        {item.customDetails.shape && <p><span className="font-bold text-heading">Shape:</span> {item.customDetails.shape}</p>}
+                        {item.customDetails.tiers && <p><span className="font-bold text-heading">Tiers:</span> {item.customDetails.tiers}</p>}
+                        {item.customDetails.eggless && <p><span className="font-bold text-heading">Eggless:</span> Yes</p>}
+                        {item.customDetails.lessSugar && <p><span className="font-bold text-heading">Less Sugar:</span> Yes</p>}
+                        {item.customDetails.messageOnCake && <p><span className="font-bold text-heading">Message:</span> {item.customDetails.messageOnCake}</p>}
+                      </div>
                     )}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-bold text-heading">{item.name}</p>
-                          <p className="text-xs text-muted font-mono">SKU: {item.sku}</p>
-                        </div>
-                        <p className="font-bold text-heading">{formatCurrency(item.totalPrice)}</p>
-                      </div>
-                      <div className="flex justify-between text-sm mt-1">
-                        <span className="text-muted">Qty: {item.qty}</span>
-                        <span className="text-muted">{formatCurrency(item.price)} each</span>
-                      </div>
-                      {(item.selectedFlavor || item.selectedWeight) && (
-                        <div className="text-xs text-muted mt-1">
-                          {item.selectedFlavor && <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
-                          {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
-                        </div>
-                      )}
-                      {item.customDetails && (
-                        <button 
-                          onClick={() => toggleItemExpand(idx)}
-                          className="text-xs text-secondary flex items-center gap-1 mt-2 font-bold"
-                        >
-                          {expandedItems[idx] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                          Custom Details
-                        </button>
-                      )}
-                    </div>
                   </div>
-                  {expandedItems[idx] && item.customDetails && (
-                    <div className="mt-3 p-3 bg-card-soft border border-border/40 rounded-lg text-xs space-y-1">
-                      {item.customDetails.flavour && <p><span className="font-bold text-heading">Color:</span> {item.customDetails.flavour}</p>}
-                      {item.customDetails.shape && <p><span className="font-bold text-heading">Shape:</span> {item.customDetails.shape}</p>}
-                      {item.customDetails.tiers && <p><span className="font-bold text-heading">Tiers:</span> {item.customDetails.tiers}</p>}
-                      {item.customDetails.eggless && <p><span className="font-bold text-heading">Eggless:</span> Yes</p>}
-                      {item.customDetails.lessSugar && <p><span className="font-bold text-heading">Less Sugar:</span> Yes</p>}
-                      {item.customDetails.messageOnCake && <p><span className="font-bold text-heading">Message:</span> {item.customDetails.messageOnCake}</p>}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-          
           {/* Payment Summary */}
           <div className="p-4 bg-card-soft border border-border/40 rounded-xl">
             <h4 className="font-bold text-sm mb-2 text-heading">Payment Summary</h4>
             <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted">Subtotal</span>
-                <span className="font-semibold text-heading">{formatCurrency(order.subtotal)}</span>
-              </div>
-              {order.discount > 0 && (
-                <div className="flex justify-between text-success-text">
-                  <span>Discount</span>
-                  <span className="font-semibold">-{formatCurrency(order.discount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted">Delivery Charge</span>
-                <span className="font-semibold text-heading">{formatCurrency(order.deliveryCharge)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted">GST</span>
-                <span className="font-semibold text-heading">{formatCurrency(order.gst)}</span>
-              </div>
-              <div className="flex justify-between font-bold pt-2 border-t border-border/40">
-                <span className="text-heading">Total</span>
-                <span className="text-primary">{formatCurrency(order.total)}</span>
-              </div>
+              <div className="flex justify-between"><span className="text-muted">Subtotal</span><span className="font-semibold text-heading">{formatCurrency(order.subtotal)}</span></div>
+              {order.discount > 0 && <div className="flex justify-between text-success-text"><span>Discount</span><span className="font-semibold">-{formatCurrency(order.discount)}</span></div>}
+              <div className="flex justify-between"><span className="text-muted">Delivery Charge</span><span className="font-semibold text-heading">{formatCurrency(order.deliveryCharge)}</span></div>
+              <div className="flex justify-between"><span className="text-muted">GST</span><span className="font-semibold text-heading">{formatCurrency(order.gst)}</span></div>
+              <div className="flex justify-between font-bold pt-2 border-t border-border/40"><span className="text-heading">Total</span><span className="text-primary">{formatCurrency(order.total)}</span></div>
             </div>
             <div className="mt-3 pt-2 border-t border-border/40">
               <p className="text-xs text-muted">Payment: <span className="font-semibold text-heading">{order.paymentMethod}</span></p>
@@ -269,7 +297,7 @@ const StaffDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const socketRef = useRef(null);
-  
+
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({ confirmedOrders: 0, outForDeliveryOrders: 0, deliveredOrders: 0 });
   const [loading, setLoading] = useState(true);
@@ -279,36 +307,27 @@ const StaffDashboard = () => {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
-  // Initialize socket connection
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     if (!token) return;
-
     socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
       auth: { token },
       transports: ['websocket']
     });
-
     socketRef.current.on('connect', () => {
       socketRef.current.emit('join_staff_room', sessionStorage.getItem('userId'));
       socketRef.current.emit('join_admin_room');
     });
-
     socketRef.current.on('assigned_order_updated', () => fetchData());
     socketRef.current.on('dashboard_needs_refresh', () => fetchData());
-
-    return () => {
-      if (socketRef.current) socketRef.current.disconnect();
-    };
+    return () => { if (socketRef.current) socketRef.current.disconnect(); };
   }, []);
 
-  // Determine current page type
   const getPageType = (path) => {
     if (path.includes('orders/new')) return 'new';
     if (path.includes('orders/active')) return 'active';
     if (path.includes('orders/history')) return 'history';
-    if (path.includes('dashboard')) return 'dashboard';
-    return 'dashboard'; 
+    return 'dashboard';
   };
 
   const pageType = getPageType(location.pathname);
@@ -318,7 +337,6 @@ const StaffDashboard = () => {
       setLoading(true);
       const statsRes = await staffService.getDashboard();
       setStats(statsRes.data.data);
-
       if (pageType === 'new') {
         const res = await staffService.getNewOrders();
         setOrders(res.data.data);
@@ -329,7 +347,7 @@ const StaffDashboard = () => {
         const res = await staffService.getDeliveredOrders();
         setOrders(res.data.data);
       } else {
-        setOrders([]); // Dashboard summary page doesn't need order list
+        setOrders([]);
       }
     } catch (err) {
       console.error('Failed to load data:', err);
@@ -358,7 +376,6 @@ const StaffDashboard = () => {
       setOtpModalOpen(true);
       return;
     }
-    
     try {
       const response = await staffService.updateKitchenStatus(id, status);
       toast.success(`Order marked as ${status.replace(/_/g, ' ')}`);
@@ -391,7 +408,7 @@ const StaffDashboard = () => {
     if (!selectedOrder) return;
     try {
       await staffService.generateDeliveryOtp(selectedOrder._id);
-      toast.success(`New OTP sent`);
+      toast.success('New OTP sent');
     } catch (err) {
       toast.error('Failed to generate OTP');
     }
@@ -410,8 +427,17 @@ const StaffDashboard = () => {
     }
   };
 
+  const handlePrintKOT = async (orderId) => {
+    try {
+      toast.loading('Printing KOT...', { id: 'kot' });
+      staffService.printKOT(orderId);
+      toast.success('KOT generated successfully', { id: 'kot' });
+    } catch (err) {
+      toast.error('Failed to generate KOT', { id: 'kot' });
+    }
+  };
 
-  // ── DASHBOARD SUMMARY VIEW ───────────────────────────────────────────
+  // Dashboard summary view (theme‑aware)
   if (pageType === 'dashboard') {
     const summaryItems = [
       { id: 'confirmed', label: 'Confirmed', icon: ClipboardList, count: stats.confirmedOrders, color: 'text-secondary', bg: 'bg-secondary/10', path: '/staff/orders/new' },
@@ -419,16 +445,12 @@ const StaffDashboard = () => {
       { id: 'delivered', label: 'Delivered', icon: CheckCircle, count: stats.deliveredOrders, color: 'text-success', bg: 'bg-success/10', path: '/staff/orders/history' },
       { id: 'history', label: 'History', icon: History, count: stats.deliveredOrders, color: 'text-heading', bg: 'bg-heading/10', path: '/staff/orders/history' },
     ];
-
     return (
       <div className="space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {summaryItems.map((item) => (
             <Link key={item.id} to={item.path} className="group">
-              <motion.div 
-                whileHover={{ y: -5 }}
-                className="bg-card border border-border p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300"
-              >
+              <motion.div whileHover={{ y: -5 }} className="bg-card border border-border p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300">
                 <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <item.icon size={28} />
                 </div>
@@ -441,7 +463,6 @@ const StaffDashboard = () => {
             </Link>
           ))}
         </div>
-
         <div className="bg-primary/5 border border-primary/10 p-6 rounded-3xl flex items-center gap-6">
           <div className="w-12 h-12 bg-primary/10 rounded-2xl shadow-sm flex items-center justify-center text-primary">
             <RefreshCw size={24} />
@@ -455,10 +476,10 @@ const StaffDashboard = () => {
     );
   }
 
-  // ── LIST VIEWS (NEW, ACTIVE, HISTORY) ──────────────────────────────
+  // List views (New, Active, History) – fully themed
   return (
     <div className="space-y-6">
-      <OtpModal 
+      <OtpModal
         isOpen={otpModalOpen}
         onClose={() => { setOtpModalOpen(false); setSelectedOrder(null); }}
         onVerify={handleVerifyOtp}
@@ -466,107 +487,86 @@ const StaffDashboard = () => {
         order={selectedOrder}
         loading={verifyingOtp}
       />
-
-      <OrderDetailsModal 
-        order={selectedOrderDetails}
-        onClose={() => {
-          setDetailsModalOpen(false);
-          setSelectedOrderDetails(null);
-        }}
-      />
-
-
+      <OrderDetailsModal order={selectedOrderDetails} onClose={() => { setDetailsModalOpen(false); setSelectedOrderDetails(null); }} />
       <div className="flex justify-end">
         <Button variant="outline" icon={RefreshCw} onClick={fetchData} loading={loading}>Refresh</Button>
       </div>
-
       {loading ? <TableSkeleton rows={3} cols={1} /> : orders.length === 0 ? (
-        <EmptyState 
-          icon={ShoppingBag} 
-          title="No orders found" 
-          message="Relax! There's nothing to do in this section right now." 
-        />
+        <EmptyState icon={ShoppingBag} title="No orders found" message="Relax! There's nothing to do in this section right now." />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {orders.map((order) => (
-              <motion.div 
+              <motion.div
                 key={order._id}
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="card-premium p-6 border-t-4 border-t-secondary relative group"
+                className="bg-card border-t-4 border-t-secondary rounded-2xl shadow-card border border-border/50 p-6 relative group flex flex-col"
               >
-                <div className="flex justify-between items-start mb-4">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-3">
                   <div>
                     <Badge variant="secondary" className="mb-2 text-[10px] tracking-widest">{order.deliverySlot}</Badge>
                     <h3 className="font-black text-xl text-heading">#{order.orderNumber}</h3>
-                    <p className="text-[9px] text-muted font-mono">{new Date(order.createdAt).toLocaleString()}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Hash size={10} className="text-muted" />
+                      <p className="text-[9px] text-muted font-mono">{order.trackingCode || '—'}</p>
+                    </div>
+                    <p className="text-[9px] text-muted font-mono mt-0.5">{new Date(order.createdAt).toLocaleString()}</p>
                   </div>
                   <OrderStatusBadge status={order.orderStatus} />
                 </div>
-
-                <div className="mb-4 p-4 bg-card-soft rounded-2xl border border-border/30">
-                  <p className="font-black text-xs uppercase tracking-widest text-secondary mb-1">Customer Info</p>
-                  <p className="font-bold text-sm text-heading">{order.address?.fullName}</p>
+                {/* Customer Info */}
+                <div className="mb-3 p-3 bg-card-soft rounded-xl border border-border/30">
+                  <p className="font-black text-xs uppercase tracking-widest text-secondary mb-1">Customer</p>
+                  <p className="font-bold text-sm text-heading truncate">{order.address?.fullName}</p>
                   <p className="text-xs text-muted">{order.address?.phone}</p>
+                  <div className="flex items-start gap-1.5 mt-2">
+                    <MapPin size={12} className="text-muted mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-muted leading-tight">{order.address?.houseNo ? `${order.address.houseNo}, ` : ''}{order.address?.street}, {order.address?.city}</p>
+                  </div>
                 </div>
-
-                <div className="space-y-2 mb-4 max-h-40 overflow-y-auto custom-scrollbar pr-1">
-                  {order.formattedItems?.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-2 bg-border/10 rounded-lg text-sm border border-transparent group-hover:border-border/50 transition-all">
-                      <div className="flex-1">
-                        <p className="font-bold truncate">{item.name}</p>
-                        <p className="text-[10px] text-muted">{item.qty}x · {item.selectedFlavor || 'Standard'}</p>
+                {/* Delivery Info */}
+                <div className="flex justify-between items-center mb-3 text-xs">
+                  <div className="flex items-center gap-1 text-muted"><Calendar size={12} /><span>{new Date(order.deliveryDate).toLocaleDateString()}</span></div>
+                  <div className="flex items-center gap-1 text-muted"><Clock size={12} /><span>{order.deliverySlot}</span></div>
+                </div>
+                {/* Order Items */}
+                <div className="space-y-2 mb-4 max-h-36 overflow-y-auto custom-scrollbar pr-1 flex-1">
+                  {order.items?.map((item, idx) => {
+                    const itemPrice = item.price || item.originalPrice;
+                    const total = itemPrice * item.qty;
+                    return (
+                      <div key={idx} className="flex justify-between items-center p-2 bg-border/10 rounded-lg text-sm border border-transparent group-hover:border-border/50 transition-all">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold truncate text-sm text-heading">{item.name}</p>
+                          <p className="text-[10px] text-muted">{item.qty}x · {item.selectedFlavor || (item.isCustomCake ? 'Custom' : 'Standard')}{item.selectedWeight && ` · ${item.selectedWeight}`}</p>
+                        </div>
+                        <p className="font-black text-xs ml-2 shrink-0 text-heading">{formatCurrency(total)}</p>
                       </div>
-                      <p className="font-black text-xs">{formatCurrency(item.price * item.qty)}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-
-                <div className="flex justify-between items-center mb-6 pt-2 border-t border-border">
-                  <span className="font-bold text-sm">Total Amount</span>
-                  <span className="font-black text-primary text-xl">{formatCurrency(order.total)}</span>
+                {/* OTP Banner (only for out_for_delivery) */}
+                {order.orderStatus === 'out_for_delivery' && (
+                  <div className="mb-3 p-2 bg-secondary/10 border border-secondary/20 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-2"><KeyRound size={14} className="text-secondary" /><span className="text-[10px] font-bold text-secondary">OTP Required for Delivery</span></div>
+                    <button onClick={() => { setSelectedOrder(order); setOtpModalOpen(true); }} className="text-[10px] bg-secondary text-white px-2 py-1 rounded-md font-bold">Verify Now</button>
+                  </div>
+                )}
+                {/* Payment & Total */}
+                <div className="flex justify-between items-center mb-5 pt-2 border-t border-border">
+                  <div className="flex flex-col"><span className="text-[9px] text-muted uppercase tracking-widest">Payment</span><span className="text-xs font-bold text-heading">{order.paymentMethod} · {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}</span></div>
+                  <div className="text-right"><span className="text-[9px] text-muted uppercase tracking-widest">Total</span><p className="font-black text-primary text-xl leading-tight">{formatCurrency(order.total)}</p></div>
                 </div>
-
+                {/* Action Buttons */}
                 <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => handleViewOrderDetails(order._id)}
-                    className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading"
-                    title="View Details"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  
-                  {pageType === 'new' && (
-                    <Button 
-                      className="flex-1 rounded-2xl py-3 text-xs" 
-                      icon={Truck} 
-                      onClick={() => handleDeliveryStatusUpdate(order._id, 'out_for_delivery')}
-                    >
-                      OUT FOR DELIVERY
-                    </Button>
-                  )}
-                  
-                  {pageType === 'active' && (
-                    <Button 
-                      className="flex-1 bg-success hover:bg-success/90 rounded-2xl py-3 text-xs" 
-                      icon={CheckCircle} 
-                      onClick={() => handleDeliveryStatusUpdate(order._id, 'delivered')}
-                    >
-                      VERIFY & DELIVER
-                    </Button>
-                  )}
-
-                  <button 
-                    onClick={() => handlePrintInvoice(order._id)} 
-                    className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading"
-                    title="Print Invoice"
-                  >
-                    <Printer size={18} />
-                  </button>
-
+                  <button onClick={() => handleViewOrderDetails(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="View Details"><Eye size={18} /></button>
+                  <OrderStatusDropdown order={order} onUpdate={handleDeliveryStatusUpdate} />
+                  <button onClick={() => handlePrintKOT(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="Print KOT"><ChefHat size={18} /></button>
+                  <button onClick={() => handlePrintInvoice(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="Print Invoice"><Printer size={18} /></button>
                 </div>
               </motion.div>
             ))}

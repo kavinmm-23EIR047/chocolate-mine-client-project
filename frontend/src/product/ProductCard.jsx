@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart, ShoppingCart, Star, ArrowRight, Tag, MapPin, Eye, CheckCircle2, XCircle, ShoppingBag
+  Heart, Star, Tag, Eye, CheckCircle2, XCircle, ShoppingBag, Plus, Minus
 } from 'lucide-react';
-import EgglessBadge from '../components/ui/EgglessBadge';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../redux/slices/cartSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart, removeFromCart, updateCartQty } from '../redux/slices/cartSlice';
 import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 
@@ -26,6 +25,10 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
   const dispatch = useDispatch();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [addingToCart, setAddingToCart] = useState(false);
+
+  const cartItems = useSelector((state) => state.cart?.items || []);
+  const currentCartItem = cartItems.find(item => item.product?._id === product._id || item._id === product._id);
+  const cartQuantity = currentCartItem ? currentCartItem.qty : 0;
 
   const isLiked = isInWishlist(product._id);
 
@@ -49,18 +52,34 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       : `${coupon.code} · ₹${coupon.value} OFF`
     : null;
 
-  const totalAvailableStock = useMemo(() => {
-    if (hasVariants && product.variants) return product.variants.reduce((acc, v) => acc + (v.stock || 0), 0);
-    return product.stock || 0;
-  }, [product, hasVariants]);
-
-  const isOutOfStock = totalAvailableStock <= 0;
+  const isOutOfStock = product.stock === false;
 
   // Rating Data from Backend
   const rating = Number(product.ratingsAverage) || 0;
   const reviewCount = Number(product.ratingsCount) || 0;
 
-  const handleAdd = async (e) => {
+  // ─── CART ACTIONS ──────────────────────────────────────────
+  const handleQuantityChange = (e, newQty) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (newQty < 0) return;
+
+    try {
+      if (newQty === 0) {
+        dispatch(removeFromCart(product._id));
+        toast.success('Removed from bag');
+      } else {
+        dispatch(updateCartQty({
+          productId: product._id,
+          qty: newQty
+        }));
+      }
+    } catch (err) {
+      toast.error('Could not update bag');
+    }
+  };
+
+  const handleInitialAdd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
@@ -80,7 +99,7 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
     } catch (err) {
       toast.error('Failed to add');
     } finally {
-      setTimeout(() => setAddingToCart(false), 400);
+      setTimeout(() => setAddingToCart(false), 300);
     }
   };
 
@@ -97,12 +116,27 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
 
   const hasValidImage = product.image && product.image !== 'none' && product.image.trim() !== '';
   const isCakeCategory = String(product.category || '').toLowerCase().includes('cake');
-
-  // Format category to remove hyphens (e.g., "bento-cakes" -> "bento cakes")
   const displayCategory = product.category ? product.category.replace(/-/g, ' ') : 'Artisan Delight';
 
-  // ─── NEUMORPHISM CLASSES ───
   const neumorphismClasses = "bg-card border-none shadow-[5px_5px_15px_rgba(0,0,0,0.3),-5px_-5px_15px_rgba(255,255,255,0.03)] hover:shadow-[inset_5px_5px_15px_rgba(0,0,0,0.3),inset_-5px_-5px_15px_rgba(255,255,255,0.03)] transition-shadow duration-500 rounded-2xl";
+
+  const QuantitySelector = ({ sizeClass = "h-8 lg:h-9" }) => (
+    <div className={`flex items-center justify-between rounded-md overflow-hidden bg-primary text-button-text font-black shadow-md ${sizeClass} min-w-[75px] lg:min-w-[90px]`}>
+      <button
+        onClick={(e) => handleQuantityChange(e, cartQuantity - 1)}
+        className="h-full px-2 hover:bg-black/10 active:scale-90 transition-transform flex items-center justify-center border-r border-black/5"
+      >
+        <Minus size={12} className="stroke-[3]" />
+      </button>
+      <span className="text-xs px-1 select-none tabular-nums w-4 text-center">{cartQuantity}</span>
+      <button
+        onClick={(e) => handleQuantityChange(e, cartQuantity + 1)}
+        className="h-full px-2 hover:bg-black/10 active:scale-90 transition-transform flex items-center justify-center border-l border-black/5"
+      >
+        <Plus size={12} className="stroke-[3]" />
+      </button>
+    </div>
+  );
 
   // ─── HORIZONTAL LAYOUT ───
   if (layout === 'horizontal') {
@@ -161,10 +195,10 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
               )}
             </span>
 
-            {/* Horizontal Rating */}
-            <div className="flex items-center gap-1 ml-auto">
-              <Star size={12} fill={rating > 0 ? "#eab308" : "none"} className={rating > 0 ? "lg:w-4 lg:h-4 text-yellow-500" : "lg:w-4 lg:h-4 text-muted"} />
-              <span className="text-[10px] lg:text-xs font-bold text-heading">{rating.toFixed(1)}</span>
+            {/* Ratings: White Icon + Green Color Scheme */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <Star size={14} fill="currentColor" className="text-white lg:w-4 lg:h-4" />
+              <span className="text-[10px] lg:text-sm font-black text-emerald-500">{rating.toFixed(1)}</span>
             </div>
           </div>
         </div>
@@ -178,10 +212,18 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
             <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'lg:w-4 lg:h-4 text-red-500' : 'lg:w-4 lg:h-4 text-heading'} />
           </button>
 
-          <div className="absolute bottom-1.5 lg:bottom-2 left-1/2 -translate-x-1/2 w-[85%] z-10">
-            <button onClick={handleAdd} disabled={isOutOfStock} className={`w-full py-1 lg:py-1.5 rounded-md text-[9px] lg:text-[11px] font-black tracking-widest uppercase transition-all shadow-md border ${isOutOfStock ? 'bg-card-soft text-muted border-border cursor-not-allowed opacity-80' : 'bg-card text-primary border-primary/30 hover:bg-primary hover:text-button-text'}`}>
-              {addingToCart ? '...' : needsVariantSelection ? 'Select' : 'ADD'}
-            </button>
+          <div className="absolute bottom-1.5 lg:bottom-2 left-1/2 -translate-x-1/2 w-[85%] z-10 flex justify-center">
+            {cartQuantity > 0 && !needsVariantSelection ? (
+              <QuantitySelector sizeClass="h-7 lg:h-8" />
+            ) : (
+              <button
+                onClick={handleInitialAdd}
+                disabled={isOutOfStock}
+                className={`w-full h-7 lg:h-8 rounded-md text-[9px] lg:text-[11px] font-black tracking-widest uppercase transition-all shadow-md border flex items-center justify-center ${isOutOfStock ? 'bg-card-soft text-muted border-border cursor-not-allowed opacity-80' : 'bg-card text-primary border-primary/30 hover:bg-primary hover:text-button-text'}`}
+              >
+                {addingToCart ? '...' : needsVariantSelection ? 'Select' : 'ADD'}
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
@@ -203,7 +245,6 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
           <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
         ) : <ImagePlaceholder />}
 
-        {/* Top-Left Badges Stacked */}
         <div className="absolute top-2 left-2 lg:top-3 lg:left-3 flex flex-col items-start gap-1 lg:gap-1.5 z-10">
           {product.bestseller && (
             <div className="bg-amber-400 text-amber-950 text-[9px] sm:text-[10px] lg:text-xs font-black px-1.5 py-0.5 lg:px-2 lg:py-1 rounded uppercase tracking-wider shadow-sm">
@@ -220,9 +261,11 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
               {discountPct}% OFF
             </div>
           )}
+          <div className={`text-[9px] sm:text-[10px] lg:text-xs font-black px-1.5 py-0.5 lg:px-2 lg:py-1 rounded uppercase tracking-wider shadow-sm ${isOutOfStock ? 'bg-red-500 text-white' : 'bg-emerald-500/20 text-emerald-500 backdrop-blur-sm'}`}>
+            {isOutOfStock ? 'Sold Out' : 'In Stock'}
+          </div>
         </div>
 
-        {/* Top-Right Wishlist */}
         <button onClick={wish} className="absolute top-2 right-2 lg:top-3 lg:right-3 p-1.5 lg:p-2 bg-card/80 backdrop-blur-md rounded-full shadow-sm hover:scale-110 active:scale-90 transition-all z-10">
           <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} className={`${isLiked ? 'text-red-500' : 'text-muted'} sm:w-4 sm:h-4 lg:w-5 lg:h-5`} />
         </button>
@@ -231,7 +274,6 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
       {/* 2. CONTENT CONTAINER */}
       <div className="p-3 lg:p-5 flex flex-col flex-1 gap-1.5 lg:gap-2">
 
-        {/* Category & Minimal Veg Tag */}
         <div className="flex items-start justify-between gap-1">
           <span className="text-[9px] lg:text-[11px] text-muted font-bold uppercase tracking-wider line-clamp-2 leading-tight pr-1">
             {displayCategory}
@@ -243,59 +285,70 @@ const ProductCard = ({ product, layout = 'vertical' }) => {
           )}
         </div>
 
-        {/* Title */}
         <h3 className="text-xs sm:text-sm lg:text-base font-black text-heading line-clamp-2 leading-snug tracking-tight group-hover:text-primary transition-colors">
           {productName}
         </h3>
 
-        {/* Description */}
         {product.shortDescription && (
           <p className="text-[10px] lg:text-xs text-muted font-medium line-clamp-2 leading-snug">
             {product.shortDescription}
           </p>
         )}
 
-        {/* Dynamic Tags & Neumorphic Rating Block */}
-        <div className="flex flex-wrap items-center gap-2 mt-auto pt-2 lg:pt-3">
-          {/* RATING DISPLAY */}
-          <div className="flex items-center gap-1 px-2 py-1 lg:px-2.5 lg:py-1.5 rounded-md bg-surface/50 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.05)]">
-            <Star size={12} fill={rating > 0 ? "#eab308" : "none"} className={rating > 0 ? "lg:w-3.5 lg:h-3.5 text-yellow-500" : "lg:w-3.5 lg:h-3.5 text-muted"} />
-            <span className="text-[10px] lg:text-xs font-black text-heading">
+        {/* Dynamic Premium Coupon & Ratings Segment */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-auto pt-2 lg:pt-4">
+
+          {/* INCREASED SIZE RATING DISPLAY: White Star Icon + Deep Green Text & Background container */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-emerald-500/10 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.2)] border border-emerald-500/10">
+            <Star size={14} fill="currentColor" className="text-white lg:w-4 lg:h-4" />
+            <span className="text-[10px] lg:text-sm font-black text-emerald-500 leading-none">
               {rating.toFixed(1)}
             </span>
             {reviewCount > 0 && (
-              <span className="text-[9px] lg:text-[10px] text-muted font-medium ml-0.5">({reviewCount})</span>
+              <span className="text-[9px] lg:text-xs text-emerald-400/70 font-bold ml-0.5">({reviewCount})</span>
             )}
           </div>
 
+          {/* INCREASED SIZE COUPON DISPLAY: High contrast Green micro-card */}
           {couponLabel && (
-            <div className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 px-1 py-[2px] lg:px-1.5 lg:py-1 rounded text-[9px] lg:text-[10px] font-black text-green-500 uppercase">
-              <Tag size={8} className="lg:w-3 lg:h-3" /> {coupon.code}
+            <div className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500/15 to-teal-500/15 border border-emerald-500/30 px-2.5 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[9px] lg:text-xs font-black text-emerald-400 uppercase tracking-wider shadow-sm">
+              <Tag size={10} className="text-emerald-400 lg:w-3.5 lg:h-3.5" />
+              <span>{coupon.code || "SAVE"}</span>
             </div>
           )}
         </div>
 
-        {/* 3. PRICE & ACTIONS */}
-        <div className="flex items-end justify-between gap-1 mt-2 pt-2 lg:mt-3 lg:pt-3 border-t border-border/10">
+        {/* 3. PRICE & ACTIONS BAR */}
+        <div className="flex items-center justify-between gap-1 mt-2 pt-2 lg:mt-3 lg:pt-3 border-t border-border/10">
           <div className="flex flex-col">
             {hasOffer && <span className="text-[9px] lg:text-xs line-through text-muted font-bold">₹{mrp}</span>}
             <span className="text-sm lg:text-lg font-black text-heading tracking-tight">₹{displayPrice}</span>
           </div>
 
-          <div className="flex items-center gap-1 lg:gap-2">
-            <button onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.slug}`); }} className="p-1.5 lg:p-2.5 rounded-md text-muted hover:text-primary transition-colors bg-card shadow-[2px_2px_5px_rgba(0,0,0,0.1),-2px_-2px_5px_rgba(255,255,255,0.05)] active:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1)]">
+          <div className="flex items-center gap-1.5 lg:gap-2">
+            <button
+              onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.slug}`); }}
+              className="p-1.5 lg:p-2.5 rounded-md text-muted hover:text-primary transition-colors bg-card shadow-[2px_2px_5px_rgba(0,0,0,0.1),-2px_-2px_5px_rgba(255,255,255,0.05)] active:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1)] flex items-center justify-center h-8 lg:h-9 w-8 lg:w-9"
+            >
               <Eye size={14} className="lg:w-4 lg:h-4" />
             </button>
-            <button
-              onClick={handleAdd}
-              disabled={isOutOfStock}
-              className={`px-2 py-1.5 lg:px-4 lg:py-2.5 rounded-md text-[10px] lg:text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1 ${isOutOfStock
-                ? 'bg-card-soft text-muted cursor-not-allowed opacity-60 shadow-inner'
-                : 'bg-primary text-button-text shadow-[3px_3px_8px_rgba(0,0,0,0.2),-2px_-2px_6px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-95 active:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3)]'
-                }`}
-            >
-              {needsVariantSelection ? 'Select' : addingToCart ? '...' : 'ADD'}
-            </button>
+
+            <div className="h-8 lg:h-9 flex items-center justify-center">
+              {cartQuantity > 0 && !needsVariantSelection ? (
+                <QuantitySelector />
+              ) : (
+                <button
+                  onClick={handleInitialAdd}
+                  disabled={isOutOfStock}
+                  className={`h-full px-3 lg:px-5 rounded-md text-[10px] lg:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 min-w-[70px] lg:min-w-[85px] ${isOutOfStock
+                    ? 'bg-card-soft text-muted cursor-not-allowed opacity-60 shadow-inner border border-border/20'
+                    : 'bg-primary text-button-text shadow-[3px_3px_8px_rgba(0,0,0,0.2),-2px_-2px_6px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-95 active:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.3)]'
+                    }`}
+                >
+                  {needsVariantSelection ? 'Select' : addingToCart ? '...' : 'ADD'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

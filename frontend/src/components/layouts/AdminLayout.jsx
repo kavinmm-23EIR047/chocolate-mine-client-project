@@ -38,6 +38,7 @@ const menuItems = [
 ];
 
 import Logo from '../Logo';
+import NotificationDropdown from '../ui/NotificationDropdown';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -183,10 +184,11 @@ const AdminLayout = () => {
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <NotificationDropdown />
             <Link
               to="/"
-              className="text-xs font-medium text-muted hover:text-heading bg-border/50 px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs font-medium text-muted hover:text-heading bg-border/50 px-3 py-1.5 rounded-lg transition-colors hidden sm:block"
             >
               View Store
             </Link>

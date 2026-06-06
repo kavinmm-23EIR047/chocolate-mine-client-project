@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
+const whatsappService = require('../services/whatsappService');
 
 // Store io instance (will be set from server.js)
 let ioInstance = null;
@@ -11,30 +12,14 @@ const setIo = (io) => {
   console.log('✅ Socket.io instance set in staffController');
 };
 
-// Helper function to send SMS (implement with your SMS provider)
-const sendSms = async (phoneNumber, message) => {
+// Helper function to send WhatsApp messages
+const sendWhatsAppMsg = async (phoneNumber, message) => {
   try {
-    // TODO: Integrate with your SMS provider (Twilio, MSG91, etc.)
-    console.log(`📱 Sending SMS to ${phoneNumber}: ${message}`);
-    
-    // Example for MSG91 (India)
-    // const response = await axios.post('https://api.msg91.com/api/v5/flow/', {
-    //   phoneNumber: phoneNumber,
-    //   message: message,
-    //   // Add your MSG91 auth config
-    // });
-    
-    // Example for Twilio
-    // const client = require('twilio')(accountSid, authToken);
-    // await client.messages.create({
-    //   body: message,
-    //   to: phoneNumber,
-    //   from: twilioPhoneNumber
-    // });
-    
+    console.log(`📱 Sending WhatsApp to ${phoneNumber}: ${message}`);
+    await whatsappService.sendWhatsApp(phoneNumber, message, 'user');
     return true;
   } catch (error) {
-    console.error('SMS sending failed:', error);
+    console.error('WhatsApp sending failed:', error);
     return false;
   }
 };
@@ -350,7 +335,7 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
     
     // Send OTP via SMS to customer
     const otpMessage = `Your OTP for order ${order.orderNumber} is ${generatedOtp}. Valid for 10 minutes. - The Chocolate Mine`;
-    await sendSms(order.address.phone, otpMessage);
+    await sendWhatsAppMsg(order.address.phone, otpMessage);
     
     console.log(`📱 OTP sent to ${order.address.phone}: ${generatedOtp}`);
   }
@@ -395,7 +380,7 @@ exports.generateDeliveryOtp = asyncHandler(async (req, res, next) => {
 
   // Send OTP via SMS to customer
   const otpMessage = `Your OTP for order ${order.orderNumber} is ${otp}. Valid for 10 minutes. - The Chocolate Mine`;
-  await sendSms(order.address.phone, otpMessage);
+  await sendWhatsAppMsg(order.address.phone, otpMessage);
   
   console.log(`📱 New OTP sent to ${order.address.phone}: ${otp}`);
 
@@ -432,7 +417,7 @@ exports.verifyDeliveryOtp = asyncHandler(async (req, res, next) => {
 
   // Send confirmation SMS to customer
   const confirmMessage = `Your order ${order.orderNumber} has been delivered successfully! Thank you for choosing The Chocolate Mine.`;
-  await sendSms(order.address.phone, confirmMessage);
+  await sendWhatsAppMsg(order.address.phone, confirmMessage);
 
   // Emit socket update for real-time notifications
   emitOrderUpdate(order);

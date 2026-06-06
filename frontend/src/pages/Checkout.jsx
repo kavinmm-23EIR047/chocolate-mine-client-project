@@ -183,7 +183,9 @@ const Checkout = () => {
   const location = useLocation();
 
   const directItem = location.state?.directItem;
-  const [localCoupon, setLocalCoupon] = useState('');
+  const [localCoupon, setLocalCoupon] = useState(
+    directItem?.coupon?.code ? directItem.coupon : ''
+  );
 
   const appliedCouponDisplay = directItem
     ? normalizeCartCoupon(localCoupon)

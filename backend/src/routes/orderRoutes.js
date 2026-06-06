@@ -5,7 +5,14 @@ const { restrictTo } = require('../middleware/role');
 
 const router = express.Router();
 
-// All order routes require authentication
+/**
+ * @route   GET /api/v1/orders/track/:orderId
+ * @desc    Get tracking data by order ID or code (PUBLIC so email links work without login)
+ * @access  Public
+ */
+router.get('/track/:orderId', orderController.getTrackingData);
+
+// All order routes below require authentication
 router.use(protect);
 
 /**
@@ -36,13 +43,6 @@ router.get('/', restrictTo('staff'), orderController.getAllOrders);
  * @access  Protected
  */
 router.get('/by-number/:orderNumber', orderController.getOrderByNumber);
-
-/**
- * @route   GET /api/v1/orders/track/:orderId
- * @desc    Get tracking data by order ID or code
- * @access  Protected
- */
-router.get('/track/:orderId', orderController.getTrackingData);
 
 /**
  * @route   GET /api/v1/orders/:id/invoice

@@ -341,8 +341,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       }
       const product = await Product.findById(dbProductId);
 
-      if (!product || product.stock < item.qty) {
-        throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
+      if (!product || product.stock === false) {
+        throw new AppError(`Stock error: ${product?.name || 'Item'} is currently out of stock`, 400);
       }
     }
   }
@@ -521,23 +521,9 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
 
   // Update Stock
   for (const item of order.items) {
-    // 1. Decrement main stock safely
+    // 1. We no longer decrement stock. It's just a Boolean toggle.
+    // However, we still fetch the product to emit its real-time status.
     const product = await Product.findById(item.productId);
-    if (product) {
-      let currentStock = typeof product.stock === 'number' ? product.stock : 100;
-      product.stock = Math.max(0, currentStock - item.qty);
-      
-      // 2. Decrement variant stock if applicable
-      if (product.hasVariants && item.selectedFlavor && item.selectedWeight) {
-        const variant = product.variants.find(v => v.flavor === item.selectedFlavor && v.weight === item.selectedWeight);
-        if (variant) {
-          let vStock = typeof variant.stock === 'number' ? variant.stock : 100;
-          variant.stock = Math.max(0, vStock - item.qty);
-        }
-      }
-      
-      await product.save({ validateBeforeSave: false });
-    }
 
     // 3. Emit real-time stock update
     if (ioInstance) {

@@ -16,7 +16,7 @@ const variantSchema = new mongoose.Schema({
   flavor: { type: String, required: true },
   weight: { type: String, required: true },
   price: { type: Number, required: true, min: 0 },
-  stock: { type: Number, default: 0, min: 0 }
+  stock: { type: Boolean, default: true }
 });
 
 const productSchema = new mongoose.Schema({
@@ -66,7 +66,7 @@ const productSchema = new mongoose.Schema({
   imagePublicId: { type: String },
 
   gallery: [String],
-  stock: { type: Number, default: 0, min: 0 },
+  stock: { type: Boolean, default: true },
   featured: { type: Boolean, default: false },
   bestseller: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },

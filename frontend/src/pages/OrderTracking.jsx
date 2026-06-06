@@ -274,6 +274,20 @@ const OrderTracking = () => {
                      <span>Total Paid</span>
                      <span className="text-primary">{formatCurrency(order?.total || 0)}</span>
                   </div>
+                  {order?.deliveryDate && (
+                    <div className="pt-3 border-t border-border flex flex-col gap-1 text-[10px] font-bold">
+                       <div className="flex justify-between">
+                         <span className="text-muted uppercase tracking-widest">Delivery Date</span>
+                         <span className="text-primary">{new Date(order.deliveryDate).toLocaleDateString()}</span>
+                       </div>
+                       {order?.deliverySlot && (
+                         <div className="flex justify-between">
+                           <span className="text-muted uppercase tracking-widest">Time Slot</span>
+                           <span className="text-primary">{order.deliverySlot}</span>
+                         </div>
+                       )}
+                    </div>
+                  )}
                </div>
             </div>
 

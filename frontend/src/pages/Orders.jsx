@@ -319,8 +319,13 @@ const OrderCard = ({ order, index, canReview = false }) => {
                 <Clock size={18} />
               </div>
               <div>
-                <p className="text-[9px] font-black text-muted uppercase tracking-widest leading-none mb-1">Slot</p>
-                <p className="text-[10px] font-black text-heading leading-none uppercase tracking-widest">{order.deliverySlot || 'TBD'}</p>
+                <p className="text-[9px] font-black text-muted uppercase tracking-widest leading-none mb-1">Delivery</p>
+                <p className="text-[10px] font-black text-heading leading-none uppercase tracking-widest">
+                  {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : ''}
+                </p>
+                <p className="text-[9px] font-black text-primary leading-none uppercase tracking-widest mt-1">
+                  {order.deliverySlot || 'TBD'}
+                </p>
               </div>
             </div>
           </div>

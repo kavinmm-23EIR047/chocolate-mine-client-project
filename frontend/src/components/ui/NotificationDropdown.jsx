@@ -26,11 +26,6 @@ const NotificationDropdown = () => {
     };
 
     fetchNotifications();
-
-    // Ideally, you would also listen to socket events here to live-update the list
-    // const handleStatusChange = () => fetchNotifications();
-    // window.addEventListener('status_changed', handleStatusChange);
-    // return () => window.removeEventListener('status_changed', handleStatusChange);
   }, [user, isOpen]);
 
   useEffect(() => {
@@ -63,12 +58,7 @@ const NotificationDropdown = () => {
   };
 
   const toggleDropdown = () => {
-    if (!isOpen) {
-      // Fetch fresh data when opening
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
+    setIsOpen(!isOpen);
   };
 
   if (!user) return null;
@@ -92,7 +82,7 @@ const NotificationDropdown = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-80 sm:w-96 bg-card border border-border/50 rounded-2xl shadow-xl z-50 overflow-hidden"
+            className="absolute top-full mt-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 w-[calc(100vw-2rem)] sm:w-96 bg-card border border-border/50 rounded-2xl shadow-xl z-50 overflow-hidden"
           >
             <div className="p-4 border-b border-border/50 flex items-center justify-between bg-black/5 dark:bg-white/5">
               <h3 className="font-black text-heading text-sm uppercase tracking-wider">Notifications</h3>

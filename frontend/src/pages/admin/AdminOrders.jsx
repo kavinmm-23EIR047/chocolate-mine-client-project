@@ -55,8 +55,13 @@ const OrderDetailsModal = ({ order, onClose }) => {
             <p className="text-sm text-muted">{order.address?.phone}</p>
             <p className="text-sm text-muted mt-1">{order.address?.houseNo}, {order.address?.street}</p>
             <p className="text-sm text-muted">{order.address?.city}, {order.address?.pincode}</p>
+            {order.deliveryDate && (
+              <p className="text-sm font-bold text-primary mt-3">
+                Delivery Date: {new Date(order.deliveryDate).toLocaleDateString()}
+              </p>
+            )}
             {order.deliverySlot && (
-              <p className="text-sm text-muted mt-2">Delivery Slot: {order.deliverySlot}</p>
+              <p className="text-sm text-muted mt-1">Delivery Slot: {order.deliverySlot}</p>
             )}
           </div>
           
@@ -335,6 +340,11 @@ const AdminOrders = () => {
                       <div>
                         <p className="font-bold text-heading text-sm">{order.address?.fullName || order.user?.name || 'Guest'}</p>
                         <p className="text-[10px] text-muted font-bold">{order.address?.phone || order.user?.email}</p>
+                        {order.deliveryDate && (
+                          <p className="text-[10px] text-primary font-bold mt-1">
+                            Deliver: {new Date(order.deliveryDate).toLocaleDateString()}
+                          </p>
+                        )}
                         {order.deliverySlot && (
                           <p className="text-[9px] text-muted mt-0.5">Slot: {order.deliverySlot}</p>
                         )}

@@ -75,7 +75,13 @@ const orderSchema = new mongoose.Schema(
         '10am-1pm',
         '1pm-4pm',
         '4pm-7pm',
-        '7pm-10pm'
+        '7pm-10pm',
+        '10:00 AM – 12:00 PM',
+        '12:00 PM – 2:00 PM',
+        '2:00 PM – 4:00 PM',
+        '4:00 PM – 6:00 PM',
+        '6:00 PM – 8:00 PM',
+        '8:00 PM – 10:00 PM'
       ]
     },
 

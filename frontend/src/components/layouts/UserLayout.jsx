@@ -10,7 +10,7 @@ import PureVegBadge from '../ui/PureVegBadge';
 const UserLayout = () => {
   const location = useLocation();
   const isProductPage = location.pathname.startsWith('/product/');
-  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+  const isAuthPage = ['/login', '/register', '/forgot-password'].some(path => location.pathname.toLowerCase().startsWith(path));
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

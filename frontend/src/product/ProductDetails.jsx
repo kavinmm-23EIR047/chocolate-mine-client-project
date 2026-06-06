@@ -397,9 +397,9 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-12">
       {/* ── BREADCRUMB ── */}
-      <div className="bg-card border-b border-border hidden lg:block">
-        <div className="max-w-[1400px] mx-auto px-6 py-4">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted">
+      <div className="bg-card border-b border-border block">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-3 lg:py-4">
+          <div className="flex items-center flex-wrap gap-1.5 lg:gap-2 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] lg:tracking-[0.2em] text-muted">
             <button onClick={() => navigate('/')} className="hover:text-primary transition">Home</button>
             <ChevronRight size={12} />
             <button onClick={() => navigate(`/shop?category=${product?.category}`)} className="hover:text-primary transition capitalize">{product?.category}</button>

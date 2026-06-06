@@ -333,7 +333,7 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
     order.assignedStaff = req.user._id;
     await order.save();
     
-    // Send OTP via SMS to customer
+    // Send OTP via WhatsApp to customer
     const otpMessage = `Your OTP for order ${order.orderNumber} is ${generatedOtp}. Valid for 10 minutes. - The Chocolate Mine`;
     await sendWhatsAppMsg(order.address.phone, otpMessage);
     
@@ -378,7 +378,7 @@ exports.generateDeliveryOtp = asyncHandler(async (req, res, next) => {
   const otp = order.generateDeliveryOtp();
   await order.save();
 
-  // Send OTP via SMS to customer
+  // Send OTP via WhatsApp to customer
   const otpMessage = `Your OTP for order ${order.orderNumber} is ${otp}. Valid for 10 minutes. - The Chocolate Mine`;
   await sendWhatsAppMsg(order.address.phone, otpMessage);
   
@@ -415,7 +415,7 @@ exports.verifyDeliveryOtp = asyncHandler(async (req, res, next) => {
   order.orderStatus = 'delivered';
   await order.save();
 
-  // Send confirmation SMS to customer
+  // Send confirmation WhatsApp to customer
   const confirmMessage = `Your order ${order.orderNumber} has been delivered successfully! Thank you for choosing The Chocolate Mine.`;
   await sendWhatsAppMsg(order.address.phone, confirmMessage);
 

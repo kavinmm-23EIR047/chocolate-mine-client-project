@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
+import { requestFirebaseNotificationPermission } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -40,6 +41,13 @@ export const AuthProvider = ({ children }) => {
         console.log('🔐 AuthContext: Token verified, user:', userData.email);
         setUser(userData);
         sessionStorage.setItem('user', JSON.stringify(userData));
+
+        // Sync FCM token
+        requestFirebaseNotificationPermission().then(token => {
+          if (token) {
+            api.put('/users/fcm-token', { fcmToken: token }).catch(err => console.error("FCM sync failed", err));
+          }
+        });
       } catch (err) {
         const status = err.response?.status || err.status;
         console.error('🔐 AuthContext: Verification failed', { status, message: err.message });
@@ -68,6 +76,13 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.setItem('user', JSON.stringify(userData));
       sessionStorage.setItem('token', token);
       
+      // Sync FCM token
+      requestFirebaseNotificationPermission().then(fcmToken => {
+        if (fcmToken) {
+          api.put('/users/fcm-token', { fcmToken }).catch(err => console.error("FCM sync failed", err));
+        }
+      });
+
       return response.data;
     } catch (err) {
       console.error('🔐 AuthContext: Manual login failed', err.response?.data?.message || err.message);

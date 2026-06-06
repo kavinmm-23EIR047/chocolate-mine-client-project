@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Mail, Phone, MapPin, ShieldCheck, CreditCard, Truck,
-  Cake, Cookie, Candy
+  Cake, Cookie, Candy, Flower2, Flame, IceCream
 } from 'lucide-react';
 import {
   FaFacebookF as Facebook,
@@ -26,21 +26,33 @@ const Footer = () => {
       {/* ─── AMBIENT BACKGROUND WATERMARKS & BLURS ─── */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--primary)]/5 rounded-full blur-[100px] -mr-64 -mt-64 pointer-events-none" />
 
-      {/* Safe Floating Watermarks */}
-      <div className="absolute top-6 left-[5%] opacity-[0.03] dark:opacity-[0.06] pointer-events-none text-current transform -rotate-12 hidden xl:block">
-        <Cake size={110} />
+      {/* Floating Scattered Icons (Adapts to Light/Dark Mode automatically) */}
+      <div className="absolute top-10 left-[8%] opacity-[0.04] dark:opacity-[0.08] pointer-events-none text-current transform -rotate-12 hidden md:block">
+        <Cake size={90} strokeWidth={1.5} />
       </div>
-      <div className="absolute bottom-24 right-[5%] opacity-[0.03] dark:opacity-[0.06] pointer-events-none text-current transform rotate-45 hidden xl:block">
-        <Cookie size={90} />
+      <div className="absolute bottom-32 right-[8%] opacity-[0.04] dark:opacity-[0.08] pointer-events-none text-current transform rotate-45 hidden md:block">
+        <Cookie size={80} strokeWidth={1.5} />
+      </div>
+      <div className="absolute top-[40%] left-[45%] opacity-[0.03] dark:opacity-[0.06] pointer-events-none text-current transform -rotate-45 hidden lg:block">
+        <Candy size={120} strokeWidth={1} />
+      </div>
+      <div className="absolute top-16 right-[20%] opacity-[0.04] dark:opacity-[0.08] pointer-events-none text-current transform rotate-12 hidden md:block">
+        <Flower2 size={85} strokeWidth={1.5} />
+      </div>
+      <div className="absolute bottom-20 left-[25%] opacity-[0.04] dark:opacity-[0.08] pointer-events-none text-current transform -rotate-6 hidden lg:block">
+        <Flame size={65} strokeWidth={1.5} />
+      </div>
+      <div className="absolute top-[20%] right-[3%] opacity-[0.04] dark:opacity-[0.08] pointer-events-none text-current transform -rotate-12 hidden xl:block">
+        <IceCream size={100} strokeWidth={1.5} />
       </div>
 
       <div className="w-full mx-auto px-6 sm:px-12 lg:px-20 relative z-10">
 
         {/* ─── TOP BLOCK: BRANDING & WHATSAPP ROW ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16 sm:mb-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-16 sm:mb-24 items-center">
 
           {/* Left Side Layout (5 Columns) */}
-          <div className="space-y-6 text-left flex flex-col items-start w-full lg:col-span-5">
+          <div className="space-y-6 text-left flex flex-col items-start w-full lg:col-span-6 xl:col-span-5">
 
             {/* Logo Wrapper */}
             <Link to="/" className="block select-none group w-[150px] sm:w-[170px]">
@@ -78,16 +90,16 @@ const Footer = () => {
               </span>
             </div>
 
-            {/* Social Icons Container (As shown in image_7e3cdd.png, configured to swap colors cleanly in dark mode) */}
+            {/* Social Icons Container */}
             <div className="flex justify-start gap-4 w-full pt-1">
               {[InstagramIcon, Facebook, Twitter, Youtube].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300 border shadow-sm
+                  className="w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-300 border shadow-sm
                     bg-[#120806] border-[#DED0CC]/20 text-[#DED0CC] 
                     dark:bg-[#DED0CC] dark:border-[#381A14]/20 dark:text-[#381A14]
-                    hover:scale-105"
+                    hover:scale-110 hover:-translate-y-1"
                 >
                   <Icon size={18} />
                 </a>
@@ -95,42 +107,47 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Right Side Layout - WhatsApp Card Container */}
-          <div className="lg:col-span-7 w-full">
-            <div className="bg-current/[0.03] dark:bg-[#381A14]/5 border border-current/15 p-6 sm:p-8 rounded-2xl relative overflow-hidden text-left w-full transition-all duration-300">
-
-              <div className="absolute -top-4 -right-4 opacity-[0.04] dark:opacity-[0.08] pointer-events-none text-current">
-                <Whatsapp size={140} className="-rotate-12" />
-              </div>
-
-              <h3 className="text-xl sm:text-2xl font-black text-current uppercase tracking-tight mb-1">
-                Join our WhatsApp Group
+          {/* Right Side Layout - WhatsApp Search-Bar Style container */}
+          <div className="lg:col-span-6 xl:col-span-7 w-full flex flex-col justify-center items-start lg:items-end">
+            <div className="w-full max-w-xl text-left lg:text-right mb-4">
+              <h3 className="text-2xl sm:text-4xl font-black text-current uppercase tracking-tighter mb-2 flex items-center lg:justify-end gap-3">
+                <Whatsapp className="text-[#25D366]" size={36} />
+                Join the Club
               </h3>
-              <p className="opacity-80 text-[#DED0CC] dark:text-[#381A14] font-bold text-[10px] uppercase tracking-widest font-['Inter',sans-serif] mb-6">
-                Join our WhatsApp group and get exciting offers
+              <p className="opacity-70 text-[11px] sm:text-xs font-bold uppercase tracking-widest font-['Inter',sans-serif]">
+                Unlock secret menus, flash sales, and sweet daily drops.
               </p>
+            </div>
 
+            {/* Colorful Sliding Border Form (Non-box shape) */}
+            <div className="w-full max-w-xl relative overflow-hidden p-[3px] rounded-[2.5rem_0.75rem_2.5rem_0.75rem] shadow-2xl group">
+
+              {/* The Sliding Animated Gradient */}
+              <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#ec4899_0%,#E6C34A_33%,#25D366_66%,#ec4899_100%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+
+              {/* Inner Form mimicking the footer background to create the border illusion */}
               <form
-                className="flex flex-col sm:flex-row gap-3 relative z-10 w-full items-stretch"
+                className="relative flex flex-col sm:flex-row items-stretch bg-[#120806] dark:bg-[#DED0CC] rounded-[2.4rem_0.65rem_2.4rem_0.65rem] overflow-hidden"
                 onSubmit={(e) => {
                   e.preventDefault();
                   window.open('https://chat.whatsapp.com/', '_blank');
                 }}
               >
-                <div className="relative flex-1">
+                <div className="relative flex-1 flex items-center px-6 py-2">
                   <input
                     type="tel"
-                    placeholder="Enter number"
+                    placeholder="Enter WhatsApp Number"
                     required
                     pattern="[0-9]{10}"
-                    className="w-full bg-black/40 dark:bg-white text-white dark:text-[#381A14] border border-current/20 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-[#25D366] transition-all font-bold placeholder:text-current/40 text-sm font-['Inter',sans-serif]"
+                    className="w-full bg-transparent text-current outline-none focus:ring-0 font-bold placeholder:text-current/40 text-sm sm:text-base font-['Inter',sans-serif] py-3"
                   />
                 </div>
+
+                {/* BUTTON: changed text to "JOIN NOW", improved mobile sizing */}
                 <button
                   type="submit"
-                  className="bg-[#25D366] text-white hover:bg-[#20ba56] font-black tracking-widest text-xs uppercase px-8 py-3.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                  className="bg-[#25D366] text-white hover:bg-[#20ba56] font-black tracking-widest text-xs uppercase px-5 sm:px-8 py-3 sm:py-4 flex items-center justify-center gap-2 transition-colors active:bg-[#1a9e48] w-full sm:w-auto"
                 >
-                  <Whatsapp size={16} />
                   <span>JOIN NOW</span>
                 </button>
               </form>

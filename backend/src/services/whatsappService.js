@@ -19,10 +19,10 @@ const getAuthHeader = () => ({
 const sendWhatsApp = async (to, message, role = 'unknown') => {
   const mode = process.env.NOTIFICATION_MODE || 'whapi';
 
-  // SKIP USER MESSAGES (Business Strategy: Email/Dashboard only for users)
-  if (role === 'user') {
-    return;
-  }
+  // Let's enable user messages as per new requirement
+  // if (role === 'user') {
+  //   return;
+  // }
 
   try {
     if (mode === 'telegram') {

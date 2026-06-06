@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { useGetProductsQuery } from '../services/api/productApi';
+import { useGetProductsQuery } from '../product/productApi';
 import toast from 'react-hot-toast';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../product/ProductCard';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import OccasionSection from '../components/home/OccasionSection';
 import Bestseller from '../components/home/bestseller';
@@ -16,8 +16,8 @@ import api from '../utils/api';
 import HomeLoader from '../components/home/HomeLoader';
 import WhatsAppButton from '../components/WhatsAppButton';
 import TrustBar from '../components/home/TrustBar';
-import CategoryCircles from '../components/home/CategoryCircles';
-import MiniAdsGrid from '../components/home/MiniAdsGrid';
+import { CategoryCircles } from '../components/home/Category';
+
 import ReviewsHome from '../components/home/ReviewsHome';
 import BottomBanner from '../components/home/BottomBanner';
 
@@ -133,7 +133,7 @@ const Home = () => {
               {/* Delivery Hero Section */}
               <DeliveryHero />
 
-              <MiniAdsGrid />
+
 
               <OccasionSection />
             </>

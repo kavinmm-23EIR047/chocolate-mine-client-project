@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, ArrowRight } from 'lucide-react';
-import { useGetProductsQuery } from '../../services/api/productApi';
-import ProductCard from '../ProductCard';
+import { useGetProductsQuery } from '../../product/productApi';
+import ProductCard from '../../product/ProductCard';
 import { CardSkeleton } from '../ui/Skeleton';
 
 const fadeUp = {
@@ -18,44 +18,49 @@ const Bestseller = ({ location }) => {
   const { data: productRes, isLoading } = useGetProductsQuery({
     bestseller: 'true',
     location,
-    limit: 4,
+    limit: 10, // Fetch a bit more in case backend pagination includes non-bestsellers
   });
 
-  const products = productRes?.data || [];
+  // STRICT FRONTEND FILTER: Only keep items where bestseller is true
+  const products = (productRes?.data || []).filter(p => p.bestseller === true);
 
   if (!isLoading && products.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-6 border-b border-border/20">
-      <div className="flex flex-col gap-6">
-        <div className="flex items-end justify-between">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-light text-warning-text border border-warning-text/10 text-[9px] font-black uppercase tracking-wider">
-              <Star size={10} fill="currentColor" /> Bestselling
+    <section className="py-6 lg:py-10 border-b border-border/20 overflow-hidden">
+      <div className="flex flex-col gap-5 lg:gap-8">
+        <div className="flex items-end justify-between gap-2 w-full px-4 sm:px-0">
+          <div className="space-y-1 lg:space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 lg:px-4 lg:py-1.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] lg:text-xs font-black uppercase tracking-wider">
+              <Star size={10} fill="currentColor" className="lg:w-3 lg:h-3" /> Bestselling
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-heading uppercase">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-heading uppercase">
               Our Bestsellers
             </h2>
-            <p className="text-[11px] sm:text-xs text-muted font-medium uppercase tracking-wider">
-              Most loved treats & popular choices
-            </p>
           </div>
-          
+
           {!isLoading && products.length > 0 && (
             <Link
               to="/shop?bestseller=true"
-              className="inline-flex items-center gap-1.5 text-xs font-black text-primary hover:text-primary-hover uppercase tracking-widest border-b-2 border-primary/20 pb-0.5 transition-all hover:gap-2.5"
+              className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs lg:text-sm font-black text-primary hover:text-primary-hover uppercase tracking-widest border-b-2 border-primary/20 pb-0.5 transition-all hover:gap-2 whitespace-nowrap mb-1"
             >
-              View All <ArrowRight size={14} />
+              View All <ArrowRight size={14} className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
             </Link>
           )}
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6">
+        <div
+          className="flex overflow-x-auto snap-x snap-mandatory gap-3 sm:gap-4 lg:gap-6 pb-4 lg:pb-6 px-4 sm:px-0 scroll-smooth [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {isLoading ? (
-            Array(4).fill(0).map((_, i) => <CardSkeleton key={`best-skeleton-${i}`} />)
+            Array(4).fill(0).map((_, i) => (
+              <div key={`best-skel-${i}`} className="snap-start shrink-0 w-[170px] sm:w-[220px] lg:w-[300px]">
+                <CardSkeleton />
+              </div>
+            ))
           ) : (
             products.map((p, i) => (
               <motion.div
@@ -65,6 +70,7 @@ const Bestseller = ({ location }) => {
                 whileInView="show"
                 viewport={{ once: true }}
                 custom={i}
+                className="snap-start shrink-0 w-[170px] sm:w-[220px] lg:w-[300px] h-auto flex flex-col"
               >
                 <ProductCard product={p} />
               </motion.div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -18,7 +18,7 @@ import {
 
 import ScooterLightImg from '../../assets/scooter-light.png';
 import ScooterDarkImg from '../../assets/scooter-dark.png';
-import CakeImg from '../../assets/cake.png';
+import CakeImg from '../../assets/cake.png'; // Placeholder for themes
 
 const DELIVERY_FEATURES = [
   { icon: <Clock size={20} />, label: 'Same-Day', sub: 'Delivery' },
@@ -35,12 +35,66 @@ const STATS = [
   { icon: <Phone size={20} />, stat: '24/7', label: 'Customer Support' },
 ];
 
+const CAKE_THEMES = [
+  { id: 'wedding', title: 'Wedding Elegance', img: CakeImg, link: '/custom-cake/wedding' },
+  { id: 'birthday', title: 'Fun Birthdays', img: CakeImg, link: '/custom-cake/birthday' },
+  { id: 'anniversary', title: 'Anniversaries', img: CakeImg, link: '/custom-cake/anniversary' },
+  { id: 'kids', title: 'Kids Specials', img: CakeImg, link: '/custom-cake/kids' },
+  { id: 'corporate', title: 'Corporate Events', img: CakeImg, link: '/custom-cake/corporate' },
+];
+
 const DeliveryHero = () => {
+  const [activeThemeIndex, setActiveThemeIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const sliderRef = useRef(null);
+
+  // Auto-slider logic (updated to scroll by full container width)
+  useEffect(() => {
+    if (isHovered) return;
+
+    const timer = setInterval(() => {
+      if (!sliderRef.current) return;
+
+      const nextIndex = (activeThemeIndex + 1) % CAKE_THEMES.length;
+      const containerWidth = sliderRef.current.clientWidth;
+
+      sliderRef.current.scrollTo({
+        left: nextIndex * containerWidth,
+        behavior: 'smooth'
+      });
+
+      setActiveThemeIndex(nextIndex);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [activeThemeIndex, isHovered]);
+
+  // Sync pagination dots with manual scroll/swipe
+  const handleScroll = (e) => {
+    if (!sliderRef.current) return;
+    const containerWidth = sliderRef.current.clientWidth;
+    const newIndex = Math.round(e.target.scrollLeft / containerWidth);
+    if (newIndex !== activeThemeIndex && newIndex < CAKE_THEMES.length) {
+      setActiveThemeIndex(newIndex);
+    }
+  };
+
+  // Pagination dot click handler
+  const scrollToSlide = (index) => {
+    if (!sliderRef.current) return;
+    const containerWidth = sliderRef.current.clientWidth;
+    sliderRef.current.scrollTo({
+      left: index * containerWidth,
+      behavior: 'smooth'
+    });
+    setActiveThemeIndex(index);
+  };
+
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-5">
+    <div className="w-full flex flex-col lg:flex-row gap-6">
       {/* MAIN CARD */}
       <section
-        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-border/20 flex-1 min-w-0"
+        className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-border/20 flex-1 min-w-0 flex flex-col"
         style={{
           background: 'var(--card)',
           boxShadow: '0 20px 40px -12px rgba(0,0,0,0.1)',
@@ -51,10 +105,9 @@ const DeliveryHero = () => {
           <div className="absolute right-1/4 bottom-0 w-64 h-64 rounded-full blur-[80px] opacity-[0.03]" style={{ background: 'var(--accent)' }} />
         </div>
 
-        <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] items-center">
+        <div className="relative flex-1 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] items-center">
           {/* LEFT TEXT CONTENT */}
-          <div className="flex flex-col justify-center px-6 sm:px-8 lg:pl-10 lg:pr-4 xl:pl-12 xl:pr-6 
-                        py-8 sm:py-10 lg:py-8 order-2 lg:order-1 z-10 text-center lg:text-left">
+          <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10 xl:p-12 order-2 lg:order-1 z-10 text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -85,7 +138,7 @@ const DeliveryHero = () => {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.13 }}
-              className="text-sm sm:text-base font-medium leading-relaxed mb-5 max-w-md mx-auto lg:mx-0"
+              className="text-sm sm:text-base font-medium leading-relaxed mb-6 max-w-md mx-auto lg:mx-0"
               style={{ color: 'var(--muted)' }}
             >
               From our kitchen to your doorstep — fast, fresh and handled with care.
@@ -96,19 +149,19 @@ const DeliveryHero = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.16 }}
-              className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 mb-6"
+              className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 mb-8"
             >
               {DELIVERY_FEATURES.map(({ icon, label, sub }) => (
                 <div
                   key={label}
-                  className="flex flex-col items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl min-w-[70px] sm:min-w-[80px] transition-all duration-300 hover:scale-105 cursor-default group"
+                  className="flex flex-col items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl min-w-[70px] sm:min-w-[80px] transition-all duration-300 hover:scale-105 cursor-default group"
                   style={{
                     background: 'var(--background)',
                     border: '1px solid var(--border)',
                   }}
                 >
                   <span className="group-hover:scale-110 transition-transform duration-300" style={{ color: 'var(--primary)' }}>{icon}</span>
-                  <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight text-center leading-tight" style={{ color: 'var(--heading)' }}>{label}</span>
+                  <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight text-center leading-tight mt-1" style={{ color: 'var(--heading)' }}>{label}</span>
                   <span className="text-[8px] sm:text-[9px] font-medium text-center leading-none" style={{ color: 'var(--muted)' }}>{sub}</span>
                 </div>
               ))}
@@ -119,11 +172,11 @@ const DeliveryHero = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="flex flex-wrap justify-center lg:justify-start items-center gap-4"
+              className="flex flex-wrap justify-center lg:justify-start items-center gap-5"
             >
               <Link
                 to="/shop"
-                className="inline-flex items-center gap-2 px-8 sm:px-10 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-[0.18em] transition-all duration-300 hover:scale-105 active:scale-95"
+                className="inline-flex items-center gap-2 px-8 sm:px-10 py-3 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-[0.18em] transition-all duration-300 hover:scale-105 active:scale-95"
                 style={{
                   background: 'var(--primary)',
                   color: 'var(--button-text)',
@@ -142,10 +195,8 @@ const DeliveryHero = () => {
             </motion.div>
           </div>
 
-          {/* Scooter image */}
-          <div className="relative order-1 lg:order-2 flex items-center justify-center 
-                        min-h-[320px] sm:min-h-[420px] lg:min-h-0 lg:h-full
-                        py-4 lg:py-0 px-4 lg:-ml-12 xl:-ml-20 z-20">
+          {/* SCOOTER IMAGE */}
+          <div className="relative order-1 lg:order-2 flex items-center justify-center p-6 lg:p-10 z-20">
             <motion.img
               src={ScooterLightImg}
               alt="Chocolate Mine Delivery"
@@ -153,11 +204,8 @@ const DeliveryHero = () => {
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-[400px] sm:max-w-[500px] lg:max-w-[130%] xl:max-w-[140%] h-auto object-contain dark:hidden scale-110 lg:scale-125 xl:scale-135"
-              style={{
-                filter: 'drop-shadow(0 20px 40px rgba(61,31,26,0.15))',
-                marginRight: '-30px'
-              }}
+              className="relative z-10 w-full max-w-[320px] sm:max-w-[400px] lg:max-w-[450px] h-auto object-contain dark:hidden"
+              style={{ filter: 'drop-shadow(0 20px 40px rgba(61,31,26,0.15))' }}
               draggable={false}
             />
             <motion.img
@@ -167,27 +215,24 @@ const DeliveryHero = () => {
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-[400px] sm:max-w-[500px] lg:max-w-[130%] xl:max-w-[140%] h-auto object-contain hidden dark:block scale-110 lg:scale-125 xl:scale-135"
-              style={{
-                filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))',
-                marginRight: '-30px'
-              }}
+              className="relative z-10 w-full max-w-[320px] sm:max-w-[400px] lg:max-w-[450px] h-auto object-contain hidden dark:block"
+              style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
               draggable={false}
             />
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar Stats */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.25 }}
-          className="relative border-t border-border/20"
+          className="relative border-t border-border/20 mt-auto"
           style={{ background: 'rgba(var(--primary-rgb), 0.02)' }}
         >
           <div
-            className="flex flex-wrap items-center justify-center lg:justify-start gap-4 px-5 sm:px-6 py-3"
+            className="flex flex-wrap items-center justify-center lg:justify-start gap-4 px-6 py-4"
             style={{ background: 'var(--background)' }}
           >
             <div className="flex flex-col gap-0.5 shrink-0 text-center lg:text-left">
@@ -200,13 +245,13 @@ const DeliveryHero = () => {
               </div>
             </div>
             <div className="hidden lg:block w-px h-6 shrink-0" style={{ background: 'var(--border)' }} />
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-5">
               {[
                 { icon: <ShieldCheck size={12} />, label: '100% Secure', sub: 'Payments' },
                 { icon: <Tag size={12} />, label: 'Multiple', sub: 'Options' },
                 { icon: <Zap size={12} />, label: 'Instant', sub: 'Confirm' },
               ].map(({ icon, label, sub }) => (
-                <div key={label} className="flex items-center gap-1.5">
+                <div key={label} className="flex items-center gap-2">
                   <span style={{ color: 'var(--accent)' }}>{icon}</span>
                   <div>
                     <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-tight leading-none mb-0.5" style={{ color: 'var(--heading)' }}>{label}</p>
@@ -222,14 +267,14 @@ const DeliveryHero = () => {
             {STATS.map(({ icon, stat, label }) => (
               <div
                 key={label}
-                className="flex items-center justify-center lg:justify-start gap-2 px-3 sm:px-4 py-3 group hover:bg-primary/10 transition-colors duration-300 cursor-default text-center lg:text-left"
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 px-4 py-4 group hover:bg-primary/10 transition-colors duration-300 cursor-default text-center sm:text-left"
               >
                 <span className="shrink-0 opacity-40 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110" style={{ color: 'var(--primary)' }}>
                   {icon}
                 </span>
                 <div>
                   <p className="text-sm sm:text-base font-black leading-none" style={{ color: 'var(--heading)' }}>{stat}</p>
-                  <p className="text-[9px] sm:text-[10px] font-semibold mt-0.5 leading-tight" style={{ color: 'var(--muted)' }}>{label}</p>
+                  <p className="text-[9px] sm:text-[10px] font-semibold mt-1 leading-tight" style={{ color: 'var(--muted)' }}>{label}</p>
                 </div>
               </div>
             ))}
@@ -237,7 +282,7 @@ const DeliveryHero = () => {
         </motion.div>
       </section>
 
-      {/* Custom Cakes Panel */}
+      {/* CUSTOM CAKES PANEL */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -249,7 +294,7 @@ const DeliveryHero = () => {
           boxShadow: '0 20px 40px -12px rgba(0,0,0,0.1)',
         }}
       >
-        <div className="px-6 pt-6 pb-2 text-center lg:text-left">
+        <div className="px-6 pt-8 pb-4 text-center lg:text-left">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-1.5" style={{ color: 'var(--accent)' }}>
             Custom Cakes
           </p>
@@ -257,22 +302,78 @@ const DeliveryHero = () => {
             Made Just for You
           </h3>
           <p className="text-[11px] sm:text-xs font-medium leading-relaxed" style={{ color: 'var(--muted)' }}>
-            Celebrate every moment with a cake as unique as your story.
+            Celebrate every moment with a cake as unique as your story. Swipe to explore themes.
           </p>
         </div>
 
-        <div className="flex justify-center px-5 py-2">
-          <div className="shrink-0 w-[150px] sm:w-[170px] lg:w-[190px]">
-            <img
-              src={CakeImg}
-              alt="Custom Cake"
-              className="w-full h-auto object-contain transition-transform duration-700 hover:scale-105"
-              style={{ filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.3))' }}
-            />
+        {/* --- MODIFIED: 100% Width Carousel (Hides Next Slide Completely) --- */}
+        <div
+          className="w-full pb-2 flex flex-col"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Slider Track */}
+          <div
+            ref={sliderRef}
+            onScroll={handleScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory w-full [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {CAKE_THEMES.map((theme) => (
+              <div
+                key={theme.id}
+                className="w-full shrink-0 snap-center px-6" // Padding is inside the 100% width slide now
+              >
+                <div className="relative rounded-2xl overflow-hidden group border border-border/10 flex flex-col items-center justify-between bg-primary/5 pb-4">
+                  <div className="p-4 w-full flex justify-center items-center h-[140px] sm:h-[150px]">
+                    <img
+                      src={theme.img}
+                      alt={theme.title}
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.15))' }}
+                    />
+                  </div>
+
+                  <div className="px-4 w-full flex flex-col items-center gap-3">
+                    <p className="text-[12px] sm:text-sm font-black uppercase tracking-wider text-center" style={{ color: 'var(--heading)' }}>
+                      {theme.title}
+                    </p>
+
+                    <Link
+                      to={theme.link}
+                      className="w-full text-center py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95"
+                      style={{
+                        background: 'var(--primary)',
+                        color: 'var(--button-text)',
+                      }}
+                    >
+                      Order Now
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Dots */}
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            {CAKE_THEMES.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => scrollToSlide(index)}
+                className={`transition-all duration-300 rounded-full ${index === activeThemeIndex
+                    ? 'w-4 h-1.5 opacity-100'
+                    : 'w-1.5 h-1.5 opacity-30 hover:opacity-60'
+                  }`}
+                style={{ background: 'var(--primary)' }}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
+        {/* ------------------------------------------------ */}
 
-        <div className="flex flex-col gap-2.5 px-5 py-3 flex-1">
+        <div className="flex flex-col gap-4 px-6 py-4 flex-1">
           {[
             { icon: <Sparkles size={14} />, label: 'Custom Flavors', sub: 'Choose your favorite flavors' },
             { icon: <BadgeCheck size={14} />, label: 'Personalized Design', sub: 'Tailored to your special moments' },
@@ -281,11 +382,10 @@ const DeliveryHero = () => {
           ].map(({ icon, label, sub, highlight }) => (
             <div key={label} className="flex items-start gap-3 group cursor-default">
               <div
-                className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 ${
-                  highlight
-                    ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-                    : 'bg-background text-accent border-border'
-                }`}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 ${highlight
+                  ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                  : 'bg-background text-accent border-border'
+                  }`}
               >
                 {icon}
               </div>
@@ -299,17 +399,18 @@ const DeliveryHero = () => {
           ))}
         </div>
 
-        <div className="px-6 pb-6 pt-2 mt-auto">
+        {/* BOTTOM BUTTON */}
+        <div className="px-6 pb-8 pt-4 mt-auto">
           <Link
-            to="/custom-cake"
-            className="inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95"
+            to="/custom-cakes"
+            className="inline-flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95"
             style={{
-              background: 'var(--primary)',
-              color: 'var(--button-text)',
-              boxShadow: '0 8px 20px rgba(var(--primary-rgb),0.25)',
+              background: 'var(--foreground)',
+              color: 'var(--background)',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
             }}
           >
-            Order Custom Cake <ChevronRight size={14} />
+            See All Custom Cakes <ChevronRight size={14} />
           </Link>
         </div>
       </motion.div>

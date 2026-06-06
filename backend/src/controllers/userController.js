@@ -165,3 +165,21 @@ exports.getWishlist = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate('wishlist');
   res.status(200).json({ status: 'success', data: user.wishlist });
 });
+
+// @desc    Update FCM Token
+// @route   PUT /api/v1/users/fcm-token
+exports.updateFcmToken = asyncHandler(async (req, res, next) => {
+  const { fcmToken } = req.body;
+  if (!fcmToken) {
+    return next(new AppError('FCM Token is required', 400));
+  }
+
+  const user = await User.findById(req.user._id);
+  user.fcmToken = fcmToken;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'FCM Token updated successfully'
+  });
+});

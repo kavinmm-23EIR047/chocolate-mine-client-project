@@ -540,10 +540,9 @@ const ProductForm = () => {
                     required 
                     className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold capitalize"
                   >
-                    <option value="coimbatore">Coimbatore</option>
-                    <option value="chennai">Chennai</option>
-                    <option value="bangalore">Bangalore</option>
-                    <option value="hyderabad">Hyderabad</option>
+                    <option value="coimbatore">Coimbatore Only</option>
+                    <option value="pan-india">Pan India Only</option>
+                    <option value="both">Both (Everywhere)</option>
                   </select>
                 </div>
 

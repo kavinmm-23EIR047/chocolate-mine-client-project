@@ -227,6 +227,15 @@ const Navbar = () => {
           </div>
 
         </div>
+
+        {/* BOTTOM DESKTOP NAVIGATION ROW */}
+        <div className="hidden lg:flex items-center justify-start gap-10 py-2.5 px-4 sm:px-6 lg:px-10 border-t border-border/10 bg-navbar max-w-[1400px] mx-auto w-full">
+          <Link to="/shop" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">All</Link>
+          <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Custom Cakes</Link>
+          <Link to="/occasion/anniversary" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Anniversary</Link>
+          <Link to="/shop?bestseller=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Bestseller</Link>
+          <Link to="/shop?featured=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Features</Link>
+        </div>
       </nav>
 
       {/* Mobile Sidebar Navigation Drawer */}

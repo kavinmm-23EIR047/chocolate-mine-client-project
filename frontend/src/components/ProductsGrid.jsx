@@ -1,5 +1,5 @@
 import React from 'react';
-import ProductCard from './ProductCard';
+import ProductCard from '../product/ProductCard';
 
 const ProductsGrid = ({ products, loading, columns = { mobile: 2, tablet: 3, laptop: 4, desktop: 5 } }) => {
   

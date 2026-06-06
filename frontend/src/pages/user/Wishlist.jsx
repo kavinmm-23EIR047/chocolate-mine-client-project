@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../../redux/slices/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
-import ProductCard from '../../components/ProductCard';
+import ProductCard from '../../product/ProductCard';
 import { Link } from 'react-router-dom';
 
 const Wishlist = () => {

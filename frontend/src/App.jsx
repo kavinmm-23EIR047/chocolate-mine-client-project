@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { LocationProvider } from './context/LocationContext';
+import { onMessageListener } from './firebase';
 
 // Layouts
 import UserLayout from './components/layouts/UserLayout';
@@ -16,7 +17,7 @@ import { ProtectedRoute, AdminRoute, StaffRoute, GuestRoute } from './routes/Gua
 
 // Pages
 import Home from './pages/Home';
-import ProductDetails from './pages/ProductDetails';
+import ProductDetails from './product/ProductDetails';
 import OccasionProducts from './pages/OccasionProducts';
 import OrderTracking from './pages/OrderTracking';
 import Checkout from './pages/Checkout';
@@ -121,6 +122,24 @@ function BrandIntroGate() {
   return <BrandIntroLoader show={visible} onFinish={onIntroDone} logoHoldMs={2500} />;
 }
 
+// Handles foreground push notifications
+const PushNotificationHandler = () => {
+  useEffect(() => {
+    onMessageListener().then(payload => {
+      if (payload?.notification) {
+        toast.success(
+          <div className="flex flex-col gap-1">
+            <span className="font-bold">{payload.notification.title}</span>
+            <span className="text-xs">{payload.notification.body}</span>
+          </div>,
+          { duration: 6000, icon: '🔔' }
+        );
+      }
+    }).catch(err => console.log('failed: ', err));
+  }, []);
+  return null;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -131,6 +150,7 @@ function App() {
             <Router>
               <ScrollToTop />
               <SocketInitializer />
+              <PushNotificationHandler />
               <Toaster
                 position="bottom-center"
                 toastOptions={{

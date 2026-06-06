@@ -3,7 +3,8 @@ const Notification = require('../models/Notification');
 const telegramService = require('./telegramService');
 const emailService = require('./emailService');
 const socketService = require('./socketService');
-
+const firebaseService = require('./firebaseService');
+const whatsappService = require('./whatsappService');
 const cacheService = require('./cacheService');
 
 const logger = require('../utils/logger');
@@ -28,6 +29,18 @@ exports.notifyOrderSuccess = async (order) => {
       emailService.sendOrderConfirmed(populatedOrder.userId.email, populatedOrder)
         .catch(e => logger.error('Order Email Failed:', e.message));
     }
+    
+    if (populatedOrder.userId.phone) {
+      whatsappService.sendOrderPlaced(populatedOrder.userId.phone, populatedOrder.orderNumber);
+    }
+
+    if (populatedOrder.userId.fcmToken) {
+      firebaseService.sendPushNotification(
+        populatedOrder.userId.fcmToken,
+        'Order Confirmed! 🎉',
+        `Your order #${populatedOrder.orderNumber} has been received successfully.`
+      );
+    }
 
     // 2. NOTIFY ADMINS & STAFF (Deduplicated Telegram Group Alert)
     const alertLockKey = `alert_lock:order:${populatedOrder._id}`;
@@ -43,6 +56,8 @@ exports.notifyOrderSuccess = async (order) => {
 
     // 3. EMIT DASHBOARD ALERTS (To all admins)
     const admins = await User.find({ role: 'admin' });
+    const adminFcmTokens = [];
+    
     for (const admin of admins) {
       socketService.emitToAdmin('new_order_alert', { 
         orderId: populatedOrder._id, 
@@ -50,6 +65,16 @@ exports.notifyOrderSuccess = async (order) => {
         amount: populatedOrder.total,
         customer: populatedOrder.address.fullName 
       });
+      if (admin.fcmToken) adminFcmTokens.push(admin.fcmToken);
+    }
+    
+    // Send Push Notification to all admins
+    if (adminFcmTokens.length > 0) {
+      firebaseService.sendMulticastPushNotification(
+        adminFcmTokens,
+        'New Order Received! 💰',
+        `Order #${populatedOrder.orderNumber} worth ₹${populatedOrder.total} from ${populatedOrder.address.fullName}`
+      );
     }
 
 
@@ -81,6 +106,21 @@ exports.handleStatusChange = async (order, status) => {
       logger.info(`Processing Delivered Email + Invoice for ${populatedOrder.orderNumber}`);
       const invoiceService = require('./invoiceService');
       await invoiceService.sendInvoiceAfterDelivery(populatedOrder._id, true); // Force resend for testing
+    }
+
+    // WHATSAPP & PUSH NOTIFICATIONS FOR USER
+    if (status === 'preparing') {
+      if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, populatedOrder.orderNumber);
+      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Order Preparing 🍰', `We are preparing your order #${populatedOrder.orderNumber}.`);
+    } else if (status === 'packed') {
+      if (populatedOrder.userId.phone) whatsappService.sendPacked(populatedOrder.userId.phone, populatedOrder.orderNumber);
+      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Order Packed 📦', `Your order #${populatedOrder.orderNumber} is packed and ready.`);
+    } else if (status === 'out_for_delivery') {
+      if (populatedOrder.userId.phone) whatsappService.sendOutForDelivery(populatedOrder.userId.phone, populatedOrder.orderNumber);
+      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Out For Delivery 🚚', `Your order #${populatedOrder.orderNumber} is on its way!`);
+    } else if (status === 'delivered') {
+      if (populatedOrder.userId.phone) whatsappService.sendDelivered(populatedOrder.userId.phone, populatedOrder.orderNumber);
+      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Order Delivered 🎉', `Your order #${populatedOrder.orderNumber} has been delivered. Enjoy!`);
     }
 
     // INTERNAL ALERTS

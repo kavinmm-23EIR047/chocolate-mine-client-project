@@ -21,4 +21,7 @@ router.delete('/addresses/:addressId', userController.deleteAddress);
 router.get('/wishlist', userController.getWishlist);
 router.post('/wishlist/toggle', userController.toggleWishlist);
 
+// Push Notifications
+router.put('/fcm-token', userController.updateFcmToken);
+
 module.exports = router;

@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
-import { useGetProductsQuery } from '../services/api/productApi';
+import { useGetProductsQuery } from '../product/productApi';
 import api from '../utils/api';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../product/ProductCard';
 
 /* ═══════════════════════════════════════════════════════
    MAIN SHOP PAGE (CLEANED - CATEGORIES ONLY)
@@ -66,26 +66,24 @@ const Shop = () => {
         const activeDbCats = dbCategories
           .filter(cat => cat.isActive !== false)
           .map(cat => ({
-            name: cat.name,   // e.g., 'chocolate-cakes', 'flowers', 'candles'
-            label: cat.label  // e.g., 'Chocolate Cakes', 'Flowers', 'Candles'
+            name: cat.name,
+            label: cat.label || cat.name.replace(/-/g, ' ')
           }));
 
         setCategories([{ name: 'all', label: 'All' }, ...activeDbCats]);
 
-        // Extract Occasions dynamically from product datasets
-        const productsRes = await api.get('/products?limit=1000');
-        const allProducts = productsRes.data?.data || [];
+        // Fetch Occasions directly from Occasions Database Schema
+        const occasionsRes = await api.get('/occasions');
+        const dbOccasions = occasionsRes.data?.data || occasionsRes.data || [];
 
-        const allOccasions = allProducts
-          .flatMap(p => p.occasion || [])
-          .map(o => o.trim())
-          .filter(Boolean);
+        const activeDbOccasions = dbOccasions
+          .filter(occ => occ.isActive !== false)
+          .map(occ => ({
+            name: occ.name,
+            label: occ.label || occ.name.replace(/-/g, ' ')
+          }));
 
-        const uniqueOccasions = [...new Set(allOccasions)];
-        setOccasions([
-          { name: 'all', label: 'All' },
-          ...uniqueOccasions.map(o => ({ name: o.toLowerCase(), label: o }))
-        ]);
+        setOccasions([{ name: 'all', label: 'All' }, ...activeDbOccasions]);
 
       } catch (err) {
         console.error('Failed to load filter updates:', err);
@@ -201,6 +199,12 @@ const Shop = () => {
               {cat.label}
             </button>
           ))}
+          <Link
+            to="/custom-cake"
+            className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-gradient-to-r from-amber-400 to-pink-500 text-white shadow-md shadow-pink-500/20 hover:scale-105 flex items-center gap-1"
+          >
+            Custom Cakes ✨
+          </Link>
         </div>
       </section>
 

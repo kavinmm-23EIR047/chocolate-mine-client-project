@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Gift } from 'lucide-react';
 import productService from '../services/productService';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../product/ProductCard';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import toast from 'react-hot-toast';
 

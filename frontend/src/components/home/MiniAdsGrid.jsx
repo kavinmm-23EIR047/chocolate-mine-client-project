@@ -1,71 +1,97 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import api from '../../utils/api';
 
-const MINI_ADS = [
-  {
-    img: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80',
-    label: 'Same Day Delivery',
-    sub: 'Same day delivery',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1548365328-8c6db3220e4c?w=600&q=80',
-    label: 'Custom Cakes',
-    sub: 'Your design, our craft',
-    to: '/custom-cake',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?w=600&q=80',
-    label: 'Fresh Daily',
-    sub: 'Baked every morning',
-  },
-];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.07, duration: 0.4, ease: 'easeOut' },
-  }),
+const HighlightCircle = ({ image, name, isActive, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="flex flex-col items-center gap-3 group outline-none shrink-0 snap-start"
+    >
+      <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[2px] transition-all duration-300 ${isActive ? 'bg-gradient-to-tr from-amber-400 to-pink-600 scale-105' : 'bg-transparent'
+        }`}>
+        <div className="w-full h-full rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-800">
+          <img
+            src={image}
+            alt={name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&q=80'; }}
+          />
+        </div>
+      </div>
+      <span className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'
+        }`}>
+        {name}
+      </span>
+    </button>
+  );
 };
 
-const MiniAdsGrid = () => {
+export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const mobileScrollRef = useRef(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/categories');
+        const backend = response.data?.data || [];
+        setCategories([{ name: 'All', image: '...' }, ...backend]);
+      } catch (error) {
+        setCategories([{ name: 'All', image: '...' }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const scrollHoriz = (direction) => {
+    if (!mobileScrollRef.current) return;
+    const amount = mobileScrollRef.current.clientWidth * 0.6;
+    mobileScrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
+
+  if (loading) return null;
+
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      {MINI_ADS.map((ad, i) => {
-        const card = (
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            custom={i}
-            className="relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all duration-700 bg-white dark:bg-card h-52"
-          >
-            <img
-              src={ad.img}
-              alt={ad.label}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+    <section className="py-8 bg-white dark:bg-slate-900 transition-colors">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Scroll Area */}
+        <div
+          ref={mobileScrollRef}
+          className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory scroll-smooth no-scrollbar"
+        >
+          {categories.map((cat) => (
+            <HighlightCircle
+              key={cat.name}
+              image={cat.image}
+              name={cat.name}
+              isActive={activeCategory === cat.name}
+              onClick={() => setActiveCategory(cat.name)}
             />
-            <div
-              className="absolute inset-0 flex flex-col justify-end p-5"
-              style={{ background: 'linear-gradient(0deg,rgba(0,0,0,0.8) 0%,transparent 60%)' }}
-            >
-              <p className="font-bold text-lg text-white drop-shadow-sm">{ad.label}</p>
-              <p className="text-[11px] mt-1 text-white/70 font-semibold uppercase tracking-wider">{ad.sub}</p>
-            </div>
-          </motion.div>
-        );
-        return ad.to ? (
-          <Link key={i} to={ad.to} className="block">
-            {card}
-          </Link>
-        ) : (
-          <div key={i}>{card}</div>
-        );
-      })}
+          ))}
+        </div>
+
+        {/* Minimalist Navigation Row */}
+        <div className="flex justify-center items-center gap-6 text-slate-400 dark:text-slate-500">
+          <button onClick={() => scrollHoriz('left')} className="hover:text-amber-500 transition-colors">
+            <ChevronLeft size={20} strokeWidth={2.5} />
+          </button>
+
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase select-none">
+            Swipe
+          </span>
+
+          <button onClick={() => scrollHoriz('right')} className="hover:text-amber-500 transition-colors">
+            <ChevronRight size={20} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
     </section>
   );
 };
 
-export default MiniAdsGrid;
+export default CategoryCircles;

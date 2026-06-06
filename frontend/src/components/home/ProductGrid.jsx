@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { useGetProductsQuery } from '../../services/api/productApi';
-import ProductCard from '../ProductCard';
+import { useGetProductsQuery } from '../../product/productApi';
+import ProductCard from '../../product/ProductCard';
 import { CardSkeleton } from '../ui/Skeleton';
 
 const fadeUp = {

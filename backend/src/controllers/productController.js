@@ -559,6 +559,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
   await product.save();
 
+  // Trigger real-time notifications for the update
+  const notificationManager = require('../services/notificationManager');
+  notificationManager.notifyProductUpdated(product).catch(console.error);
+
   res.status(200).json({ status: 'success', data: product });
 });
 

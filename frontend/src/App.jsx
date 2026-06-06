@@ -122,10 +122,14 @@ function BrandIntroGate() {
   return <BrandIntroLoader show={visible} onFinish={onIntroDone} logoHoldMs={2500} />;
 }
 
-// Handles foreground push notifications
-const PushNotificationHandler = () => {
+import { toast } from 'react-hot-toast'; // Import toast if missing
+import { getSocket } from './sockets/socketManager';
+
+// Handles foreground push notifications and global socket events
+const GlobalNotificationHandler = () => {
   useEffect(() => {
-    onMessageListener().then(payload => {
+    // 1. Firebase Foreground Push Notifications
+    const unsubscribe = onMessageListener((payload) => {
       if (payload?.notification) {
         toast.success(
           <div className="flex flex-col gap-1">
@@ -135,7 +139,26 @@ const PushNotificationHandler = () => {
           { duration: 6000, icon: '🔔' }
         );
       }
-    }).catch(err => console.log('failed: ', err));
+    });
+
+    // 2. Global Socket Listeners
+    const socket = getSocket();
+    if (socket) {
+      socket.on('product_updated', (data) => {
+        toast.success(
+          <div className="flex flex-col gap-1">
+            <span className="font-bold">Product Updated</span>
+            <span className="text-xs">{data.message || `${data.name} has been updated.`}</span>
+          </div>,
+          { duration: 6000, icon: '🔄' }
+        );
+      });
+    }
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+      if (socket) socket.off('product_updated');
+    };
   }, []);
   return null;
 };
@@ -150,7 +173,7 @@ function App() {
             <Router>
               <ScrollToTop />
               <SocketInitializer />
-              <PushNotificationHandler />
+              <GlobalNotificationHandler />
               <Toaster
                 position="bottom-center"
                 toastOptions={{

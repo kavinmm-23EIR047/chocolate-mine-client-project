@@ -31,6 +31,13 @@ try {
 export const requestFirebaseNotificationPermission = async () => {
   if (!messaging) return null;
 
+  const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+  if (!vapidKey) {
+    console.error("❌ VITE_FIREBASE_VAPID_KEY is missing in frontend/.env! Browser notifications cannot be enabled.");
+    alert("Configuration Error: Firebase VAPID Key is missing. Notifications cannot be enabled.");
+    return null;
+  }
+
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {

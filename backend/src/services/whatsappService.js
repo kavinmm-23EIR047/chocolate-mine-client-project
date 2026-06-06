@@ -91,6 +91,7 @@ const sendInternalOrderAlert = (to, order) => {
     `📍 *Full Address:* ${address}\n` +
     `🍰 *Ordered Items:* ${itemsList}\n` +
     `💰 *Total Amount:* ₹${order.total}\n` +
+    `📅 *Delivery Date:* ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
     `⏰ *Delivery Slot:* ${order.deliverySlot || 'N/A'}\n` +
     `📅 *Ordered Time:* ${new Date(order.createdAt).toLocaleString()}\n\n` +
     footer;

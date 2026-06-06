@@ -65,6 +65,7 @@ const sendInternalOrderAlert = (phone, order) => {
     `📍 *Full Address:* ${address}\n` +
     `🍰 *Ordered Items:* ${itemsList}\n` +
     `💰 *Total Amount:* ₹${orderObj.total}\n` +
+    `📅 *Delivery Date:* ${orderObj.deliveryDate ? new Date(orderObj.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
     `⏰ *Delivery Slot:* ${orderObj.deliverySlot || 'N/A'}\n` +
     `📅 *Ordered Time:* ${new Date(orderObj.createdAt).toLocaleString()}\n\n` +
     `Please check admin dashboard now.`;

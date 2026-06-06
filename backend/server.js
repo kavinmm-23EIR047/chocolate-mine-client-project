@@ -131,6 +131,7 @@ app.use('/api/v1/payment', require('./src/routes/paymentRoutes'));
 app.use('/api/v1/coupon', require('./src/routes/couponRoutes'));
 app.use('/api/v1/reviews', require('./src/routes/reviewRoutes'));
 app.use('/api/v1/users', require('./src/routes/userRoutes'));
+app.use('/api/v1/notifications', require('./src/routes/notificationRoutes'));
 
 // Admin routes
 app.use('/api/v1/admin', require('./src/routes/adminRoutes'));

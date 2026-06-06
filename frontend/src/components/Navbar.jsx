@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDeliveryLocation } from '../context/LocationContext';
 import SearchOverlay from './search/SearchOverlay';
 import ThemeToggle from './ui/ThemeToggle';
+import NotificationDropdown from './ui/NotificationDropdown';
 
 const NAV_LINKS = [
   { label: 'HOME', path: '/' },
@@ -162,16 +163,23 @@ const Navbar = () => {
 
             {/* Right Action Icons Panel (Desktop) */}
             <div className="hidden lg:flex items-center gap-1 shrink-0">
-              {/* Notification Bell */}
-              <button 
-                onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
-                className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]"
-              >
-                <div className="relative">
-                  <Bell size={19} className={`text-heading group-hover:text-primary transition-colors ${user?.fcmToken ? 'fill-primary text-primary' : ''}`} />
+              {/* Notification Bell Dropdown */}
+              {user ? (
+                <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[64px]">
+                  <NotificationDropdown />
+                  <span className="text-[9px] font-bold text-muted uppercase tracking-wide whitespace-nowrap mt-0.5">Alerts</span>
                 </div>
-                <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
-              </button>
+              ) : (
+                <button 
+                  onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
+                  className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]"
+                >
+                  <div className="relative">
+                    <Bell size={19} className="text-heading group-hover:text-primary transition-colors" />
+                  </div>
+                  <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
+                </button>
+              )}
               {[
                 user
                   ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' }
@@ -202,12 +210,16 @@ const Navbar = () => {
 
             {/* Mobile View – Right Side Icons */}
             <div className="lg:hidden ml-auto flex items-center gap-1">
-              <button 
-                onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
-                className="p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0"
-              >
-                <Bell size={20} className={`text-heading ${user?.fcmToken ? 'fill-primary text-primary' : ''}`} />
-              </button>
+              {user ? (
+                <NotificationDropdown />
+              ) : (
+                <button 
+                  onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
+                  className="p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0"
+                >
+                  <Bell size={20} className="text-heading" />
+                </button>
+              )}
               <ThemeToggle />
             </div>
           </div>

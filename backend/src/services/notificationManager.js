@@ -17,6 +17,24 @@ const isUserOnline = async (userId) => {
   return (Date.now() - new Date(user.lastActiveAt).getTime()) < OFFLINE_THRESHOLD;
 };
 
+const saveWebNotification = async (userId, title, message, orderId = null) => {
+  try {
+    await Notification.create({
+      userId,
+      orderId,
+      recipientRole: 'user',
+      type: title,
+      channel: 'WEB',
+      message,
+      status: 'SENT',
+      delivered: true,
+      sentAt: new Date()
+    });
+  } catch (err) {
+    logger.error('Failed to save WEB notification:', err.message);
+  }
+};
+
 exports.notifyOrderSuccess = async (order) => {
   try {
     // Ensure order is populated for email
@@ -35,11 +53,15 @@ exports.notifyOrderSuccess = async (order) => {
     }
 
     if (populatedOrder.userId.fcmToken) {
-      firebaseService.sendPushNotification(
-        populatedOrder.userId.fcmToken,
-        'Order Confirmed! 🎉',
-        `Your order #${populatedOrder.orderNumber} has been received successfully.`
-      );
+      const title = 'Order Confirmed! 🎉';
+      const msg = `Your order #${populatedOrder.orderNumber} has been received successfully.`;
+      firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, title, msg);
+      await saveWebNotification(populatedOrder.userId._id, title, msg, populatedOrder._id);
+    } else {
+      // Still save history even if push is disabled
+      const title = 'Order Confirmed! 🎉';
+      const msg = `Your order #${populatedOrder.orderNumber} has been received successfully.`;
+      await saveWebNotification(populatedOrder.userId._id, title, msg, populatedOrder._id);
     }
 
     // 2. NOTIFY ADMINS & STAFF (Deduplicated Telegram Group Alert)
@@ -73,7 +95,7 @@ exports.notifyOrderSuccess = async (order) => {
       firebaseService.sendMulticastPushNotification(
         adminFcmTokens,
         'New Order Received! 💰',
-        `Order #${populatedOrder.orderNumber} worth ₹${populatedOrder.total} from ${populatedOrder.address.fullName}`
+        `Order #${populatedOrder.orderNumber} worth ₹${populatedOrder.total} from ${populatedOrder.address.fullName} for Delivery on ${populatedOrder.deliveryDate ? new Date(populatedOrder.deliveryDate).toLocaleDateString() : 'N/A'}`
       );
     }
 
@@ -109,18 +131,31 @@ exports.handleStatusChange = async (order, status) => {
     }
 
     // WHATSAPP & PUSH NOTIFICATIONS FOR USER
+    let title = '';
+    let msg = '';
     if (status === 'preparing') {
       if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, populatedOrder.orderNumber);
-      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Order Preparing 🍰', `We are preparing your order #${populatedOrder.orderNumber}.`);
+      title = 'Order Preparing 🍰';
+      msg = `We are preparing your order #${populatedOrder.orderNumber}.`;
     } else if (status === 'packed') {
       if (populatedOrder.userId.phone) whatsappService.sendPacked(populatedOrder.userId.phone, populatedOrder.orderNumber);
-      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Order Packed 📦', `Your order #${populatedOrder.orderNumber} is packed and ready.`);
+      title = 'Order Packed 📦';
+      msg = `Your order #${populatedOrder.orderNumber} is packed and ready.`;
     } else if (status === 'out_for_delivery') {
       if (populatedOrder.userId.phone) whatsappService.sendOutForDelivery(populatedOrder.userId.phone, populatedOrder.orderNumber);
-      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Out For Delivery 🚚', `Your order #${populatedOrder.orderNumber} is on its way!`);
+      title = 'Out For Delivery 🚚';
+      msg = `Your order #${populatedOrder.orderNumber} is on its way!`;
     } else if (status === 'delivered') {
       if (populatedOrder.userId.phone) whatsappService.sendDelivered(populatedOrder.userId.phone, populatedOrder.orderNumber);
-      if (populatedOrder.userId.fcmToken) firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, 'Order Delivered 🎉', `Your order #${populatedOrder.orderNumber} has been delivered. Enjoy!`);
+      title = 'Order Delivered 🎉';
+      msg = `Your order #${populatedOrder.orderNumber} has been delivered. Enjoy!`;
+    }
+
+    if (title && msg) {
+      if (populatedOrder.userId.fcmToken) {
+        firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, title, msg);
+      }
+      await saveWebNotification(populatedOrder.userId._id, title, msg, populatedOrder._id);
     }
 
     // INTERNAL ALERTS

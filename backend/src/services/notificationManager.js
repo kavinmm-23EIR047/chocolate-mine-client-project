@@ -134,5 +134,64 @@ exports.handleStatusChange = async (order, status) => {
   }
 };
 
+exports.notifyPaymentFailure = async (order, reason) => {
+  try {
+    const populatedOrder = await order.populate('userId');
+    logger.info(`Payment Failure Notification Triggered for Order ${populatedOrder.orderNumber}`);
 
+    // 1. NOTIFY USER
+    if (populatedOrder.userId) {
+      if (populatedOrder.userId.email) {
+        emailService.sendUserPaymentFailed(populatedOrder.userId.email, populatedOrder, reason)
+          .catch(e => logger.error('User Payment Failed Email Error:', e.message));
+      }
+      
+      if (populatedOrder.userId.phone) {
+        whatsappService.sendPaymentFailure(populatedOrder.userId.phone, populatedOrder.total, populatedOrder.address.fullName);
+      }
 
+      if (populatedOrder.userId.fcmToken) {
+        firebaseService.sendPushNotification(
+          populatedOrder.userId.fcmToken,
+          'Payment Failed 🔴',
+          `Your payment of ₹${populatedOrder.total} for order #${populatedOrder.orderNumber} failed. Please retry.`
+        );
+      }
+    }
+
+    // 2. NOTIFY ADMINS (Email, Telegram, WhatsApp, Push)
+    const admins = await User.find({ role: 'admin' });
+    const adminFcmTokens = [];
+
+    // Telegram group alert
+    await telegramService.sendAdminPaymentFailure(null, populatedOrder.address.fullName, populatedOrder.total);
+
+    for (const admin of admins) {
+      // Admin Email
+      if (admin.email) {
+        emailService.sendAdminPaymentFailed(admin.email, populatedOrder, reason)
+          .catch(e => logger.error('Admin Payment Failed Email Error:', e.message));
+      }
+
+      // Admin WhatsApp
+      if (admin.phone) {
+        whatsappService.sendAdminPaymentFailure(admin.phone, populatedOrder.address.fullName, populatedOrder.total);
+      }
+
+      if (admin.fcmToken) {
+        adminFcmTokens.push(admin.fcmToken);
+      }
+    }
+
+    if (adminFcmTokens.length > 0) {
+      firebaseService.sendMulticastPushNotification(
+        adminFcmTokens,
+        'Payment Failed Alert 🔴',
+        `Payment of ₹${populatedOrder.total} failed for Order #${populatedOrder.orderNumber} by ${populatedOrder.address.fullName}.`
+      );
+    }
+
+  } catch (err) {
+    logger.error('Payment Failure Notification Manager Error:', err.message);
+  }
+};

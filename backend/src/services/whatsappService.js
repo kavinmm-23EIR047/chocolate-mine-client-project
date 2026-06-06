@@ -25,25 +25,6 @@ const sendWhatsApp = async (to, message, role = 'unknown') => {
   // }
 
   try {
-    if (mode === 'telegram') {
-      // Telegram Integration (Group Alerts)
-      const token = process.env.TELEGRAM_BOT_TOKEN;
-      const chatId = process.env.TELEGRAM_CHAT_ID;
-
-      if (!token || !chatId) {
-        logger.warn('Telegram skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing');
-        return;
-      }
-
-      await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'Markdown'
-      });
-      logger.info(`Telegram Alert [${role}] SENT`);
-      return;
-    }
-
     // Existing WhatsApp logic (Whapi / CallMeBot)
     let formattedPhone = formatPhone(to);
     if (formattedPhone) {
@@ -100,9 +81,8 @@ const sendInternalOrderAlert = (to, order) => {
   const itemsList = order.items.map(item => `${item.name} (x${item.qty})`).join(', ');
   const address = `${order.address.fullName}, ${order.address.houseNo}, ${order.address.street}, ${order.address.city} - ${order.address.pincode}`;
   
-  const mode = process.env.NOTIFICATION_MODE || 'whapi';
-  const emoji = mode === 'telegram' ? '🍫' : '🔔';
-  const footer = mode === 'telegram' ? 'Please check admin dashboard now.' : 'Check dashboard for more details.';
+  const emoji = '🔔';
+  const footer = 'Check dashboard for more details.';
 
   const message = `${emoji} *New Order Received*\n\n` +
     `🆔 *Order ID:* ${order.orderNumber}\n` +

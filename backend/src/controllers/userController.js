@@ -170,7 +170,7 @@ exports.getWishlist = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/users/fcm-token
 exports.updateFcmToken = asyncHandler(async (req, res, next) => {
   const { fcmToken } = req.body;
-  if (!fcmToken) {
+  if (fcmToken === undefined) {
     return next(new AppError('FCM Token is required', 400));
   }
 

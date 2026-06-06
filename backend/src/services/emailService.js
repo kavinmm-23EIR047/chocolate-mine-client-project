@@ -141,6 +141,58 @@ const emailService = {
 
 
 
+  sendUserPaymentFailed: (email, order, reason) => {
+    return sendMail({
+      to: email,
+      subject: `Payment Failed - Order #${order.orderNumber} - The Chocolate Mine`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto; background-color: #FFF9F5; color: #2D1816;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="${process.env.FRONTEND_URL}/logo.png" alt="The Chocolate Mine" style="max-width: 120px;" />
+          </div>
+          <h2 style="color: #A94442; text-align: center; margin-top: 0;">Payment Failed 🔴</h2>
+          <p>Hi ${order.address.fullName},</p>
+          <p>We noticed an issue while processing your payment for order <b style="color: #C68E5A;">${order.orderNumber}</b>.</p>
+          
+          <div style="background: #ffffff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #A94442;">
+            <p style="margin: 0;"><b>Amount:</b> ₹${order.total}</p>
+            <p style="margin: 5px 0 0 0;"><b>Reason:</b> ${reason || 'Transaction could not be completed'}</p>
+          </div>
+
+          <p>Don't worry, your order is still saved! You can try your payment again by visiting your orders page.</p>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${process.env.FRONTEND_URL}/orders" style="display: inline-block; padding: 12px 25px; background: #C68E5A; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Retry Payment</a>
+          </div>
+
+          <p>If you continue to experience issues, please contact our support team.</p>
+          <br/>
+          <p>Warm regards,<br/><b style="color: #4A2C2A;">Team The Chocolate Mine</b></p>
+        </div>
+      `,
+    });
+  },
+
+  sendAdminPaymentFailed: (adminEmail, order, reason) => {
+    return sendMail({
+      to: adminEmail,
+      subject: `🔴 PAYMENT FAILED: Order #${order.orderNumber}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; max-width: 600px; margin: auto;">
+          <h2 style="color: #A94442;">Payment Failure Alert</h2>
+          <p>A payment has failed for an order.</p>
+          <ul>
+            <li><b>Order ID:</b> ${order.orderNumber}</li>
+            <li><b>Customer Name:</b> ${order.address.fullName}</li>
+            <li><b>Amount:</b> ₹${order.total}</li>
+            <li><b>Reason:</b> ${reason || 'Unknown'}</li>
+          </ul>
+          <p>Please check the admin dashboard for details.</p>
+        </div>
+      `,
+    });
+  },
+
   sendLowStockAlert: (product) => {
     return sendMail({
       to: process.env.SMTP_EMAIL,

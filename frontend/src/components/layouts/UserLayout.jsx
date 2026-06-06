@@ -6,6 +6,7 @@ import Footer from '../Footer';
 import MobileBottomNav from '../layout/MobileBottomNav';
 import EgglessBadge from '../ui/EgglessBadge';
 import PureVegBadge from '../ui/PureVegBadge';
+import NotificationPrompt from '../ui/NotificationPrompt';
 
 const UserLayout = () => {
   const location = useLocation();
@@ -79,6 +80,7 @@ const UserLayout = () => {
         <Footer />
       </div>
       {!isAuthPage && <MobileBottomNav />}
+      <NotificationPrompt />
     </div>
   );
 };

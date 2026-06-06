@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Calendar, Edit3, Home, Building, Navigation } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Edit3, Home, Building, Navigation, Bell, BellOff } from 'lucide-react';
+import { requestFirebaseNotificationPermission } from '../../firebase';
 import Button from '../../components/ui/Button';
 import toast from 'react-hot-toast';
 import api from '../../utils/api';
@@ -10,6 +11,7 @@ const ProfileDetails = () => {
   const { user, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || ''
@@ -38,6 +40,35 @@ const ProfileDetails = () => {
       toast.error(err.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    try {
+      setNotifLoading(true);
+      const isCurrentlyEnabled = !!user?.fcmToken;
+
+      if (isCurrentlyEnabled) {
+        // Disable notifications
+        await api.put('/users/fcm-token', { fcmToken: null });
+        updateUser({ ...user, fcmToken: null });
+        toast.success("Push notifications disabled");
+      } else {
+        // Enable notifications
+        const token = await requestFirebaseNotificationPermission();
+        if (token) {
+          await api.put('/users/fcm-token', { fcmToken: token });
+          updateUser({ ...user, fcmToken: token });
+          toast.success("Push notifications enabled");
+        } else {
+          toast.error("Please allow notification permissions in your browser settings.");
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to update notification preferences.");
+      console.error(err);
+    } finally {
+      setNotifLoading(false);
     }
   };
 
@@ -161,6 +192,38 @@ const ProfileDetails = () => {
             </div>
           </div>
         )}
+
+        {/* Notifications Preference */}
+        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-border/50">
+          <div className="flex items-center gap-2 mb-4 sm:mb-5">
+            <Bell size={18} className="text-primary shrink-0" />
+            <h3 className="text-sm sm:text-base font-black text-heading uppercase tracking-wider">Notification Preferences</h3>
+          </div>
+          <div className="bg-surface/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-bold text-heading">Push Notifications</p>
+              <p className="text-xs text-muted font-bold mt-1">Get real-time alerts for your orders and delivery updates.</p>
+            </div>
+            <Button
+              variant={user?.fcmToken ? "outline" : "primary"}
+              onClick={handleToggleNotifications}
+              loading={notifLoading}
+              className="w-full sm:w-auto shrink-0"
+            >
+              {user?.fcmToken ? (
+                <>
+                  <BellOff size={14} className="mr-2" />
+                  DISABLE NOTIFICATIONS
+                </>
+              ) : (
+                <>
+                  <Bell size={14} className="mr-2" />
+                  ENABLE NOTIFICATIONS
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
 
         {/* Action Buttons */}
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-border/50">

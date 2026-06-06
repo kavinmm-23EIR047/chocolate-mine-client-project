@@ -597,10 +597,10 @@ exports.handlePaymentFailure = asyncHandler(async (req, res) => {
   const { orderId, reason } = req.body;
 
   if (orderId) {
-    await Order.findByIdAndUpdate(orderId, {
+    const order = await Order.findByIdAndUpdate(orderId, {
       paymentStatus: 'failed',
       paymentFailureReason: reason || 'Payment failed'
-    });
+    }, { new: true });
 
     await Payment.findOneAndUpdate(
       { orderId },
@@ -609,6 +609,17 @@ exports.handlePaymentFailure = asyncHandler(async (req, res) => {
         failureReason: reason || 'Payment failed'
       }
     );
+
+    if (order) {
+      try {
+        const notificationManager = require('../services/notificationManager');
+        if (notificationManager && typeof notificationManager.notifyPaymentFailure === 'function') {
+          notificationManager.notifyPaymentFailure(order, reason).catch(err => console.error('Notification error:', err));
+        }
+      } catch (err) {
+        console.error('Failed to load notification manager:', err);
+      }
+    }
   }
 
   res.status(200).json({ status: 'success' });

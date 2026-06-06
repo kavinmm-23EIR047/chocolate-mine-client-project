@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, ShoppingCart, User, Menu, X, MapPin, Heart, ChevronDown, ShoppingBag, LogIn,
-  Cake, Mic
+  Cake, Mic, Bell
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
@@ -162,6 +162,16 @@ const Navbar = () => {
 
             {/* Right Action Icons Panel (Desktop) */}
             <div className="hidden lg:flex items-center gap-1 shrink-0">
+              {/* Notification Bell */}
+              <button 
+                onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
+                className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]"
+              >
+                <div className="relative">
+                  <Bell size={19} className={`text-heading group-hover:text-primary transition-colors ${user?.fcmToken ? 'fill-primary text-primary' : ''}`} />
+                </div>
+                <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
+              </button>
               {[
                 user
                   ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' }
@@ -192,6 +202,12 @@ const Navbar = () => {
 
             {/* Mobile View – Right Side Icons */}
             <div className="lg:hidden ml-auto flex items-center gap-1">
+              <button 
+                onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
+                className="p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0"
+              >
+                <Bell size={20} className={`text-heading ${user?.fcmToken ? 'fill-primary text-primary' : ''}`} />
+              </button>
               <ThemeToggle />
             </div>
           </div>

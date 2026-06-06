@@ -55,11 +55,7 @@ exports.signup = asyncHandler(async (req, res, next) => {
 
   try {
     const notificationManager = require('../services/notificationManager');
-    notificationManager.notifyAdminGeneric(
-      'New User Registered 👤',
-      `${name} (${email}) has just joined the platform.`,
-      { type: 'new_user', url: '/admin/users' }
-    );
+    notificationManager.notifyNewUserRegistration(user).catch(err => console.error('Notification Error:', err));
   } catch (err) {
     console.error('Notification Error:', err);
   }

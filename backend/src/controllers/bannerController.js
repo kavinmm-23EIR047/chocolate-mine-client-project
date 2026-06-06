@@ -58,6 +58,15 @@ exports.createBanner = asyncHandler(async (req, res, next) => {
     isActive: isActive !== undefined ? isActive : true
   });
 
+  if (banner.isActive) {
+    try {
+      const notificationManager = require('../services/notificationManager');
+      notificationManager.notifyOfferAdded(banner).catch(err => console.error('Failed to trigger notifyOfferAdded:', err));
+    } catch (err) {
+      console.error('Failed to require notificationManager in bannerController:', err);
+    }
+  }
+
   res.status(201).json({ 
     status: 'success', 
     data: banner 

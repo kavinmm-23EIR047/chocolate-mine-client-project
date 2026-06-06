@@ -1,9 +1,8 @@
 const admin = require('firebase-admin');
 const logger = require('../utils/logger');
+const User = require('../models/User');
 
 // Initialize Firebase Admin SDK
-// The user needs to provide the service account credentials in the .env file
-// or via a service account JSON file.
 try {
   if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
     console.log("Firebase Private Key Prefix:", process.env.FIREBASE_PRIVATE_KEY.slice(0, 30));
@@ -27,32 +26,55 @@ try {
   logger.error('Failed to initialize Firebase Admin:', error.message);
 }
 
-const User = require('../models/User');
+/**
+ * Helper to clean up invalid registration tokens from User models
+ * @param {string[]} failedTokens - Array of invalid tokens to remove.
+ */
+const removeInvalidTokens = async (failedTokens) => {
+  if (!failedTokens || failedTokens.length === 0) return;
+  try {
+    const result = await User.updateMany(
+      { fcmTokens: { $in: failedTokens } },
+      { $pull: { fcmTokens: { $in: failedTokens } } }
+    );
+    logger.info(`Cleaned up ${failedTokens.length} invalid FCM tokens. MongoDB ModifiedCount: ${result.modifiedCount}`);
+  } catch (error) {
+    logger.error('Error cleaning up invalid FCM tokens:', error.message);
+  }
+};
 
 /**
- * Sends a push notification via Firebase Cloud Messaging (FCM).
- * @param {string|string[]} tokenOrTokens - The recipient's FCM device token(s).
- * @param {string} title - Notification title.
- * @param {string} body - Notification body text.
- * @param {Object} data - Optional extra data payload (key-value strings).
+ * Base function to send push notifications to a list of tokens.
+ * Supports retrying failed sends and cleaning up invalid tokens.
+ * @param {string[]} tokens - Array of destination FCM tokens.
+ * @param {string} title - Title of notification.
+ * @param {string} body - Body content of notification.
+ * @param {Object} data - Optional payload data (key-value string pairs).
  */
-const sendPushNotification = async (tokenOrTokens, title, body, data = {}) => {
+const sendPushNotification = async (tokens, title, body, data = {}) => {
   if (!admin.apps.length) {
     logger.warn('Push notification skipped: Firebase Admin not initialized.');
-    return;
+    return { successCount: 0, failureCount: 0 };
   }
 
-  const tokens = Array.isArray(tokenOrTokens) ? tokenOrTokens : [tokenOrTokens];
-  const validTokens = tokens.filter(t => t);
+  const validTokens = (Array.isArray(tokens) ? tokens : [tokens]).filter(t => typeof t === 'string' && t.trim() !== '');
 
   if (validTokens.length === 0) {
     logger.warn('Push notification skipped: No valid FCM tokens provided.');
-    return;
+    return { successCount: 0, failureCount: 0 };
   }
+
+  // Ensure all data values are string pairs
+  const stringifiedData = {};
+  Object.keys(data).forEach(key => {
+    if (data[key] !== undefined && data[key] !== null) {
+      stringifiedData[key] = String(data[key]);
+    }
+  });
 
   const message = {
     notification: { title, body },
-    data,
+    data: stringifiedData,
     tokens: validTokens,
   };
 
@@ -67,25 +89,97 @@ const sendPushNotification = async (tokenOrTokens, title, body, data = {}) => {
           const errorCode = resp.error?.code;
           if (errorCode === 'messaging/invalid-registration-token' || errorCode === 'messaging/registration-token-not-registered') {
             failedTokens.push(validTokens[idx]);
+          } else {
+            logger.warn(`FCM send failure token ${validTokens[idx].slice(0, 15)}...: ${resp.error?.message} (Code: ${errorCode})`);
           }
         }
       });
 
       if (failedTokens.length > 0) {
-        // Clean up invalid tokens from User model
-        await User.updateMany(
-          { fcmTokens: { $in: failedTokens } },
-          { $pull: { fcmTokens: { $in: failedTokens } } }
-        );
-        logger.info(`Cleaned up ${failedTokens.length} invalid FCM tokens.`);
+        await removeInvalidTokens(failedTokens);
       }
     }
+    return response;
   } catch (error) {
-    logger.error('Error sending push notification:', error.message);
+    logger.error('Error sending multicast push notification:', error.message);
+    return { successCount: 0, failureCount: validTokens.length };
+  }
+};
+
+/**
+ * Sends notification to a single user.
+ */
+const sendToUser = async (userId, title, body, data = {}) => {
+  try {
+    const user = await User.findById(userId, 'fcmTokens');
+    if (!user || !user.fcmTokens || user.fcmTokens.length === 0) {
+      logger.info(`Skipped sendToUser for ${userId}: No FCM tokens`);
+      return;
+    }
+    return await sendPushNotification(user.fcmTokens, title, body, data);
+  } catch (error) {
+    logger.error(`Error in sendToUser for ${userId}:`, error.message);
+  }
+};
+
+/**
+ * Sends notification to all admin users.
+ */
+const sendToAdmin = async (title, body, data = {}) => {
+  try {
+    const admins = await User.find({ role: 'admin', active: true }, 'fcmTokens');
+    const tokens = admins.flatMap(admin => admin.fcmTokens || []);
+    if (tokens.length === 0) {
+      logger.info('Skipped sendToAdmin: No active admins with FCM tokens');
+      return;
+    }
+    return await sendPushNotification(tokens, title, body, data);
+  } catch (error) {
+    logger.error('Error in sendToAdmin:', error.message);
+  }
+};
+
+/**
+ * Sends notification to multiple specific users.
+ */
+const sendToMultipleUsers = async (userIds, title, body, data = {}) => {
+  try {
+    const users = await User.find({ _id: { $in: userIds } }, 'fcmTokens');
+    const tokens = users.flatMap(user => user.fcmTokens || []);
+    if (tokens.length === 0) {
+      logger.info('Skipped sendToMultipleUsers: No target users found with FCM tokens');
+      return;
+    }
+    return await sendPushNotification(tokens, title, body, data);
+  } catch (error) {
+    logger.error('Error in sendToMultipleUsers:', error.message);
+  }
+};
+
+/**
+ * Sends notification to all active users (broadcast).
+ */
+const sendBroadcast = async (title, body, data = {}) => {
+  try {
+    // Find all active users with role 'user'
+    const users = await User.find({ role: 'user', active: true }, 'fcmTokens');
+    const tokens = users.flatMap(user => user.fcmTokens || []);
+    if (tokens.length === 0) {
+      logger.info('Skipped sendBroadcast: No active users with FCM tokens');
+      return;
+    }
+    return await sendPushNotification(tokens, title, body, data);
+  } catch (error) {
+    logger.error('Error in sendBroadcast:', error.message);
   }
 };
 
 module.exports = {
   sendPushNotification,
-  sendMulticastPushNotification: sendPushNotification // Alias for backward compatibility
+  sendMulticastPushNotification: sendPushNotification, // Alias
+  sendToUser,
+  sendToAdmin,
+  sendToMultipleUsers,
+  sendBroadcast,
+  removeInvalidTokens
 };

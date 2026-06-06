@@ -409,12 +409,19 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   // Trigger Push Notification asynchronously
   notificationManager.notifyNewProduct(product).catch(console.error);
   
+  if (product.coupon && product.coupon.enabled) {
+    notificationManager.notifyCouponAdded(product).catch(console.error);
+  }
+  
   res.status(201).json({ status: 'success', data: product });
 });
 
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) return next(new AppError('Product not found', 404));
+
+  const oldCouponCode = product.coupon?.code;
+  const oldCouponEnabled = product.coupon?.enabled;
 
   const body = { ...req.body };
   
@@ -562,6 +569,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   // Trigger real-time notifications for the update
   const notificationManager = require('../services/notificationManager');
   notificationManager.notifyProductUpdated(product).catch(console.error);
+
+  if (product.coupon && product.coupon.enabled && (!oldCouponEnabled || oldCouponCode !== product.coupon.code)) {
+    notificationManager.notifyCouponAdded(product).catch(console.error);
+  }
 
   res.status(200).json({ status: 'success', data: product });
 });

@@ -39,6 +39,7 @@ import OrderHistory from './pages/user/OrderHistory';
 import OrderDetails from './pages/user/OrderDetails';
 import Wishlist from './pages/user/Wishlist';
 import MyReviews from './pages/user/Reviews';
+import UserNotifications from './pages/user/Notifications';
 import Shop from './pages/Shop';
 import CustomCake from './custom-cakes/CustomCake';
 import BrandIntroLoader from './components/BrandIntroLoader.jsx';
@@ -226,6 +227,7 @@ function App() {
                     <Route path="settings" element={<AccountSettings />} />
                     <Route path="orders" element={<OrderHistory />} />
                     <Route path="orders/:id" element={<OrderDetails />} />
+                    <Route path="notifications" element={<UserNotifications />} />
                     <Route path="wishlist" element={<Wishlist />} />
                     <Route path="reviews" element={<MyReviews />} />
                   </Route>

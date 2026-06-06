@@ -12,7 +12,8 @@ import {
   X,
   ChevronRight,
   Heart,
-  Star
+  Star,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -36,6 +37,7 @@ const DashboardLayout = () => {
   const navItems = [
     { id: 'dashboard', path: '/account/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'orders', path: '/account/orders', label: 'My Orders', icon: ShoppingBag },
+    { id: 'notifications', path: '/account/notifications', label: 'Notifications', icon: Bell },
     { id: 'wishlist', path: '/account/wishlist', label: 'My Wishlist', icon: Heart },
     { id: 'reviews', path: '/account/reviews', label: 'My Reviews', icon: Star },
     { id: 'profile', path: '/account/profile', label: 'Profile Details', icon: User },

@@ -550,7 +550,18 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
     }
 
     // Low stock alert
-    if (product && product.stock <= 5) {
+    if (product) {
+      try {
+        const notificationManager = require('../services/notificationManager');
+        if (product.stock === false || product.stock === 0) {
+          notificationManager.notifyOutOfStockAlert(product.name).catch(e => console.error(e));
+        } else if (typeof product.stock === 'number' && product.stock <= 5) {
+          notificationManager.notifyLowStockAlert(product.name, product.stock).catch(e => console.error(e));
+        }
+      } catch (err) {
+        console.error('Failed to trigger stock alert notification:', err);
+      }
+
       const admins = await User.find({ role: 'admin' });
       for (const admin of admins) {
         if (admin.phone) {

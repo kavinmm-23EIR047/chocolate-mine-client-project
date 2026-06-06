@@ -346,6 +346,14 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
   // Emit socket update for real-time notifications
   emitOrderUpdate(order);
 
+  // Trigger push/DB notifications for the user
+  try {
+    const notificationManager = require('../services/notificationManager');
+    notificationManager.handleStatusChange(order, status).catch(console.error);
+  } catch (err) {
+    console.error('Failed to trigger handleStatusChange notification:', err);
+  }
+
   // Return formatted response with order details
   const responseData = {
     ...order.toObject(),
@@ -421,6 +429,14 @@ exports.verifyDeliveryOtp = asyncHandler(async (req, res, next) => {
 
   // Emit socket update for real-time notifications
   emitOrderUpdate(order);
+
+  // Trigger push/DB notifications for the user
+  try {
+    const notificationManager = require('../services/notificationManager');
+    notificationManager.handleStatusChange(order, 'delivered').catch(console.error);
+  } catch (err) {
+    console.error('Failed to trigger handleStatusChange notification:', err);
+  }
 
   res.status(200).json({
     status: 'success',

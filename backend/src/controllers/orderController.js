@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const cacheService = require('../services/cacheService');
 const telegramService = require('../services/telegramService');
 const invoiceService = require('../services/invoiceService');
+const notificationManager = require('../services/notificationManager');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -224,6 +225,9 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
 
   // Emit socket update for real-time notifications
   emitOrderUpdate(order);
+  
+  // Trigger Push Notifications, Email, and WhatsApp asynchronously
+  notificationManager.handleStatusChange(order, status).catch(console.error);
 
   res.status(200).json({
     status: 'success',
@@ -293,6 +297,9 @@ exports.verifyDeliveryOtp = asyncHandler(async (req, res, next) => {
 
   // Emit socket update
   emitOrderUpdate(order);
+  
+  // Trigger Push Notifications, Email, and WhatsApp asynchronously
+  notificationManager.handleStatusChange(order, 'delivered').catch(console.error);
 
   res.status(200).json({
     status: 'success',

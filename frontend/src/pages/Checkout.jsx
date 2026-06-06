@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ArrowLeft,
   ChevronRight,
+  ChevronLeft,
   X,
   Tag,
   Cake,
@@ -214,7 +215,36 @@ const Checkout = () => {
   const [distance, setDistance] = useState(0);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [deliveryDate, setDeliveryDate] = useState(new Date());
+
+  // Delivery date with future support (up to 30 days)
+  const [deliveryDate, setDeliveryDate] = useState(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
+
+  const minDate = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  })();
+
+  const maxDate = (() => {
+    const max = new Date();
+    max.setDate(max.getDate() + 30);
+    max.setHours(0, 0, 0, 0);
+    return max;
+  })();
+
+  const changeDate = (days) => {
+    const newDate = new Date(deliveryDate);
+    newDate.setDate(newDate.getDate() + days);
+    if (newDate >= minDate && newDate <= maxDate) {
+      setDeliveryDate(newDate);
+    } else {
+      toast.error(days > 0 ? 'Cannot order more than 30 days ahead' : 'Cannot select past dates');
+    }
+  };
 
   // Helper: format phone with +91 prefix for display, but store only digits
   const formatPhoneForDisplay = (digits) => digits ? `+91 ${digits}` : '';
@@ -259,14 +289,19 @@ const Checkout = () => {
 
   const isSlotAvailableForDate = (slot, date, now) => {
     const current = now || new Date();
-    const currentDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
     const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    if (selectedDate.getTime() !== currentDate.getTime()) return false;
+    const todayDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
 
+    // Future dates: all slots available (business hours assumed, can be customized)
+    if (selectedDate > todayDate) return true;
+
+    // Today: apply 2-hour advance and exclude slots that have already ended
     const slotStartMinutes = slot.startHour * 60 + slot.startMinute;
+    const slotEndMinutes = slot.endHour * 60 + slot.endMinute;
     const currentMinutes = current.getHours() * 60 + current.getMinutes();
 
-    return slotStartMinutes - currentMinutes >= 120;
+    // Must start at least 2 hours from now and not have ended yet
+    return (slotStartMinutes - currentMinutes >= 120) && (currentMinutes < slotEndMinutes);
   };
 
   const getSlotsWithAvailability = () => {
@@ -804,8 +839,8 @@ const Checkout = () => {
                                 key={addr._id}
                                 onClick={() => handleSelectAddress(addr)}
                                 className={`w-full min-w-0 text-left p-3 sm:p-4 border-2 rounded-2xl transition-all relative overflow-hidden group cursor-pointer ${selectedAddressId === addr._id
-                                    ? 'border-primary bg-primary/5 shadow-md'
-                                    : 'border-border/30 hover:border-primary/30 bg-surface/20'
+                                  ? 'border-primary bg-primary/5 shadow-md'
+                                  : 'border-border/30 hover:border-primary/30 bg-surface/20'
                                   }`}
                               >
                                 <div className="flex justify-between items-start gap-2 min-w-0">
@@ -864,8 +899,8 @@ const Checkout = () => {
                           initial={{ opacity: 0, scale: 0.97 }}
                           animate={{ opacity: 1, scale: 1 }}
                           className={`w-full min-w-0 p-3 sm:p-4 rounded-2xl border flex items-start gap-3 ${locationValid
-                              ? 'bg-success-light border-success/20'
-                              : 'bg-error-light border-error/20'
+                            ? 'bg-success-light border-success/20'
+                            : 'bg-error-light border-error/20'
                             }`}
                         >
                           <Navigation size={15} className={`mt-0.5 shrink-0 ${locationValid ? 'text-success-text' : 'text-error-text'}`} />
@@ -982,15 +1017,27 @@ const Checkout = () => {
                   >
                     <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
                       <div className="flex items-center gap-3">
-                        <button disabled className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface opacity-40 cursor-not-allowed transition text-muted shrink-0">
-                          <ChevronDown size={16} />
+                        <button
+                          onClick={() => changeDate(-1)}
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-primary/10 transition text-foreground shrink-0"
+                          aria-label="Previous day"
+                        >
+                          <ChevronLeft size={16} />
                         </button>
                         <div className="flex-1 text-center">
-                          <p className="font-black text-heading text-sm uppercase tracking-widest">{formatDate(deliveryDate)}</p>
-                          {isToday && <p className="text-[10px] text-primary font-bold mt-0.5 uppercase tracking-widest">Today</p>}
+                          <p className="font-black text-heading text-sm uppercase tracking-widest">
+                            {formatDate(deliveryDate)}
+                          </p>
+                          {deliveryDate.toDateString() === new Date().toDateString() && (
+                            <p className="text-[10px] text-primary font-bold mt-0.5 uppercase tracking-widest">Today</p>
+                          )}
                         </div>
-                        <button disabled className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface opacity-40 cursor-not-allowed transition text-muted shrink-0">
-                          <ChevronUp size={16} />
+                        <button
+                          onClick={() => changeDate(1)}
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-primary/10 transition text-foreground shrink-0"
+                          aria-label="Next day"
+                        >
+                          <ChevronRight size={16} />
                         </button>
                       </div>
 
@@ -1001,10 +1048,10 @@ const Checkout = () => {
                             onClick={() => slot.available && setDeliverySlot(slot.value)}
                             disabled={!slot.available}
                             className={`relative p-3 sm:p-4 rounded-2xl border-2 transition-all text-center ${!slot.available
-                                ? 'opacity-30 cursor-not-allowed border-border/10 bg-muted/5'
-                                : deliverySlot === slot.value
-                                  ? 'border-primary bg-primary/5 shadow-md'
-                                  : 'border-border/40 hover:border-primary/40 bg-surface/30'
+                              ? 'opacity-30 cursor-not-allowed border-border/10 bg-muted/5'
+                              : deliverySlot === slot.value
+                                ? 'border-primary bg-primary/5 shadow-md'
+                                : 'border-border/40 hover:border-primary/40 bg-surface/30'
                               }`}
                           >
                             <span className="text-lg sm:text-xl block mb-1">{slot.emoji}</span>
@@ -1024,7 +1071,7 @@ const Checkout = () => {
                       </div>
                       {noSlotsAvailable && (
                         <p className="text-sm text-red-500 font-bold mt-3">
-                          No delivery slots are available for today. Please try again earlier or contact support.
+                          No delivery slots are available for the selected date. Please choose another day.
                         </p>
                       )}
                       <div className="pt-4 flex justify-between gap-3">
@@ -1154,8 +1201,8 @@ const Checkout = () => {
                               key={method.id}
                               onClick={() => setSelectedPayMethod(selected ? null : method.id)}
                               className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
-                                  ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
-                                  : `border-border/30 bg-surface/20 hover:bg-surface/40`
+                                ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
+                                : `border-border/30 bg-surface/20 hover:bg-surface/40`
                                 }`}
                             >
                               <div className="flex items-start justify-between mb-2 sm:mb-3">

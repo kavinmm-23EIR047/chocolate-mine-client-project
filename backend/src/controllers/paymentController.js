@@ -521,25 +521,22 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
 
   // Update Stock
   for (const item of order.items) {
-    // 1. Decrement main stock
-    const product = await Product.findByIdAndUpdate(
-      item.productId,
-      { $inc: { stock: -item.qty } },
-      { new: true }
-    );
-
-    // 2. Decrement variant stock if applicable
-    if (product && product.hasVariants && item.selectedFlavor && item.selectedWeight) {
-      await Product.updateOne(
-        { 
-          _id: item.productId, 
-          "variants.flavor": item.selectedFlavor, 
-          "variants.weight": item.selectedWeight 
-        },
-        { 
-          $inc: { "variants.$.stock": -item.qty } 
+    // 1. Decrement main stock safely
+    const product = await Product.findById(item.productId);
+    if (product) {
+      let currentStock = typeof product.stock === 'number' ? product.stock : 100;
+      product.stock = Math.max(0, currentStock - item.qty);
+      
+      // 2. Decrement variant stock if applicable
+      if (product.hasVariants && item.selectedFlavor && item.selectedWeight) {
+        const variant = product.variants.find(v => v.flavor === item.selectedFlavor && v.weight === item.selectedWeight);
+        if (variant) {
+          let vStock = typeof variant.stock === 'number' ? variant.stock : 100;
+          variant.stock = Math.max(0, vStock - item.qty);
         }
-      );
+      }
+      
+      await product.save({ validateBeforeSave: false });
     }
 
     // 3. Emit real-time stock update

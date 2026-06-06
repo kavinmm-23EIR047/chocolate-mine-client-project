@@ -195,3 +195,24 @@ exports.notifyPaymentFailure = async (order, reason) => {
     logger.error('Payment Failure Notification Manager Error:', err.message);
   }
 };
+
+exports.notifyNewProduct = async (product) => {
+  try {
+    logger.info(`New Product Notification Triggered: ${product.name}`);
+    
+    // NOTIFY ALL USERS (who have FCM Tokens)
+    // We only fetch users who have an fcmToken set to optimize query
+    const usersWithTokens = await User.find({ fcmToken: { $exists: true, $ne: null, $ne: '' } }, 'fcmToken');
+    const fcmTokens = usersWithTokens.map(user => user.fcmToken);
+
+    if (fcmTokens.length > 0) {
+      firebaseService.sendMulticastPushNotification(
+        fcmTokens,
+        'New Product Alert! 🆕',
+        `Check out our new ${product.category || 'item'}: ${product.name} is now available!`
+      );
+    }
+  } catch (err) {
+    logger.error('New Product Notification Error:', err.message);
+  }
+};

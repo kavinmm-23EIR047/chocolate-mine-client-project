@@ -4,6 +4,7 @@ const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const slugify = require('slugify');
 const cloudinaryService = require('../services/cloudinaryService');
+const notificationManager = require('../services/notificationManager');
 
 const DEFAULT_CAKE_IMAGE_URL = 'https://via.placeholder.com/800x600.png?text=Chocolate+Mine+Cake+Background';
 
@@ -404,6 +405,10 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   body.createdBy = req.user._id;
   
   const product = await Product.create(body);
+  
+  // Trigger Push Notification asynchronously
+  notificationManager.notifyNewProduct(product).catch(console.error);
+  
   res.status(201).json({ status: 'success', data: product });
 });
 

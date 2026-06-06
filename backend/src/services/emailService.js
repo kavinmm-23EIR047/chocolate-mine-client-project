@@ -60,7 +60,7 @@ const emailService = {
   sendOrderConfirmed: (email, order) => {
     const quote = "All you need is love. But a little chocolate now and then doesn't hurt. 🍫";
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
-    const trackingLink = `${frontendUrl}/track/${order._id}`;
+    const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
     return sendMail({
       to: email,
@@ -94,7 +94,7 @@ const emailService = {
 
   sendDispatched: (email, order) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
-    const trackingLink = `${frontendUrl}/track/${order._id}`;
+    const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
     return sendMail({
       to: email,
@@ -158,7 +158,7 @@ const emailService = {
 
   sendUserPaymentFailed: (email, order, reason) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
-    const ordersLink = `${frontendUrl}/orders`;
+    const ordersLink = `${frontendUrl}/account/orders`;
 
     return sendMail({
       to: email,

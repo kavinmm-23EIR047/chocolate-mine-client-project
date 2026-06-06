@@ -120,7 +120,7 @@ const sendStaffWhatsApp = async (order, item) => {
 
 const sendUserConfirmation = async (order, item) => {
   const { designImages } = item;
-  const caption = `✅ Your custom cake order #${order.orderNumber} is confirmed.\n\nTrack: ${process.env.FRONTEND_URL}/track/${order._id}`;
+  const caption = `✅ Your custom cake order #${order.orderNumber} is confirmed.\n\nTrack: ${process.env.FRONTEND_URL}/account/orders/${order._id}`;
   
   if (designImages?.preview) {
     await telegramService.sendMediaWhatsApp(order.userId.phone, designImages.preview, caption);

@@ -170,13 +170,21 @@ exports.getWishlist = asyncHandler(async (req, res) => {
 // @route   PUT /api/v1/users/fcm-token
 exports.updateFcmToken = asyncHandler(async (req, res, next) => {
   const { fcmToken } = req.body;
-  if (fcmToken === undefined) {
+  if (!fcmToken) {
     return next(new AppError('FCM Token is required', 400));
   }
 
   const user = await User.findById(req.user._id);
-  user.fcmToken = fcmToken;
-  await user.save({ validateBeforeSave: false });
+  
+  if (!user.fcmTokens) {
+    user.fcmTokens = [];
+  }
+  
+  // Only add if not already present
+  if (!user.fcmTokens.includes(fcmToken)) {
+    user.fcmTokens.push(fcmToken);
+    await user.save({ validateBeforeSave: false });
+  }
 
   res.status(200).json({
     status: 'success',

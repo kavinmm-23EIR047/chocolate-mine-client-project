@@ -96,6 +96,17 @@ exports.createReview = asyncHandler(async (req, res, next) => {
   // Update product ratings
   await updateProductRatings(productId);
 
+  try {
+    const notificationManager = require('../services/notificationManager');
+    notificationManager.notifyAdminGeneric(
+      'New Review Submitted ⭐',
+      `${req.user.name || 'A user'} rated a product ${rating} stars.`,
+      { type: 'new_review', url: '/admin/reviews' }
+    );
+  } catch (err) {
+    console.error('Notification Error:', err);
+  }
+
   res.status(201).json({
     status: 'success',
     message: 'Review submitted successfully',

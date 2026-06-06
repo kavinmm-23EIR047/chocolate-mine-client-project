@@ -27,69 +27,65 @@ try {
   logger.error('Failed to initialize Firebase Admin:', error.message);
 }
 
+const User = require('../models/User');
+
 /**
  * Sends a push notification via Firebase Cloud Messaging (FCM).
- * @param {string} token - The recipient's FCM device token.
+ * @param {string|string[]} tokenOrTokens - The recipient's FCM device token(s).
  * @param {string} title - Notification title.
  * @param {string} body - Notification body text.
  * @param {Object} data - Optional extra data payload (key-value strings).
  */
-const sendPushNotification = async (token, title, body, data = {}) => {
+const sendPushNotification = async (tokenOrTokens, title, body, data = {}) => {
   if (!admin.apps.length) {
     logger.warn('Push notification skipped: Firebase Admin not initialized.');
     return;
   }
 
-  if (!token) {
-    logger.warn('Push notification skipped: No FCM token provided.');
+  const tokens = Array.isArray(tokenOrTokens) ? tokenOrTokens : [tokenOrTokens];
+  const validTokens = tokens.filter(t => t);
+
+  if (validTokens.length === 0) {
+    logger.warn('Push notification skipped: No valid FCM tokens provided.');
     return;
   }
 
   const message = {
-    notification: {
-      title,
-      body,
-    },
-    data,
-    token,
-  };
-
-  try {
-    const response = await admin.messaging().send(message);
-    logger.info(`Push notification sent successfully. Message ID: ${response}`);
-  } catch (error) {
-    logger.error('Error sending push notification:', error.message);
-    // If the token is invalid or unregistered, we could handle it here 
-    // (e.g., by removing it from the user document).
-  }
-};
-
-/**
- * Sends a multicast push notification to multiple devices.
- * @param {string[]} tokens - Array of FCM device tokens.
- * @param {string} title - Notification title.
- * @param {string} body - Notification body text.
- * @param {Object} data - Optional extra data payload.
- */
-const sendMulticastPushNotification = async (tokens, title, body, data = {}) => {
-  if (!admin.apps.length) return;
-  if (!tokens || tokens.length === 0) return;
-
-  const message = {
     notification: { title, body },
     data,
-    tokens,
+    tokens: validTokens,
   };
 
   try {
     const response = await admin.messaging().sendEachForMulticast(message);
     logger.info(`Multicast push sent: ${response.successCount} successes, ${response.failureCount} failures.`);
+    
+    if (response.failureCount > 0) {
+      const failedTokens = [];
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          const errorCode = resp.error?.code;
+          if (errorCode === 'messaging/invalid-registration-token' || errorCode === 'messaging/registration-token-not-registered') {
+            failedTokens.push(validTokens[idx]);
+          }
+        }
+      });
+
+      if (failedTokens.length > 0) {
+        // Clean up invalid tokens from User model
+        await User.updateMany(
+          { fcmTokens: { $in: failedTokens } },
+          { $pull: { fcmTokens: { $in: failedTokens } } }
+        );
+        logger.info(`Cleaned up ${failedTokens.length} invalid FCM tokens.`);
+      }
+    }
   } catch (error) {
-    logger.error('Error sending multicast push notification:', error.message);
+    logger.error('Error sending push notification:', error.message);
   }
 };
 
 module.exports = {
   sendPushNotification,
-  sendMulticastPushNotification
+  sendMulticastPushNotification: sendPushNotification // Alias for backward compatibility
 };

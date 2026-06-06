@@ -52,10 +52,14 @@ exports.notifyOrderSuccess = async (order) => {
       whatsappService.sendOrderPlaced(populatedOrder.userId.phone, populatedOrder.orderNumber);
     }
 
-    if (populatedOrder.userId.fcmToken) {
+    if (populatedOrder.userId.fcmTokens && populatedOrder.userId.fcmTokens.length > 0) {
       const title = 'Order Confirmed! 🎉';
       const msg = `Your order #${populatedOrder.orderNumber} has been received successfully.`;
-      firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, title, msg);
+      firebaseService.sendPushNotification(populatedOrder.userId.fcmTokens, title, msg, {
+        type: 'order_confirmed',
+        orderId: populatedOrder._id.toString(),
+        url: `/account/orders/${populatedOrder._id}`
+      });
       await saveWebNotification(populatedOrder.userId._id, title, msg, populatedOrder._id);
     } else {
       // Still save history even if push is disabled
@@ -87,7 +91,9 @@ exports.notifyOrderSuccess = async (order) => {
         amount: populatedOrder.total,
         customer: populatedOrder.address.fullName 
       });
-      if (admin.fcmToken) adminFcmTokens.push(admin.fcmToken);
+      if (admin.fcmTokens && admin.fcmTokens.length > 0) {
+        adminFcmTokens.push(...admin.fcmTokens);
+      }
     }
     
     // Send Push Notification to all admins
@@ -95,7 +101,8 @@ exports.notifyOrderSuccess = async (order) => {
       firebaseService.sendMulticastPushNotification(
         adminFcmTokens,
         'New Order Received! 💰',
-        `Order #${populatedOrder.orderNumber} worth ₹${populatedOrder.total} from ${populatedOrder.address.fullName} for Delivery on ${populatedOrder.deliveryDate ? new Date(populatedOrder.deliveryDate).toLocaleDateString() : 'N/A'}`
+        `Order #${populatedOrder.orderNumber} worth ₹${populatedOrder.total} from ${populatedOrder.address.fullName} for Delivery on ${populatedOrder.deliveryDate ? new Date(populatedOrder.deliveryDate).toLocaleDateString() : 'N/A'}`,
+        { type: 'new_order', orderId: populatedOrder._id.toString(), customerName: populatedOrder.address.fullName, url: '/admin/orders' }
       );
     }
 
@@ -116,7 +123,7 @@ exports.handleStatusChange = async (order, status) => {
       return;
     }
 
-    const trackingLink = `${process.env.FRONTEND_URL}/track/${populatedOrder._id}`;
+    const trackingLink = `${process.env.FRONTEND_URL}/account/orders/${populatedOrder._id}`;
     
     // WEB UPDATE
     socketService.emitToUser(populatedOrder.userId._id, 'status_changed', { orderId: populatedOrder._id, status });
@@ -152,8 +159,12 @@ exports.handleStatusChange = async (order, status) => {
     }
 
     if (title && msg) {
-      if (populatedOrder.userId.fcmToken) {
-        firebaseService.sendPushNotification(populatedOrder.userId.fcmToken, title, msg);
+      if (populatedOrder.userId.fcmTokens && populatedOrder.userId.fcmTokens.length > 0) {
+        firebaseService.sendPushNotification(populatedOrder.userId.fcmTokens, title, msg, {
+          type: 'status_changed',
+          orderId: populatedOrder._id.toString(),
+          url: `/account/orders/${populatedOrder._id}`
+        });
       }
       await saveWebNotification(populatedOrder.userId._id, title, msg, populatedOrder._id);
     }
@@ -185,11 +196,12 @@ exports.notifyPaymentFailure = async (order, reason) => {
         whatsappService.sendPaymentFailure(populatedOrder.userId.phone, populatedOrder.total, populatedOrder.address.fullName);
       }
 
-      if (populatedOrder.userId.fcmToken) {
+      if (populatedOrder.userId.fcmTokens && populatedOrder.userId.fcmTokens.length > 0) {
         firebaseService.sendPushNotification(
-          populatedOrder.userId.fcmToken,
+          populatedOrder.userId.fcmTokens,
           'Payment Failed 🔴',
-          `Your payment of ₹${populatedOrder.total} for order #${populatedOrder.orderNumber} failed. Please retry.`
+          `Your payment of ₹${populatedOrder.total} for order #${populatedOrder.orderNumber} failed. Please retry.`,
+          { type: 'payment_failed', orderId: populatedOrder._id.toString(), url: `/account/orders/${populatedOrder._id}` }
         );
       }
     }
@@ -213,8 +225,8 @@ exports.notifyPaymentFailure = async (order, reason) => {
         whatsappService.sendAdminPaymentFailure(admin.phone, populatedOrder.address.fullName, populatedOrder.total);
       }
 
-      if (admin.fcmToken) {
-        adminFcmTokens.push(admin.fcmToken);
+      if (admin.fcmTokens && admin.fcmTokens.length > 0) {
+        adminFcmTokens.push(...admin.fcmTokens);
       }
     }
 
@@ -222,7 +234,8 @@ exports.notifyPaymentFailure = async (order, reason) => {
       firebaseService.sendMulticastPushNotification(
         adminFcmTokens,
         'Payment Failed Alert 🔴',
-        `Payment of ₹${populatedOrder.total} failed for Order #${populatedOrder.orderNumber} by ${populatedOrder.address.fullName}.`
+        `Payment of ₹${populatedOrder.total} failed for Order #${populatedOrder.orderNumber} by ${populatedOrder.address.fullName}.`,
+        { type: 'payment_failed', orderId: populatedOrder._id.toString(), url: '/admin/orders' }
       );
     }
 
@@ -237,17 +250,53 @@ exports.notifyNewProduct = async (product) => {
     
     // NOTIFY ALL USERS (who have FCM Tokens)
     // We only fetch users who have an fcmToken set to optimize query
-    const usersWithTokens = await User.find({ fcmToken: { $exists: true, $ne: null, $ne: '' } }, 'fcmToken');
-    const fcmTokens = usersWithTokens.map(user => user.fcmToken);
+    const usersWithTokens = await User.find({ fcmTokens: { $exists: true, $not: { $size: 0 } } }, 'fcmTokens');
+    const fcmTokens = usersWithTokens.flatMap(user => user.fcmTokens);
 
     if (fcmTokens.length > 0) {
       firebaseService.sendMulticastPushNotification(
         fcmTokens,
         'New Product Alert! 🆕',
-        `Check out our new ${product.category || 'item'}: ${product.name} is now available!`
+        `Check out our new ${product.category || 'item'}: ${product.name} is now available!`,
+        { type: 'new_product', url: `/menu` }
       );
     }
   } catch (err) {
     logger.error('New Product Notification Error:', err.message);
+  }
+};
+
+exports.notifyAdminGeneric = async (title, body, payload = {}) => {
+  try {
+    const admins = await User.find({ role: 'admin' });
+    const adminFcmTokens = [];
+    for (const admin of admins) {
+      if (admin.fcmTokens && admin.fcmTokens.length > 0) {
+        adminFcmTokens.push(...admin.fcmTokens);
+      }
+    }
+    if (adminFcmTokens.length > 0) {
+      firebaseService.sendMulticastPushNotification(adminFcmTokens, title, body, payload);
+    }
+  } catch (err) {
+    logger.error('Admin Generic Notification Error:', err.message);
+  }
+};
+
+exports.notifyAdminError = async (title, errorMessage, payload = {}) => {
+  try {
+    const admins = await User.find({ role: 'admin' });
+    const adminFcmTokens = [];
+    for (const admin of admins) {
+      if (admin.fcmTokens && admin.fcmTokens.length > 0) {
+        adminFcmTokens.push(...admin.fcmTokens);
+      }
+    }
+    if (adminFcmTokens.length > 0) {
+      const finalPayload = { ...payload, type: 'system_error' };
+      firebaseService.sendMulticastPushNotification(adminFcmTokens, `⚠️ System Error: ${title}`, errorMessage, finalPayload);
+    }
+  } catch (err) {
+    logger.error('Admin Error Notification Failed:', err.message);
   }
 };

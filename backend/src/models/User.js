@@ -46,9 +46,9 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  fcmToken: {
+  fcmTokens: [{
     type: String
-  },
+  }],
   lastActiveAt: {
     type: Date,
     default: Date.now

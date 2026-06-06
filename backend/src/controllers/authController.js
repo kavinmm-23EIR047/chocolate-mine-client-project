@@ -53,6 +53,17 @@ exports.signup = asyncHandler(async (req, res, next) => {
     provider: 'local'
   });
 
+  try {
+    const notificationManager = require('../services/notificationManager');
+    notificationManager.notifyAdminGeneric(
+      'New User Registered 👤',
+      `${name} (${email}) has just joined the platform.`,
+      { type: 'new_user', url: '/admin/users' }
+    );
+  } catch (err) {
+    console.error('Notification Error:', err);
+  }
+
   sendTokenResponse(user, 201, res);
 });
 

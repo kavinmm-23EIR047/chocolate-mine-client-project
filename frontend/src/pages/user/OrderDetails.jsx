@@ -477,9 +477,11 @@ const OrderDetails = () => {
             <p className="text-sm text-muted mb-3">
               Have questions about your order? Contact our support team.
             </p>
-            <Button variant="outline" className="w-full" icon={Phone}>
-              Contact Support
-            </Button>
+            <a href={`tel:${order.assignedStaff?.phone || '+918098009228'}`} className="block w-full">
+              <Button variant="outline" className="w-full" icon={Phone}>
+                {order.assignedStaff ? 'Contact Delivery Partner' : 'Contact Support'}
+              </Button>
+            </a>
           </div>
         </div>
       </div>

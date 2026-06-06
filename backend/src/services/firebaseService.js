@@ -6,10 +6,16 @@ const logger = require('../utils/logger');
 // or via a service account JSON file.
 try {
   if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+    console.log("Firebase Private Key Prefix:", process.env.FIREBASE_PRIVATE_KEY.slice(0, 30));
+    
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    // Strip surrounding quotes if they exist, then replace escaped newlines
+    privateKey = privateKey.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
+
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle newlines in .env
+        privateKey: privateKey,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       })
     });

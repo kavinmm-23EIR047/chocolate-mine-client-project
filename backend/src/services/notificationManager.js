@@ -203,21 +203,30 @@ exports.handleStatusChange = async (order, status) => {
 
     const trackingNumber = populatedOrder.orderNumber || populatedOrder._id.toString();
     const trackingLink = `${process.env.FRONTEND_URL}/account/orders/${populatedOrder._id}`;
+    const userPhone = populatedOrder.userId.phone || populatedOrder.address?.phone;
     
     // WEB UPDATE (SOCKET)
     socketService.emitToUser(populatedOrder.userId._id, 'status_changed', { orderId: populatedOrder._id, status });
 
     // EMAIL & TELEGRAM FOR SPECIFIC STATUSES
-    if (status === 'out_for_delivery') {
+    if (status === 'packed') {
+      if (populatedOrder.userId.email) {
+        emailService.sendPacked(populatedOrder.userId.email, populatedOrder).catch(e => logger.error('Packed Email Failed:', e.message));
+      }
+    } else if (status === 'out_for_delivery') {
       if (populatedOrder.userId.email) {
         emailService.sendDispatched(populatedOrder.userId.email, populatedOrder).catch(e => logger.error('Dispatch Email Failed:', e.message));
       }
-      await telegramService.sendOutForDelivery(populatedOrder.userId.phone, trackingNumber, trackingLink, populatedOrder.userId._id);
+      if (userPhone) {
+        await telegramService.sendOutForDelivery(userPhone, trackingNumber, trackingLink, populatedOrder.userId._id);
+      }
     } else if (status === 'delivered') {
       logger.info(`Processing Delivered Email + Invoice for ${trackingNumber}`);
       const invoiceService = require('./invoiceService');
       await invoiceService.sendInvoiceAfterDelivery(populatedOrder._id, true);
-      await telegramService.sendDelivered(populatedOrder.userId.phone, trackingNumber, `${process.env.FRONTEND_URL}/review`, populatedOrder.userId._id);
+      if (userPhone) {
+        await telegramService.sendDelivered(userPhone, trackingNumber, `${process.env.FRONTEND_URL}/review`, populatedOrder.userId._id);
+      }
     }
 
     // WHATSAPP & PUSH/DB NOTIFICATIONS FOR USER
@@ -227,24 +236,25 @@ exports.handleStatusChange = async (order, status) => {
 
     switch (status) {
       case 'processing':
-        if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, trackingNumber);
+        if (userPhone) whatsappService.sendPreparing(userPhone, trackingNumber);
         title = '👨‍🍳 Order Processing';
         msg = `Your order #${trackingNumber} is being prepared.`;
         type = 'order_processing';
         break;
       case 'packed':
+        if (userPhone) whatsappService.sendPacked(userPhone, trackingNumber);
         title = '📦 Order Packed';
         msg = `Your order #${trackingNumber} has been packed and is ready for dispatch.`;
         type = 'order_packed';
         break;
       case 'out_for_delivery':
-        if (populatedOrder.userId.phone) whatsappService.sendOutForDelivery(populatedOrder.userId.phone, trackingNumber);
+        if (userPhone) whatsappService.sendOutForDelivery(userPhone, trackingNumber);
         title = '🚚 Out For Delivery';
         msg = `Your order #${trackingNumber} is on the way.`;
         type = 'out_for_delivery';
         break;
       case 'delivered':
-        if (populatedOrder.userId.phone) whatsappService.sendDelivered(populatedOrder.userId.phone, trackingNumber);
+        if (userPhone) whatsappService.sendDelivered(userPhone, trackingNumber);
         title = '✅ Delivered';
         msg = `Your order #${trackingNumber} has been delivered.`;
         type = 'delivered';
@@ -257,7 +267,7 @@ exports.handleStatusChange = async (order, status) => {
       default:
         // For 'preparing' (legacy) or unknown statuses
         if (status === 'preparing') {
-          if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, trackingNumber);
+          if (userPhone) whatsappService.sendPreparing(userPhone, trackingNumber);
           title = '👨‍🍳 Order Preparing';
           msg = `Your order #${trackingNumber} is being prepared.`;
           type = 'order_preparing';

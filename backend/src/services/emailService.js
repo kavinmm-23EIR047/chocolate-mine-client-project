@@ -92,6 +92,32 @@ const emailService = {
     });
   },
 
+  sendPacked: (email, order) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+    const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
+
+    return sendMail({
+      to: email,
+      subject: `Your Order is Packed! #${order.orderNumber} 📦`,
+      html: `
+        <div style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; padding: 20px; border-radius: 12px; max-width: 600px; margin: auto; background-color: #E8DCD8; color: #140907;">
+          ${getLogoMarkup()}
+          <h2 style="color: #381A14; text-align: center; margin-top: 0;">Order Packed! 📦</h2>
+          <p>Hi ${order.address.fullName},</p>
+          <p>Great news! Your order <b style="color: #D4A017;">${order.orderNumber}</b> has been packed and is ready for dispatch.</p>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${trackingLink}" style="display: inline-block; padding: 12px 25px; background: #D4A017; color: #140907; text-decoration: none; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Track Order</a>
+          </div>
+
+          <p>We'll notify you as soon as it is out for delivery.</p>
+          <br/>
+          <p>Warm regards,<br/><b style="color: #381A14;">Team The Chocolate Mine</b></p>
+        </div>
+      `,
+    });
+  },
+
   sendDispatched: (email, order) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;

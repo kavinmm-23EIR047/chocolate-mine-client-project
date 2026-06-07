@@ -4,6 +4,7 @@ import { Bell, CheckCircle, Package, Clock, ShoppingBag, X } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { getSocket } from '../../sockets/socketManager';
 
 const NotificationDropdown = () => {
   const { user } = useAuth();
@@ -33,6 +34,39 @@ const NotificationDropdown = () => {
     if (!user) return;
     fetchNotifications();
   }, [user, isOpen]);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const socket = getSocket();
+    if (socket) {
+      const handleNewNotification = (data) => {
+        setUnreadCount(prev => prev + 1);
+        setNotifications(prev => {
+          const exists = prev.some(n => n._id === data._id);
+          if (exists) return prev;
+          return [
+            {
+              _id: data._id || Date.now().toString(),
+              title: data.title,
+              message: data.message,
+              type: data.type,
+              data: data.data || {},
+              isRead: false,
+              createdAt: data.createdAt || new Date().toISOString()
+            },
+            ...prev
+          ].slice(0, 5);
+        });
+      };
+
+      socket.on('new_notification', handleNewNotification);
+
+      return () => {
+        socket.off('new_notification', handleNewNotification);
+      };
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {

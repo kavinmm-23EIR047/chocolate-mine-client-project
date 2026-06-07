@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import api from '../../utils/api';
 
 const ProfileDetails = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, syncFcmToken, disableNotifications } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
@@ -43,22 +43,21 @@ const ProfileDetails = () => {
     }
   };
 
+  const hasFcmToken = user?.fcmTokens && user.fcmTokens.length > 0;
+
   const handleToggleNotifications = async () => {
     try {
       setNotifLoading(true);
-      const isCurrentlyEnabled = !!user?.fcmToken;
 
-      if (isCurrentlyEnabled) {
+      if (hasFcmToken) {
         // Disable notifications
-        await api.put('/users/fcm-token', { fcmToken: null });
-        updateUser({ ...user, fcmToken: null });
+        await disableNotifications();
         toast.success("Push notifications disabled");
       } else {
         // Enable notifications
-        const token = await requestFirebaseNotificationPermission();
-        if (token) {
-          await api.put('/users/fcm-token', { fcmToken: token });
-          updateUser({ ...user, fcmToken: token });
+        await syncFcmToken();
+        const isPermissionGranted = Notification.permission === 'granted';
+        if (isPermissionGranted) {
           toast.success("Push notifications enabled");
         } else {
           toast.error("Please allow notification permissions in your browser settings.");
@@ -205,12 +204,12 @@ const ProfileDetails = () => {
               <p className="text-xs text-muted font-bold mt-1">Get real-time alerts for your orders and delivery updates.</p>
             </div>
             <Button
-              variant={user?.fcmToken ? "outline" : "primary"}
+              variant={hasFcmToken ? "outline" : "primary"}
               onClick={handleToggleNotifications}
               loading={notifLoading}
               className="w-full sm:w-auto shrink-0"
             >
-              {user?.fcmToken ? (
+              {hasFcmToken ? (
                 <>
                   <BellOff size={14} className="mr-2" />
                   DISABLE NOTIFICATIONS

@@ -24,14 +24,65 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await requestFirebaseNotificationPermission();
       if (token) {
+        const deviceName = getDeviceName();
         await api.put('/users/fcm-token', {
           fcmToken: token,
-          deviceName: getDeviceName()
+          deviceName
         });
         console.log('🔔 FCM token synced successfully');
+        
+        // Update user fcmTokens array locally
+        setUser(prev => {
+          if (!prev) return prev;
+          const updatedTokens = prev.fcmTokens ? [...prev.fcmTokens] : [];
+          const idx = updatedTokens.findIndex(t => t.token === token);
+          if (idx >= 0) {
+            updatedTokens[idx].deviceName = deviceName;
+            updatedTokens[idx].createdAt = new Date();
+          } else {
+            updatedTokens.push({ token, deviceName, createdAt: new Date() });
+          }
+          const updatedUser = { ...prev, fcmTokens: updatedTokens };
+          sessionStorage.setItem('user', JSON.stringify(updatedUser));
+          return updatedUser;
+        });
       }
     } catch (err) {
       console.error('FCM sync failed:', err.message);
+    }
+  };
+
+  // Disable/remove FCM token
+  const disableNotifications = async () => {
+    try {
+      let token = null;
+      try {
+        token = await requestFirebaseNotificationPermission();
+      } catch (e) {}
+
+      if (token) {
+        await api.put('/users/fcm-token', { fcmToken: token, remove: true });
+        setUser(prev => {
+          if (!prev) return prev;
+          const updatedTokens = (prev.fcmTokens || []).filter(t => t.token !== token);
+          const updatedUser = { ...prev, fcmTokens: updatedTokens };
+          sessionStorage.setItem('user', JSON.stringify(updatedUser));
+          return updatedUser;
+        });
+      } else {
+        // Fallback: clear all if no token is accessible
+        await api.put('/users/fcm-token', { fcmToken: null });
+        setUser(prev => {
+          if (!prev) return prev;
+          const updatedUser = { ...prev, fcmTokens: [] };
+          sessionStorage.setItem('user', JSON.stringify(updatedUser));
+          return updatedUser;
+        });
+      }
+      console.log('🔔 FCM notifications disabled successfully');
+    } catch (err) {
+      console.error('Disable notifications failed:', err.message);
+      throw err;
     }
   };
 
@@ -131,7 +182,9 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated, 
       login, 
       logout, 
-      updateUser 
+      updateUser,
+      syncFcmToken,
+      disableNotifications
     }}>
       {children}
     </AuthContext.Provider>

@@ -24,7 +24,7 @@ const saveWebNotification = async (userId, title, message, type = 'general', met
     const orderId = metadata.orderId || null;
 
     // Create DB notification
-    await Notification.create({
+    const notification = await Notification.create({
       userId,
       orderId,
       recipientRole: 'user',
@@ -38,6 +38,16 @@ const saveWebNotification = async (userId, title, message, type = 'general', met
       status: 'SENT',
       delivered: true,
       sentAt: new Date()
+    });
+
+    // Emit socket notification
+    socketService.emitToUser(userId, 'new_notification', {
+      _id: notification._id,
+      title,
+      message,
+      type,
+      data: metadata,
+      createdAt: notification.createdAt
     });
 
     // Send FCM push notification
@@ -57,7 +67,7 @@ const saveAdminWebNotification = async (title, message, type = 'admin_general', 
     
     // Save DB records for each admin (so they have individual read status)
     for (const admin of admins) {
-      await Notification.create({
+      const notification = await Notification.create({
         userId: admin._id,
         orderId,
         recipientRole: 'admin',
@@ -71,6 +81,16 @@ const saveAdminWebNotification = async (title, message, type = 'admin_general', 
         status: 'SENT',
         delivered: true,
         sentAt: new Date()
+      });
+
+      // Emit socket event individually to each admin's room
+      socketService.emitToUser(admin._id, 'new_notification', {
+        _id: notification._id,
+        title,
+        message,
+        type,
+        data: metadata,
+        createdAt: notification.createdAt
       });
     }
 
@@ -90,7 +110,7 @@ const saveBroadcastWebNotification = async (title, message, type = 'broadcast', 
     
     // Save DB record for each user
     for (const user of users) {
-      await Notification.create({
+      const notification = await Notification.create({
         userId: user._id,
         recipientRole: 'user',
         title,
@@ -103,6 +123,16 @@ const saveBroadcastWebNotification = async (title, message, type = 'broadcast', 
         status: 'SENT',
         delivered: true,
         sentAt: new Date()
+      });
+
+      // Emit socket event individually to each user's room
+      socketService.emitToUser(user._id, 'new_notification', {
+        _id: notification._id,
+        title,
+        message,
+        type,
+        data: metadata,
+        createdAt: notification.createdAt
       });
     }
 

@@ -10,7 +10,10 @@ const socketService = {
   },
 
   emitToUser: (userId, event, data) => {
-    if (io) io.to(`user:${userId}`).emit(event, data);
+    if (io) {
+      io.to(`user:${userId}`).emit(event, data);
+      io.to(`user_${userId}`).emit(event, data);
+    }
   },
 
   emitToStaff: (event, data) => {

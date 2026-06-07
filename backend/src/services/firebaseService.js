@@ -83,6 +83,21 @@ const sendPushNotification = async (tokens, title, body, data = {}) => {
   const message = {
     notification: { title, body },
     data: stringifiedData,
+    webpush: {
+      notification: {
+        title,
+        body,
+        icon: '/logo.png',
+        badge: '/favicon.svg',
+        tag: stringifiedData.type || 'general',
+        renotify: true,
+        requireInteraction: false,
+        data: stringifiedData
+      },
+      headers: {
+        Urgency: 'high'
+      }
+    },
     tokens: validTokens,
   };
 

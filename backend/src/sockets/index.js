@@ -21,7 +21,15 @@ module.exports = (io) => {
     socket.on('join_user_room', (userId) => {
       if (userId) {
         socket.join(`user_${userId}`);
+        socket.join(`user:${userId}`);
         console.log(`👤 User ${userId} joined their room`);
+      }
+    });
+    socket.on('join_user', (userId) => {
+      if (userId) {
+        socket.join(`user_${userId}`);
+        socket.join(`user:${userId}`);
+        console.log(`👤 User ${userId} joined user room (alias)`);
       }
     });
 
@@ -32,11 +40,21 @@ module.exports = (io) => {
         console.log(`👨‍🍳 Staff ${staffId} joined staff room`);
       }
     });
+    socket.on('join_staff', (staffId) => {
+      if (staffId) {
+        socket.join(`staff_${staffId}`);
+        console.log(`👨‍🍳 Staff ${staffId} joined staff room (alias)`);
+      }
+    });
 
     // Join admin room
     socket.on('join_admin_room', () => {
       socket.join('admin_room');
       console.log(`👑 Admin joined admin room`);
+    });
+    socket.on('join_admin', () => {
+      socket.join('admin_room');
+      console.log(`👑 Admin joined admin room (alias)`);
     });
 
     // Join specific order room for real-time tracking

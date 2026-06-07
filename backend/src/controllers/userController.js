@@ -169,16 +169,36 @@ exports.getWishlist = asyncHandler(async (req, res) => {
 // @desc    Update FCM Token
 // @route   PUT /api/v1/users/fcm-token
 exports.updateFcmToken = asyncHandler(async (req, res, next) => {
-  const { fcmToken, deviceName } = req.body;
-  if (!fcmToken) {
-    return next(new AppError('FCM Token is required', 400));
-  }
+  const { fcmToken, deviceName, remove } = req.body;
 
   const user = await User.findById(req.user._id);
   if (!user) {
     return next(new AppError('User not found', 404));
   }
-  
+
+  // Handle Token Removal/Disable
+  if (remove || !fcmToken) {
+    if (user.role === 'admin') {
+      const AdminFcmToken = require('../models/AdminFcmToken');
+      if (fcmToken) {
+        await AdminFcmToken.deleteOne({ token: fcmToken });
+      } else {
+        await AdminFcmToken.deleteMany({ userId: user._id });
+      }
+    } else {
+      if (fcmToken) {
+        user.fcmTokens = (user.fcmTokens || []).filter(t => t.token !== fcmToken);
+      } else {
+        user.fcmTokens = [];
+      }
+      await user.save({ validateBeforeSave: false });
+    }
+    return res.status(200).json({
+      status: 'success',
+      message: 'FCM Token(s) removed successfully'
+    });
+  }
+
   if (user.role === 'admin') {
     // Store admin FCM tokens separately
     const AdminFcmToken = require('../models/AdminFcmToken');

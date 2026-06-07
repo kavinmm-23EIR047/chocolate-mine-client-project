@@ -8,13 +8,15 @@ import Modal from './Modal';
 import Button from './Button';
 
 const NotificationPrompt = () => {
-  const { user, updateUser } = useAuth();
+  const { user, syncFcmToken, disableNotifications } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const hasFcmToken = user?.fcmTokens && user.fcmTokens.length > 0;
+
   useEffect(() => {
     // Auto-prompt on first load for logged-in users who haven't enabled notifications yet
-    if (user && !user.fcmToken) {
+    if (user && !hasFcmToken) {
       const hasSeenPrompt = localStorage.getItem('notificationPromptSeen');
       if (!hasSeenPrompt) {
         // Slight delay so it doesn't interrupt immediate page load
@@ -22,7 +24,7 @@ const NotificationPrompt = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [user]);
+  }, [user, hasFcmToken]);
 
   useEffect(() => {
     // Listen for manual triggers (e.g., from Navbar)
@@ -39,19 +41,16 @@ const NotificationPrompt = () => {
   const handleToggleNotifications = async () => {
     try {
       setIsLoading(true);
-      const isCurrentlyEnabled = !!user?.fcmToken;
-
-      if (isCurrentlyEnabled) {
+      if (hasFcmToken) {
         // Disable notifications
-        await api.put('/users/fcm-token', { fcmToken: null });
-        updateUser({ ...user, fcmToken: null });
+        await disableNotifications();
         toast.success("Push notifications disabled");
       } else {
         // Enable notifications
-        const token = await requestFirebaseNotificationPermission();
-        if (token) {
-          await api.put('/users/fcm-token', { fcmToken: token });
-          updateUser({ ...user, fcmToken: token });
+        await syncFcmToken();
+        // Check if enabled successfully
+        const isPermissionGranted = Notification.permission === 'granted';
+        if (isPermissionGranted) {
           toast.success("Push notifications enabled");
         } else {
           toast.error("Please allow notification permissions in your browser settings.");
@@ -70,30 +69,30 @@ const NotificationPrompt = () => {
     <Modal isOpen={isOpen} onClose={handleClose} title="Notification Preferences" size="sm">
       <div className="flex flex-col items-center text-center space-y-4">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
-          {user?.fcmToken ? <Bell size={32} /> : <BellOff size={32} />}
+          {hasFcmToken ? <Bell size={32} /> : <BellOff size={32} />}
         </div>
         
         <h4 className="text-xl font-black text-heading">
-          {user?.fcmToken ? 'Notifications Enabled' : 'Stay in the loop!'}
+          {hasFcmToken ? 'Notifications Enabled' : 'Stay in the loop!'}
         </h4>
         
         <p className="text-body text-sm px-2">
-          {user?.fcmToken 
+          {hasFcmToken 
             ? "You are currently receiving real-time alerts for your orders and delivery updates." 
             : "Get real-time push notifications about your order status, delivery tracking, and payment updates so you never miss a thing."}
         </p>
 
         <div className="w-full pt-4 flex gap-3">
           <Button variant="ghost" className="w-full" onClick={handleClose} disabled={isLoading}>
-            {user?.fcmToken ? 'Close' : 'Not Now'}
+            {hasFcmToken ? 'Close' : 'Not Now'}
           </Button>
           <Button 
-            variant={user?.fcmToken ? "danger" : "primary"} 
+            variant={hasFcmToken ? "danger" : "primary"} 
             className="w-full" 
             onClick={handleToggleNotifications}
             loading={isLoading}
           >
-            {user?.fcmToken ? 'Disable' : 'Enable'}
+            {hasFcmToken ? 'Disable' : 'Enable'}
           </Button>
         </div>
       </div>

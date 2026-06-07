@@ -34,6 +34,14 @@
     @apply antialiased;
   }
 
+  /* Smooth global button transitions and interactive click effects */
+  button, .btn-base, input[type="button"], input[type="submit"] {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  button:active, .btn-base:active {
+    transform: scale(0.96);
+  }
+
   /* Smooth theme transitions (opt-in via ThemeContext) */
   .theme-transition,
   .theme-transition * {

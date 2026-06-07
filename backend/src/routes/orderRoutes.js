@@ -65,18 +65,4 @@ router.get('/:id', orderController.getOrder);
  */
 router.patch('/:id/status', restrictTo('staff'), orderController.updateStatus);
 
-/**
- * @route   POST /api/v1/orders/:id/generate-otp
- * @desc    Generate and send OTP for delivery verification (Staff only)
- * @access  Staff only
- */
-router.post('/:id/generate-otp', restrictTo('staff'), orderController.generateDeliveryOtp);
-
-/**
- * @route   POST /api/v1/orders/:id/verify-otp
- * @desc    Verify OTP and complete delivery (Staff only)
- * @access  Staff only
- */
-router.post('/:id/verify-otp', restrictTo('staff'), orderController.verifyDeliveryOtp);
-
 module.exports = router;

@@ -76,7 +76,15 @@ const ProductReviews = ({ product, productReviews }) => {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm font-black text-heading capitalize truncate">{rev.userName || 'Verified Customer'}</p>
-                      <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5 truncate">Purchased recently</p>
+                      <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5">
+                        {(() => {
+                          if (!rev.createdAt) return 'Verified Purchase';
+                          const diffTime = Math.abs(new Date() - new Date(rev.createdAt));
+                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                          const dateStr = new Date(rev.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                          return diffDays <= 7 ? `Purchased recently · ${dateStr}` : `Verified Purchase · ${dateStr}`;
+                        })()}
+                      </p>
                     </div>
                   </div>
                 </div>

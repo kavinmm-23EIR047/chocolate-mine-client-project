@@ -557,3 +557,25 @@ exports.getOrderDetails = asyncHandler(async (req, res, next) => {
     data: order
   });
 });
+
+// @desc    Admin custom FCM broadcast to all active users
+// @route   POST /api/admin/broadcast
+// @access  Admin Only
+exports.broadcastNotification = asyncHandler(async (req, res, next) => {
+  const { title, message, url, type } = req.body;
+
+  if (!title || !message) {
+    return next(new AppError('Title and message are required for broadcast', 400));
+  }
+
+  const notificationManager = require('../services/notificationManager');
+  await notificationManager.sendAdminBroadcast(title, message, {
+    url: url || '',
+    type: type || 'broadcast'
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Broadcast notification sent to all active users successfully'
+  });
+});

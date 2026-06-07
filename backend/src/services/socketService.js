@@ -20,6 +20,10 @@ const socketService = {
   emitToAdmin: (event, data) => {
     if (io) io.to('admin_room').emit(event, data);
   },
+
+  emitToAll: (event, data) => {
+    if (io) io.emit(event, data);
+  },
 };
 
 module.exports = socketService;

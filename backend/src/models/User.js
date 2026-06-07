@@ -47,8 +47,14 @@ const userSchema = new mongoose.Schema({
     default: true
   },
   fcmTokens: [{
-    type: String
+    token: { type: String, required: true },
+    deviceName: { type: String, default: 'Unknown Device' },
+    createdAt: { type: Date, default: Date.now }
   }],
+  notificationEnabled: {
+    type: Boolean,
+    default: true
+  },
   lastActiveAt: {
     type: Date,
     default: Date.now

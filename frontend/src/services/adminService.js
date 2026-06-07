@@ -132,7 +132,14 @@ const adminService = {
   /* ----------------------------------------
      Seed Defaults
   ---------------------------------------- */
-  seedCustomCakeDefaults: () => api.post('/custom-cakes/seed-defaults')
+  seedCustomCakeDefaults: () => api.post('/custom-cakes/seed-defaults'),
+
+  /* ----------------------------------------
+     Review Management
+  ---------------------------------------- */
+  getReviews: () => api.get('/admin/reviews'),
+  updateReview: (id, data) => api.patch(`/admin/reviews/${id}`, data),
+  deleteReview: (id) => api.delete(`/admin/reviews/${id}`)
 };
 
 export default adminService;

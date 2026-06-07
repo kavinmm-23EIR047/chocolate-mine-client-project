@@ -81,8 +81,12 @@ router.post('/reset-password', validate(resetPasswordSchema), authController.res
 
 // POST /api/v1/auth/logout
 router.post('/logout', (req, res) => {
-  res.clearCookie('token');
-  return res.status(200).json({ success: true, message: 'Logged out successfully' });
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  });
+  return res.status(200).json({ status: 'success', message: 'Logged out successfully' });
 });
 
 module.exports = router;

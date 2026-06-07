@@ -13,98 +13,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import io from 'socket.io-client';
 import orderService from '../../services/orderService';
 
-// OTP Modal Component – updated to use theme variables
-const OtpModal = ({ isOpen, onClose, onVerify, order, loading, onRegenerateOtp }) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const inputRefs = [];
 
-  const handleOtpChange = (index, value) => {
-    if (value.length > 1) value = value[0];
-    if (!/^\d*$/.test(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value && index < 5) inputRefs[index + 1]?.focus();
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) inputRefs[index - 1]?.focus();
-  };
-
-  const handleSubmit = () => {
-    const otpValue = otp.join('');
-    if (otpValue.length !== 6) {
-      toast.error('Please enter 6-digit OTP');
-      return;
-    }
-    onVerify(otpValue);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm cursor-pointer" onClick={onClose}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-card text-foreground border border-border rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden cursor-default"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-6 border-b border-border bg-card">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-secondary/15 rounded-full flex items-center justify-center">
-                <KeyRound size={20} className="text-secondary" />
-              </div>
-              <div>
-                <h3 className="font-black text-heading text-lg">Verify Delivery OTP</h3>
-                <p className="text-xs text-muted">Order #{order?.orderNumber || order?.trackingCode}</p>
-              </div>
-            </div>
-            <button onClick={onClose} className="p-2 hover:bg-border/20 rounded-full transition-colors">
-              <X size={20} className="text-heading" />
-            </button>
-          </div>
-        </div>
-        <div className="p-6 space-y-6">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Phone size={28} className="text-secondary" />
-            </div>
-            <p className="text-sm text-muted">Please ask the customer for the 6-digit OTP sent to their mobile number.</p>
-            <p className="text-xs text-muted mt-2">
-              Customer: <span className="font-bold text-heading">{order?.address?.fullName}</span><br />
-              Phone: <span className="font-bold text-heading">{order?.address?.phone}</span>
-            </p>
-          </div>
-          <div className="flex justify-center gap-3">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={el => inputRefs[index] = el}
-                type="text"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-2xl font-black bg-card-soft border-2 border-border/60 rounded-xl focus:border-secondary focus:outline-none transition-colors text-heading"
-                autoFocus={index === 0}
-              />
-            ))}
-          </div>
-          <Button onClick={handleSubmit} className="w-full" icon={CheckCircle} loading={loading}>
-            VERIFY & COMPLETE DELIVERY
-          </Button>
-          <button onClick={onRegenerateOtp} className="w-full text-center text-xs text-secondary hover:underline">
-            Resend OTP
-          </button>
-          <p className="text-[10px] text-center text-muted">OTP expires in 10 minutes.</p>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
 
 // Order Status Dropdown – fully theme-aware
 const OrderStatusDropdown = ({ order, onUpdate }) => {
@@ -121,9 +30,13 @@ const OrderStatusDropdown = ({ order, onUpdate }) => {
 
   const actions = [];
   if (order.orderStatus === 'confirmed') {
+    actions.push({ id: 'processing', label: 'Start Preparing', icon: ChefHat, color: 'text-warning', hover: 'hover:bg-warning/10' });
+  } else if (order.orderStatus === 'processing') {
+    actions.push({ id: 'packed', label: 'Mark Packed', icon: Package, color: 'text-secondary', hover: 'hover:bg-secondary/10' });
+  } else if (order.orderStatus === 'packed') {
     actions.push({ id: 'out_for_delivery', label: 'Out For Delivery', icon: Truck, color: 'text-primary', hover: 'hover:bg-primary/10' });
   } else if (order.orderStatus === 'out_for_delivery') {
-    actions.push({ id: 'delivered', label: 'Verify & Deliver', icon: CheckCircle, color: 'text-success', hover: 'hover:bg-success/10' });
+    actions.push({ id: 'delivered', label: 'Deliver Order', icon: CheckCircle, color: 'text-success', hover: 'hover:bg-success/10' });
   }
 
   if (actions.length === 0) {
@@ -301,9 +214,6 @@ const StaffDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({ confirmedOrders: 0, outForDeliveryOrders: 0, deliveredOrders: 0 });
   const [loading, setLoading] = useState(true);
-  const [otpModalOpen, setOtpModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
@@ -370,49 +280,16 @@ const StaffDashboard = () => {
   };
 
   const handleDeliveryStatusUpdate = async (id, status) => {
-    if (status === 'delivered') {
-      const order = orders.find(o => o._id === id);
-      setSelectedOrder(order);
-      setOtpModalOpen(true);
-      return;
-    }
     try {
-      const response = await staffService.updateKitchenStatus(id, status);
+      await staffService.updateKitchenStatus(id, status);
       toast.success(`Order marked as ${status.replace(/_/g, ' ')}`);
-      if (status === 'out_for_delivery' && response.data.otp) {
-        toast.success(`OTP: ${response.data.otp}`, { duration: 10000 });
-      }
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update status');
     }
   };
 
-  const handleVerifyOtp = async (otp) => {
-    if (!selectedOrder) return;
-    setVerifyingOtp(true);
-    try {
-      await staffService.verifyDeliveryOtp(selectedOrder._id, otp);
-      toast.success('Delivery confirmed! 🎉');
-      setOtpModalOpen(false);
-      setSelectedOrder(null);
-      fetchData();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Invalid OTP');
-    } finally {
-      setVerifyingOtp(false);
-    }
-  };
 
-  const handleRegenerateOtp = async () => {
-    if (!selectedOrder) return;
-    try {
-      await staffService.generateDeliveryOtp(selectedOrder._id);
-      toast.success('New OTP sent');
-    } catch (err) {
-      toast.error('Failed to generate OTP');
-    }
-  };
 
   const handlePrintInvoice = async (orderId) => {
     try {
@@ -476,17 +353,8 @@ const StaffDashboard = () => {
     );
   }
 
-  // List views (New, Active, History) – fully themed
   return (
     <div className="space-y-6">
-      <OtpModal
-        isOpen={otpModalOpen}
-        onClose={() => { setOtpModalOpen(false); setSelectedOrder(null); }}
-        onVerify={handleVerifyOtp}
-        onRegenerateOtp={handleRegenerateOtp}
-        order={selectedOrder}
-        loading={verifyingOtp}
-      />
       <OrderDetailsModal order={selectedOrderDetails} onClose={() => { setDetailsModalOpen(false); setSelectedOrderDetails(null); }} />
       <div className="flex justify-end">
         <Button variant="outline" icon={RefreshCw} onClick={fetchData} loading={loading}>Refresh</Button>
@@ -549,13 +417,7 @@ const StaffDashboard = () => {
                     );
                   })}
                 </div>
-                {/* OTP Banner (only for out_for_delivery) */}
-                {order.orderStatus === 'out_for_delivery' && (
-                  <div className="mb-3 p-2 bg-secondary/10 border border-secondary/20 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-2"><KeyRound size={14} className="text-secondary" /><span className="text-[10px] font-bold text-secondary">OTP Required for Delivery</span></div>
-                    <button onClick={() => { setSelectedOrder(order); setOtpModalOpen(true); }} className="text-[10px] bg-secondary text-white px-2 py-1 rounded-md font-bold">Verify Now</button>
-                  </div>
-                )}
+
                 {/* Payment & Total */}
                 <div className="flex justify-between items-center mb-5 pt-2 border-t border-border">
                   <div className="flex flex-col"><span className="text-[9px] text-muted uppercase tracking-widest">Payment</span><span className="text-xs font-bold text-heading">{order.paymentMethod} · {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}</span></div>

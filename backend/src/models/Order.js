@@ -39,11 +39,7 @@ const orderSchema = new mongoose.Schema(
     invoiceUrl: { type: String },
     customCakePdfUrl: { type: String },
 
-    // OTP for delivery verification
-    deliveryOtp: { type: String },
-    deliveryOtpExpiry: { type: Date },
-    otpVerified: { type: Boolean, default: false },
-    otpVerifiedAt: { type: Date },
+
 
     // ✅ Add this field - Track if review has been submitted
     reviewed: { type: Boolean, default: false },
@@ -171,7 +167,7 @@ const orderSchema = new mongoose.Schema(
 
     orderStatus: {
       type: String,
-      enum: ['confirmed', 'out_for_delivery', 'delivered'],
+      enum: ['confirmed', 'processing', 'packed', 'out_for_delivery', 'delivered', 'cancelled'],
       default: 'confirmed'
     },
 
@@ -230,38 +226,6 @@ orderSchema.pre('save', function() {
   });
 });
 
-// Method to generate delivery OTP
-orderSchema.methods.generateDeliveryOtp = function() {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  this.deliveryOtp = otp;
-  this.deliveryOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-  this.otpVerified = false;
-  return otp;
-};
-
-// Method to verify delivery OTP
-orderSchema.methods.verifyDeliveryOtp = function(otp) {
-  if (!this.deliveryOtp || !this.deliveryOtpExpiry) {
-    return { valid: false, message: 'No OTP generated for this order' };
-  }
-  
-  if (this.otpVerified) {
-    return { valid: false, message: 'OTP already verified' };
-  }
-  
-  if (new Date() > this.deliveryOtpExpiry) {
-    return { valid: false, message: 'OTP has expired' };
-  }
-  
-  if (this.deliveryOtp !== otp) {
-    return { valid: false, message: 'Invalid OTP' };
-  }
-  
-  this.otpVerified = true;
-  this.otpVerifiedAt = new Date();
-  return { valid: true, message: 'OTP verified successfully' };
-};
-
 // Method to get SKU for tracking
 orderSchema.methods.getOrderSKUs = function() {
   return this.items.map(item => ({
@@ -275,7 +239,6 @@ orderSchema.index({ userId: 1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ createdAt: -1 });
-orderSchema.index({ deliveryOtp: 1 });
 
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -180,8 +180,7 @@ exports.getOrderByNumber = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc Update status (Staff only: confirmed → out_for_delivery → delivered)
-// When moving to out_for_delivery, generate OTP
+// @desc Update status (Staff: confirmed → processing → packed → out_for_delivery → delivered)
 exports.updateStatus = asyncHandler(async (req, res, next) => {
   const { status } = req.body;
 
@@ -191,33 +190,28 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
     return next(new AppError('Order not found', 404));
   }
 
-  const allowedStatuses = ['confirmed', 'out_for_delivery', 'delivered'];
+  const allowedStatuses = ['confirmed', 'processing', 'packed', 'out_for_delivery', 'delivered', 'cancelled'];
 
   if (!allowedStatuses.includes(status)) {
     return next(new AppError('Invalid status update', 400));
   }
 
-  // Validate sequential status update
-  if (order.orderStatus === 'confirmed' && status !== 'out_for_delivery') {
-    return next(new AppError('Confirmed orders can only be updated to out_for_delivery', 400));
-  }
-  if (order.orderStatus === 'out_for_delivery' && status !== 'delivered') {
-    return next(new AppError('Out for delivery orders can only be updated to delivered', 400));
-  }
-  if (order.orderStatus === 'delivered') {
-    return next(new AppError('Delivered orders cannot be updated further', 400));
-  }
+  // Status transition map
+  const transitions = {
+    confirmed: ['processing'],
+    processing: ['packed'],
+    packed: ['out_for_delivery'],
+    out_for_delivery: ['delivered'],
+    delivered: [],
+    cancelled: []
+  };
 
-  // If moving to out_for_delivery, generate OTP and send SMS
-  if (status === 'out_for_delivery') {
-    const otp = order.generateDeliveryOtp();
-    await order.save();
-    
-    // Send OTP via SMS to customer
-    const otpMessage = `Your OTP for order ${order.orderNumber} is ${otp}. Valid for 10 minutes. - The Chocolate Mine`;
-    await sendSms(order.address.phone, otpMessage);
-    
-    console.log(`📱 OTP sent to ${order.address.phone}: ${otp}`);
+  const allowed = transitions[order.orderStatus];
+  if (!allowed || !allowed.includes(status)) {
+    return next(new AppError(
+      `Cannot update from "${order.orderStatus}" to "${status}".`,
+      400
+    ));
   }
 
   order.orderStatus = status;
@@ -235,78 +229,7 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc Generate and send OTP for delivery (Staff action)
-exports.generateDeliveryOtp = asyncHandler(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
 
-  if (!order) {
-    return next(new AppError('Order not found', 404));
-  }
-
-  // Only generate OTP if order is out_for_delivery
-  if (order.orderStatus !== 'out_for_delivery') {
-    return next(new AppError('OTP can only be generated for out_for_delivery orders', 400));
-  }
-
-  const otp = order.generateDeliveryOtp();
-  await order.save();
-
-  // Send OTP via SMS to customer
-  const otpMessage = `Your OTP for order ${order.orderNumber} is ${otp}. Valid for 10 minutes. - The Chocolate Mine`;
-  await sendSms(order.address.phone, otpMessage);
-  
-  console.log(`📱 New OTP sent to ${order.address.phone}: ${otp}`);
-
-  res.status(200).json({
-    status: 'success',
-    message: 'OTP generated successfully',
-    data: {
-      // In production, don't return OTP in response - only for testing
-      otp: process.env.NODE_ENV === 'development' ? otp : undefined
-    }
-  });
-});
-
-// @desc Verify OTP and complete delivery
-exports.verifyDeliveryOtp = asyncHandler(async (req, res, next) => {
-  const { otp } = req.body;
-  const order = await Order.findById(req.params.id);
-
-  if (!order) {
-    return next(new AppError('Order not found', 404));
-  }
-
-  // Only verify OTP if order is out_for_delivery
-  if (order.orderStatus !== 'out_for_delivery') {
-    return next(new AppError('Order is not out for delivery', 400));
-  }
-
-  const verification = order.verifyDeliveryOtp(otp);
-
-  if (!verification.valid) {
-    return next(new AppError(verification.message, 400));
-  }
-
-  // Update order status to delivered
-  order.orderStatus = 'delivered';
-  await order.save();
-
-  // Send delivery confirmation SMS
-  const confirmMessage = `Your order ${order.orderNumber} has been delivered successfully! Thank you for choosing The Chocolate Mine.`;
-  await sendSms(order.address.phone, confirmMessage);
-
-  // Emit socket update
-  emitOrderUpdate(order);
-  
-  // Trigger Push Notifications, Email, and WhatsApp asynchronously
-  notificationManager.handleStatusChange(order, 'delivered').catch(console.error);
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Delivery confirmed successfully',
-    data: order
-  });
-});
 
 // @desc Tracking
 exports.getTrackingData = asyncHandler(async (req, res, next) => {

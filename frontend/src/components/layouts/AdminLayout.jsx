@@ -18,6 +18,7 @@ import {
   Gift,
   Image as ImageIcon,
   Cake,
+  MessageSquare,
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -34,6 +35,7 @@ const menuItems = [
   { path: '/admin/occasions', label: 'Occasions', icon: Gift },
   { path: '/admin/banners', label: 'Banners', icon: ImageIcon },
   { path: '/admin/custom-cakes', label: 'Custom Cakes', icon: Cake },
+  { path: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 

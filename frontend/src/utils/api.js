@@ -48,10 +48,13 @@ api.interceptors.request.use(
    RESPONSE INTERCEPTOR
 ---------------------------------------- */
 
-const PAYMENT_ROUTES = [
+const SKIP_401_REDIRECT_ROUTES = [
   '/payment/create-order',
   '/payment/verify',
-  '/payment/log-failure'
+  '/payment/log-failure',
+  '/auth/me',
+  '/auth/login',
+  '/auth/signup'
 ];
 
 api.interceptors.response.use(
@@ -61,12 +64,12 @@ api.interceptors.response.use(
     const requestUrl = error.config?.url || '';
 
     if (status === 401) {
-      const isPaymentRoute = PAYMENT_ROUTES.some((route) =>
+      const shouldSkip = SKIP_401_REDIRECT_ROUTES.some((route) =>
         requestUrl.includes(route)
       );
 
-      // ✅ Prevent payment flow break during Razorpay verification
-      if (!isPaymentRoute) {
+      // Don't redirect for auth-check routes or payment routes
+      if (!shouldSkip) {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
 

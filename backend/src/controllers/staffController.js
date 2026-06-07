@@ -1,7 +1,6 @@
 const Order = require('../models/Order');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
-const whatsappService = require('../services/whatsappService');
 
 // Store io instance (will be set from server.js)
 let ioInstance = null;
@@ -10,18 +9,6 @@ let ioInstance = null;
 const setIo = (io) => {
   ioInstance = io;
   console.log('✅ Socket.io instance set in staffController');
-};
-
-// Helper function to send WhatsApp messages
-const sendWhatsAppMsg = async (phoneNumber, message) => {
-  try {
-    console.log(`📱 Sending WhatsApp to ${phoneNumber}: ${message}`);
-    await whatsappService.sendWhatsApp(phoneNumber, message, 'user');
-    return true;
-  } catch (error) {
-    console.error('WhatsApp sending failed:', error);
-    return false;
-  }
 };
 
 // Helper to emit socket event for real-time updates
@@ -44,13 +31,14 @@ const emitOrderUpdate = (order) => {
   
   // Emit to user room
   if (order.userId) {
-    ioInstance.to(`user_${order.userId}`).emit('my_order_updated', {
+    const userId = typeof order.userId === 'object' ? order.userId._id : order.userId;
+    ioInstance.to(`user_${userId}`).emit('my_order_updated', {
       orderId: order._id,
       orderNumber: order.orderNumber,
       status: order.orderStatus,
       updatedAt: order.updatedAt
     });
-    ioInstance.to(`user_${order.userId}`).emit('orders_needs_refresh');
+    ioInstance.to(`user_${userId}`).emit('orders_needs_refresh');
   }
   
   // Emit to admin room
@@ -124,12 +112,23 @@ const formatOrderItems = (items) => {
   }));
 };
 
-// @desc    Staff Dashboard Stats - Updated to show all orders by status
+// Status transition map: current status → allowed next statuses
+const STATUS_TRANSITIONS = {
+  confirmed: ['processing'],
+  processing: ['packed'],
+  packed: ['out_for_delivery'],
+  out_for_delivery: ['delivered'],
+  delivered: [],       // terminal state
+  cancelled: []        // terminal state
+};
+
+// @desc    Staff Dashboard Stats
 // @route   GET /api/v1/staff/dashboard
 exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
-  // Count all orders by status (no assignedStaff filter)
-  const [confirmedOrders, outForDeliveryOrders, deliveredOrders] = await Promise.all([
+  const [confirmedCount, processingCount, packedCount, outForDeliveryOrders, deliveredOrders] = await Promise.all([
     Order.countDocuments({ orderStatus: 'confirmed' }),
+    Order.countDocuments({ orderStatus: 'processing' }),
+    Order.countDocuments({ orderStatus: 'packed' }),
     Order.countDocuments({ orderStatus: 'out_for_delivery' }),
     Order.countDocuments({ orderStatus: 'delivered' })
   ]);
@@ -137,17 +136,17 @@ exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      confirmedOrders,
+      confirmedOrders: confirmedCount + processingCount + packedCount,
       outForDeliveryOrders,
       deliveredOrders
     }
   });
 });
 
-// @desc    Get Confirmed Orders (Ready to be picked up) with full product details
+// @desc    Get Confirmed/Processing/Packed Orders (Ready to be managed in kitchen)
 // @route   GET /api/v1/staff/orders/new
 exports.getNewOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ orderStatus: 'confirmed' })
+  const orders = await Order.find({ orderStatus: { $in: ['confirmed', 'processing', 'packed'] } })
     .populate('userId', 'name phone email')
     .sort('-createdAt');
 
@@ -165,10 +164,51 @@ exports.getNewOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get Out For Delivery Orders with full product details
+// @desc    Get Processing Orders
+// @route   GET /api/v1/staff/orders/processing
+exports.getProcessingOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find({ orderStatus: 'processing' })
+    .populate('userId', 'name phone email')
+    .sort('-createdAt');
+
+  const formattedOrders = orders.map(order => ({
+    ...order.toObject(),
+    formattedItems: formatOrderItems(order.items),
+    itemsCount: order.items.length,
+    totalItems: order.items.reduce((sum, item) => sum + item.qty, 0)
+  }));
+
+  res.status(200).json({
+    status: 'success',
+    count: orders.length,
+    data: formattedOrders
+  });
+});
+
+// @desc    Get Packed Orders
+// @route   GET /api/v1/staff/orders/packed
+exports.getPackedOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find({ orderStatus: 'packed' })
+    .populate('userId', 'name phone email')
+    .sort('-createdAt');
+
+  const formattedOrders = orders.map(order => ({
+    ...order.toObject(),
+    formattedItems: formatOrderItems(order.items),
+    itemsCount: order.items.length,
+    totalItems: order.items.reduce((sum, item) => sum + item.qty, 0)
+  }));
+
+  res.status(200).json({
+    status: 'success',
+    count: orders.length,
+    data: formattedOrders
+  });
+});
+
+// @desc    Get Out For Delivery Orders
 // @route   GET /api/v1/staff/orders/out-for-delivery
 exports.getOutForDeliveryOrders = asyncHandler(async (req, res) => {
-  // REMOVED assignedStaff filter - show all out_for_delivery orders
   const orders = await Order.find({ 
     orderStatus: 'out_for_delivery'
   })
@@ -192,7 +232,6 @@ exports.getOutForDeliveryOrders = asyncHandler(async (req, res) => {
 // @desc    Get Delivered Orders
 // @route   GET /api/v1/staff/orders/delivered
 exports.getDeliveredOrders = asyncHandler(async (req, res) => {
-  // REMOVED assignedStaff filter - show all delivered orders
   const orders = await Order.find({ 
     orderStatus: 'delivered'
   })
@@ -299,8 +338,9 @@ exports.markKOTPrinted = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Update Kitchen Status (confirmed → out_for_delivery → delivered)
+// @desc    Update Order Status (smooth sequential transition, NO OTP)
 // @route   PATCH /api/v1/staff/orders/:id/kitchen-status
+// Flow: confirmed → processing → packed → out_for_delivery → delivered
 exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
   const { status } = req.body;
   const order = await Order.findById(req.params.id).populate('userId', 'name phone email');
@@ -309,35 +349,24 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
     return next(new AppError('Order not found', 404));
   }
 
-  const allowedStatuses = ['confirmed', 'out_for_delivery', 'delivered'];
-  if (!allowedStatuses.includes(status)) {
-    return next(new AppError('Invalid status update', 400));
+  // Validate the status is a known status
+  const allStatuses = ['confirmed', 'processing', 'packed', 'out_for_delivery', 'delivered', 'cancelled'];
+  if (!allStatuses.includes(status)) {
+    return next(new AppError('Invalid status', 400));
   }
 
-  // Validate sequential status update
-  if (order.orderStatus === 'confirmed' && status !== 'out_for_delivery') {
-    return next(new AppError('Confirmed orders can only be updated to out_for_delivery', 400));
-  }
-  if (order.orderStatus === 'out_for_delivery' && status !== 'delivered') {
-    return next(new AppError('Out for delivery orders can only be updated to delivered', 400));
-  }
-  if (order.orderStatus === 'delivered') {
-    return next(new AppError('Delivered orders cannot be updated further', 400));
+  // Validate sequential transition
+  const allowed = STATUS_TRANSITIONS[order.orderStatus];
+  if (!allowed || !allowed.includes(status)) {
+    return next(new AppError(
+      `Cannot update from "${order.orderStatus}" to "${status}". Allowed: ${(allowed || []).join(', ') || 'none (terminal state)'}`,
+      400
+    ));
   }
 
-  let generatedOtp = null;
-
-  // If moving to out_for_delivery, generate OTP and assign staff
+  // If out_for_delivery, assign staff
   if (status === 'out_for_delivery') {
-    generatedOtp = order.generateDeliveryOtp();
     order.assignedStaff = req.user._id;
-    await order.save();
-    
-    // Send OTP via WhatsApp to customer
-    const otpMessage = `Your OTP for order ${order.orderNumber} is ${generatedOtp}. Valid for 10 minutes. - The Chocolate Mine`;
-    await sendWhatsAppMsg(order.address.phone, otpMessage);
-    
-    console.log(`📱 OTP sent to ${order.address.phone}: ${generatedOtp}`);
   }
 
   order.orderStatus = status;
@@ -364,87 +393,7 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: responseData,
-    ...(generatedOtp && process.env.NODE_ENV === 'development' && { otp: generatedOtp })
-  });
-});
-
-// @desc    Generate Delivery OTP
-// @route   POST /api/v1/staff/orders/:id/generate-otp
-exports.generateDeliveryOtp = asyncHandler(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
-  
-  if (!order) {
-    return next(new AppError('Order not found', 404));
-  }
-
-  // Only generate OTP if order is out_for_delivery
-  if (order.orderStatus !== 'out_for_delivery') {
-    return next(new AppError('OTP can only be generated for out_for_delivery orders', 400));
-  }
-
-  const otp = order.generateDeliveryOtp();
-  await order.save();
-
-  // Send OTP via WhatsApp to customer
-  const otpMessage = `Your OTP for order ${order.orderNumber} is ${otp}. Valid for 10 minutes. - The Chocolate Mine`;
-  await sendWhatsAppMsg(order.address.phone, otpMessage);
-  
-  console.log(`📱 New OTP sent to ${order.address.phone}: ${otp}`);
-
-  res.status(200).json({
-    status: 'success',
-    message: 'OTP sent to customer successfully',
-    otp: process.env.NODE_ENV === 'development' ? otp : undefined
-  });
-});
-
-// @desc    Verify Delivery OTP
-// @route   POST /api/v1/staff/orders/:id/verify-otp
-exports.verifyDeliveryOtp = asyncHandler(async (req, res, next) => {
-  const { otp } = req.body;
-  const order = await Order.findById(req.params.id).populate('userId', 'name phone email');
-  
-  if (!order) {
-    return next(new AppError('Order not found', 404));
-  }
-
-  // Only verify OTP if order is out_for_delivery
-  if (order.orderStatus !== 'out_for_delivery') {
-    return next(new AppError('Order is not out for delivery', 400));
-  }
-
-  const result = order.verifyDeliveryOtp(otp);
-  
-  if (!result.valid) {
-    return next(new AppError(result.message, 400));
-  }
-
-  order.orderStatus = 'delivered';
-  await order.save();
-
-  // Send confirmation WhatsApp to customer
-  const confirmMessage = `Your order ${order.orderNumber} has been delivered successfully! Thank you for choosing The Chocolate Mine.`;
-  await sendWhatsAppMsg(order.address.phone, confirmMessage);
-
-  // Emit socket update for real-time notifications
-  emitOrderUpdate(order);
-
-  // Trigger push/DB notifications for the user
-  try {
-    const notificationManager = require('../services/notificationManager');
-    notificationManager.handleStatusChange(order, 'delivered').catch(console.error);
-  } catch (err) {
-    console.error('Failed to trigger handleStatusChange notification:', err);
-  }
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Order delivered successfully',
-    data: {
-      ...order.toObject(),
-      formattedItems: formatOrderItems(order.items)
-    }
+    data: responseData
   });
 });
 

@@ -169,7 +169,7 @@ exports.getWishlist = asyncHandler(async (req, res) => {
 // @desc    Update FCM Token
 // @route   PUT /api/v1/users/fcm-token
 exports.updateFcmToken = asyncHandler(async (req, res, next) => {
-  const { fcmToken } = req.body;
+  const { fcmToken, deviceName } = req.body;
   if (!fcmToken) {
     return next(new AppError('FCM Token is required', 400));
   }
@@ -184,20 +184,33 @@ exports.updateFcmToken = asyncHandler(async (req, res, next) => {
     const AdminFcmToken = require('../models/AdminFcmToken');
     await AdminFcmToken.findOneAndUpdate(
       { token: fcmToken },
-      { userId: user._id, createdAt: new Date() },
+      { userId: user._id, deviceName: deviceName || 'Admin Device', createdAt: new Date() },
       { upsert: true, new: true }
     );
   } else {
-    // Store user FCM tokens
+    // Store user FCM tokens (structured)
     if (!user.fcmTokens) {
       user.fcmTokens = [];
     }
     
-    // Only add if not already present
-    if (!user.fcmTokens.includes(fcmToken)) {
-      user.fcmTokens.push(fcmToken);
-      await user.save({ validateBeforeSave: false });
+    // Check if token already exists, update it; otherwise add new
+    const existingIndex = user.fcmTokens.findIndex(t => t.token === fcmToken);
+    if (existingIndex >= 0) {
+      // Update existing token's timestamp and device name
+      user.fcmTokens[existingIndex].deviceName = deviceName || user.fcmTokens[existingIndex].deviceName;
+      user.fcmTokens[existingIndex].createdAt = new Date();
+    } else {
+      // Add new token, limit to 10 devices max
+      if (user.fcmTokens.length >= 10) {
+        user.fcmTokens.shift(); // Remove oldest
+      }
+      user.fcmTokens.push({
+        token: fcmToken,
+        deviceName: deviceName || 'Unknown Device',
+        createdAt: new Date()
+      });
     }
+    await user.save({ validateBeforeSave: false });
   }
 
   res.status(200).json({

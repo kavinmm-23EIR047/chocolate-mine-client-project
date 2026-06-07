@@ -207,7 +207,7 @@ exports.handleStatusChange = async (order, status) => {
     // WEB UPDATE (SOCKET)
     socketService.emitToUser(populatedOrder.userId._id, 'status_changed', { orderId: populatedOrder._id, status });
 
-    // EMAIL & TELEGRAM PRESERVED FLOWS
+    // EMAIL & TELEGRAM FOR SPECIFIC STATUSES
     if (status === 'out_for_delivery') {
       if (populatedOrder.userId.email) {
         emailService.sendDispatched(populatedOrder.userId.email, populatedOrder).catch(e => logger.error('Dispatch Email Failed:', e.message));
@@ -225,21 +225,44 @@ exports.handleStatusChange = async (order, status) => {
     let msg = '';
     let type = 'status_changed';
 
-    if (status === 'preparing') {
-      if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, trackingNumber);
-      title = '👨🍳 Order Preparing';
-      msg = `Your order #${trackingNumber} is being prepared.`;
-      type = 'order_preparing';
-    } else if (status === 'out_for_delivery') {
-      if (populatedOrder.userId.phone) whatsappService.sendOutForDelivery(populatedOrder.userId.phone, trackingNumber);
-      title = '🚚 Out For Delivery';
-      msg = `Your order #${trackingNumber} is on the way.`;
-      type = 'out_for_delivery';
-    } else if (status === 'delivered') {
-      if (populatedOrder.userId.phone) whatsappService.sendDelivered(populatedOrder.userId.phone, trackingNumber);
-      title = '🎉 Order Delivered';
-      msg = `Your order #${trackingNumber} has been delivered.`;
-      type = 'delivered';
+    switch (status) {
+      case 'processing':
+        if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, trackingNumber);
+        title = '👨‍🍳 Order Processing';
+        msg = `Your order #${trackingNumber} is being prepared.`;
+        type = 'order_processing';
+        break;
+      case 'packed':
+        title = '📦 Order Packed';
+        msg = `Your order #${trackingNumber} has been packed and is ready for dispatch.`;
+        type = 'order_packed';
+        break;
+      case 'out_for_delivery':
+        if (populatedOrder.userId.phone) whatsappService.sendOutForDelivery(populatedOrder.userId.phone, trackingNumber);
+        title = '🚚 Out For Delivery';
+        msg = `Your order #${trackingNumber} is on the way.`;
+        type = 'out_for_delivery';
+        break;
+      case 'delivered':
+        if (populatedOrder.userId.phone) whatsappService.sendDelivered(populatedOrder.userId.phone, trackingNumber);
+        title = '✅ Delivered';
+        msg = `Your order #${trackingNumber} has been delivered.`;
+        type = 'delivered';
+        break;
+      case 'cancelled':
+        title = '❌ Order Cancelled';
+        msg = `Your order #${trackingNumber} has been cancelled.`;
+        type = 'order_cancelled';
+        break;
+      default:
+        // For 'preparing' (legacy) or unknown statuses
+        if (status === 'preparing') {
+          if (populatedOrder.userId.phone) whatsappService.sendPreparing(populatedOrder.userId.phone, trackingNumber);
+          title = '👨‍🍳 Order Preparing';
+          msg = `Your order #${trackingNumber} is being prepared.`;
+          type = 'order_preparing';
+        }
+        break;
     }
 
     if (title && msg) {
@@ -333,12 +356,14 @@ exports.notifyPaymentFailure = async (order, reason) => {
     }
 
     const adminTitle = '⚠️ Payment Failed';
-    const adminMsg = `Order #${trackingNumber}\nCustomer: ${populatedOrder.address.fullName}\nAmount: ₹${populatedOrder.total}`;
+    const adminMsg = `Order #${trackingNumber} payment failed.\nReason: ${reason || 'Unknown'}\nCustomer: ${populatedOrder.address.fullName}\nPhone: ${populatedOrder.userId?.phone || populatedOrder.address.phone}\nEmail: ${populatedOrder.userId?.email || 'N/A'}\nAmount: ₹${populatedOrder.total}`;
     const adminMetadata = {
       type: 'admin_payment_failed',
       orderId: populatedOrder._id.toString(),
       customerId: populatedOrder.userId?._id?.toString() || '',
-      customerPhone: populatedOrder.address.phone,
+      customerPhone: populatedOrder.userId?.phone || populatedOrder.address.phone,
+      customerEmail: populatedOrder.userId?.email || '',
+      reason: reason || 'Unknown',
       amount: String(populatedOrder.total),
       url: '/admin/orders'
     };
@@ -494,28 +519,88 @@ exports.notifyNewProduct = async (product) => {
   }
 };
 
-exports.notifyProductUpdated = async (product) => {
+exports.notifyBackInStock = async (product) => {
   try {
-    logger.info(`Product Update Notification Triggered: ${product.name}`);
+    const title = '🔥 Back In Stock';
+    const msg = `${product.name} is available again.`;
+    const metadata = {
+      type: 'back_in_stock',
+      productId: product._id.toString(),
+      url: `/product/${product.slug || product._id}`
+    };
+    await saveBroadcastWebNotification(title, msg, 'back_in_stock', metadata);
+  } catch (err) {
+    logger.error('notifyBackInStock error:', err.message);
+  }
+};
+
+exports.notifyOfferPrice = async (product) => {
+  try {
+    const title = '💰 Special Offer';
+    const msg = `Special offer available on ${product.name}.`;
+    const metadata = {
+      type: 'new_offer',
+      productId: product._id.toString(),
+      url: `/product/${product.slug || product._id}`
+    };
+    await saveBroadcastWebNotification(title, msg, 'new_offer', metadata);
+  } catch (err) {
+    logger.error('notifyOfferPrice error:', err.message);
+  }
+};
+
+exports.sendAdminBroadcast = async (title, message, metadata = {}) => {
+  try {
+    await saveBroadcastWebNotification(title, message, metadata.type || 'broadcast', metadata);
+  } catch (err) {
+    logger.error('sendAdminBroadcast error:', err.message);
+  }
+};
+
+exports.notifyProductUpdated = async (product, previousData = {}) => {
+  try {
+    logger.info(`Product Update Check: ${product.name}`);
     
-    // Broadcast via socket to all online users
+    // Broadcast via socket to all online users (always, for real-time UI)
     socketService.emitToAll('product_updated', {
       productId: product._id,
       name: product.name,
       message: `${product.name} details have been updated!`
     });
 
-    const title = '✨ Product Updated';
-    const msg = `${product.name} has been updated.`;
-    const metadata = {
-      type: 'product_updated',
-      productId: product._id.toString(),
-      url: `/product/${product.slug || product._id}`
-    };
+    // Determine what changed:
+    const isBackInStock = previousData.stock === false && (product.stock === true || (typeof product.stock === 'number' && product.stock > 0));
+    const isOutOfStock = (previousData.stock === true || (typeof previousData.stock === 'number' && previousData.stock > 0)) && 
+                         (product.stock === false || product.stock === 0);
+    const isNewOffer = product.offerPrice && product.offerPrice < product.price &&
+                       (!previousData.offerPrice || previousData.offerPrice >= previousData.price);
 
-    await saveBroadcastWebNotification(title, msg, 'product_updated', metadata);
+    if (isBackInStock) {
+      await exports.notifyBackInStock(product);
+    } else if (isOutOfStock) {
+      const title = '🚨 Out of Stock';
+      const msg = `${product.name} is now temporarily out of stock.`;
+      const metadata = {
+        type: 'out_of_stock',
+        productId: product._id.toString(),
+        url: `/product/${product.slug || product._id}`
+      };
+      await saveBroadcastWebNotification(title, msg, 'out_of_stock', metadata);
+    } else if (isNewOffer) {
+      await exports.notifyOfferPrice(product);
+    } else {
+      // General update (broadcast to all users)
+      const title = '🔄 Product Updated';
+      const msg = `${product.name} has been updated with new details!`;
+      const metadata = {
+        type: 'product_updated',
+        productId: product._id.toString(),
+        url: `/product/${product.slug || product._id}`
+      };
+      await saveBroadcastWebNotification(title, msg, 'product_updated', metadata);
+    }
 
-    // Also check stock update alerts
+    // Admin stock alerts (internal)
     if (product.stock === false || product.stock === 0) {
       await exports.notifyOutOfStockAlert(product.name);
     } else if (typeof product.stock === 'number' && product.stock <= 5) {
@@ -572,6 +657,23 @@ exports.notifyAdminGeneric = async (title, body, payload = {}) => {
     await saveAdminWebNotification(title, body, payload.type || 'admin_generic', payload);
   } catch (err) {
     logger.error('Admin Generic Notification Error:', err.message);
+  }
+};
+
+exports.notifyNewReview = async (review, user, product) => {
+  try {
+    const title = '⭐ New Review Submitted';
+    const message = `Customer: ${user.name}\nPhone: ${user.phone || 'N/A'}\nEmail: ${user.email}\nProduct: ${product?.name || 'Product'}\nRating: ${review.rating} Stars\nComment: "${review.comment || 'No comment'}"`;
+    const metadata = {
+      type: 'new_review',
+      reviewId: review._id.toString(),
+      productId: review.productId.toString(),
+      userId: user._id.toString(),
+      url: '/admin/reviews'
+    };
+    await saveAdminWebNotification(title, message, 'new_review', metadata);
+  } catch (err) {
+    logger.error('New Review Notification Error:', err.message);
   }
 };
 

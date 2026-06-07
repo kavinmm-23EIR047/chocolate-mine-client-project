@@ -3,12 +3,18 @@ const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
-// Protect routes - Verify JWT
+// Protect routes - Verify JWT (supports both Bearer token and HttpOnly cookie)
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 
+  // 1. Check Authorization header first
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
+  }
+
+  // 2. Fallback to HttpOnly cookie
+  if (!token && req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {

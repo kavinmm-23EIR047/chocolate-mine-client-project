@@ -188,7 +188,7 @@ const ReviewsHome = () => {
                           {review.userName}
                         </p>
                         <p className="text-[10px] font-semibold tracking-wider uppercase text-[var(--muted)] mt-0.5">
-                          Verified User
+                          Verified User {review.createdAt && `· ${new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`}
                         </p>
                       </div>
                     </div>

@@ -27,4 +27,14 @@ router.get('/orders/:id', adminController.getOrderDetails);
 router.get('/orders/:id/invoice', adminController.downloadInvoice);
 router.post('/orders/:id/resend-invoice', adminController.resendInvoice);
 
+// --- Broadcast Notification ---
+// @route   POST /api/admin/broadcast
+router.post('/broadcast', adminController.broadcastNotification);
+
+// --- Review Management ---
+const reviewController = require('../controllers/reviewController');
+router.get('/reviews', reviewController.getAllReviews);
+router.patch('/reviews/:id', reviewController.updateReview);
+router.delete('/reviews/:id', reviewController.deleteReview);
+
 module.exports = router;

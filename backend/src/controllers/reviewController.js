@@ -98,11 +98,8 @@ exports.createReview = asyncHandler(async (req, res, next) => {
 
   try {
     const notificationManager = require('../services/notificationManager');
-    notificationManager.notifyAdminGeneric(
-      'New Review Submitted ⭐',
-      `${req.user.name || 'A user'} rated a product ${rating} stars.`,
-      { type: 'new_review', url: '/admin/reviews' }
-    );
+    const product = await Product.findById(productId);
+    notificationManager.notifyNewReview(review, req.user, product).catch(console.error);
   } catch (err) {
     console.error('Notification Error:', err);
   }
@@ -235,5 +232,50 @@ exports.deleteReview = asyncHandler(async (req, res, next) => {
   res.status(204).json({
     status: 'success',
     data: null,
+  });
+});
+
+/* =========================================
+   ADMIN GET ALL REVIEWS
+========================================= */
+exports.getAllReviews = asyncHandler(async (req, res) => {
+  const reviews = await Review.find()
+    .populate('productId', 'name image price')
+    .populate('userId', 'name email phone')
+    .sort('-createdAt');
+
+  res.status(200).json({
+    status: 'success',
+    results: reviews.length,
+    data: { reviews },
+  });
+});
+
+/* =========================================
+   ADMIN UPDATE/TOGGLE REVIEW
+========================================= */
+exports.updateReview = asyncHandler(async (req, res, next) => {
+  const { rating, comment, isApproved } = req.body;
+  const updateData = {};
+  if (rating !== undefined) updateData.rating = rating;
+  if (comment !== undefined) updateData.comment = comment;
+  if (isApproved !== undefined) updateData.isApproved = isApproved;
+
+  const review = await Review.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    { new: true, runValidators: true }
+  );
+
+  if (!review) {
+    return next(new AppError('Review not found', 404));
+  }
+
+  // Recalculate ratings
+  await updateProductRatings(review.productId);
+
+  res.status(200).json({
+    status: 'success',
+    data: { review },
   });
 });

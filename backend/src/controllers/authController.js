@@ -19,9 +19,16 @@ const generateToken = (userId) => {
 const sendTokenResponse = (user, statusCode, res) => {
   const token = generateToken(user._id);
 
+  // Set HttpOnly cookie
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
+  });
+
   res.status(statusCode).json({
     status: 'success',
-    token,
     user: {
       id: user._id,
       name: user.name,
@@ -141,21 +148,25 @@ exports.getMe = asyncHandler(async (req, res) => {
 
 // @desc    Google OAuth Success Redirect
 exports.googleSuccess = asyncHandler(async (req, res) => {
+  const frontendUrl =
+    process.env.FRONTEND_URL ||
+    'https://chocolate-mine-client-project.vercel.app';
+
   if (req.user) {
     const token = generateToken(req.user._id);
 
-    const frontendUrl =
-      process.env.FRONTEND_URL ||
-      'https://chocolate-mine-client-project.vercel.app';
+    // Set HttpOnly cookie for auto-login
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 30
+    });
 
     res.redirect(
       `${frontendUrl}/oauth-callback?token=${token}`
     );
   } else {
-    const frontendUrl =
-      process.env.FRONTEND_URL ||
-      'https://chocolate-mine-client-project.vercel.app';
-
     res.redirect(
       `${frontendUrl}/login?error=GoogleAuthFailed`
     );

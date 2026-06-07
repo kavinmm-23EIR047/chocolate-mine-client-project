@@ -33,10 +33,10 @@ try {
 const removeInvalidTokens = async (failedTokens) => {
   if (!failedTokens || failedTokens.length === 0) return;
   try {
-    // Clean from regular users
+    // Clean from regular users (structured token objects)
     const userResult = await User.updateMany(
-      { fcmTokens: { $in: failedTokens } },
-      { $pull: { fcmTokens: { $in: failedTokens } } }
+      { 'fcmTokens.token': { $in: failedTokens } },
+      { $pull: { fcmTokens: { token: { $in: failedTokens } } } }
     );
     
     // Clean from admin tokens collection
@@ -124,7 +124,13 @@ const sendToUser = async (userId, title, body, data = {}) => {
       logger.info(`Skipped sendToUser for ${userId}: No FCM tokens`);
       return;
     }
-    return await sendPushNotification(user.fcmTokens, title, body, data);
+    // Extract token strings from structured objects
+    const tokens = user.fcmTokens.map(t => typeof t === 'object' ? t.token : t).filter(Boolean);
+    if (tokens.length === 0) {
+      logger.info(`Skipped sendToUser for ${userId}: No valid FCM tokens`);
+      return;
+    }
+    return await sendPushNotification(tokens, title, body, data);
   } catch (error) {
     logger.error(`Error in sendToUser for ${userId}:`, error.message);
   }
@@ -155,7 +161,9 @@ const sendToAdmin = async (title, body, data = {}) => {
 const sendToMultipleUsers = async (userIds, title, body, data = {}) => {
   try {
     const users = await User.find({ _id: { $in: userIds } }, 'fcmTokens');
-    const tokens = users.flatMap(user => user.fcmTokens || []);
+    const tokens = users.flatMap(user => 
+      (user.fcmTokens || []).map(t => typeof t === 'object' ? t.token : t).filter(Boolean)
+    );
     if (tokens.length === 0) {
       logger.info('Skipped sendToMultipleUsers: No target users found with FCM tokens');
       return;
@@ -173,7 +181,9 @@ const sendBroadcast = async (title, body, data = {}) => {
   try {
     // Find all active users with role 'user'
     const users = await User.find({ role: 'user', active: true }, 'fcmTokens');
-    const tokens = users.flatMap(user => user.fcmTokens || []);
+    const tokens = users.flatMap(user => 
+      (user.fcmTokens || []).map(t => typeof t === 'object' ? t.token : t).filter(Boolean)
+    );
     if (tokens.length === 0) {
       logger.info('Skipped sendBroadcast: No active users with FCM tokens');
       return;

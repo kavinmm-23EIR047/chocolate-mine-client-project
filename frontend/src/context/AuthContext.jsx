@@ -8,55 +8,66 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialize auth state
+  // Detect device name for FCM token registration
+  const getDeviceName = () => {
+    const ua = navigator.userAgent;
+    if (/android/i.test(ua)) return 'Android Mobile';
+    if (/iPad|iPhone|iPod/.test(ua)) return 'iOS Device';
+    if (/Windows/.test(ua)) return 'Windows Desktop';
+    if (/Mac/.test(ua)) return 'Mac Desktop';
+    if (/Linux/.test(ua)) return 'Linux Desktop';
+    return 'Web Browser';
+  };
+
+  // Register FCM token with backend
+  const syncFcmToken = async () => {
+    try {
+      const token = await requestFirebaseNotificationPermission();
+      if (token) {
+        await api.put('/users/fcm-token', {
+          fcmToken: token,
+          deviceName: getDeviceName()
+        });
+        console.log('🔔 FCM token synced successfully');
+      }
+    } catch (err) {
+      console.error('FCM sync failed:', err.message);
+    }
+  };
+
+  // Initialize auth state - auto-login via HttpOnly cookie
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = sessionStorage.getItem('token');
+      // First, check sessionStorage for fast restore
       const storedUser = sessionStorage.getItem('user');
-
-      console.log('🔐 AuthContext: Initializing...', { hasToken: !!token, hasStoredUser: !!storedUser });
-
-      if (!token) {
-        console.log('🔐 AuthContext: No token found, user is guest');
-        setLoading(false);
-        return;
-      }
-
-      // If we have a user in storage, use it immediately for better UX
       if (storedUser) {
         try {
           const parsed = JSON.parse(storedUser);
-          console.log('🔐 AuthContext: Restoring user from storage', parsed.email);
           setUser(parsed);
         } catch (err) {
-          console.error('🔐 AuthContext: Failed to parse stored user', err);
+          console.error('🔐 Failed to parse stored user', err);
         }
       }
 
-      // Always verify token and get fresh user data from server
+      // Verify session with server (cookie sent automatically)
       try {
-        console.log('🔐 AuthContext: Verifying token with server...');
+        console.log('🔐 Auto-login: verifying session...');
         const response = await api.get('/auth/me');
         const userData = response.data.user;
-        console.log('🔐 AuthContext: Token verified, user:', userData.email);
+        console.log('🔐 Auto-login: session valid for', userData.email);
         setUser(userData);
         sessionStorage.setItem('user', JSON.stringify(userData));
 
-        // Sync FCM token
-        requestFirebaseNotificationPermission().then(token => {
-          if (token) {
-            api.put('/users/fcm-token', { fcmToken: token }).catch(err => console.error("FCM sync failed", err));
-          }
-        });
+        // Sync FCM token in background
+        syncFcmToken();
       } catch (err) {
         const status = err.response?.status || err.status;
-        console.error('🔐 AuthContext: Verification failed', { status, message: err.message });
+        console.log('🔐 Auto-login: no valid session', status);
         
-        // Only clear if it's a 401/403 error
-        if (status === 401 || status === 403) {
-          console.log('🔐 AuthContext: Clearing session due to auth error');
-          logout();
-        }
+        // Clear stale session data
+        setUser(null);
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('token');
       } finally {
         setLoading(false);
       }
@@ -66,35 +77,39 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async ({ email, password }) => {
-    console.log('🔐 AuthContext: Attempting manual login for:', email);
+    console.log('🔐 Logging in:', email);
     try {
       const response = await api.post('/auth/login', { email, password });
       const { user: userData, token } = response.data;
       
-      console.log('🔐 AuthContext: Manual login successful!', userData.email);
       setUser(userData);
       sessionStorage.setItem('user', JSON.stringify(userData));
-      sessionStorage.setItem('token', token);
+      // Keep token in sessionStorage for backward compat (Bearer header)
+      if (token) {
+        sessionStorage.setItem('token', token);
+      }
       
-      // Sync FCM token
-      requestFirebaseNotificationPermission().then(fcmToken => {
-        if (fcmToken) {
-          api.put('/users/fcm-token', { fcmToken }).catch(err => console.error("FCM sync failed", err));
-        }
-      });
+      // Sync FCM token after login
+      syncFcmToken();
 
       return response.data;
     } catch (err) {
-      console.error('🔐 AuthContext: Manual login failed', err.response?.data?.message || err.message);
+      console.error('🔐 Login failed:', err.message);
       throw err;
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Clear server cookie
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error('Logout API error:', err.message);
+    }
+    
     setUser(null);
     sessionStorage.removeItem('user');
     sessionStorage.removeItem('token');
-    // Clear any other auth related items
     sessionStorage.removeItem('auth_user');
     
     if (window.location.pathname !== '/login') {

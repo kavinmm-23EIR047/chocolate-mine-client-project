@@ -420,6 +420,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) return next(new AppError('Product not found', 404));
 
+  // Capture old values for meaningful notification comparison
+  const oldStock = product.stock;
+  const oldOfferPrice = product.offerPrice;
+  const oldPrice = product.price;
+
   const oldCouponCode = product.coupon?.code;
   const oldCouponEnabled = product.coupon?.enabled;
 
@@ -566,9 +571,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
   await product.save();
 
-  // Trigger real-time notifications for the update
+  // Trigger real-time notifications for the update (only meaningful changes)
   const notificationManager = require('../services/notificationManager');
-  notificationManager.notifyProductUpdated(product).catch(console.error);
+  const previousData = { stock: oldStock, offerPrice: oldOfferPrice, price: oldPrice };
+  notificationManager.notifyProductUpdated(product, previousData).catch(console.error);
 
   if (product.coupon && product.coupon.enabled && (!oldCouponEnabled || oldCouponCode !== product.coupon.code)) {
     notificationManager.notifyCouponAdded(product).catch(console.error);

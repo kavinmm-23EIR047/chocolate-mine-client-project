@@ -1,8 +1,7 @@
+/* eslint-disable no-undef */
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
-// This requires the user to replace the placeholders or have a build step
-// that injects the env vars. For simplicity, we fallback gracefully if not configured.
 const firebaseConfig = {
   apiKey: "AIzaSyDEx-sUHYz6ir6RtwR75s09BGnLccWhnGM",
   authDomain: "chocolate-mine.firebaseapp.com",
@@ -13,43 +12,95 @@ const firebaseConfig = {
 };
 
 try {
-  if (firebaseConfig.apiKey !== "REPLACE_WITH_VITE_FIREBASE_API_KEY") {
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
-    messaging.onBackgroundMessage((payload) => {
-      console.log('[firebase-messaging-sw.js] Received background message ', payload);
-      const notificationTitle = payload.notification.title;
-      const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/favicon.ico',
-        data: payload.data // Pass data payload to notification for click handling
-      };
+  // Handle background messages (when tab is closed or app not focused)
+  messaging.onBackgroundMessage((payload) => {
+    console.log('[SW] Background message received:', payload);
 
-      self.registration.showNotification(notificationTitle, notificationOptions);
-    });
+    const title = payload.notification?.title || payload.data?.title || 'The Chocolate Mine';
+    const body = payload.notification?.body || payload.data?.message || 'You have a new notification';
+    const data = payload.data || {};
 
-    self.addEventListener('notificationclick', function(event) {
-      event.notification.close();
-      const url = event.notification.data?.url || '/';
-      
-      event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(windowClients => {
-          // Check if there is already a window/tab open with the target URL
-          for (let i = 0; i < windowClients.length; i++) {
-            const client = windowClients[i];
-            if (client.url.includes(url) && 'focus' in client) {
-              return client.focus();
-            }
+    // Determine icon based on notification type
+    let icon = '/logo.png';
+    let badge = '/favicon.svg';
+
+    const notificationOptions = {
+      body,
+      icon,
+      badge,
+      tag: data.type || 'general', // Prevents duplicate notifications of same type
+      renotify: true,
+      requireInteraction: false,
+      data: {
+        url: data.url || '/',
+        type: data.type || 'general',
+        orderId: data.orderId || null,
+        productId: data.productId || null
+      },
+      actions: []
+    };
+
+    // Add contextual actions based on type
+    if (data.type && data.type.includes('order')) {
+      notificationOptions.actions = [
+        { action: 'view', title: '👀 View Order' }
+      ];
+    } else if (data.type && (data.type.includes('product') || data.type.includes('stock') || data.type.includes('offer'))) {
+      notificationOptions.actions = [
+        { action: 'view', title: '🛍️ View Product' }
+      ];
+    }
+
+    self.registration.showNotification(title, notificationOptions);
+  });
+
+  // Handle notification click
+  self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const data = event.notification.data || {};
+    let targetUrl = data.url || '/';
+
+    // Handle action buttons
+    if (event.action === 'view') {
+      targetUrl = data.url || '/';
+    }
+
+    // Ensure full URL
+    if (!targetUrl.startsWith('http')) {
+      targetUrl = self.location.origin + targetUrl;
+    }
+
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+        // Try to focus an existing window
+        for (const client of windowClients) {
+          if (client.url === targetUrl && 'focus' in client) {
+            return client.focus();
           }
-          // If not, open a new window
-          if (clients.openWindow) {
-            return clients.openWindow(url);
+        }
+        // Try to navigate an existing window
+        for (const client of windowClients) {
+          if ('navigate' in client) {
+            return client.navigate(targetUrl).then(() => client.focus());
           }
-        })
-      );
-    });
-  }
+        }
+        // Open a new window
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
+      })
+    );
+  });
+
+  // Handle notification close
+  self.addEventListener('notificationclose', (event) => {
+    console.log('[SW] Notification closed:', event.notification.tag);
+  });
+
 } catch (e) {
-  console.warn("Service worker Firebase failed to initialize", e);
+  console.warn('[SW] Firebase initialization failed:', e);
 }

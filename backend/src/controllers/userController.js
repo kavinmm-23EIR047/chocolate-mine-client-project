@@ -199,9 +199,21 @@ exports.updateFcmToken = asyncHandler(async (req, res, next) => {
     });
   }
 
+  // Disassociate this fcmToken from all other users and admins
+  await User.updateMany(
+    { _id: { $ne: user._id }, 'fcmTokens.token': fcmToken },
+    { $pull: { fcmTokens: { token: fcmToken } } }
+  );
+
+  const AdminFcmToken = require('../models/AdminFcmToken');
+  if (user.role === 'admin') {
+    await AdminFcmToken.deleteMany({ token: fcmToken, userId: { $ne: user._id } });
+  } else {
+    await AdminFcmToken.deleteMany({ token: fcmToken });
+  }
+
   if (user.role === 'admin') {
     // Store admin FCM tokens separately
-    const AdminFcmToken = require('../models/AdminFcmToken');
     await AdminFcmToken.findOneAndUpdate(
       { token: fcmToken },
       { userId: user._id, deviceName: deviceName || 'Admin Device', createdAt: new Date() },

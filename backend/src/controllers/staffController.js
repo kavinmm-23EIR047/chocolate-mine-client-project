@@ -114,10 +114,8 @@ const formatOrderItems = (items) => {
 
 // Status transition map: current status → allowed next statuses
 const STATUS_TRANSITIONS = {
-  confirmed: ['processing'],
-  processing: ['packed'],
-  packed: ['out_for_delivery'],
-  out_for_delivery: ['delivered'],
+  confirmed: ['out_for_delivery', 'cancelled'],
+  out_for_delivery: ['delivered', 'cancelled'],
   delivered: [],       // terminal state
   cancelled: []        // terminal state
 };
@@ -125,10 +123,8 @@ const STATUS_TRANSITIONS = {
 // @desc    Staff Dashboard Stats
 // @route   GET /api/v1/staff/dashboard
 exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
-  const [confirmedCount, processingCount, packedCount, outForDeliveryOrders, deliveredOrders] = await Promise.all([
+  const [confirmedCount, outForDeliveryOrders, deliveredOrders] = await Promise.all([
     Order.countDocuments({ orderStatus: 'confirmed' }),
-    Order.countDocuments({ orderStatus: 'processing' }),
-    Order.countDocuments({ orderStatus: 'packed' }),
     Order.countDocuments({ orderStatus: 'out_for_delivery' }),
     Order.countDocuments({ orderStatus: 'delivered' })
   ]);
@@ -136,17 +132,17 @@ exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      confirmedOrders: confirmedCount + processingCount + packedCount,
+      confirmedOrders: confirmedCount,
       outForDeliveryOrders,
       deliveredOrders
     }
   });
 });
 
-// @desc    Get Confirmed/Processing/Packed Orders (Ready to be managed in kitchen)
+// @desc    Get Confirmed Orders (Ready to be managed in kitchen)
 // @route   GET /api/v1/staff/orders/new
 exports.getNewOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ orderStatus: { $in: ['confirmed', 'processing', 'packed'] } })
+  const orders = await Order.find({ orderStatus: 'confirmed' })
     .populate('userId', 'name phone email')
     .sort('-createdAt');
 
@@ -340,7 +336,7 @@ exports.markKOTPrinted = asyncHandler(async (req, res, next) => {
 
 // @desc    Update Order Status (smooth sequential transition, NO OTP)
 // @route   PATCH /api/v1/staff/orders/:id/kitchen-status
-// Flow: confirmed → processing → packed → out_for_delivery → delivered
+// Flow: confirmed → out_for_delivery → delivered
 exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
   const { status } = req.body;
   const order = await Order.findById(req.params.id).populate('userId', 'name phone email');
@@ -350,7 +346,7 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
   }
 
   // Validate the status is a known status
-  const allStatuses = ['confirmed', 'processing', 'packed', 'out_for_delivery', 'delivered', 'cancelled'];
+  const allStatuses = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
   if (!allStatuses.includes(status)) {
     return next(new AppError('Invalid status', 400));
   }

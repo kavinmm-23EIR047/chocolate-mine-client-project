@@ -23,6 +23,7 @@ import Button from "../../components/ui/Button";
 import toast from "react-hot-toast";
 import { CardSkeleton } from "../../components/ui/Skeleton";
 import io from "socket.io-client";
+import { useAuth } from "../../context/AuthContext";
 
 const STATUS_ORDER = ["confirmed", "out_for_delivery", "delivered"];
 
@@ -30,7 +31,8 @@ const STATUS_ORDER = ["confirmed", "out_for_delivery", "delivered"];
 const STATUS_MAP = {
   confirmed: { label: "Confirmed", color: "text-blue-600 bg-blue-500/10 border border-blue-200/20" },
   out_for_delivery: { label: "Out for Delivery", color: "text-orange-600 bg-orange-500/10 border border-orange-200/20" },
-  delivered: { label: "Delivered", color: "text-green-600 bg-green-500/10 border border-green-200/20" }
+  delivered: { label: "Delivered", color: "text-green-600 bg-green-500/10 border border-green-200/20" },
+  cancelled: { label: "Payment Cancelled", color: "text-red-600 bg-red-500/10 border border-red-200/20" }
 };
 
 
@@ -38,6 +40,7 @@ const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const socketRef = useRef(null);
+  const { user } = useAuth();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,12 +50,11 @@ const OrderDetails = () => {
 
   // Initialize socket connection for real-time updates
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (!token || !id) return;
+    if (!user || !id) return;
 
     socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-      auth: { token },
-      transports: ['websocket']
+      transports: ['websocket'],
+      withCredentials: true
     });
 
     socketRef.current.on('connect', () => {
@@ -311,9 +313,14 @@ const OrderDetails = () => {
                         <p className="text-xs mt-2 text-muted">
                           {step.description}
                         </p>
+                        {step.id === "confirmed" && order.orderStatus === "cancelled" && (
+                          <div className="mt-3 p-3 bg-red-500/10 rounded-xl text-xs text-red-600 border border-red-200/20">
+                            ❌ Order Cancelled / Payment Failed.
+                          </div>
+                        )}
                         {step.id === "out_for_delivery" && order.orderStatus === "out_for_delivery" && (
                           <div className="mt-3 p-3 bg-orange-500/10 rounded-xl text-xs text-orange-600 border border-orange-200/20">
-                            📦 Your order is out for delivery! Please keep your phone handy for OTP verification.
+                            📦 Your order is out for delivery! Please keep your phone handy.
                           </div>
 
                         )}

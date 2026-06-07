@@ -6,24 +6,43 @@ const emailService = require('../services/emailService');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
-const generateToken = (userId) => {
+const generateAccessToken = (userId) => {
   return jwt.sign(
     { userId: userId.toString() },
     process.env.JWT_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN || '30d'
+      expiresIn: '15m'
+    }
+  );
+};
+
+const generateRefreshToken = (userId) => {
+  return jwt.sign(
+    { userId: userId.toString() },
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    {
+      expiresIn: '30d'
     }
   );
 };
 
 const sendTokenResponse = (user, statusCode, res) => {
-  const token = generateToken(user._id);
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
 
-  // Set HttpOnly cookie
-  res.cookie('jwt', token, {
+  // Set HttpOnly access token cookie
+  res.cookie('jwt', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 15 // 15 minutes
+  });
+
+  // Set HttpOnly refresh token cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
   });
 
@@ -33,7 +52,10 @@ const sendTokenResponse = (user, statusCode, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      phone: user.phone,
+      fcmTokens: user.fcmTokens || [],
+      notificationEnabled: user.notificationEnabled
     }
   });
 };
@@ -141,7 +163,9 @@ exports.getMe = asyncHandler(async (req, res) => {
       name: req.user.name,
       email: req.user.email,
       role: req.user.role,
-      phone: req.user.phone
+      phone: req.user.phone,
+      fcmTokens: req.user.fcmTokens || [],
+      notificationEnabled: req.user.notificationEnabled
     }
   });
 });
@@ -153,18 +177,27 @@ exports.googleSuccess = asyncHandler(async (req, res) => {
     'https://chocolate-mine-client-project.vercel.app';
 
   if (req.user) {
-    const token = generateToken(req.user._id);
+    const accessToken = generateAccessToken(req.user._id);
+    const refreshToken = generateRefreshToken(req.user._id);
 
-    // Set HttpOnly cookie for auto-login
-    res.cookie('jwt', token, {
+    // Set HttpOnly access token cookie for auto-login
+    res.cookie('jwt', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 30
+      maxAge: 1000 * 60 * 15 // 15 mins
+    });
+
+    // Set HttpOnly refresh token cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
     });
 
     res.redirect(
-      `${frontendUrl}/oauth-callback?token=${token}`
+      `${frontendUrl}/oauth-callback?token=${accessToken}`
     );
   } else {
     res.redirect(

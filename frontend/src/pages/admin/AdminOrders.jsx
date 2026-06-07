@@ -177,12 +177,12 @@ const AdminOrders = () => {
 
   // Initialize socket connection for real-time updates
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) return;
 
     socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-      auth: { token },
-      transports: ['websocket']
+      transports: ['websocket'],
+      withCredentials: true
     });
 
     socketRef.current.on('connect', () => {
@@ -238,7 +238,7 @@ const AdminOrders = () => {
   };
 
   // Admin can only view orders - NO status update functionality
-  const statusOptions = ['confirmed', 'out_for_delivery', 'delivered'];
+  const statusOptions = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
 
   const handleViewOrder = (orderId) => {
     navigate(`/admin/orders/${orderId}`);

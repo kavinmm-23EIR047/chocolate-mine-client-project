@@ -16,6 +16,11 @@ export const ORDER_STATUSES = {
     label: 'Delivered',
     color: 'bg-green-100 text-green-700',
     dot: 'bg-green-500'
+  },
+  cancelled: {
+    label: 'Payment Cancelled',
+    color: 'bg-red-100 text-red-700',
+    dot: 'bg-red-500'
   }
 };
 

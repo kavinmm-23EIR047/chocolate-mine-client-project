@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Package, Search, Filter, ShoppingBag, ArrowRight, 
   ChevronRight, ExternalLink, RefreshCcw, Star,
-  Clock, MapPin, Calendar, CreditCard, ChevronDown, Truck, CheckCircle
+  Clock, MapPin, Calendar, CreditCard, ChevronDown, Truck, CheckCircle, X
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -22,7 +22,8 @@ import reviewService from '../services/reviewService';
 const STATUS_MAP = {
   'confirmed': { label: 'Confirmed', value: 'confirmed', icon: Package },
   'out_for_delivery': { label: 'Out for Delivery', value: 'out-for-delivery', icon: Truck },
-  'delivered': { label: 'Delivered', value: 'delivered', icon: CheckCircle }
+  'delivered': { label: 'Delivered', value: 'delivered', icon: CheckCircle },
+  'cancelled': { label: 'Payment Cancelled', value: 'cancelled', icon: X }
 };
 
 const Orders = () => {
@@ -39,13 +40,10 @@ const Orders = () => {
   // Initialize socket connection for real-time updates
   useEffect(() => {
     if (!user) return;
-    
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
 
     socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-      auth: { token },
-      transports: ['websocket']
+      transports: ['websocket'],
+      withCredentials: true
     });
 
     socketRef.current.on('connect', () => {
@@ -124,9 +122,9 @@ const Orders = () => {
     { label: 'Confirmed', value: 'confirmed' },
     { label: 'Out for Delivery', value: 'out_for_delivery' },
     { label: 'Delivered', value: 'delivered' },
+    { label: 'Cancelled', value: 'cancelled' }
   ];
 
-  return (
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header Section */}

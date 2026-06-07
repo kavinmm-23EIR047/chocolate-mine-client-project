@@ -190,7 +190,7 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
     return next(new AppError('Order not found', 404));
   }
 
-  const allowedStatuses = ['confirmed', 'processing', 'packed', 'out_for_delivery', 'delivered', 'cancelled'];
+  const allowedStatuses = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
 
   if (!allowedStatuses.includes(status)) {
     return next(new AppError('Invalid status update', 400));
@@ -198,10 +198,8 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
 
   // Status transition map
   const transitions = {
-    confirmed: ['processing'],
-    processing: ['packed'],
-    packed: ['out_for_delivery'],
-    out_for_delivery: ['delivered'],
+    confirmed: ['out_for_delivery', 'cancelled'],
+    out_for_delivery: ['delivered', 'cancelled'],
     delivered: [],
     cancelled: []
   };

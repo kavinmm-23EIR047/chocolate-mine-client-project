@@ -30,10 +30,6 @@ const OrderStatusDropdown = ({ order, onUpdate }) => {
 
   const actions = [];
   if (order.orderStatus === 'confirmed') {
-    actions.push({ id: 'processing', label: 'Start Preparing', icon: ChefHat, color: 'text-warning', hover: 'hover:bg-warning/10' });
-  } else if (order.orderStatus === 'processing') {
-    actions.push({ id: 'packed', label: 'Mark Packed', icon: Package, color: 'text-secondary', hover: 'hover:bg-secondary/10' });
-  } else if (order.orderStatus === 'packed') {
     actions.push({ id: 'out_for_delivery', label: 'Out For Delivery', icon: Truck, color: 'text-primary', hover: 'hover:bg-primary/10' });
   } else if (order.orderStatus === 'out_for_delivery') {
     actions.push({ id: 'delivered', label: 'Deliver Order', icon: CheckCircle, color: 'text-success', hover: 'hover:bg-success/10' });
@@ -218,14 +214,24 @@ const StaffDashboard = () => {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) return;
+    let userId = '';
+    try {
+      const userObj = JSON.parse(userStr);
+      userId = userObj.id || userObj._id;
+    } catch (e) {
+      console.error('Failed to parse user session in StaffDashboard', e);
+    }
+
     socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
-      auth: { token },
-      transports: ['websocket']
+      transports: ['websocket'],
+      withCredentials: true
     });
     socketRef.current.on('connect', () => {
-      socketRef.current.emit('join_staff_room', sessionStorage.getItem('userId'));
+      if (userId) {
+        socketRef.current.emit('join_staff_room', userId);
+      }
       socketRef.current.emit('join_admin_room');
     });
     socketRef.current.on('assigned_order_updated', () => fetchData());

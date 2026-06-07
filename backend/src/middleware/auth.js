@@ -3,6 +3,44 @@ const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
+const handleRefreshToken = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return next(new AppError('You are not logged in. Please login to get access.', 401));
+    }
+    
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    
+    const currentUser = await User.findById(decoded.userId);
+    if (!currentUser || !currentUser.active) {
+      return next(new AppError('Session expired. Please login again.', 401));
+    }
+
+    // Generate new Access Token
+    const accessToken = jwt.sign(
+      { userId: currentUser._id.toString() },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    // Set new Access Token HttpOnly cookie
+    res.cookie('jwt', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 15 // 15 mins
+    });
+
+    // Grant access
+    req.user = currentUser;
+    next();
+  } catch (err) {
+    return next(new AppError('Session expired. Please login again.', 401));
+  }
+};
+
 // Protect routes - Verify JWT (supports both Bearer token and HttpOnly cookie)
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -18,6 +56,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
   }
 
   if (!token) {
+    if (req.cookies && req.cookies.refreshToken) {
+      return handleRefreshToken(req, res, next);
+    }
     return next(new AppError('You are not logged in. Please login to get access.', 401));
   }
 
@@ -40,6 +81,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
     req.user = currentUser;
     next();
   } catch (error) {
+    if (req.cookies && req.cookies.refreshToken) {
+      return handleRefreshToken(req, res, next);
+    }
     return next(new AppError('Invalid token. Please login again.', 401));
   }
 });

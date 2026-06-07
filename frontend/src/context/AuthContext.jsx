@@ -131,14 +131,10 @@ export const AuthProvider = ({ children }) => {
     console.log('🔐 Logging in:', email);
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { user: userData, token } = response.data;
+      const { user: userData } = response.data;
       
       setUser(userData);
       sessionStorage.setItem('user', JSON.stringify(userData));
-      // Keep token in sessionStorage for backward compat (Bearer header)
-      if (token) {
-        sessionStorage.setItem('token', token);
-      }
       
       // Sync FCM token after login
       syncFcmToken();
@@ -151,6 +147,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    try {
+      // Remove current browser FCM token from database first (while still authenticated)
+      await disableNotifications();
+    } catch (err) {
+      console.error('Failed to disable FCM on logout:', err.message);
+    }
+
     try {
       // Clear server cookie
       await api.post('/auth/logout');

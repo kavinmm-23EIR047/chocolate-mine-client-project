@@ -249,12 +249,10 @@ exports.getOrderStatusDistribution = asyncHandler(async (req, res) => {
   ]);
 
   const distribution = {
-    pending: 0,
-    processing: 0,
-    shipped: 0,
+    confirmed: 0,
+    out_for_delivery: 0,
     delivered: 0,
-    cancelled: 0,
-    returned: 0
+    cancelled: 0
   };
 
   statusStats.forEach(stat => {

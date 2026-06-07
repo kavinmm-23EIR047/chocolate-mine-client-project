@@ -7,14 +7,22 @@ import MobileBottomNav from '../layout/MobileBottomNav';
 import EgglessBadge from '../ui/EgglessBadge';
 import PureVegBadge from '../ui/PureVegBadge';
 import NotificationPrompt from '../ui/NotificationPrompt';
+import NotificationBanner from '../ui/NotificationBanner';
+import { useAuth } from '../../context/AuthContext';
 
 const UserLayout = () => {
+  const { user } = useAuth();
   const location = useLocation();
   const isProductPage = location.pathname.startsWith('/product/');
   const isAuthPage = ['/login', '/register', '/forgot-password'].some(path => location.pathname.toLowerCase().startsWith(path));
 
+  const hasPermission = 'Notification' in window && Notification.permission === 'granted';
+  const hasFcmToken = user?.fcmTokens && user.fcmTokens.length > 0;
+  const showBanner = user && (!hasPermission || !hasFcmToken);
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className={`min-h-screen flex flex-col bg-background ${showBanner ? 'has-notification-banner' : ''}`}>
+      <NotificationBanner />
       <Navbar />
 
       {/* ── RESPONSIVE INFO BANNER ── */}

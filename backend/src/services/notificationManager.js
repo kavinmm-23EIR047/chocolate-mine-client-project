@@ -239,11 +239,7 @@ exports.handleStatusChange = async (order, status) => {
     socketService.emitToUser(populatedOrder.userId._id, 'status_changed', { orderId: populatedOrder._id, status });
 
     // EMAIL & TELEGRAM FOR SPECIFIC STATUSES
-    if (status === 'packed') {
-      if (populatedOrder.userId.email) {
-        emailService.sendPacked(populatedOrder.userId.email, populatedOrder).catch(e => logger.error('Packed Email Failed:', e.message));
-      }
-    } else if (status === 'out_for_delivery') {
+    if (status === 'out_for_delivery') {
       if (populatedOrder.userId.email) {
         emailService.sendDispatched(populatedOrder.userId.email, populatedOrder).catch(e => logger.error('Dispatch Email Failed:', e.message));
       }
@@ -265,18 +261,6 @@ exports.handleStatusChange = async (order, status) => {
     let type = 'status_changed';
 
     switch (status) {
-      case 'processing':
-        if (userPhone) whatsappService.sendPreparing(userPhone, trackingNumber);
-        title = '👨‍🍳 Order Processing';
-        msg = `Your order #${trackingNumber} is being prepared.`;
-        type = 'order_processing';
-        break;
-      case 'packed':
-        if (userPhone) whatsappService.sendPacked(userPhone, trackingNumber);
-        title = '📦 Order Packed';
-        msg = `Your order #${trackingNumber} has been packed and is ready for dispatch.`;
-        type = 'order_packed';
-        break;
       case 'out_for_delivery':
         if (userPhone) whatsappService.sendOutForDelivery(userPhone, trackingNumber);
         title = '🚚 Out For Delivery';
@@ -295,13 +279,6 @@ exports.handleStatusChange = async (order, status) => {
         type = 'order_cancelled';
         break;
       default:
-        // For 'preparing' (legacy) or unknown statuses
-        if (status === 'preparing') {
-          if (userPhone) whatsappService.sendPreparing(userPhone, trackingNumber);
-          title = '👨‍🍳 Order Preparing';
-          msg = `Your order #${trackingNumber} is being prepared.`;
-          type = 'order_preparing';
-        }
         break;
     }
 

@@ -30,18 +30,15 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    const token = sessionStorage.getItem('token');
-    if (!token) return;
-
     const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api/v1', '');
     
     // Initialize socket connection
     const socket = io(baseUrl, {
-      auth: { token },
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      withCredentials: true
     });
 
     socketRef.current = socket;

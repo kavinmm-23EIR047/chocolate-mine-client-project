@@ -447,10 +447,7 @@ const Checkout = () => {
     e.stopPropagation();
     if (!window.confirm('Delete this address?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await api.delete(`/users/addresses/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/users/addresses/${id}`);
       setSavedAddresses(prev => prev.filter(a => a._id !== id));
       if (selectedAddressId === id) setSelectedAddressId(null);
       toast.success('Address deleted');
@@ -483,13 +480,10 @@ const Checkout = () => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const { data } = await api.patch(`/users/addresses/${editingAddressId}`, {
         ...addressDetails,
         lat: deliveryInfo.position.lat,
         lng: deliveryInfo.position.lng,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       setSavedAddresses(prev => prev.map(a => a._id === editingAddressId ? data : a));
@@ -583,8 +577,7 @@ const Checkout = () => {
     if (isProcessingPayment.current) { toast.error('Payment already in progress.'); return; }
     if (!validateForm()) return;
 
-    const token = sessionStorage.getItem('token');
-    if (!token) { toast.error('Session expired. Please login again.'); navigate('/login'); return; }
+    if (!user) { toast.error('Session expired. Please login again.'); navigate('/login'); return; }
 
     const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
     if (!razorpayKey) { toast.error('Payment configuration error.'); return; }
@@ -645,8 +638,7 @@ const Checkout = () => {
           couponCode: directItem ? localCoupon : appliedCouponFromRedux,
           notes: notesMerged || undefined,
           cakeMessage: cakeMessage || undefined,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       const { razorpayOrder, orderId } = res.data.data;
@@ -679,11 +671,6 @@ const Checkout = () => {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 orderId,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
               }
             );
             if (!directItem) {

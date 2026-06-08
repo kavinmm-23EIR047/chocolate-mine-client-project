@@ -137,14 +137,26 @@ const slots = [
 ];
 
 /* ─────────────────────────────────────────────
+   HELPER: Safe string formatting for notes
+───────────────────────────────────────────── */
+const safeFormatNotes = (notes) => {
+  if (!notes) return '';
+  if (typeof notes === 'string') return notes;
+  try {
+    return JSON.stringify(notes, null, 2);
+  } catch {
+    return String(notes);
+  }
+};
+
+/* ─────────────────────────────────────────────
    STEP BADGE (with improved UX)
 ───────────────────────────────────────────── */
 const StepBadge = ({ n, label, isActive, isCompleted, onEdit, summary }) => (
   <div
     onClick={isCompleted && !isActive ? onEdit : undefined}
-    className={`flex items-center gap-3 p-4 sm:p-5 border-b border-border/30 transition-all duration-300 ${isActive ? 'bg-primary/5' : 'bg-transparent'
-      } ${isCompleted && !isActive ? 'cursor-pointer hover:bg-muted/5' : ''
-      }`}
+    className={`flex items-center gap-3 p-4 sm:p-5 border-b transition-all duration-300 ${isActive ? 'bg-primary/5 border-primary/20' : 'bg-transparent border-border/30'
+      } ${isCompleted && !isActive ? 'cursor-pointer hover:bg-muted/5' : ''}`}
   >
     <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-black shadow-sm shrink-0 transition-all duration-300 ${isCompleted && !isActive ? 'bg-success text-white' : isActive ? 'bg-primary text-button-text' : 'bg-muted/20 text-muted'
       }`}>
@@ -605,7 +617,7 @@ const Checkout = () => {
       }
 
       const cakeMessage = customCakeRequest?.messageOnCake?.trim() || '';
-      const builderNotes = customCakeRequest ? formatCustomCakeNotes(customCakeRequest) : '';
+      const builderNotes = customCakeRequest ? safeFormatNotes(formatCustomCakeNotes(customCakeRequest)) : '';
       const notesMerged = [builderNotes, orderNotesExtra.trim()].filter(Boolean).join('\n\n');
 
       const res = await api.post(
@@ -649,8 +661,6 @@ const Checkout = () => {
 
       clearInterval(interval);
       setLoading(false);
-
-      const selectedMethod = PAYMENT_METHODS.find((m) => m.id === selectedPayMethod);
 
       const options = {
         key: razorpayKey,
@@ -730,6 +740,16 @@ const Checkout = () => {
         },
       };
 
+      // Add method preference if selected
+      if (selectedPayMethod) {
+        const method = PAYMENT_METHODS.find(m => m.id === selectedPayMethod);
+        if (method) {
+          options.method = {
+            [method.rzpMethod]: true
+          };
+        }
+      }
+
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', async (r) => {
         setLoading(false);
@@ -774,6 +794,13 @@ const Checkout = () => {
 
   const isToday = deliveryDate.toDateString() === new Date().toDateString();
 
+  // Get formatted custom cake notes safely
+  const getFormattedCustomNotes = () => {
+    if (!customCakeRequest) return '';
+    const notes = formatCustomCakeNotes(customCakeRequest);
+    return safeFormatNotes(notes);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <ScooterLoader isVisible={loading} text={loaderText} />
@@ -800,7 +827,7 @@ const Checkout = () => {
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 w-full min-w-0">
 
             {/* STEP 1: DELIVERY ADDRESS */}
-            <div data-step="1" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+            <div data-step="1" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden">
               <StepBadge
                 n="1"
                 label="Delivery Address"
@@ -828,8 +855,8 @@ const Checkout = () => {
                                 key={addr._id}
                                 onClick={() => handleSelectAddress(addr)}
                                 className={`w-full min-w-0 text-left p-3 sm:p-4 border-2 rounded-2xl transition-all relative overflow-hidden group cursor-pointer ${selectedAddressId === addr._id
-                                  ? 'border-primary bg-primary/5 shadow-md'
-                                  : 'border-border/30 hover:border-primary/30 bg-surface/20'
+                                    ? 'border-primary bg-primary/5 shadow-md'
+                                    : 'border-border-muted hover:border-primary/40 bg-surface/20'
                                   }`}
                               >
                                 <div className="flex justify-between items-start gap-2 min-w-0">
@@ -878,7 +905,7 @@ const Checkout = () => {
 
                       <button
                         onClick={() => setShowMap(true)}
-                        className="w-full p-3 sm:p-4 border-2 border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
+                        className="w-full p-3 sm:p-4 border-2 border-dashed border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
                       >
                         <MapPin size={15} /> Add / Update Location on Map
                       </button>
@@ -887,9 +914,9 @@ const Checkout = () => {
                         <motion.div
                           initial={{ opacity: 0, scale: 0.97 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className={`w-full min-w-0 p-3 sm:p-4 rounded-2xl border flex items-start gap-3 ${locationValid
-                            ? 'bg-success-light border-success/20'
-                            : 'bg-error-light border-error/20'
+                          className={`w-full min-w-0 p-3 sm:p-4 rounded-2xl border-2 flex items-start gap-3 ${locationValid
+                              ? 'bg-success-light border-success/40'
+                              : 'bg-error-light border-error/40'
                             }`}
                         >
                           <Navigation size={15} className={`mt-0.5 shrink-0 ${locationValid ? 'text-success-text' : 'text-error-text'}`} />
@@ -927,7 +954,7 @@ const Checkout = () => {
                             <Phone size={12} /> Phone Number *
                           </label>
                           <div className="flex items-stretch gap-1">
-                            <span className="inline-flex items-center px-3 rounded-xl border border-border/50 bg-muted/10 text-heading font-black text-sm">+91</span>
+                            <span className="inline-flex items-center px-3 rounded-xl border border-input-border bg-muted/10 text-heading font-black text-sm">+91</span>
                             <input
                               className="input-field text-sm sm:text-base min-w-0 flex-1"
                               placeholder="9876543210"
@@ -987,7 +1014,7 @@ const Checkout = () => {
             </div>
 
             {/* STEP 2: DELIVERY SLOT */}
-            <div data-step="2" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+            <div data-step="2" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden">
               <StepBadge
                 n="2"
                 label="Delivery Date & Slot"
@@ -1008,7 +1035,7 @@ const Checkout = () => {
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => changeDate(-1)}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-primary/10 transition text-foreground shrink-0"
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border-2 border-border-card bg-surface hover:bg-primary/10 transition text-foreground shrink-0"
                           aria-label="Previous day"
                         >
                           <ChevronLeft size={16} />
@@ -1023,7 +1050,7 @@ const Checkout = () => {
                         </div>
                         <button
                           onClick={() => changeDate(1)}
-                          className="w-9 h-9 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-primary/10 transition text-foreground shrink-0"
+                          className="w-9 h-9 flex items-center justify-center rounded-xl border-2 border-border-card bg-surface hover:bg-primary/10 transition text-foreground shrink-0"
                           aria-label="Next day"
                         >
                           <ChevronRight size={16} />
@@ -1037,10 +1064,10 @@ const Checkout = () => {
                             onClick={() => slot.available && setDeliverySlot(slot.value)}
                             disabled={!slot.available}
                             className={`relative p-3 sm:p-4 rounded-2xl border-2 transition-all text-center ${!slot.available
-                              ? 'opacity-30 cursor-not-allowed border-border/10 bg-muted/5'
-                              : deliverySlot === slot.value
-                                ? 'border-primary bg-primary/5 shadow-md'
-                                : 'border-border/40 hover:border-primary/40 bg-surface/30'
+                                ? 'opacity-40 cursor-not-allowed border-border-muted bg-muted/5'
+                                : deliverySlot === slot.value
+                                  ? 'border-primary bg-primary/5 shadow-md'
+                                  : 'border-border-muted hover:border-primary/40 bg-surface/30'
                               }`}
                           >
                             <span className="text-lg sm:text-xl block mb-1">{slot.emoji}</span>
@@ -1080,7 +1107,7 @@ const Checkout = () => {
             </div>
 
             {/* STEP 3: ORDER SUMMARY (ITEMS) */}
-            <div data-step="3" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+            <div data-step="3" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden">
               <StepBadge
                 n="3"
                 label="Order Summary"
@@ -1126,12 +1153,14 @@ const Checkout = () => {
                       ))}
                       <div className="p-4 sm:p-5 space-y-4">
                         {customCakeRequest ? (
-                          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                          <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 space-y-3">
                             <div className="flex items-start justify-between gap-3">
                               <p className="text-xs font-black uppercase tracking-widest text-primary">From custom cake builder</p>
                               <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-accent hover:underline">Edit</Link>
                             </div>
-                            <pre className="text-xs text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">{formatCustomCakeNotes(customCakeRequest)}</pre>
+                            <pre className="text-xs text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">
+                              {getFormattedCustomNotes()}
+                            </pre>
                           </div>
                         ) : (
                           <p className="text-xs text-muted font-bold uppercase tracking-widest text-center opacity-40">No custom notes added</p>
@@ -1152,7 +1181,7 @@ const Checkout = () => {
             </div>
 
             {/* STEP 4: PAYMENT METHOD */}
-            <div data-step="4" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden">
+            <div data-step="4" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden">
               <StepBadge
                 n="4"
                 label="Payment Method"
@@ -1170,7 +1199,7 @@ const Checkout = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="p-4 sm:p-5 space-y-4">
-                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card-soft/80 border border-border/20 backdrop-blur-sm">
+                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card-soft/80 border-2 border-border-muted backdrop-blur-sm">
                         <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
                           <img src={paymentLogos.razorpay} alt="Razorpay" className="w-6 h-6 object-contain" />
                         </div>
@@ -1190,8 +1219,8 @@ const Checkout = () => {
                               key={method.id}
                               onClick={() => setSelectedPayMethod(selected ? null : method.id)}
                               className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
-                                ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
-                                : `border-border/30 bg-surface/20 hover:bg-surface/40`
+                                  ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
+                                  : `border-border-muted bg-surface/20 hover:bg-surface/40 hover:border-primary/30`
                                 }`}
                             >
                               <div className="flex items-start justify-between mb-2 sm:mb-3">
@@ -1232,6 +1261,13 @@ const Checkout = () => {
 
                       <div className="pt-4 flex justify-between gap-3">
                         <Button onClick={() => setActiveStep(3)} className="btn-secondary px-6">Back</Button>
+                        <Button
+                          onClick={handlePlaceOrder}
+                          className="btn-primary px-8"
+                          disabled={!selectedPayMethod}
+                        >
+                          Pay Now
+                        </Button>
                       </div>
                     </div>
                   </motion.div>
@@ -1247,7 +1283,7 @@ const Checkout = () => {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-card rounded-2xl sm:rounded-3xl shadow-card border border-border/50 overflow-hidden w-full min-w-0"
+                className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden w-full min-w-0"
               >
                 <div className="p-4 sm:p-5 border-b border-border/30 bg-gradient-to-r from-card-soft to-card">
                   <div className="flex items-center gap-2">
@@ -1327,7 +1363,7 @@ const Checkout = () => {
                   </div>
 
                   {(offerDiscount + couponDiscount) > 0 && (
-                    <div className="flex items-center justify-between bg-success-light border border-success/20 rounded-xl px-3 py-2 text-success-text font-black text-xs uppercase tracking-widest w-full min-w-0">
+                    <div className="flex items-center justify-between bg-success-light border-2 border-success/30 rounded-xl px-3 py-2 text-success-text font-black text-xs uppercase tracking-widest w-full min-w-0">
                       <div className="flex items-center gap-1.5">
                         <Star size={11} /> You Save
                       </div>
@@ -1382,7 +1418,7 @@ const Checkout = () => {
                               type="button"
                               disabled={couponBusy}
                               onClick={() => handleApplyCoupon(code)}
-                              className="px-3 py-1.5 rounded-lg text-[10px] font-black text-heading font-mono hover:bg-primary/10 transition-colors border border-border/30 bg-card-soft/60 uppercase tracking-widest"
+                              className="px-3 py-1.5 rounded-lg text-[10px] font-black text-heading font-mono hover:bg-primary/10 transition-colors border-2 border-border-muted bg-card-soft/60 uppercase tracking-widest"
                             >
                               {code}
                             </button>
@@ -1394,7 +1430,7 @@ const Checkout = () => {
                 )}
 
                 {hasAppliedCoupon && (
-                  <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 p-3 sm:p-3.5 bg-success-light rounded-2xl flex justify-between items-center border border-success/20">
+                  <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 p-3 sm:p-3.5 bg-success-light rounded-2xl flex justify-between items-center border-2 border-success/30">
                     <div>
                       <span className="text-[9px] font-black text-success-text uppercase tracking-widest opacity-70">Coupon Applied</span>
                       <p className="text-sm font-mono font-black text-success-text tracking-widest">{appliedCouponDisplay}</p>
@@ -1410,7 +1446,8 @@ const Checkout = () => {
                     disabled={
                       !addressDetails.fullName.trim() ||
                       !addressDetails.phone.trim() ||
-                      !deliveryInfo.position
+                      !deliveryInfo.position ||
+                      !selectedPayMethod
                     }
                   >
                     <Lock size={12} className="mr-1 inline shrink-0" />
@@ -1425,7 +1462,7 @@ const Checkout = () => {
                       { icon: Truck, label: 'Fresh Delivery' },
                       { icon: Sparkles, label: 'Handcrafted' },
                     ].map(({ icon: Icon, label }) => (
-                      <div key={label} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-surface/30 border border-border/20">
+                      <div key={label} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-surface/30 border-2 border-border-muted">
                         <Icon size={13} className="text-primary/60 shrink-0" />
                         <span className="text-[10px] font-black text-muted/60 uppercase tracking-widest text-center leading-tight">{label}</span>
                       </div>
@@ -1445,7 +1482,7 @@ const Checkout = () => {
               initial={{ scale: 0.97, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.97, opacity: 0, y: 40 }}
-              className="bg-card rounded-t-3xl sm:rounded-3xl w-full sm:max-w-4xl h-[85vh] sm:h-[80vh] relative overflow-hidden shadow-premium border border-border"
+              className="bg-card rounded-t-3xl sm:rounded-3xl w-full sm:max-w-4xl h-[85vh] sm:h-[80vh] relative overflow-hidden shadow-premium border-2 border-border-card"
             >
               <button onClick={() => setShowMap(false)} className="absolute top-4 right-4 z-10 bg-surface p-2 sm:p-2.5 rounded-full shadow text-foreground hover:bg-muted/10 transition-colors">
                 <X size={18} />

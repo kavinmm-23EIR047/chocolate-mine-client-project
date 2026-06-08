@@ -1,111 +1,144 @@
-/* /* ═══════════════════════════════════════════════════════════════
-   THE CHOCOLATE MINE — MASTER THEME FILE
-   ─────────────────────────────────────────────────────────────
-   SINGLE SOURCE OF TRUTH for all brand colors & design tokens.
-   Updated to perfectly match the logo's exact color values.
-   ═══════════════════════════════════════════════════════════════ */
-
-
 /* ═══════════════════════════════════════════════════════════════
-   THE CHOCOLATE MINE — MASTER THEME FILE (v2 - Conflict‑Free)
+   THE CHOCOLATE MINE — MODERN NEUMORPHISM THEME (NO WHITE SHADOWS)
    ─────────────────────────────────────────────────────────────
-   Usage: 
-     - Light theme is default (no extra class)
-     - Apply class "dark" to <html> or <body> for dark mode
-   ───────────────────────────────────────────────────────────── */
+   Light: Soft Rose Cream (#EBDEDA)
+   Dark: Deep Cocoa (#120806)
+   Accent: Caramel Gold (#E6B25A)
+   ═══════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
-/* Base reset & smooth transitions */
 * {
-   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+   box-sizing: border-box;
 }
 
 /* ───────────────────────────────────────────
-   LIGHT THEME (default)
+   LIGHT THEME - Soft Rose Cream (Enhanced Contrast)
    ─────────────────────────────────────────── */
 :root {
-   /* Core Surfaces */
-   --background: #E8DCD8;
-   --background-rgb: 232 220 216;
-   --surface: #E8DCD8;
-   --surface-rgb: 232 220 216;
-   --card: #E8DCD8;
-   --card-rgb: 232 220 216;
-   --card-soft: #DED0CC;
-   --card-soft-rgb: 222 208 204;
-
-   /* Brand Colors */
-   --primary: #381A14;
-   --primary-rgb: 56 26 20;
-   --primary-hover: #52271E;
-   --primary-hover-rgb: 82 39 30;
-   --primary-active: #24110D;
-   --primary-active-rgb: 36 17 13;
-   --secondary: #7A4B43;
-   --secondary-rgb: 122 75 67;
-   --accent: #D4A017;
-   --accent-rgb: 212 160 23;
-   --accent-hover: #B8880F;
-   --accent-hover-rgb: 184 136 15;
+   /* Base Surfaces */
+   --background: #EBDEDA;
+   --background-rgb: 235 222 218;
+   --surface: #EBDEDA;
+   --surface-rgb: 235 222 218;
+   --card: #F1E6E2;
+   --card-rgb: 241 230 226;
+   --card-soft: #E4D4CF;
+   --card-soft-rgb: 228 212 207;
 
    /* Typography */
-   --foreground: #140907;
-   --foreground-rgb: 20 9 7;
-   --heading: #381A14;
-   --heading-rgb: 56 26 20;
-   --body: #381A14;
-   --body-rgb: 56 26 20;
-   --muted: #8F736F;
-   --muted-rgb: 143 115 111;
-   --card-text: #140907;
-   --card-text-rgb: 20 9 7;
+   --foreground: #2D1B17;
+   --foreground-rgb: 45 27 23;
+   --heading: #1F120F;
+   --heading-rgb: 31 18 15;
+   --body: #4A3732;
+   --body-rgb: 74 55 50;
+   --muted: #7C6660;
+   --muted-rgb: 124 102 96;
+
+   /* Brand Colors */
+   --primary: #4E2820;
+   --primary-rgb: 78 40 32;
+   --primary-hover: #3D1E18;
+   --primary-hover-rgb: 61 30 24;
+   --primary-active: #2C1511;
+   --primary-active-rgb: 44 21 17;
+   --secondary: #936456;
+   --secondary-rgb: 147 100 86;
+   --accent: #C98F45;
+   --accent-rgb: 201 143 69;
+   --accent-hover: #E6B25A;
+   --accent-hover-rgb: 230 178 90;
 
    /* Navigation */
-   --navbar: #E8DCD8;
-   --navbar-rgb: 232 220 216;
-   --navbar-text: #381A14;
-   --navbar-text-rgb: 56 26 20;
-   --sidebar: #E8DCD8;
-   --sidebar-rgb: 232 220 216;
+   --navbar: #EBDEDA;
+   --navbar-rgb: 235 222 218;
+   --navbar-text: #1F120F;
+   --navbar-text-rgb: 31 18 15;
 
    /* Footer */
-   --footer: #140907;
-   --footer-rgb: 20 9 7;
-   --footer-text: #FFFFFF;
-   --footer-text-rgb: 255 255 255;
+   --footer: #1F120F;
+   --footer-rgb: 31 18 15;
+   --footer-text: #F2E2DB;
+   --footer-text-rgb: 242 226 219;
 
-   /* Borders & Inputs */
-   --border: #E8E0DF;
-   --border-rgb: 232 224 223;
-   --border-muted: #D1C5C3;
-   --border-muted-rgb: 209 197 195;
-   --input: #E8DCD8;
-   --input-rgb: 232 220 216;
-   --input-border: #D1C5C3;
-   --input-border-rgb: 209 197 195;
-   --input-focus: #381A14;
-   --ring: rgba(56, 26, 20, 0.15);
+   /* Borders */
+   --border: #D5C0BA;
+   --border-rgb: 213 192 186;
+   --border-light: #F5ECE9;
+   --border-light-rgb: 245 236 233;
+   --border-dark: #C4AAA3;
+   --border-dark-rgb: 196 170 163;
+
+   /* Inputs */
+   --input: #F1E6E2;
+   --input-rgb: 241 230 226;
+   --input-border: #D5C0BA;
+   --input-border-rgb: 213 192 186;
+   --input-focus: #4E2820;
+   --ring: rgba(78, 40, 32, 0.15);
+
+   /* Neumorphism Shadows */
+   --shadow-light: rgba(168, 138, 128, 0.15);
+   --shadow-dark: rgba(56, 26, 20, 0.12);
+   --shadow-deep: rgba(56, 26, 20, 0.2);
+
+   --nm-extruded: -8px -8px 16px var(--shadow-light), 8px 8px 16px var(--shadow-dark);
+   --nm-sunken: inset -4px -4px 8px var(--shadow-light), inset 4px 4px 8px var(--shadow-dark);
+   --nm-card: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
+   --nm-button: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
+   --nm-button-pressed: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-deep);
+   --nm-flat: 0px 2px 4px var(--shadow-dark);
 
    /* Buttons */
-   --button-bg: #381A14;
-   --button-bg-rgb: 56 26 20;
-   --button-text: #FFFFFF;
-   --button-text-rgb: 255 255 255;
-   --button-hover: #24110D;
-   --button-hover-rgb: 36 17 13;
-   --button-alt-bg: #E8DCD8;
-   --button-alt-bg-rgb: 232 220 216;
-   --button-alt-text: #381A14;
-   --button-alt-text-rgb: 56 26 20;
-   --button-alt-hover: #DED0CC;
-   --button-alt-hover-rgb: 222 208 204;
-   --button-buy: #381A14;
-   --button-buy-rgb: 56 26 20;
-   --button-buy-text: #FFFFFF;
-   --button-buy-text-rgb: 255 255 255;
+   --button-bg: #4E2820;
+   --button-bg-rgb: 78 40 32;
+   --button-text: #F2E2DB;
+   --button-text-rgb: 242 226 219;
+   --button-hover: #3D1E18;
+   --button-hover-rgb: 61 30 24;
+   --button-alt-bg: #F1E6E2;
+   --button-alt-bg-rgb: 241 230 226;
+   --button-alt-text: #4E2820;
+   --button-alt-text-rgb: 78 40 32;
+   --button-alt-hover: #E4D4CF;
+   --button-alt-hover-rgb: 228 212 207;
 
-   /* Semantic: Success */
+   /* ─── BADGE COLORS - Light Theme ─── */
+   --badge-bestseller-bg: #FEF3C7;
+   --badge-bestseller-text: #D97706;
+   --badge-bestseller-border: #FDE68A;
+
+   --badge-featured-bg: #FCE7F3;
+   --badge-featured-text: #BE185D;
+   --badge-featured-border: #FBCFE8;
+
+   --badge-discount-bg: #FEE2E2;
+   --badge-discount-text: #DC2626;
+   --badge-discount-border: #FECACA;
+
+   /* Optimized Green Badges for premium pop & clear readability */
+   --badge-stock-bg: #E6F7EE;
+   --badge-stock-text: #0B5334;
+   --badge-stock-border: #C2EAD5;
+
+   --badge-soldout-bg: #F3F4F6;
+   --badge-soldout-text: #4B5563;
+   --badge-soldout-border: #E5E7EB;
+
+   --badge-coupon-bg: #E0E7FF;
+   --badge-coupon-text: #4338CA;
+   --badge-coupon-border: #C7D2FE;
+
+   --badge-new-bg: #E6F7EE;
+   --badge-new-text: #0B5334;
+   --badge-new-border: #C2EAD5;
+
+   --badge-limited-bg: #FEF3C7;
+   --badge-limited-text: #D97706;
+   --badge-limited-border: #FDE68A;
+
+   /* Semantic Colors */
    --success: #2E7D32;
    --success-rgb: 46 125 50;
    --success-light: #E8F5E9;
@@ -113,7 +146,6 @@
    --success-text: #1B5E20;
    --success-text-rgb: 27 94 32;
 
-   /* Semantic: Error */
    --error: #D32F2F;
    --error-rgb: 211 47 47;
    --error-light: #FFEBEE;
@@ -121,7 +153,6 @@
    --error-text: #B71C1C;
    --error-text-rgb: 183 28 28;
 
-   /* Semantic: Warning */
    --warning: #F9A825;
    --warning-rgb: 249 168 37;
    --warning-light: #FFF8E1;
@@ -129,7 +160,6 @@
    --warning-text: #E65100;
    --warning-text-rgb: 230 81 0;
 
-   /* Semantic: Info */
    --info: #0288D1;
    --info-rgb: 2 136 209;
    --info-light: #E1F5FE;
@@ -137,135 +167,153 @@
    --info-text: #01579B;
    --info-text-rgb: 1 87 155;
 
-   /* Sale / Discount */
+   /* E-Commerce */
    --sale: #E53935;
    --sale-rgb: 229 57 53;
-   --sale-dark: #D32F2F;
-   --sale-dark-rgb: 211 47 47;
-   --sale-flash: #FF6F00;
-   --sale-flash-rgb: 255 111 0;
-
-   /* Coupon / Savings */
    --coupon: #2E7D32;
    --coupon-rgb: 46 125 50;
-   --coupon-mid: #43A047;
-   --coupon-mid-rgb: 67 160 71;
-   --coupon-light: #66BB6A;
-   --coupon-light-rgb: 102 187 106;
-
-   /* Stock / Urgency */
    --urgency: #F9A825;
    --urgency-rgb: 249 168 37;
-   --urgency-dark: #FFB300;
-   --urgency-dark-rgb: 255 179 0;
-
-   /* Ratings */
    --star: #FBC02D;
    --star-rgb: 251 192 45;
 
    /* Overlay */
-   --overlay: rgba(20, 9, 7, 0.5);
-   --backdrop: rgba(232, 220, 216, 0.85);
+   --overlay: rgba(31, 18, 15, 0.4);
+   --backdrop: rgba(235, 222, 218, 0.92);
 
    /* Skeleton */
-   --skeleton: #E8E0DF;
-   --skeleton-rgb: 232 224 223;
-   --skeleton-shine: #DED0CC;
-   --skeleton-shine-rgb: 222 208 204;
-
-   /* Shadow */
-   --shadow-color: 15deg 30% 20%;
-
-   /* Badges */
-   --badge-amber-bg: #fff4d1;
-   --badge-green-bg: #e7f9ec;
+   --skeleton: #E4D4CF;
+   --skeleton-rgb: 228 212 207;
+   --skeleton-shine: #F1E6E2;
+   --skeleton-shine-rgb: 241 230 226;
 }
 
 /* ───────────────────────────────────────────
-   DARK THEME
+   DARK THEME - Deep Cocoa (No White Shadows)
    ─────────────────────────────────────────── */
 .dark {
-   /* Core Surfaces */
+   /* Base Surfaces */
    --background: #120806;
    --background-rgb: 18 8 6;
-   --surface: #1C0D0A;
-   --surface-rgb: 28 13 10;
-   --card: #1C0D0A;
-   --card-rgb: 28 13 10;
-   --card-soft: #24110D;
-   --card-soft-rgb: 36 17 13;
-
-   /* Brand Colors */
-   --primary: #DED0CC;
-   --primary-rgb: 244 232 218;
-   --primary-hover: #DED0CC;
-   --primary-hover-rgb: 250 241 231;
-   --primary-active: #DED0CC;
-   --primary-active-rgb: 232 216 199;
-   --secondary: #DCC7AF;
-   --secondary-rgb: 220 199 175;
-   --accent: #E6C34A;
-   --accent-rgb: 230 195 74;
-   --accent-hover: #FFD740;
-   --accent-hover-rgb: 255 215 64;
+   --surface: #1A0E0B;
+   --surface-rgb: 26 14 11;
+   --card: #21120E;
+   --card-rgb: 33 18 14;
+   --card-soft: #2A1813;
+   --card-soft-rgb: 42 24 19;
 
    /* Typography */
-   --foreground: #DED0CC;
-   --foreground-rgb: 244 232 218;
-   --heading: #DED0CC;
-   --heading-rgb: 244 232 218;
-   --body: #DED0CC;
-   --body-rgb: 232 216 199;
-   --muted: #B89F8A;
-   --muted-rgb: 184 159 138;
-   --card-text: #DED0CC;
-   --card-text-rgb: 244 232 218;
+   --foreground: #F2E2DB;
+   --foreground-rgb: 242 226 219;
+   --heading: #FFF4EE;
+   --heading-rgb: 255 244 238;
+   --body: #D4C0BA;
+   --body-rgb: 212 192 186;
+   --muted: #A18881;
+   --muted-rgb: 161 136 129;
+
+   /* Brand Colors */
+   --primary: #E8D3CB;
+   --primary-rgb: 232 211 203;
+   --primary-hover: #F4E5DF;
+   --primary-hover-rgb: 244 229 223;
+   --primary-active: #D4C0BA;
+   --primary-active-rgb: 212 192 186;
+   --secondary: #C8A79B;
+   --secondary-rgb: 200 167 155;
+   --accent: #E6B25A;
+   --accent-rgb: 230 178 90;
+   --accent-hover: #F0C46E;
+   --accent-hover-rgb: 240 196 110;
 
    /* Navigation */
    --navbar: #120806;
    --navbar-rgb: 18 8 6;
-   --navbar-text: #DED0CC;
-   --navbar-text-rgb: 244 232 218;
-   --sidebar: #1C0D0A;
-   --sidebar-rgb: 28 13 10;
+   --navbar-text: #F2E2DB;
+   --navbar-text-rgb: 242 226 219;
 
    /* Footer */
    --footer: #0A0403;
    --footer-rgb: 10 4 3;
-   --footer-text: #DED0CC;
-   --footer-text-rgb: 244 232 218;
+   --footer-text: #F2E2DB;
+   --footer-text-rgb: 242 226 219;
 
-   /* Borders & Inputs */
-   --border: #381A14;
-   --border-rgb: 56 26 20;
-   --border-muted: #52271E;
-   --border-muted-rgb: 82 39 30;
-   --input: #1C0D0A;
-   --input-rgb: 28 13 10;
-   --input-border: #381A14;
-   --input-border-rgb: 56 26 20;
-   --input-focus: #DED0CC;
-   --ring: rgba(244, 232, 218, 0.15);
+   /* Borders */
+   --border: #3A211B;
+   --border-rgb: 58 33 27;
+   --border-light: #4B2B24;
+   --border-light-rgb: 75 43 36;
+   --border-dark: #27130F;
+   --border-dark-rgb: 39 19 15;
+
+   /* Inputs */
+   --input: #21120E;
+   --input-rgb: 33 18 14;
+   --input-border: #3A211B;
+   --input-border-rgb: 58 33 27;
+   --input-focus: #E8D3CB;
+   --ring: rgba(232, 211, 203, 0.15);
+
+   /* Neumorphism Shadows - Dark Theme */
+   --shadow-light: rgba(70, 40, 35, 0.3);
+   --shadow-dark: rgba(0, 0, 0, 0.5);
+   --shadow-deep: rgba(0, 0, 0, 0.7);
+
+   --nm-extruded: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
+   --nm-sunken: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-dark);
+   --nm-card: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
+   --nm-button: -4px -4px 8px var(--shadow-light), 4px 4px 8px var(--shadow-dark);
+   --nm-button-pressed: inset -2px -2px 4px var(--shadow-light), inset 2px 2px 4px var(--shadow-deep);
+   --nm-flat: 0px 2px 4px var(--shadow-dark);
 
    /* Buttons */
-   --button-bg: #DED0CC;
-   --button-bg-rgb: 244 232 218;
+   --button-bg: #E8D3CB;
+   --button-bg-rgb: 232 211 203;
    --button-text: #120806;
    --button-text-rgb: 18 8 6;
-   --button-hover: #DED0CC;
-   --button-hover-rgb: 250 241 231;
-   --button-alt-bg: #1C0D0A;
-   --button-alt-bg-rgb: 28 13 10;
-   --button-alt-text: #DED0CC;
-   --button-alt-text-rgb: 244 232 218;
-   --button-alt-hover: #381A14;
-   --button-alt-hover-rgb: 56 26 20;
-   --button-buy: #DED0CC;
-   --button-buy-rgb: 244 232 218;
-   --button-buy-text: #120806;
-   --button-buy-text-rgb: 18 8 6;
+   --button-hover: #F4E5DF;
+   --button-hover-rgb: 244 229 223;
+   --button-alt-bg: #21120E;
+   --button-alt-bg-rgb: 33 18 14;
+   --button-alt-text: #E8D3CB;
+   --button-alt-text-rgb: 232 211 203;
+   --button-alt-hover: #2A1813;
+   --button-alt-hover-rgb: 42 24 19;
 
-   /* Semantic: Success */
+   /* ─── BADGE COLORS - Dark Theme (Vibrant for visibility) ─── */
+   --badge-bestseller-bg: rgba(251, 191, 36, 0.2);
+   --badge-bestseller-text: #FBBF24;
+   --badge-bestseller-border: rgba(251, 191, 36, 0.4);
+
+   --badge-featured-bg: rgba(236, 72, 153, 0.2);
+   --badge-featured-text: #F472B6;
+   --badge-featured-border: rgba(236, 72, 153, 0.4);
+
+   --badge-discount-bg: rgba(239, 68, 68, 0.2);
+   --badge-discount-text: #F87171;
+   --badge-discount-border: rgba(239, 68, 68, 0.4);
+
+   --badge-stock-bg: rgba(16, 185, 129, 0.2);
+   --badge-stock-text: #34D399;
+   --badge-stock-border: rgba(16, 185, 129, 0.4);
+
+   --badge-soldout-bg: rgba(107, 114, 128, 0.2);
+   --badge-soldout-text: #9CA3AF;
+   --badge-soldout-border: rgba(107, 114, 128, 0.4);
+
+   --badge-coupon-bg: rgba(99, 102, 241, 0.2);
+   --badge-coupon-text: #A5B4FC;
+   --badge-coupon-border: rgba(99, 102, 241, 0.4);
+
+   --badge-new-bg: rgba(16, 185, 129, 0.2);
+   --badge-new-text: #34D399;
+   --badge-new-border: rgba(16, 185, 129, 0.4);
+
+   --badge-limited-bg: rgba(251, 191, 36, 0.2);
+   --badge-limited-text: #FBBF24;
+   --badge-limited-border: rgba(251, 191, 36, 0.4);
+
+   /* Semantic Colors */
    --success: #66BB6A;
    --success-rgb: 102 187 106;
    --success-light: #1A381E;
@@ -273,7 +321,6 @@
    --success-text: #4ADE80;
    --success-text-rgb: 74 222 128;
 
-   /* Semantic: Error */
    --error: #EF5350;
    --error-rgb: 239 83 80;
    --error-light: #4A1A1A;
@@ -281,7 +328,6 @@
    --error-text: #EF9A9A;
    --error-text-rgb: 239 154 154;
 
-   /* Semantic: Warning */
    --warning: #FFB74D;
    --warning-rgb: 255 183 77;
    --warning-light: #4A3311;
@@ -289,7 +335,6 @@
    --warning-text: #FFD54F;
    --warning-text-rgb: 255 213 79;
 
-   /* Semantic: Info */
    --info: #4FC3F7;
    --info-rgb: 79 195 247;
    --info-light: #0B334A;
@@ -297,73 +342,384 @@
    --info-text: #81D4FA;
    --info-text-rgb: 129 212 250;
 
-   /* Sale / Discount */
+   /* E-commerce */
    --sale: #FF5252;
    --sale-rgb: 255 82 82;
-   --sale-dark: #FF1744;
-   --sale-dark-rgb: 255 23 68;
-   --sale-flash: #FF9100;
-   --sale-flash-rgb: 255 145 0;
-
-   /* Coupon / Savings */
    --coupon: #4ADE80;
    --coupon-rgb: 74 222 128;
-   --coupon-mid: #22C55E;
-   --coupon-mid-rgb: 34 197 94;
-   --coupon-light: rgba(74, 222, 128, 0.15);
-
-   /* Stock / Urgency */
    --urgency: #FFB74D;
    --urgency-rgb: 255 183 77;
-   --urgency-dark: #FFA726;
-   --urgency-dark-rgb: 255 167 38;
-
-   /* Ratings */
    --star: #FFD740;
    --star-rgb: 255 215 64;
 
-   /* Overlays */
+   /* Overlay */
    --overlay: rgba(0, 0, 0, 0.6);
-   --backdrop: rgba(18, 8, 6, 0.88);
+   --backdrop: rgba(18, 8, 6, 0.92);
 
    /* Skeleton */
-   --skeleton: #381A14;
-   --skeleton-rgb: 56 26 20;
-   --skeleton-shine: #52271E;
-   --skeleton-shine-rgb: 82 39 30;
-
-   /* Shadow */
-   --shadow-color: 15deg 10% 5%;
-
-   /* Badges */
-   --badge-amber-bg: #2B1A05;
-   --badge-green-bg: #10261C;
+   --skeleton: #2A1813;
+   --skeleton-rgb: 42 24 19;
+   --skeleton-shine: #21120E;
+   --skeleton-shine-rgb: 33 18 14;
 }
 
 /* ───────────────────────────────────────────
-   GLOBAL STYLES (using the custom properties)
+   GLOBAL STYLES
    ─────────────────────────────────────────── */
 html,
 body {
    background-color: var(--background);
    color: var(--foreground);
    font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
+   margin: 0;
+   padding: 0;
 }
 
-/* Ensure all elements inherit background properly */
-* {
-   background-color: transparent;
+/* ───────────────────────────────────────────
+   BADGE STYLES
+   ─────────────────────────────────────────── */
+
+/* Base Badge */
+.neo-badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 4px;
+   padding: 4px 10px;
+   border-radius: 40px;
+   font-size: 10px;
+   font-weight: 800;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+   white-space: nowrap;
 }
 
-/* Example utility classes (optional) */
+/* Bestseller Badge */
+.badge-bestseller {
+   background: var(--badge-bestseller-bg);
+   color: var(--badge-bestseller-text);
+   border: 1px solid var(--badge-bestseller-border);
+}
+
+/* Featured Badge */
+.badge-featured {
+   background: var(--badge-featured-bg);
+   color: var(--badge-featured-text);
+   border: 1px solid var(--badge-featured-border);
+}
+
+/* Discount Badge */
+.badge-discount {
+   background: var(--badge-discount-bg);
+   color: var(--badge-discount-text);
+   border: 1px solid var(--badge-discount-border);
+}
+
+/* In Stock Badge */
+.badge-instock {
+   background: var(--badge-stock-bg);
+   color: var(--badge-stock-text);
+   border: 1px solid var(--badge-stock-border);
+}
+
+/* Sold Out Badge */
+.badge-soldout {
+   background: var(--badge-soldout-bg);
+   color: var(--badge-soldout-text);
+   border: 1px solid var(--badge-soldout-border);
+}
+
+/* Coupon Badge */
+.badge-coupon {
+   background: var(--badge-coupon-bg);
+   color: var(--badge-coupon-text);
+   border: 1px solid var(--badge-coupon-border);
+   font-family: monospace;
+   letter-spacing: 1px;
+}
+
+/* New Arrival Badge */
+.badge-new {
+   background: var(--badge-new-bg);
+   color: var(--badge-new-text);
+   border: 1px solid var(--badge-new-border);
+}
+
+/* Limited Edition Badge */
+.badge-limited {
+   background: var(--badge-limited-bg);
+   color: var(--badge-limited-text);
+   border: 1px solid var(--badge-limited-border);
+}
+
+/* Gradient badges for product cards */
+.badge-gradient-bestseller {
+   background: linear-gradient(135deg, #F59E0B, #D97706);
+   color: white;
+   border: none;
+}
+
+.badge-gradient-featured {
+   background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+   color: white;
+   border: none;
+}
+
+.badge-gradient-discount {
+   background: linear-gradient(135deg, #EF4444, #DC2626);
+   color: white;
+   border: none;
+}
+
+.badge-gradient-new {
+   background: linear-gradient(135deg, #10B981, #059669);
+   color: white;
+   border: none;
+}
+
+.badge-gradient-limited {
+   background: linear-gradient(135deg, #F59E0B, #EA580C);
+   color: white;
+   border: none;
+}
+
+/* ───────────────────────────────────────────
+   NEUMORPHISM UTILITY CLASSES
+   ─────────────────────────────────────────── */
+
+/* Card Styles */
+.neo-card,
 .bg-card {
-   background-color: var(--card);
+   background: var(--card);
+   border-radius: 24px;
+   box-shadow: var(--nm-extruded);
+   border: 1px solid var(--border);
 }
 
-.text-primary {
-   color: var(--primary);
+/* Sunken/Inset Card */
+.neo-card-sunken {
+   background: var(--card);
+   border-radius: 24px;
+   box-shadow: var(--nm-sunken);
+   border: 1px solid var(--border-light);
 }
 
-.border-border {
-   border-color: var(--border);
+/* Input Styles */
+.neo-input,
+input,
+textarea,
+select {
+   background: var(--input);
+   box-shadow: var(--nm-sunken);
+   border: 1px solid var(--input-border);
+   border-radius: 16px;
+   padding: 12px 16px;
+   color: var(--foreground);
+   font-size: 14px;
+   transition: all 0.2s ease;
+}
+
+.neo-input:focus,
+input:focus,
+textarea:focus,
+select:focus {
+   outline: none;
+   border-color: var(--input-focus);
+   box-shadow: var(--nm-sunken), 0 0 0 3px var(--ring);
+}
+
+/* Button Styles */
+.neo-btn {
+   background: var(--button-bg);
+   color: var(--button-text);
+   box-shadow: var(--nm-button);
+   border: none;
+   border-radius: 40px;
+   padding: 12px 24px;
+   font-weight: 700;
+   font-size: 14px;
+   cursor: pointer;
+   transition: all 0.2s ease;
+}
+
+.neo-btn:hover {
+   background: var(--button-hover);
+   transform: translateY(-1px);
+}
+
+.neo-btn:active {
+   box-shadow: var(--nm-button-pressed);
+   transform: translateY(0);
+}
+
+/* Secondary Button */
+.neo-btn-secondary {
+   background: var(--button-alt-bg);
+   color: var(--button-alt-text);
+   box-shadow: var(--nm-button);
+   border: 1px solid var(--border);
+   border-radius: 40px;
+   padding: 12px 24px;
+   font-weight: 700;
+   cursor: pointer;
+   transition: all 0.2s ease;
+}
+
+.neo-btn-secondary:hover {
+   background: var(--button-alt-hover);
+}
+
+.neo-btn-secondary:active {
+   box-shadow: var(--nm-button-pressed);
+}
+
+/* Avatar Styles */
+.neo-avatar {
+   background: var(--card);
+   box-shadow: var(--nm-sunken);
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+/* Product Card */
+.product-card {
+   background: var(--card);
+   border-radius: 20px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+.product-card:hover {
+   transform: translateY(-2px);
+   box-shadow: var(--nm-extruded);
+}
+
+/* Product Card Variations - Different Border Radius Options */
+.product-card-rounded-sm {
+   background: var(--card);
+   border-radius: 12px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+.product-card-rounded-md {
+   background: var(--card);
+   border-radius: 16px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+.product-card-rounded-lg {
+   background: var(--card);
+   border-radius: 20px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+.product-card-rounded-xl {
+   background: var(--card);
+   border-radius: 24px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+.product-card-soft {
+   background: var(--card);
+   border-radius: 30px 16px 30px 16px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+.product-card-pill {
+   background: var(--card);
+   border-radius: 32px;
+   box-shadow: var(--nm-card);
+   border: 1px solid var(--border);
+   overflow: hidden;
+   transition: all 0.2s ease;
+}
+
+/* Hover effects for all product card variations */
+.product-card-rounded-sm:hover,
+.product-card-rounded-md:hover,
+.product-card-rounded-lg:hover,
+.product-card-rounded-xl:hover,
+.product-card-soft:hover,
+.product-card-pill:hover {
+   transform: translateY(-2px);
+   box-shadow: var(--nm-extruded);
+}
+
+/* Image border radius variations */
+.product-card-rounded-sm .product-image {
+   border-radius: 8px;
+}
+
+.product-card-rounded-md .product-image {
+   border-radius: 12px;
+}
+
+.product-card-rounded-lg .product-image {
+   border-radius: 16px;
+}
+
+.product-card-rounded-xl .product-image {
+   border-radius: 20px;
+}
+
+/* Pagination Bullets */
+.neo-pagination-bullet {
+   width: 8px;
+   height: 8px;
+   border-radius: 50%;
+   background: var(--border);
+   box-shadow: var(--nm-sunken);
+   cursor: pointer;
+   transition: all 0.2s ease;
+}
+
+.neo-pagination-bullet-active {
+   width: 24px;
+   border-radius: 6px;
+   background: var(--primary);
+}
+
+/* Divider */
+.neo-divider {
+   height: 1px;
+   background: var(--border);
+   margin: 16px 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+   width: 8px;
+   height: 8px;
+}
+
+::-webkit-scrollbar-track {
+   background: var(--border-light);
+   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+   background: var(--border);
+   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+   background: var(--border-dark);
 }

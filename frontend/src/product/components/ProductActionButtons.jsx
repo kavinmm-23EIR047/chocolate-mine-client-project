@@ -34,11 +34,12 @@ const ProductActionButtons = ({
           </button>
         )}
 
+        {/* Updated from bg-secondary to bg-primary for accessible contrast */}
         <button
           onClick={handleBuyNow}
           disabled={!isInStock || !isDeliverable}
           className={`h-12 sm:h-14 font-black text-xs sm:text-sm uppercase tracking-wider rounded-xl transition shadow-lg flex items-center justify-center gap-2 ${(isInStock && isDeliverable)
-            ? 'bg-secondary text-button-text shadow-secondary/20 active:scale-95'
+            ? 'bg-primary text-button-text shadow-primary/20 active:scale-95'
             : 'bg-muted/40 text-muted/60 cursor-not-allowed'
             }`}
         >
@@ -86,11 +87,12 @@ const ProductActionButtons = ({
           </button>
         )}
 
+        {/* Updated from bg-secondary to bg-primary for accessible contrast */}
         <button
           onClick={handleBuyNow}
           disabled={!isInStock || !isDeliverable}
           className={`h-14 xl:h-16 font-black text-xs xl:text-sm uppercase tracking-widest rounded-2xl transition shadow-xl flex items-center justify-center gap-3 ${(isInStock && isDeliverable)
-            ? 'bg-secondary text-button-text shadow-secondary/20 hover:brightness-110 cursor-pointer'
+            ? 'bg-primary text-button-text shadow-primary/20 hover:brightness-110 cursor-pointer'
             : 'bg-muted/40 text-muted/60 cursor-not-allowed shadow-none'
             }`}
         >

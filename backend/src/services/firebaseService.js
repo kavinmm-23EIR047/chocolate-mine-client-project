@@ -80,20 +80,14 @@ const sendPushNotification = async (tokens, title, body, data = {}) => {
     }
   });
 
+  // Inject title and message into the data object for Data-only notifications
+  stringifiedData.title = String(title);
+  stringifiedData.message = String(body);
+
   const message = {
-    notification: { title, body },
+    // Data-only payload prevents Firebase SDK from intercepting the notification
     data: stringifiedData,
     webpush: {
-      notification: {
-        title,
-        body,
-        icon: '/logo.png',
-        badge: '/favicon.svg',
-        tag: stringifiedData.type || 'general',
-        renotify: true,
-        requireInteraction: false,
-        data: stringifiedData
-      },
       headers: {
         Urgency: 'high'
       }

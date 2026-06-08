@@ -19,18 +19,15 @@ try {
   messaging.onBackgroundMessage((payload) => {
     console.log('[SW] Background message received:', payload);
 
-    const title = payload.notification?.title || payload.data?.title || 'The Chocolate Mine';
-    const body = payload.notification?.body || payload.data?.message || 'You have a new notification';
+    // Prioritize data attributes for data-only payloads
+    const title = payload.data?.title || payload.notification?.title || 'The Chocolate Mine';
+    const body = payload.data?.message || payload.notification?.body || 'You have a new notification';
     const data = payload.data || {};
-
-    // Determine icon based on notification type
-    let icon = '/logo.png';
-    let badge = '/favicon.svg';
 
     const notificationOptions = {
       body,
-      icon,
-      badge,
+      icon: '/logo.png',
+      badge: '/favicon.svg',
       tag: data.type || 'general', // Prevents duplicate notifications of same type
       renotify: true,
       requireInteraction: false,
@@ -54,7 +51,8 @@ try {
       ];
     }
 
-    self.registration.showNotification(title, notificationOptions);
+    // CRITICAL MOBILE FIX: Return the promise so the OS doesn't kill the worker early
+    return self.registration.showNotification(title, notificationOptions);
   });
 
   // Handle notification click
@@ -62,33 +60,25 @@ try {
     event.notification.close();
 
     const data = event.notification.data || {};
-    let targetUrl = data.url || '/';
-
-    // Handle action buttons
-    if (event.action === 'view') {
-      targetUrl = data.url || '/';
-    }
-
-    // Ensure full URL
-    if (!targetUrl.startsWith('http')) {
-      targetUrl = self.location.origin + targetUrl;
-    }
+    
+    // URL CLEANUP FIX: Safe construction preventing double slashes (//)
+    const targetUrl = new URL(data.url || '/', self.location.origin).href;
 
     event.waitUntil(
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-        // Try to focus an existing window
+        // Try to focus an existing window matching the exact URL
         for (const client of windowClients) {
           if (client.url === targetUrl && 'focus' in client) {
             return client.focus();
           }
         }
-        // Try to navigate an existing window
+        // Try to navigate an existing open window to the target URL
         for (const client of windowClients) {
           if ('navigate' in client) {
-            return client.navigate(targetUrl).then(() => client.focus());
+            return client.navigate(targetUrl).then((c) => c?.focus());
           }
         }
-        // Open a new window
+        // Open a completely new window/tab if none are available
         if (clients.openWindow) {
           return clients.openWindow(targetUrl);
         }

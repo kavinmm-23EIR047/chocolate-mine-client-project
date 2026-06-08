@@ -19,15 +19,13 @@ transporter.verify((error, success) => {
   }
 });
 
-// Shared Logo Markup (exactly as used in Navbar)
+// Shared Logo Markup
 const getLogoMarkup = () => `
   <div style="text-align: center; margin-bottom: 20px;">
     <div style="display: inline-block; text-align: center;">
-      <!-- "THE CHOCOLATE" text row -->
       <div style="font-size: 7px; font-weight: 800; letter-spacing: 0.5px; color: #381A14; text-transform: uppercase; margin-bottom: 3px; white-space: nowrap;">
         T H E &nbsp;&nbsp; C H O C O L A T E
       </div>
-      <!-- SVG "MINE" logo -->
       <svg width="140" height="38" viewBox="0 0 325 90" fill="currentColor" style="color: #381A14; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 86V0h25.5l29.5 45L84.5 0H110v86H87V32L61.5 71h-13L23 32v54H0z" />
         <path d="M131 0h24v86h-24V0z" />
@@ -52,17 +50,18 @@ const sendMail = async (options) => {
     return info;
   } catch (err) {
     logger.error('Email Delivery Failed:', err.message);
-    return null;
+    // 💡 FIX: Throw the error so the controller handles the failure cleanly
+    throw new Error(`Email delivery failed: ${err.message}`);
   }
 };
 
 const emailService = {
-  sendOrderConfirmed: (email, order) => {
+  sendOrderConfirmed: async (email, order) => {
     const quote = "All you need is love. But a little chocolate now and then doesn't hurt. 🍫";
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
-    return sendMail({
+    return await sendMail({
       to: email,
       subject: `Order Confirmed #${order.orderNumber} - The Chocolate Mine`,
       html: `
@@ -72,18 +71,15 @@ const emailService = {
           <p>Hi ${order.address.fullName},</p>
           <p style="font-style: italic; color: #D4A017; text-align: center;">"${quote}"</p>
           <p>We've received your order and our kitchen is already buzzing with excitement! We're getting your treats ready with the finest ingredients.</p>
-          
           <div style="background: #FFFFFF; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D4A017;">
             <p style="margin: 0;"><b>Order ID:</b> ${order.orderNumber}</p>
             <p style="margin: 5px 0 0 0;"><b>Tracking Code:</b> ${order.trackingCode || order.orderNumber}</p>
             <p style="margin: 5px 0 0 0;"><b>Estimated Delivery:</b> ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'As scheduled'}</p>
           </div>
-
           <p>You can track your order live anytime:</p>
           <div style="text-align: center; margin: 20px 0;">
             <a href="${trackingLink}" style="display: inline-block; padding: 12px 25px; background: #D4A017; color: #140907; text-decoration: none; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Track My Order</a>
           </div>
-
           <p>Thank you for letting us be part of your sweet moments!</p>
           <br/>
           <p>Warm regards,<br/><b style="color: #381A14;">Team The Chocolate Mine</b></p>
@@ -92,11 +88,11 @@ const emailService = {
     });
   },
 
-  sendPacked: (email, order) => {
+  sendPacked: async (email, order) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
-    return sendMail({
+    return await sendMail({
       to: email,
       subject: `Your Order is Packed! #${order.orderNumber} 📦`,
       html: `
@@ -105,11 +101,9 @@ const emailService = {
           <h2 style="color: #381A14; text-align: center; margin-top: 0;">Order Packed! 📦</h2>
           <p>Hi ${order.address.fullName},</p>
           <p>Great news! Your order <b style="color: #D4A017;">${order.orderNumber}</b> has been packed and is ready for dispatch.</p>
-          
           <div style="text-align: center; margin: 20px 0;">
             <a href="${trackingLink}" style="display: inline-block; padding: 12px 25px; background: #D4A017; color: #140907; text-decoration: none; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Track Order</a>
           </div>
-
           <p>We'll notify you as soon as it is out for delivery.</p>
           <br/>
           <p>Warm regards,<br/><b style="color: #381A14;">Team The Chocolate Mine</b></p>
@@ -118,11 +112,11 @@ const emailService = {
     });
   },
 
-  sendDispatched: (email, order) => {
+  sendDispatched: async (email, order) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
-    return sendMail({
+    return await sendMail({
       to: email,
       subject: `Your Treats are on the Way! #${order.orderNumber}`,
       html: `
@@ -131,11 +125,9 @@ const emailService = {
           <h2 style="color: #381A14; text-align: center; margin-top: 0;">Out for Delivery! 🚚</h2>
           <p>Hi ${order.address.fullName},</p>
           <p>The wait is almost over! Your order <b style="color: #D4A017;">${order.orderNumber}</b> is out for delivery and should reach you shortly.</p>
-          
           <div style="text-align: center; margin: 20px 0;">
             <a href="${trackingLink}" style="display: inline-block; padding: 12px 25px; background: #D4A017; color: #140907; text-decoration: none; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Track Delivery</a>
           </div>
-
           <p>Get ready for some chocolatey goodness!</p>
           <br/>
           <p>Warm regards,<br/><b style="color: #381A14;">Team The Chocolate Mine</b></p>
@@ -144,11 +136,11 @@ const emailService = {
     });
   },
 
-  sendDelivered: (email, order, pdfBuffer = null) => {
+  sendDelivered: async (email, order, pdfBuffer = null) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const feedbackLink = `${frontendUrl}/review/${order._id}`;
 
-    return sendMail({
+    return await sendMail({
       to: email,
       subject: `Delivered & Sweet! Order #${order.orderNumber}`,
       html: `
@@ -157,15 +149,12 @@ const emailService = {
           <h2 style="color: #381A14; text-align: center; margin-top: 0;">Enjoy Your Treats! 🎉</h2>
           <p>Hi ${order.address.fullName},</p>
           <p>Your order <b style="color: #D4A017;">${order.orderNumber}</b> has been delivered. We hope it tastes even better than it looks!</p>
-          
           <p>Please find your invoice attached to this email.</p>
-          
           <div style="background: #FFFFFF; padding: 20px; border-radius: 12px; text-align: center; margin: 30px 0; border: 1px solid #D4A017;">
             <h3 style="margin-top: 0; color: #381A14;">How was it?</h3>
             <p>Your feedback helps us make the world a sweeter place.</p>
             <a href="${feedbackLink}" style="display: inline-block; padding: 12px 25px; background: #D4A017; color: #140907; text-decoration: none; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Give Feedback & Review</a>
           </div>
-
           <p>Thank you for choosing The Chocolate Mine. We can't wait to bake for you again!</p>
           <br/>
           <p>Warm regards,<br/><b style="color: #381A14;">Team The Chocolate Mine</b></p>
@@ -178,15 +167,15 @@ const emailService = {
     });
   },
 
-  sendInvoiceEmail: (email, order, pdfBuffer) => {
-    return emailService.sendDelivered(email, order, pdfBuffer);
+  sendInvoiceEmail: async (email, order, pdfBuffer) => {
+    return await emailService.sendDelivered(email, order, pdfBuffer);
   },
 
-  sendUserPaymentFailed: (email, order, reason) => {
+  sendUserPaymentFailed: async (email, order, reason) => {
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const ordersLink = `${frontendUrl}/account/orders`;
 
-    return sendMail({
+    return await sendMail({
       to: email,
       subject: `Payment Failed - Order #${order.orderNumber} - The Chocolate Mine`,
       html: `
@@ -195,18 +184,14 @@ const emailService = {
           <h2 style="color: #A94442; text-align: center; margin-top: 0;">Payment Failed 🔴</h2>
           <p>Hi ${order.address.fullName},</p>
           <p>We noticed an issue while processing your payment for order <b style="color: #D4A017;">${order.orderNumber}</b>.</p>
-          
           <div style="background: #FFFFFF; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #A94442;">
             <p style="margin: 0;"><b>Amount:</b> ₹${order.total}</p>
             <p style="margin: 5px 0 0 0;"><b>Reason:</b> ${reason || 'Transaction could not be completed'}</p>
           </div>
-
           <p>Don't worry, your order is still saved! You can try your payment again by visiting your orders page.</p>
-          
           <div style="text-align: center; margin: 20px 0;">
             <a href="${ordersLink}" style="display: inline-block; padding: 12px 25px; background: #D4A017; color: #140907; text-decoration: none; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Retry Payment</a>
           </div>
-
           <p>If you continue to experience issues, please contact our support team.</p>
           <br/>
           <p>Warm regards,<br/><b style="color: #381A14;">Team The Chocolate Mine</b></p>
@@ -215,8 +200,8 @@ const emailService = {
     });
   },
 
-  sendAdminPaymentFailed: (adminEmail, order, reason) => {
-    return sendMail({
+  sendAdminPaymentFailed: async (adminEmail, order, reason) => {
+    return await sendMail({
       to: adminEmail,
       subject: `🔴 PAYMENT FAILED: Order #${order.orderNumber}`,
       html: `
@@ -235,40 +220,41 @@ const emailService = {
     });
   },
 
-  sendLowStockAlert: (product) => {
-    return sendMail({
+  sendLowStockAlert: async (product) => {
+    return await sendMail({
       to: process.env.SMTP_EMAIL,
       subject: `Low Stock Alert: ${product.name}`,
       text: `Product ${product.name} is low on stock (${product.stock} left).`,
     });
   },
 
-  sendDailySalesReport: (reportData) => {
-    return sendMail({
+  sendDailySalesReport: async (reportData) => {
+    return await sendMail({
       to: process.env.SMTP_EMAIL,
       subject: 'Daily Sales Report',
       html: `<h1>Daily Sales</h1><p>${JSON.stringify(reportData)}</p>`,
     });
   },
 
-  sendMonthlyRevenueReport: (reportData) => {
-    return sendMail({
+  sendMonthlyRevenueReport: async (reportData) => {
+    return await sendMail({
       to: process.env.SMTP_EMAIL,
       subject: 'Monthly Revenue Report',
       html: `<h1>Monthly Revenue</h1><p>${JSON.stringify(reportData)}</p>`,
     });
   },
 
-  sendCustomerSupportMail: (userEmail, subject, message) => {
-    return sendMail({
+  sendCustomerSupportMail: async (userEmail, subject, message) => {
+    return await sendMail({
       to: process.env.SMTP_EMAIL,
       subject: `Support: ${subject}`,
       text: `From: ${userEmail}\n\n${message}`,
     });
   },
 
-  sendPasswordResetOTP: (email, otp) => {
-    return sendMail({
+  // 💡 FIX: Explicitly asynchronous to handle string interpolation safely
+  sendPasswordResetOTP: async (email, otp) => {
+    return await sendMail({
       to: email,
       subject: 'Password Reset OTP - The Chocolate Mine',
       html: `

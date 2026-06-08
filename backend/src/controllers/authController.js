@@ -208,47 +208,43 @@ exports.googleSuccess = asyncHandler(async (req, res) => {
 
 // @desc    Forgot Password - Generate OTP and send email
 // @route   POST /api/v1/auth/forgot-password
+// @desc    Forgot Password - Generate OTP and send email
+// @route   POST /api/v1/auth/forgot-password
+// @desc    Forgot Password - Optimized for Fast Frontend Loading
+// @route   POST /api/v1/auth/forgot-password
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
 
   if (!email) {
-    return next(
-      new AppError(
-        'Please provide an email address',
-        400
-      )
-    );
+    return next(new AppError('Please provide an email address', 400));
   }
 
-  const user = await User.findOne({ email });
+  const targetEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ email: targetEmail });
 
   if (!user) {
-    return next(
-      new AppError(
-        'No user found with that email address',
-        404
-      )
-    );
+    return next(new AppError('No user found with that email address', 404));
   }
 
-  const otp = Math.floor(
-    100000 + Math.random() * 900000
-  ).toString();
-
+  // 1. Generate OTP and Hash it
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const hashedOtp = await bcrypt.hash(otp, 12);
 
+  // 2. Wait for the Database record creation
   await OtpSession.create({
-    email,
+    email: targetEmail,
     hashedOtp,
     type: 'password_reset',
-    expiresAt: new Date(
-      Date.now() + 10 * 60 * 1000
-    ),
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
   });
 
+  // 3. 💡 OPTIMIZATION: Remove "await" from the email service!
+  // This sends the email in the background. Node.js won't block the API response.
+  emailService.sendPasswordResetOTP(targetEmail, otp).catch((err) => {
+    console.error('Background Email Sending Failed:', err.message);
+  });
 
-  await emailService.sendPasswordResetOTP(email, otp);
-
+  // 4. Respond instantly to the frontend!
   res.status(200).json({
     status: 'success',
     message: 'OTP sent to your email'

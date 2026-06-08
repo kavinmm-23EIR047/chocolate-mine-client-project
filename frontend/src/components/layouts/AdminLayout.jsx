@@ -41,6 +41,8 @@ const menuItems = [
 
 import Logo from '../Logo';
 import NotificationDropdown from '../ui/NotificationDropdown';
+import NotificationBanner from '../ui/NotificationBanner';
+import NotificationPrompt from '../ui/NotificationPrompt';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -130,7 +132,9 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
+      <NotificationBanner />
+      <div className="flex flex-1 overflow-hidden">
       {/* Desktop Sidebar */}
       <aside
         className={`
@@ -202,6 +206,8 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+      </div>
+      <NotificationPrompt />
     </div>
   );
 };

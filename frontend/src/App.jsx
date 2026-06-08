@@ -132,13 +132,17 @@ const GlobalNotificationHandler = () => {
   useEffect(() => {
     // 1. Firebase Foreground Push Notifications
     const unsubscribe = onMessageListener((payload) => {
-      if (payload?.notification) {
+      // Support both standard notification payloads AND data-only payloads
+      const title = payload.data?.title || payload.notification?.title;
+      const body = payload.data?.message || payload.notification?.body;
+      
+      if (title || body) {
         toast.success(
           <div className="flex flex-col gap-1">
-            <span className="font-bold">{payload.notification.title}</span>
-            <span className="text-xs">{payload.notification.body}</span>
+            <span className="font-bold">{title || 'The Chocolate Mine'}</span>
+            <span className="text-xs">{body || 'You have a new update'}</span>
           </div>,
-          { duration: 6000, icon: '🔔' }
+          { duration: 6000, icon: '🍫' }
         );
       }
     });

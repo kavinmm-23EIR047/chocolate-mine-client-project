@@ -106,7 +106,7 @@ const saveAdminWebNotification = async (title, message, type = 'admin_general', 
  */
 const saveBroadcastWebNotification = async (title, message, type = 'broadcast', metadata = {}) => {
   try {
-    const users = await User.find({ role: 'user', active: true }, '_id');
+    const users = await User.find({ active: { $ne: false } }, '_id');
     
     // Save DB record for each user
     for (const user of users) {

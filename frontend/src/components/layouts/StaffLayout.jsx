@@ -17,6 +17,8 @@ import { useAuth } from '../../context/AuthContext';
 import { getInitials } from '../../utils/helpers';
 import Logo from '../Logo';
 import NotificationDropdown from '../ui/NotificationDropdown';
+import NotificationBanner from '../ui/NotificationBanner';
+import NotificationPrompt from '../ui/NotificationPrompt';
 
 const menuItems = [
   { path: '/staff/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -32,7 +34,9 @@ const StaffLayout = () => {
   const location = useLocation();
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden text-heading">
+    <div className="flex flex-col h-screen bg-background overflow-hidden text-heading">
+      <NotificationBanner />
+      <div className="flex flex-1 overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border flex-shrink-0">
         <div className="px-5 py-6 border-b border-border">
@@ -168,6 +172,8 @@ const StaffLayout = () => {
           <Outlet />
         </main>
       </div>
+      </div>
+      <NotificationPrompt />
     </div>
   );
 };

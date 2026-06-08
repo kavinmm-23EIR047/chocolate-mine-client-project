@@ -188,8 +188,8 @@ const sendToMultipleUsers = async (userIds, title, body, data = {}) => {
  */
 const sendBroadcast = async (title, body, data = {}) => {
   try {
-    // Find all active users with role 'user'
-    const users = await User.find({ role: 'user', active: true }, 'fcmTokens');
+    // Find ALL active users (all roles: user, admin, staff) to ensure everyone gets broadcast notifications
+    const users = await User.find({ active: { $ne: false } }, 'fcmTokens');
     const tokens = users.flatMap(user => 
       (user.fcmTokens || []).map(t => typeof t === 'object' ? t.token : t).filter(Boolean)
     );

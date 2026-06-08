@@ -15,10 +15,11 @@ const NotificationPrompt = () => {
   const hasFcmToken = user?.fcmTokens && user.fcmTokens.length > 0;
 
   useEffect(() => {
-    // Auto-prompt on first load for logged-in users who haven't enabled notifications yet
+    // Auto-prompt on each session for logged-in users who haven't enabled notifications yet
     if (user && !hasFcmToken) {
-      const hasSeenPrompt = localStorage.getItem('notificationPromptSeen');
-      if (!hasSeenPrompt) {
+      // Use sessionStorage so the prompt re-appears each new browser session
+      const hasSeenPromptThisSession = sessionStorage.getItem('notificationPromptSeen');
+      if (!hasSeenPromptThisSession) {
         // Slight delay so it doesn't interrupt immediate page load
         const timer = setTimeout(() => setIsOpen(true), 2500);
         return () => clearTimeout(timer);
@@ -34,7 +35,8 @@ const NotificationPrompt = () => {
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem('notificationPromptSeen', '1');
+    // Only store in sessionStorage (resets on browser close) so it re-prompts next session
+    sessionStorage.setItem('notificationPromptSeen', '1');
     setIsOpen(false);
   };
 
@@ -51,9 +53,14 @@ const NotificationPrompt = () => {
         // Check if enabled successfully
         const isPermissionGranted = Notification.permission === 'granted';
         if (isPermissionGranted) {
-          toast.success("Push notifications enabled");
+          toast.success("🎉 Push notifications enabled! You'll get order updates and offers.");
+        } else if (Notification.permission === 'denied') {
+          toast.error(
+            "Notifications are blocked by your browser. Go to browser Settings → Site Settings → Notifications to allow.",
+            { duration: 8000 }
+          );
         } else {
-          toast.error("Please allow notification permissions in your browser settings.");
+          toast.error("Please allow notification permissions when prompted by your browser.");
         }
       }
       handleClose(); // Close modal on success

@@ -27,7 +27,7 @@ try {
     const notificationOptions = {
       body,
       icon: '/logo.png',
-      badge: '/favicon.svg',
+      badge: '/logo.png',
       tag: data.type || 'general', // Prevents duplicate notifications of same type
       renotify: true,
       requireInteraction: false,
@@ -60,7 +60,7 @@ try {
     event.notification.close();
 
     const data = event.notification.data || {};
-    
+
     // URL CLEANUP FIX: Safe construction preventing double slashes (//)
     const targetUrl = new URL(data.url || '/', self.location.origin).href;
 

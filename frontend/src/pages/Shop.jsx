@@ -19,7 +19,8 @@ const Shop = () => {
   const [categories, setCategories] = useState([]);
   const [occasions, setOccasions] = useState([]);
   // Mobile layout toggle: 'list' (horizontal, 1-col) or 'grid' (vertical, 2-col)
-  const [mobileLayout, setMobileLayout] = useState('list');
+  // Defaulting to grid as it matches your reference image better
+  const [mobileLayout, setMobileLayout] = useState('grid');
 
   const activeCategory = searchParams.get('category') || 'all';
   const activeOccasion = searchParams.get('occasion') || 'all';
@@ -129,16 +130,16 @@ const Shop = () => {
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button key={cat.name} onClick={() => updateSearchParam('category', cat.name)}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
                 activeCategory === cat.name
-                  ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-lg'
+                  ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                   : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
               }`}>
               {cat.label}
             </button>
           ))}
           <Link to="/custom-cake"
-            className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-amber-400 to-pink-500 text-white shadow-md hover:scale-105 flex items-center gap-1 transition-all">
+            className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-gradient-to-r from-amber-400 to-pink-500 text-white shadow-md hover:scale-105 flex items-center gap-1 transition-all">
             Custom Cakes ✨
           </Link>
         </div>
@@ -150,9 +151,9 @@ const Shop = () => {
           <div className="grid grid-cols-2 gap-1.5">
             {occasions.map((occ) => (
               <button key={occ.name} onClick={() => updateSearchParam('occasion', occ.name)}
-                className={`px-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-left transition-all ${
+                className={`px-2 py-2 rounded-lg text-[11px] font-bold text-left transition-all ${
                   activeOccasion === occ.name
-                    ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-md'
+                    ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                     : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
                 }`}>
                 {occ.label}
@@ -167,17 +168,17 @@ const Shop = () => {
         <div className="space-y-1.5">
           {[4, 3, 2].map((r) => (
             <button key={r} onClick={() => updateSearchParam('rating', activeRating === r ? 0 : r)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                 activeRating === r
                   ? 'bg-[var(--secondary)]/15 text-[var(--secondary)] border border-[var(--secondary)]/30'
                   : 'text-[var(--heading)]/70 hover:bg-[var(--heading)]/5 hover:text-[var(--heading)]'
               }`}>
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={11} className={i < r ? 'fill-[var(--secondary)] text-[var(--secondary)]' : 'text-[var(--heading)]/30'} />
+                  <Star key={i} size={12} className={i < r ? 'fill-[#FBBF24] text-[#FBBF24]' : 'text-[var(--heading)]/30'} />
                 ))}
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest">& up</span>
+              <span className="text-[11px] font-bold">& up</span>
             </button>
           ))}
         </div>
@@ -189,20 +190,20 @@ const Shop = () => {
         </h3>
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-bold text-[var(--heading)]/60 mb-1 block">Min ₹{priceRange[0]}</label>
+            <label className="text-[10px] font-bold text-[var(--heading)]/60 mb-1 block">Min ₹{priceRange[0]}</label>
             <input type="range" min={10} max={10000} step={50} value={priceRange[0]}
               onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
               onMouseUp={() => { updateSearchParam('minPrice', priceRange[0]); updateSearchParam('maxPrice', priceRange[1]); }}
               onTouchEnd={() => { updateSearchParam('minPrice', priceRange[0]); updateSearchParam('maxPrice', priceRange[1]); }}
-              className="w-full accent-[var(--primary)] cursor-pointer" />
+              className="w-full h-1.5 bg-[var(--border)] rounded-full appearance-none accent-[var(--primary)] cursor-pointer" />
           </div>
           <div>
-            <label className="text-[9px] font-bold text-[var(--heading)]/60 mb-1 block">Max ₹{priceRange[1]}</label>
+            <label className="text-[10px] font-bold text-[var(--heading)]/60 mb-1 block">Max ₹{priceRange[1]}</label>
             <input type="range" min={10} max={10000} step={50} value={priceRange[1]}
               onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
               onMouseUp={() => { updateSearchParam('minPrice', priceRange[0]); updateSearchParam('maxPrice', priceRange[1]); }}
               onTouchEnd={() => { updateSearchParam('minPrice', priceRange[0]); updateSearchParam('maxPrice', priceRange[1]); }}
-              className="w-full accent-[var(--primary)] cursor-pointer" />
+              className="w-full h-1.5 bg-[var(--border)] rounded-full appearance-none accent-[var(--primary)] cursor-pointer" />
           </div>
         </div>
       </section>
@@ -210,7 +211,7 @@ const Shop = () => {
       <section>
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Sort By</h3>
         <select value={sortBy} onChange={(e) => updateSearchParam('sort', e.target.value)}
-          className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-xl p-3 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer">
+          className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg p-2.5 text-[12px] font-bold outline-none cursor-pointer">
           <option value="newest">Newest First</option>
           <option value="price-low">Price: Low → High</option>
           <option value="price-high">Price: High → Low</option>
@@ -219,7 +220,7 @@ const Shop = () => {
       </section>
 
       <button onClick={clearFilters}
-        className="w-full py-3 border border-dashed border-[var(--heading)]/15 rounded-xl text-[10px] font-black uppercase tracking-widest text-[var(--heading)]/70 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all">
+        className="w-full py-3 border border-dashed border-[var(--heading)]/20 rounded-lg text-[12px] font-bold text-[var(--heading)]/80 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all">
         Reset All Filters
       </button>
     </div>
@@ -227,76 +228,67 @@ const Shop = () => {
 
   /* ── Mobile Top Bar: search + sort + layout toggle ── */
   const MobileTopBar = () => (
-    <div className="sm:hidden mb-4 flex flex-col gap-2.5">
+    <div className="sm:hidden mb-4 flex flex-col gap-3">
       {/* Search */}
       <div className="relative">
+        <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
         <input type="text" placeholder="Search products..." value={searchQuery}
           onChange={(e) => updateSearchParam('search', e.target.value)}
-          className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-2xl py-3 pl-11 pr-9 text-sm font-medium focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/40 outline-none transition-all"
+          className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg py-2.5 pl-10 pr-9 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
         />
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
         {searchQuery && (
-          <button onClick={() => updateSearchParam('search', '')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--heading)]">
-            <X size={14} />
+          <button onClick={() => updateSearchParam('search', '')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--heading)]">
+            <X size={16} />
           </button>
         )}
       </div>
 
       {/* Controls row */}
       <div className="flex items-center gap-2">
-        {/* Item count */}
-        <span className="text-[10px] font-black text-[var(--muted)] uppercase tracking-wider shrink-0">
-          {filteredProducts.length} items
-        </span>
-
-        <div className="flex-1" />
+        <button onClick={() => setIsFilterOpen(true)}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-[12px] font-bold text-[var(--heading)] hover:border-[var(--primary)] transition-colors">
+          <SlidersHorizontal size={14} /> Filter
+        </button>
 
         {/* Sort dropdown */}
-        <div className="relative">
+        <div className="relative flex-1">
           <select value={sortBy} onChange={(e) => updateSearchParam('sort', e.target.value)}
-            className="appearance-none bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-xl pl-3 pr-7 py-2 text-[10px] font-black uppercase tracking-wider outline-none cursor-pointer">
+            className="w-full appearance-none bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg pl-3 pr-7 py-2.5 text-[12px] font-bold outline-none cursor-pointer">
             <option value="newest">Newest</option>
             <option value="price-low">Price ↑</option>
             <option value="price-high">Price ↓</option>
             <option value="rating">Top Rated</option>
           </select>
-          <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
         </div>
 
         {/* Layout toggle */}
-        <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden">
+        <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-lg overflow-hidden shrink-0 h-[42px]">
           <button onClick={() => setMobileLayout('list')}
-            className={`p-2 transition-colors ${mobileLayout === 'list' ? 'bg-[var(--primary)] text-[var(--button-text)]' : 'text-[var(--muted)] hover:text-[var(--heading)]'}`}>
-            <List size={14} />
+            className={`h-full px-3 transition-colors ${mobileLayout === 'list' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'text-[var(--muted)] hover:text-[var(--heading)]'}`}>
+            <List size={16} />
           </button>
           <button onClick={() => setMobileLayout('grid')}
-            className={`p-2 transition-colors ${mobileLayout === 'grid' ? 'bg-[var(--primary)] text-[var(--button-text)]' : 'text-[var(--muted)] hover:text-[var(--heading)]'}`}>
-            <LayoutGrid size={14} />
+            className={`h-full px-3 transition-colors ${mobileLayout === 'grid' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'text-[var(--muted)] hover:text-[var(--heading)]'}`}>
+            <LayoutGrid size={16} />
           </button>
         </div>
-
-        {/* Filter button */}
-        <button onClick={() => setIsFilterOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-2 bg-[var(--card)] border border-[var(--border)] rounded-xl text-[10px] font-black uppercase tracking-wider text-[var(--heading)] hover:border-[var(--primary)] transition-colors">
-          <SlidersHorizontal size={13} />
-          Filter
-        </button>
       </div>
 
       {/* Category pills — horizontal scroll */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {categories.map((cat) => (
           <button key={cat.name} onClick={() => updateSearchParam('category', cat.name)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+            className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
               activeCategory === cat.name
                 ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
-                : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/70 hover:border-[var(--primary)]/40'
+                : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/80 hover:border-[var(--primary)]/40'
             }`}>
             {cat.label}
           </button>
         ))}
         <Link to="/custom-cake"
-          className="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap bg-gradient-to-r from-amber-400 to-pink-500 text-white">
+          className="shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-gradient-to-r from-amber-400 to-pink-500 text-white">
           Custom ✨
         </Link>
       </div>
@@ -305,35 +297,35 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-[var(--background)] pt-16 pb-20">
-      <div className="w-full mx-auto px-3 sm:px-8 lg:px-14">
+      <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
 
         {/* ── Desktop Page Header ── */}
-        <div className="hidden sm:block relative mb-10 overflow-hidden rounded-3xl bg-[var(--footer)] p-6 sm:p-10 border border-white/5 shadow-2xl">
+        <div className="hidden sm:block relative mb-8 overflow-hidden rounded-2xl bg-[var(--footer)] p-6 sm:p-10 border border-white/5 shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/8 via-transparent to-[var(--accent)]/8 pointer-events-none" />
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div>
-              <nav className="flex items-center gap-2 mb-2.5">
-                <Link to="/" className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 hover:text-[var(--primary)] transition-colors">Home</Link>
+              <nav className="flex items-center gap-2 mb-2">
+                <Link to="/" className="text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-[var(--primary)] transition-colors">Home</Link>
                 <span className="text-white/40">/</span>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">{getPageTitle()}</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-white">{getPageTitle()}</span>
               </nav>
-              <h1 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-2">{getPageTitle()}</h1>
-              <p className="text-xs text-white/80 font-medium max-w-md">Premium handcrafted confectionery, customized with passion and delivered fresh to your door.</p>
+              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">{getPageTitle()}</h1>
+              <p className="text-sm text-white/80 font-medium max-w-md">Premium handcrafted confectionery, customized with passion and delivered fresh to your door.</p>
             </div>
             <div className="flex flex-col items-end gap-3">
               <div className="relative w-72 group">
                 <input type="text" placeholder="Search products..." value={searchQuery}
                   onChange={(e) => updateSearchParam('search', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white rounded-2xl py-3.5 pl-14 pr-10 text-sm font-bold focus:ring-4 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)]/40 outline-none transition-all backdrop-blur-md"
+                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all backdrop-blur-md placeholder:text-white/40"
                 />
-                <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/60" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
                 {searchQuery && (
-                  <button onClick={() => updateSearchParam('search', '')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white">
-                    <X size={14} />
+                  <button onClick={() => updateSearchParam('search', '')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                    <X size={16} />
                   </button>
                 )}
               </div>
-              <span className="text-[10px] font-black text-white/70 uppercase tracking-[0.2em] bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+              <span className="text-[11px] font-bold text-white/80 bg-white/5 px-4 py-1.5 rounded-lg border border-white/10">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'Item' : 'Items'}
               </span>
             </div>
@@ -343,44 +335,48 @@ const Shop = () => {
         {/* ── Mobile: compact title ── */}
         <div className="sm:hidden flex items-center justify-between mb-3 pt-1">
           <div>
-            <h1 className="text-xl font-black text-[var(--heading)] uppercase tracking-tight leading-none">{getPageTitle()}</h1>
-            <p className="text-[10px] text-[var(--muted)] mt-0.5">Discover our artisan cakes made with love.</p>
+            <h1 className="text-xl font-black text-[var(--heading)] leading-none">{getPageTitle()}</h1>
+            <p className="text-[11px] text-[var(--muted)] mt-1 font-medium">Discover our artisan cakes made with love.</p>
           </div>
+          <span className="text-[10px] font-bold text-[var(--muted)] shrink-0">
+            {filteredProducts.length} items
+          </span>
         </div>
 
         {/* ── Mobile Top Bar ── */}
         <MobileTopBar />
 
         {/* ── Layout Body ── */}
-        <div className="flex gap-8">
+        <div className="flex gap-6 lg:gap-8">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-60 shrink-0">
+          <aside className="hidden lg:block w-64 shrink-0">
             <div className="sticky top-20"><FilterPanel /></div>
           </aside>
 
           <main className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-5">
+                {[...Array(8)].map((_, i) => <CardSkeleton key={i} />)}
               </div>
             ) : filteredProducts.length > 0 ? (
               <>
                 {/* ── Mobile: list (1-col horizontal) or grid (2-col vertical) ── */}
                 <div className="sm:hidden">
                   {mobileLayout === 'list' ? (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5">
                       {filteredProducts.map((product, i) => (
                         <motion.div key={product._id?.$oid || product._id}
-                          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
                           <ProductCard product={product} layout="horizontal" />
                         </motion.div>
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-3">
+                    // Tight 2-column grid matching the reference image perfectly
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
                       {filteredProducts.map((product, i) => (
                         <motion.div key={product._id?.$oid || product._id}
-                          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
                           <ProductCard product={product} layout="vertical" />
                         </motion.div>
                       ))}
@@ -388,11 +384,11 @@ const Shop = () => {
                   )}
                 </div>
 
-                {/* ── Desktop: 2-col (sm) → 3-col (lg) vertical grid ── */}
-                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+                {/* ── Desktop: 3-col (lg) -> 4-col (xl) vertical grid ── */}
+                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {filteredProducts.map((product, i) => (
                     <motion.div key={product._id?.$oid || product._id}
-                      initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+                      initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
                       <ProductCard product={product} layout="vertical" />
                     </motion.div>
                   ))}
@@ -402,7 +398,7 @@ const Shop = () => {
               <EmptyState
                 title="No products found"
                 message="Try adjusting your filters or search terms."
-                action={<button onClick={clearFilters} className="btn-primary">Clear All Filters</button>}
+                action={<button onClick={clearFilters} className="neo-btn text-sm">Clear All Filters</button>}
               />
             )}
           </main>
@@ -415,19 +411,19 @@ const Shop = () => {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsFilterOpen(false)}
-              className="fixed inset-0 bg-black/65 backdrop-blur-sm z-[200]" />
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]" />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28 }}
-              className="fixed right-0 top-0 bottom-0 w-[88%] max-w-sm bg-[var(--card)] z-[210] p-6 overflow-y-auto">
-              <div className="flex justify-between items-center mb-7">
-                <h2 className="text-xl font-black text-[var(--heading)] uppercase tracking-tighter">Filters</h2>
-                <button onClick={() => setIsFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-xl border border-[var(--border)] text-[var(--muted)]">
+              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-l border-[var(--border)]">
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
+                <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
+                <button onClick={() => setIsFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
                   <X size={18} />
                 </button>
               </div>
               <FilterPanel />
               <button onClick={() => setIsFilterOpen(false)}
-                className="w-full mt-6 py-4 bg-[var(--primary)] text-[var(--button-text)] rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl">
+                className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md">
                 Show Results
               </button>
             </motion.div>

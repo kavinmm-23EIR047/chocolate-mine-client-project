@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, Star, Tag, Eye, CheckCircle2, XCircle, ShoppingBag, Plus, Minus,
   Ticket, Gift, Sparkles, ChevronDown, Truck, Flame, Crown, Zap,
-  Shield, Clock, Package, TrendingUp, Info
+  Shield, Clock, Package, TrendingUp, Info, MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -122,7 +122,7 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied, onClose }) => {
   );
 };
 
-// Add to Cart Button (Slightly larger heights as requested)
+// Add to Cart Button
 const AddToCartBtn = ({ onClick, disabled, isOutOfStock, addingToCart, needsVariantSelection }) => {
   const label = needsVariantSelection ? 'Options' : addingToCart ? 'Adding…' : 'Add to Cart';
   return (
@@ -140,12 +140,12 @@ const AddToCartBtn = ({ onClick, disabled, isOutOfStock, addingToCart, needsVari
       }}
     >
       <ShoppingBag size={14} className="shrink-0" />
-      <span className="truncate">{label}</span>
+      <span>{label}</span>
     </button>
   );
 };
 
-// Quick View Button (Slightly larger)
+// Quick View Button
 const QuickViewBtn = ({ onClick }) => (
   <button
     onClick={onClick}
@@ -230,7 +230,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const productName = product.name;
   const hasValidImage = product.image && product.image !== 'none' && product.image.trim() !== '';
-  const isCakeCategory = String(product.category || '').toLowerCase().includes('cake');
 
   const QuantitySelector = () => (
     <div className="flex items-center justify-between rounded-lg font-bold h-10 sm:h-11 w-full" style={{ background: 'var(--card)', border: `1px solid var(--border)`, color: 'var(--heading)' }} onClick={(e) => e.stopPropagation()}>
@@ -271,6 +270,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
                 </>
               )}
             </div>
+
+            {/* Coupon tag inside horizontal layout if available */}
+            {isCouponActive && (
+              <div className="inline-flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded">
+                <Ticket size={10} /> Use code: {coupon.code}
+              </div>
+            )}
+
             {rating > 0 && (
               <div className="flex items-center gap-1.5">
                 <span className="bg-green-600 text-white px-1.5 py-0.5 rounded flex items-center gap-0.5 text-[10px] font-bold">
@@ -279,6 +286,10 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
                 {reviewCount > 0 && <span className="text-[10px] text-gray-500 font-medium">({reviewCount} Reviews)</span>}
               </div>
             )}
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 font-medium mt-1">
+              <MapPin size={10} className="text-gray-400 shrink-0" />
+              <span className="capitalize">{product.location || 'coimbatore'}</span>
+            </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
              {cartQuantity > 0 && !needsVariantSelection ? <div className="flex-1"><QuantitySelector /></div> : <AddToCartBtn onClick={handleInitialAdd} disabled={isOutOfStock} isOutOfStock={isOutOfStock} addingToCart={addingToCart} needsVariantSelection={needsVariantSelection} />}
@@ -295,7 +306,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       className={`group h-full flex flex-col transition-all duration-300 overflow-hidden w-full ${cardStyleMap[cardStyle]}`}
       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
     >
-      {/* Image - reduced height / increased width appearance by using aspect-square or slightly tall aspect */}
+      {/* Image Container */}
       <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden shrink-0 w-full" style={{ background: 'var(--surface)' }}>
         {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" loading="lazy" /> : <ImagePlaceholder />}
         
@@ -334,6 +345,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           )}
         </div>
 
+        {/* Coupon Indicator Tag */}
+        {isCouponActive && (
+          <div className="mb-1.5 flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded self-start">
+            <Ticket size={11} className="shrink-0" />
+            <span>Use code: {coupon.code}</span>
+          </div>
+        )}
+
         {/* Rating Line */}
         <div className="flex items-center gap-1.5 mb-1.5">
           {rating > 0 ? (
@@ -348,10 +367,12 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           )}
         </div>
 
-        {/* Delivery Info */}
+        {/* Location Info (Swapped out estimated hours info) */}
         <div className="flex items-center gap-1 mt-auto pb-2 border-b border-gray-100 dark:border-gray-800">
-           <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium truncate">Earliest Delivery: <strong className="font-semibold text-gray-700 dark:text-gray-300">In 3 hours</strong></span>
-           <Info size={10} className="text-gray-400 shrink-0" />
+           <MapPin size={11} className="text-gray-400 shrink-0" />
+           <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium capitalize">
+             Location: <strong className="font-semibold text-gray-700 dark:text-gray-300">{product.location || 'coimbatore'}</strong>
+           </span>
         </div>
 
         {/* Action Buttons Row */}

@@ -117,7 +117,6 @@
    --badge-discount-text: #DC2626;
    --badge-discount-border: #FECACA;
 
-   /* Optimized Green Badges for premium pop & clear readability */
    --badge-stock-bg: #E6F7EE;
    --badge-stock-text: #0B5334;
    --badge-stock-border: #C2EAD5;
@@ -280,38 +279,38 @@
    --button-alt-hover: #2A1813;
    --button-alt-hover-rgb: 42 24 19;
 
-   /* ─── BADGE COLORS - Dark Theme (Vibrant for visibility) ─── */
-   --badge-bestseller-bg: rgba(251, 191, 36, 0.2);
+   /* ─── BADGE COLORS - Dark Theme Solid Block Overrides ─── */
+   --badge-bestseller-bg: #332200;
    --badge-bestseller-text: #FBBF24;
-   --badge-bestseller-border: rgba(251, 191, 36, 0.4);
+   --badge-bestseller-border: rgba(251, 191, 36, 0.5);
 
-   --badge-featured-bg: rgba(236, 72, 153, 0.2);
+   --badge-featured-bg: #3D0C23;
    --badge-featured-text: #F472B6;
-   --badge-featured-border: rgba(236, 72, 153, 0.4);
+   --badge-featured-border: rgba(236, 72, 153, 0.5);
 
-   --badge-discount-bg: rgba(239, 68, 68, 0.2);
+   --badge-discount-bg: #450A0A;
    --badge-discount-text: #F87171;
-   --badge-discount-border: rgba(239, 68, 68, 0.4);
+   --badge-discount-border: rgba(239, 68, 68, 0.5);
 
-   --badge-stock-bg: rgba(16, 185, 129, 0.2);
+   --badge-stock-bg: #062F1E;
    --badge-stock-text: #34D399;
-   --badge-stock-border: rgba(16, 185, 129, 0.4);
+   --badge-stock-border: rgba(16, 185, 129, 0.5);
 
-   --badge-soldout-bg: rgba(107, 114, 128, 0.2);
+   --badge-soldout-bg: #1F2226;
    --badge-soldout-text: #9CA3AF;
-   --badge-soldout-border: rgba(107, 114, 128, 0.4);
+   --badge-soldout-border: rgba(107, 114, 128, 0.5);
 
-   --badge-coupon-bg: rgba(99, 102, 241, 0.2);
+   --badge-coupon-bg: #111338;
    --badge-coupon-text: #A5B4FC;
-   --badge-coupon-border: rgba(99, 102, 241, 0.4);
+   --badge-coupon-border: rgba(99, 102, 241, 0.5);
 
-   --badge-new-bg: rgba(16, 185, 129, 0.2);
+   --badge-new-bg: #062F1E;
    --badge-new-text: #34D399;
-   --badge-new-border: rgba(16, 185, 129, 0.4);
+   --badge-new-border: rgba(16, 185, 129, 0.5);
 
-   --badge-limited-bg: rgba(251, 191, 36, 0.2);
+   --badge-limited-bg: #332200;
    --badge-limited-text: #FBBF24;
-   --badge-limited-border: rgba(251, 191, 36, 0.4);
+   --badge-limited-border: rgba(251, 191, 36, 0.5);
 
    /* Semantic Colors */
    --success: #66BB6A;
@@ -376,10 +375,16 @@ body {
 }
 
 /* ───────────────────────────────────────────
-   BADGE STYLES
+   BADGE STYLES (Solid Blocks + Shifting Gradient Borders)
    ─────────────────────────────────────────── */
 
-/* Base Badge */
+@keyframes badgeBorderMove {
+   0% { background-position: 0% 50%; }
+   50% { background-position: 100% 50%; }
+   100% { background-position: 0% 50%; }
+}
+
+/* Base Badge Configuration */
 .neo-badge {
    display: inline-flex;
    align-items: center;
@@ -391,95 +396,91 @@ body {
    text-transform: uppercase;
    letter-spacing: 0.5px;
    white-space: nowrap;
+   position: relative;
+   z-index: 1;
 }
 
-/* Bestseller Badge */
-.badge-bestseller {
-   background: var(--badge-bestseller-bg);
+/* Base Gradient Animated Border Template */
+.badge-gradient-bestseller,
+.badge-gradient-featured,
+.badge-gradient-discount,
+.badge-gradient-new,
+.badge-gradient-limited {
+   border: none;
+   background-clip: padding-box;
+   position: relative;
+}
+
+.badge-gradient-bestseller::before,
+.badge-gradient-featured::before,
+.badge-gradient-discount::before,
+.badge-gradient-new::before,
+.badge-gradient-limited::before {
+   content: "";
+   position: absolute;
+   top: -1px; left: -1px; right: -1px; bottom: -1px;
+   border-radius: inherit;
+   z-index: -1;
+   background-size: 200% auto;
+   animation: badgeBorderMove 3s linear infinite;
+}
+
+/* Solid Fill Custom Overrides with Animated Borders */
+.badge-gradient-bestseller {
+   background-color: var(--badge-bestseller-bg);
    color: var(--badge-bestseller-text);
-   border: 1px solid var(--badge-bestseller-border);
+}
+.badge-gradient-bestseller::before {
+   background-image: linear-gradient(135deg, #F59E0B, #D97706, #FEF3C7, #F59E0B);
 }
 
-/* Featured Badge */
-.badge-featured {
-   background: var(--badge-featured-bg);
+.badge-gradient-featured {
+   background-color: var(--badge-featured-bg);
    color: var(--badge-featured-text);
-   border: 1px solid var(--badge-featured-border);
+}
+.badge-gradient-featured::before {
+   background-image: linear-gradient(135deg, #8B5CF6, #6D28D9, #FCE7F3, #8B5CF6);
 }
 
-/* Discount Badge */
-.badge-discount {
-   background: var(--badge-discount-bg);
+.badge-gradient-discount {
+   background-color: var(--badge-discount-bg);
    color: var(--badge-discount-text);
-   border: 1px solid var(--badge-discount-border);
+}
+.badge-gradient-discount::before {
+   background-image: linear-gradient(135deg, #EF4444, #DC2626, #FEE2E2, #EF4444);
 }
 
-/* In Stock Badge */
-.badge-instock {
-   background: var(--badge-stock-bg);
-   color: var(--badge-stock-text);
-   border: 1px solid var(--badge-stock-border);
+.badge-gradient-new {
+   background-color: var(--badge-new-bg);
+   color: var(--badge-new-text);
+}
+.badge-gradient-new::before {
+   background-image: linear-gradient(135deg, #10B981, #059669, #E6F7EE, #10B981);
 }
 
-/* Sold Out Badge */
-.badge-soldout {
-   background: var(--badge-soldout-bg);
-   color: var(--badge-soldout-text);
-   border: 1px solid var(--badge-soldout-border);
+.badge-gradient-limited {
+   background-color: var(--badge-limited-bg);
+   color: var(--badge-limited-text);
+}
+.badge-gradient-limited::before {
+   background-image: linear-gradient(135deg, #F59E0B, #EA580C, #FEF3C7, #F59E0B);
 }
 
-/* Coupon Badge */
+/* Standard Badges (Opaque Fills) */
+.badge-bestseller { background: var(--badge-bestseller-bg); color: var(--badge-bestseller-text); border: 1px solid var(--badge-bestseller-border); }
+.badge-featured { background: var(--badge-featured-bg); color: var(--badge-featured-text); border: 1px solid var(--badge-featured-border); }
+.badge-discount { background: var(--badge-discount-bg); color: var(--badge-discount-text); border: 1px solid var(--badge-discount-border); }
+.badge-instock { background: var(--badge-stock-bg); color: var(--badge-stock-text); border: 1px solid var(--badge-stock-border); }
+.badge-soldout { background: var(--badge-soldout-bg); color: var(--badge-soldout-text); border: 1px solid var(--badge-soldout-border); }
+.badge-new { background: var(--badge-new-bg); color: var(--badge-new-text); border: 1px solid var(--badge-new-border); }
+.badge-limited { background: var(--badge-limited-bg); color: var(--badge-limited-text); border: 1px solid var(--badge-limited-border); }
+
 .badge-coupon {
    background: var(--badge-coupon-bg);
    color: var(--badge-coupon-text);
    border: 1px solid var(--badge-coupon-border);
    font-family: monospace;
    letter-spacing: 1px;
-}
-
-/* New Arrival Badge */
-.badge-new {
-   background: var(--badge-new-bg);
-   color: var(--badge-new-text);
-   border: 1px solid var(--badge-new-border);
-}
-
-/* Limited Edition Badge */
-.badge-limited {
-   background: var(--badge-limited-bg);
-   color: var(--badge-limited-text);
-   border: 1px solid var(--badge-limited-border);
-}
-
-/* Gradient badges for product cards */
-.badge-gradient-bestseller {
-   background: linear-gradient(135deg, #F59E0B, #D97706);
-   color: white;
-   border: none;
-}
-
-.badge-gradient-featured {
-   background: linear-gradient(135deg, #8B5CF6, #6D28D9);
-   color: white;
-   border: none;
-}
-
-.badge-gradient-discount {
-   background: linear-gradient(135deg, #EF4444, #DC2626);
-   color: white;
-   border: none;
-}
-
-.badge-gradient-new {
-   background: linear-gradient(135deg, #10B981, #059669);
-   color: white;
-   border: none;
-}
-
-.badge-gradient-limited {
-   background: linear-gradient(135deg, #F59E0B, #EA580C);
-   color: white;
-   border: none;
 }
 
 /* ───────────────────────────────────────────
@@ -582,77 +583,30 @@ select:focus {
    justify-content: center;
 }
 
-/* Product Card */
-.product-card {
-   background: var(--card);
-   border-radius: 20px;
-   box-shadow: var(--nm-card);
-   border: 1px solid var(--border);
-   overflow: hidden;
-   transition: all 0.2s ease;
-}
-
-.product-card:hover {
-   transform: translateY(-2px);
-   box-shadow: var(--nm-extruded);
-}
-
-/* Product Card Variations - Different Border Radius Options */
-.product-card-rounded-sm {
-   background: var(--card);
-   border-radius: 12px;
-   box-shadow: var(--nm-card);
-   border: 1px solid var(--border);
-   overflow: hidden;
-   transition: all 0.2s ease;
-}
-
-.product-card-rounded-md {
-   background: var(--card);
-   border-radius: 16px;
-   box-shadow: var(--nm-card);
-   border: 1px solid var(--border);
-   overflow: hidden;
-   transition: all 0.2s ease;
-}
-
-.product-card-rounded-lg {
-   background: var(--card);
-   border-radius: 20px;
-   box-shadow: var(--nm-card);
-   border: 1px solid var(--border);
-   overflow: hidden;
-   transition: all 0.2s ease;
-}
-
-.product-card-rounded-xl {
-   background: var(--card);
-   border-radius: 24px;
-   box-shadow: var(--nm-card);
-   border: 1px solid var(--border);
-   overflow: hidden;
-   transition: all 0.2s ease;
-}
-
-.product-card-soft {
-   background: var(--card);
-   border-radius: 30px 16px 30px 16px;
-   box-shadow: var(--nm-card);
-   border: 1px solid var(--border);
-   overflow: hidden;
-   transition: all 0.2s ease;
-}
-
+/* Product Cards and Variations */
+.product-card,
+.product-card-rounded-sm,
+.product-card-rounded-md,
+.product-card-rounded-lg,
+.product-card-rounded-xl,
+.product-card-soft,
 .product-card-pill {
    background: var(--card);
-   border-radius: 32px;
    box-shadow: var(--nm-card);
    border: 1px solid var(--border);
    overflow: hidden;
    transition: all 0.2s ease;
 }
 
-/* Hover effects for all product card variations */
+.product-card { border-radius: 20px; }
+.product-card-rounded-sm { border-radius: 12px; }
+.product-card-rounded-md { border-radius: 16px; }
+.product-card-rounded-lg { border-radius: 20px; }
+.product-card-rounded-xl { border-radius: 24px; }
+.product-card-soft { border-radius: 30px 16px 30px 16px; }
+.product-card-pill { border-radius: 32px; }
+
+.product-card:hover,
 .product-card-rounded-sm:hover,
 .product-card-rounded-md:hover,
 .product-card-rounded-lg:hover,
@@ -664,21 +618,10 @@ select:focus {
 }
 
 /* Image border radius variations */
-.product-card-rounded-sm .product-image {
-   border-radius: 8px;
-}
-
-.product-card-rounded-md .product-image {
-   border-radius: 12px;
-}
-
-.product-card-rounded-lg .product-image {
-   border-radius: 16px;
-}
-
-.product-card-rounded-xl .product-image {
-   border-radius: 20px;
-}
+.product-card-rounded-sm .product-image { border-radius: 8px; }
+.product-card-rounded-md .product-image { border-radius: 12px; }
+.product-card-rounded-lg .product-image { border-radius: 16px; }
+.product-card-rounded-xl .product-image { border-radius: 20px; }
 
 /* Pagination Bullets */
 .neo-pagination-bullet {
@@ -705,21 +648,7 @@ select:focus {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-   width: 8px;
-   height: 8px;
-}
-
-::-webkit-scrollbar-track {
-   background: var(--border-light);
-   border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-   background: var(--border);
-   border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-   background: var(--border-dark);
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-dark); }

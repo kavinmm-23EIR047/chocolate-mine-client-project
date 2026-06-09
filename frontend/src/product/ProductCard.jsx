@@ -173,7 +173,7 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied, onClose }) => {
   );
 };
 
-// Enhanced Add to Cart Button with Neurophism
+// Fixed Add to Cart Button with proper theme logic (Light = dark bg + light text, Dark = light bg + dark text)
 const AddToCartBtn = ({ onClick, disabled, isOutOfStock, addingToCart, needsVariantSelection }) => {
   const label = needsVariantSelection
     ? 'Select Options'
@@ -193,15 +193,21 @@ const AddToCartBtn = ({ onClick, disabled, isOutOfStock, addingToCart, needsVari
         ${isOutOfStock
           ? 'bg-card-soft text-muted border border-border/50 cursor-not-allowed opacity-60'
           : `
-            bg-gradient-to-r from-[var(--button-bg-start)] to-[var(--button-bg-end)]
-            text-[var(--button-text)]
-            shadow-[inset_1px_1px_2px_rgba(255,255,255,0.3),inset_-1px_-1px_2px_rgba(0,0,0,0.05),3px_3px_8px_rgba(0,0,0,0.15)]
-            hover:shadow-[inset_2px_2px_3px_rgba(255,255,255,0.4),inset_-2px_-2px_3px_rgba(0,0,0,0.08),4px_4px_12px_rgba(0,0,0,0.2)]
+            /* Light theme: dark background + light text */
+            bg-gray-800 text-white
+            hover:bg-gray-900
+            /* Dark theme: light background + dark text */
+            dark:bg-gray-100 dark:text-gray-900
+            dark:hover:bg-gray-200
+            shadow-[inset_1px_1px_2px_rgba(255,255,255,0.2),inset_-1px_-1px_2px_rgba(0,0,0,0.05),3px_3px_8px_rgba(0,0,0,0.15)]
+            hover:shadow-[inset_2px_2px_3px_rgba(255,255,255,0.3),inset_-2px_-2px_3px_rgba(0,0,0,0.08),4px_4px_12px_rgba(0,0,0,0.2)]
           `
         }
       `}
     >
-      <ShoppingBag size={12} className="shrink-0 drop-shadow-sm" />
+      <ShoppingBag size={12} className={`shrink-0 drop-shadow-sm ${
+        isOutOfStock ? '' : 'light:text-white dark:text-gray-900'
+      }`} />
       <span className="hidden sm:inline truncate">{label}</span>
     </button>
   );
@@ -217,8 +223,10 @@ const QuickViewBtn = ({ onClick }) => (
       px-2 sm:px-3
       text-[8px] sm:text-[9px] font-bold uppercase tracking-wide
       border border-[var(--border)]
-      bg-[var(--button-alt-bg)] text-[var(--button-alt-text)]
-      hover:bg-[var(--button-alt-hover)]
+      /* Light theme: light background + dark text */
+      bg-gray-100 text-gray-800 hover:bg-gray-200
+      /* Dark theme: dark background + light text */
+      dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700
       shadow-[inset_1px_1px_2px_rgba(255,255,255,0.3),inset_-1px_-1px_2px_rgba(0,0,0,0.05),2px_2px_5px_rgba(0,0,0,0.1)]
       transition-all active:scale-95 whitespace-nowrap
     `}

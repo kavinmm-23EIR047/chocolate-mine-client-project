@@ -20,13 +20,12 @@ const ImagePlaceholder = () => (
   </div>
 );
 
-// Badge Component - For description side
+// Badge Component
 const ProductBadge = ({ type, value = "" }) => {
-  // Original Veg Icon (Green Square with Dot)
   if (type === 'veg') {
     return (
       <div title="Pure Veg" className="inline-flex items-center justify-center shrink-0">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="1" y="1" width="14" height="14" stroke="#008000" strokeWidth="2" />
           <circle cx="8" cy="8" r="4" fill="#008000" />
         </svg>
@@ -35,13 +34,13 @@ const ProductBadge = ({ type, value = "" }) => {
   }
 
   const badges = {
-    bestseller: { icon: <Flame size={10} />, text: "Bestseller", color: "amber" },
-    featured: { icon: <Crown size={10} />, text: "Featured", color: "purple" },
-    discount: { icon: <Zap size={10} />, text: `${value}% OFF`, color: "red" },
-    new: { icon: <Sparkles size={10} />, text: "New Arrival", color: "emerald" },
-    limited: { icon: <Clock size={10} />, text: "Limited Edition", color: "orange" },
-    eggless: { icon: <CheckCircle2 size={10} />, text: "Eggless", color: "teal" },
-    premium: { icon: <TrendingUp size={10} />, text: "Premium", color: "indigo" }
+    bestseller: { icon: <Flame size={9} />, text: "Bestseller", color: "amber" },
+    featured: { icon: <Crown size={9} />, text: "Featured", color: "purple" },
+    discount: { icon: <Zap size={9} />, text: `${value}% OFF`, color: "red" },
+    new: { icon: <Sparkles size={9} />, text: "New", color: "emerald" },
+    limited: { icon: <Clock size={9} />, text: "Limited", color: "orange" },
+    eggless: { icon: <CheckCircle2 size={9} />, text: "Eggless", color: "teal" },
+    premium: { icon: <TrendingUp size={9} />, text: "Premium", color: "indigo" }
   };
 
   const badge = badges[type];
@@ -58,7 +57,7 @@ const ProductBadge = ({ type, value = "" }) => {
   };
 
   return (
-    <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${colorClasses[badge.color]}`}>
+    <div className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border ${colorClasses[badge.color]}`}>
       {badge.icon}
       <span>{badge.text}</span>
     </div>
@@ -72,43 +71,40 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied, onClose }) => {
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
-      className={`relative rounded-lg overflow-hidden border-l-4 ${isApplied ? 'border-l-emerald-500 bg-emerald-500/5' : 'border-l-amber-500 bg-amber-500/5'
-        }`}
+      className={`relative rounded-lg overflow-hidden border-l-4 ${isApplied ? 'border-l-emerald-500 bg-emerald-500/5' : 'border-l-amber-500 bg-amber-500/5'}`}
     >
-      <div className="p-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${isApplied ? 'bg-emerald-500/20' : 'bg-amber-500/20'
-              }`}>
+      <div className="p-1.5">
+        <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isApplied ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
               {isApplied ? (
-                <CheckCircle2 size={12} className="text-emerald-500" />
+                <CheckCircle2 size={10} className="text-emerald-500" />
               ) : (
-                <Gift size={12} className="text-amber-500" />
+                <Gift size={10} className="text-amber-500" />
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-mono font-bold text-heading">{coupon.code}</span>
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isApplied ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'
-                  }`}>
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="text-[9px] font-mono font-bold text-heading">{coupon.code}</span>
+                <span className={`text-[8px] font-bold px-1 py-0.5 rounded ${isApplied ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'}`}>
                   {coupon.type === 'percent' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`}
                 </span>
               </div>
-              <p className="text-[8px] text-muted mt-0.5">{coupon.description || `Save on this product`}</p>
+              <p className="text-[7px] text-muted mt-0.5 truncate">{coupon.description || `Save on this product`}</p>
             </div>
           </div>
 
           {isApplied ? (
             <button
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              className="text-[9px] font-medium text-muted hover:text-red-500 shrink-0"
+              className="text-[8px] font-medium text-muted hover:text-red-500 shrink-0 whitespace-nowrap"
             >
               Remove
             </button>
           ) : (
             <button
               onClick={(e) => { e.stopPropagation(); onApply(); }}
-              className="px-2 py-1 text-[9px] font-bold rounded bg-amber-500 text-white hover:bg-amber-600 transition-colors shrink-0"
+              className="px-2 py-1 text-[8px] font-bold rounded bg-amber-500 text-white hover:bg-amber-600 transition-colors shrink-0"
             >
               Apply
             </button>
@@ -137,7 +133,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const cartQuantity = currentCartItem ? currentCartItem.qty : 0;
   const isLiked = isInWishlist(product._id);
 
-  // Card style mapping
   const cardStyles = {
     'rounded-sm': 'rounded-xl',
     'rounded-md': 'rounded-2xl',
@@ -231,19 +226,29 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const isCakeCategory = String(product.category || '').toLowerCase().includes('cake');
   const displayCategory = product.category ? product.category.replace(/-/g, ' ') : 'Artisan Delight';
 
+  // Mobile-optimized quantity selector — smaller on mobile
   const QuantitySelector = () => (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-card text-heading font-bold h-8 min-w-[80px]" onClick={(e) => e.stopPropagation()}>
-      <button onClick={(e) => handleQuantityChange(e, cartQuantity - 1)} className="h-full px-2 hover:bg-card-soft active:scale-95 flex items-center justify-center border-r border-border/40">
+    <div
+      className="flex items-center justify-between rounded-lg border border-border bg-card text-heading font-bold h-8 min-w-[76px] w-full sm:w-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={(e) => handleQuantityChange(e, cartQuantity - 1)}
+        className="h-full px-2 hover:bg-card-soft active:scale-95 flex items-center justify-center border-r border-border/40"
+      >
         <Minus size={10} />
       </button>
       <span className="text-[11px] px-1 font-black">{cartQuantity}</span>
-      <button onClick={(e) => handleQuantityChange(e, cartQuantity + 1)} className="h-full px-2 hover:bg-card-soft active:scale-95 flex items-center justify-center border-l border-border/40">
+      <button
+        onClick={(e) => handleQuantityChange(e, cartQuantity + 1)}
+        className="h-full px-2 hover:bg-card-soft active:scale-95 flex items-center justify-center border-l border-border/40"
+      >
         <Plus size={10} />
       </button>
     </div>
   );
 
-  // Horizontal Layout
+  // ─── Horizontal Layout ───────────────────────────────────────────────────────
   if (layout === 'horizontal') {
     return (
       <motion.div
@@ -251,66 +256,67 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={() => navigate(`/product/${product.slug}`)}
-        className={`group flex flex-row p-3 gap-4 cursor-pointer bg-card border border-border/50 hover:shadow-lg transition-all duration-300 ${cardStyles[cardStyle]}`}
+        className={`group flex flex-row p-2.5 gap-3 cursor-pointer bg-card border border-border/50 hover:shadow-lg transition-all duration-300 w-full ${cardStyles[cardStyle]}`}
       >
-        {/* Image Section */}
-        <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-surface border border-border/30">
+        {/* Image */}
+        <div className="relative w-20 h-20 sm:w-28 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-surface border border-border/30">
           {hasValidImage ? (
             <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
           ) : <ImagePlaceholder />}
 
           <button onClick={wish} className="absolute top-1 right-1 p-1 bg-card/80 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all z-10">
-            <Heart size={12} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-muted'} />
+            <Heart size={11} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-muted'} />
           </button>
 
           {isOutOfStock && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="text-[10px] font-black text-white bg-red-500 px-2 py-0.5 rounded-full">SOLD OUT</span>
+              <span className="text-[9px] font-black text-white bg-red-500 px-1.5 py-0.5 rounded-full">SOLD OUT</span>
             </div>
           )}
         </div>
 
-        {/* Content Section */}
-        <div className="flex flex-col flex-1 min-w-0 justify-between py-1">
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-1.5">
+        {/* Content */}
+        <div className="flex flex-col flex-1 min-w-0 justify-between py-0.5">
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-1">
               {isCakeCategory && <ProductBadge type="veg" />}
               {discountPct > 0 && <ProductBadge type="discount" value={discountPct} />}
               {product.bestseller && <ProductBadge type="bestseller" />}
               {product.featured && <ProductBadge type="featured" />}
             </div>
 
-            <h3 className="text-sm font-black text-heading leading-tight">
+            <h3 className="text-xs sm:text-sm font-black text-heading leading-tight line-clamp-2">
               {productName}
             </h3>
 
-            <p className="text-[10px] text-muted line-clamp-2 leading-relaxed">
+            <p className="text-[9px] text-muted line-clamp-2 leading-relaxed hidden sm:block">
               {product.shortDescription || "Premium quality handcrafted product made with finest ingredients."}
             </p>
 
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-black text-heading">₹{Math.round(finalPrice)}</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-base font-black text-heading">₹{Math.round(finalPrice)}</span>
               {(hasOffer || isCouponApplied) && (
-                <span className="text-[10px] font-bold text-muted line-through">₹{isCouponApplied ? displayPrice : mrp}</span>
+                <span className="text-[9px] font-bold text-muted line-through">₹{isCouponApplied ? displayPrice : mrp}</span>
               )}
             </div>
 
             {rating > 0 && (
               <div className="flex items-center gap-1">
-                <Star size={11} fill="#FBBF24" className="text-amber-400" />
-                <span className="text-[10px] font-bold text-heading">{rating.toFixed(1)}</span>
-                {reviewCount > 0 && <span className="text-[9px] text-muted">({reviewCount} reviews)</span>}
+                <Star size={10} fill="#FBBF24" className="text-amber-400" />
+                <span className="text-[9px] font-bold text-heading">{rating.toFixed(1)}</span>
+                {reviewCount > 0 && <span className="text-[8px] text-muted">({reviewCount})</span>}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/30">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-border/30">
             <button
               onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.slug}`); }}
-              className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1.5 border border-border bg-card text-muted hover:text-primary hover:border-primary/30 transition-all"
+              className="px-2 py-1.5 rounded-lg text-[9px] font-bold uppercase flex items-center gap-1 border border-border bg-card text-muted hover:text-primary hover:border-primary/30 transition-all"
             >
-              <Eye size={12} />
-              <span>View Details</span>
+              <Eye size={11} />
+              <span className="hidden xs:inline">View</span>
             </button>
 
             {cartQuantity > 0 && !needsVariantSelection ? (
@@ -319,13 +325,13 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
               <button
                 onClick={handleInitialAdd}
                 disabled={isOutOfStock}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1.5 transition-all ${isOutOfStock
+                className={`flex-1 px-2 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1 transition-all ${isOutOfStock
                   ? 'bg-card-soft text-muted border border-border/50 cursor-not-allowed opacity-60'
                   : 'bg-gradient-to-r from-primary to-primary/80 text-white hover:shadow-md active:scale-95'
                   }`}
               >
-                <ShoppingBag size={12} />
-                {needsVariantSelection ? 'Select Options' : addingToCart ? 'Adding...' : 'Add to Cart'}
+                <ShoppingBag size={11} />
+                {needsVariantSelection ? 'Select' : addingToCart ? 'Adding...' : 'Add to Cart'}
               </button>
             )}
           </div>
@@ -334,63 +340,72 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
     );
   }
 
-  // Vertical Layout - Fixed Even Heights
+  // ─── Vertical Layout ─────────────────────────────────────────────────────────
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       onClick={() => navigate(`/product/${product.slug}`)}
-      className={`group h-full flex flex-col bg-card border border-border/50 hover:shadow-lg transition-all duration-300 overflow-hidden ${cardStyles[cardStyle]}`}
+      className={`group h-full flex flex-col bg-card border border-border/50 hover:shadow-lg transition-all duration-300 overflow-hidden w-full ${cardStyles[cardStyle]}`}
     >
-      {/* Image Container */}
-      <div className="relative aspect-square bg-surface overflow-hidden shrink-0">
+      {/* Image — shorter on mobile */}
+      <div className="relative aspect-[4/3] sm:aspect-square bg-surface overflow-hidden shrink-0">
         {hasValidImage ? (
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
         ) : <ImagePlaceholder />}
 
-        <button onClick={wish} className="absolute top-2 right-2 p-1.5 bg-card/80 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all z-10">
-          <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-muted'} />
+        <button
+          onClick={wish}
+          className="absolute top-2 right-2 p-1.5 bg-card/80 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all z-10"
+        >
+          <Heart size={13} fill={isLiked ? '#ef4444' : 'none'} className={isLiked ? 'text-red-500' : 'text-muted'} />
         </button>
 
         {isOutOfStock && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
             <div className="flex flex-col items-center gap-1">
-              <XCircle size={24} className="text-red-400" />
-              <span className="text-[11px] font-black text-white bg-red-500 px-2 py-1 rounded-full">SOLD OUT</span>
+              <XCircle size={20} className="text-red-400" />
+              <span className="text-[10px] font-black text-white bg-red-500 px-2 py-0.5 rounded-full">SOLD OUT</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Content Container - Uses flex-1 to push footer to the bottom */}
-      <div className="p-3 flex flex-col flex-1">
+      {/* Content */}
+      <div className="p-2 sm:p-3 flex flex-col flex-1">
 
-        {/* Top Information Section */}
-        <div className="flex flex-col gap-2">
-          {/* Category */}
+        {/* Top Info */}
+        <div className="flex flex-col gap-1 sm:gap-1.5">
+
+          {/* Category + Delivery */}
           <div className="flex items-center justify-between">
-            <span className="text-[9px] text-muted font-bold uppercase tracking-wider">
+            <span className="text-[8px] text-muted font-bold uppercase tracking-wider truncate max-w-[55%]">
               {displayCategory}
             </span>
-            <div className="flex items-center gap-1">
-              <Truck size={10} className="text-muted" />
-              <span className="text-[8px] text-muted font-medium">Fast Delivery</span>
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Truck size={9} className="text-muted" />
+              <span className="text-[7px] text-muted font-medium">Fast Delivery</span>
             </div>
           </div>
 
           {/* Product Name */}
-          <h3 className="text-sm font-black text-heading leading-tight">
+          <h3 className="text-[12px] sm:text-sm font-black text-heading leading-tight line-clamp-2">
             {productName}
           </h3>
 
-          {/* Short Description */}
-          <p className="text-[10px] text-muted leading-relaxed line-clamp-2">
+          {/* Short Description — hidden on very small screens to save height */}
+          <p className="text-[9px] text-muted leading-relaxed line-clamp-2 hidden xs:block sm:block">
             {product.shortDescription || "Premium quality handcrafted product made with finest ingredients for your special moments."}
           </p>
 
-          {/* Badges Section */}
-          <div className="flex flex-wrap items-center gap-1.5 py-1">
+          {/* Badges — wrapping row, compact */}
+          <div className="flex flex-wrap items-center gap-1 py-0.5">
             {isCakeCategory && <ProductBadge type="veg" />}
             {!isCakeCategory && <ProductBadge type="eggless" />}
             {discountPct > 0 && <ProductBadge type="discount" value={discountPct} />}
@@ -398,91 +413,106 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             {product.featured && <ProductBadge type="featured" />}
           </div>
 
-          {/* Price Section */}
-          <div className="flex items-baseline gap-2">
-            <span className="text-lg font-black text-heading">₹{Math.round(finalPrice)}</span>
+          {/* Price */}
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-base sm:text-lg font-black text-heading">₹{Math.round(finalPrice)}</span>
             {(hasOffer || isCouponApplied) && (
               <span className="text-[9px] font-bold text-muted line-through">₹{isCouponApplied ? displayPrice : mrp}</span>
             )}
             {discountPct > 0 && !isCouponApplied && (
-              <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+              <span className="text-[8px] font-black text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">
                 Save {discountPct}%
               </span>
             )}
           </div>
 
-          {/* Rating & Stock Status */}
+          {/* Rating + Stock */}
           <div className="flex items-center justify-between">
             {rating > 0 ? (
-              <div className="flex items-center gap-1">
-                <Star size={11} fill="#FBBF24" className="text-amber-400" />
-                <span className="text-[10px] font-bold text-heading">{rating.toFixed(1)}</span>
+              <div className="flex items-center gap-0.5">
+                <Star size={10} fill="#FBBF24" className="text-amber-400" />
+                <span className="text-[9px] font-bold text-heading">{rating.toFixed(1)}</span>
                 {reviewCount > 0 && <span className="text-[8px] text-muted">({reviewCount})</span>}
               </div>
-            ) : (
-              <div />
-            )}
+            ) : <div />}
             {!isOutOfStock && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <CheckCircle2 size={9} className="text-emerald-500" />
-                <span className="text-[8px] font-medium text-emerald-600">In Stock</span>
+                <span className="text-[7px] font-medium text-emerald-600">In Stock</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Bottom Actions Section (Coupons & Buttons) - Pushed to the bottom evenly */}
-        <div className="mt-auto pt-3 flex flex-col gap-2">
+        {/* Bottom Actions */}
+        <div className="mt-auto pt-2 flex flex-col gap-1.5">
+
           {/* Coupon Section */}
           {isCouponActive && (
             <div>
               {isCouponApplied ? (
-                <CouponCard coupon={coupon} onApply={handleApplyCoupon} onRemove={handleRemoveCoupon} isApplied={true} />
+                <CouponCard
+                  coupon={coupon}
+                  onApply={handleApplyCoupon}
+                  onRemove={handleRemoveCoupon}
+                  isApplied={true}
+                />
               ) : showCoupon ? (
-                <CouponCard coupon={coupon} onApply={handleApplyCoupon} onRemove={handleRemoveCoupon} isApplied={false} onClose={() => setShowCoupon(false)} />
+                <CouponCard
+                  coupon={coupon}
+                  onApply={handleApplyCoupon}
+                  onRemove={handleRemoveCoupon}
+                  isApplied={false}
+                  onClose={() => setShowCoupon(false)}
+                />
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); setShowCoupon(true); }}
-                  className="w-full flex items-center justify-between p-1.5 rounded-lg bg-amber-500/5 border border-amber-500/20 hover:border-amber-500/40 transition-all"
+                  className="w-full flex items-center justify-between p-1.5 rounded-lg bg-amber-500/5 border border-amber-500/20 hover:border-amber-500/40 transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
-                    <Ticket size={11} className="text-amber-500" />
+                    <Ticket size={10} className="text-amber-500 shrink-0" />
                     <span className="text-[9px] font-bold text-amber-600">Available Coupon</span>
                   </div>
-                  <ChevronDown size={10} className="text-muted" />
+                  <ChevronDown size={10} className="text-amber-500 shrink-0" />
                 </button>
               )}
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+          {/* Action Buttons Row */}
+          <div className="flex items-center gap-1.5 w-full">
+            {/* Quick View */}
             <button
               onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.slug}`); }}
-              className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase flex items-center justify-center gap-1.5 border border-border bg-card text-muted hover:text-primary hover:border-primary/30 transition-all"
+              className="flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-[9px] font-bold uppercase border border-border bg-card text-muted hover:text-primary hover:border-primary/30 transition-all shrink-0 h-9"
             >
               <Eye size={12} />
-              <span>Quick View</span>
+              <span className="hidden sm:inline">Quick View</span>
             </button>
 
+            {/* Add to Cart / Quantity */}
             {cartQuantity > 0 && !needsVariantSelection ? (
-              <QuantitySelector />
+              <div className="flex-1">
+                <QuantitySelector />
+              </div>
             ) : (
               <button
                 onClick={handleInitialAdd}
                 disabled={isOutOfStock}
-                className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-1.5 transition-all ${isOutOfStock
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl text-[10px] font-black uppercase h-9 transition-all ${isOutOfStock
                   ? 'bg-card-soft text-muted border border-border/50 cursor-not-allowed opacity-60'
                   : 'bg-gradient-to-r from-primary to-primary/80 text-white hover:shadow-md active:scale-95'
                   }`}
               >
                 <ShoppingBag size={12} />
-                {needsVariantSelection ? 'Select' : addingToCart ? '...' : 'Add to Cart'}
+                <span>
+                  {needsVariantSelection ? 'Select Options' : addingToCart ? 'Adding...' : 'Add to Cart'}
+                </span>
               </button>
             )}
           </div>
         </div>
-
       </div>
     </motion.div>
   );

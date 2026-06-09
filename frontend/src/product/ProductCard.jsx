@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart, Star, Tag, Eye, CheckCircle2, XCircle, ShoppingBag, Plus, Minus,
-  Ticket, Gift, Sparkles, ChevronDown, Truck, Flame, Crown, Zap,
-  Shield, Clock, Package, TrendingUp, Info, MapPin
+  Heart, Star, Eye, ShoppingBag, Plus, Minus, Ticket, ChevronDown, MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,11 +10,11 @@ import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 
 const ImagePlaceholder = () => (
-  <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: 'var(--card-soft)' }}>
-    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-      <ShoppingBag className="w-3.5 h-3.5" style={{ color: 'var(--muted)' }} />
+  <div className="w-full h-full flex flex-col items-center justify-center bg-[#241b15]">
+    <div className="w-9 h-9 rounded-full flex items-center justify-center bg-[#16110e] border border-[#2d241e]">
+      <ShoppingBag className="w-4 h-4 text-gray-500" />
     </div>
-    <span className="text-[8px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--muted)' }}>Artisan</span>
+    <span className="text-[9px] font-black uppercase tracking-widest mt-2 text-gray-500">Artisan</span>
   </div>
 );
 
@@ -142,14 +140,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
   const [showCoupon, setShowCoupon] = useState(false);
   const [isCouponApplied, setIsCouponApplied] = useState(false);
 
-  const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
+  const hasVariants = product?.hasVariants || (product?.variants && product.variants.length > 0);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const activeVariant = hasVariants && product.variants ? product.variants[selectedVariantIndex] : null;
 
   const cartItems = useSelector((state) => state.cart?.items || []);
   
   const currentCartItem = cartItems.find(item => {
-    const standardMatch = item.product?._id === product._id || item._id === product._id;
+    const standardMatch = item.product?._id === product?._id || item._id === product?._id;
     if (standardMatch && activeVariant) {
       return item.options?.flavor === activeVariant.flavor && item.options?.weight === activeVariant.weight;
     }
@@ -157,7 +155,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
   });
   
   const cartQuantity = currentCartItem ? currentCartItem.qty : 0;
-  const isLiked = isInWishlist(product._id);
+  const isLiked = product?._id ? isInWishlist(product._id) : false;
 
   const cardStyleMap = {
     'rounded-sm': 'rounded-sm',
@@ -166,15 +164,15 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
     'rounded-xl': 'rounded-xl',
   };
 
-  const baseMrp = activeVariant ? activeVariant.price : product.price;
-  const baseOfferPrice = !activeVariant && product.offerPrice ? product.offerPrice : null;
+  const baseMrp = activeVariant ? activeVariant.price : (product?.price || 0);
+  const baseOfferPrice = !activeVariant && product?.offerPrice ? product.offerPrice : null;
   
   const hasOffer = baseOfferPrice && baseOfferPrice < baseMrp;
   const displayPrice = hasOffer ? baseOfferPrice : baseMrp;
   const mrp = baseMrp;
   const discountPct = hasOffer ? Math.round(((mrp - displayPrice) / mrp) * 100) : 0;
 
-  const coupon = product.coupon;
+  const coupon = product?.coupon;
   const isCouponActive = coupon?.enabled && coupon?.code && (!coupon.endDate || new Date(coupon.endDate) > new Date());
 
   const handleApplyCoupon = () => { setIsCouponApplied(true); toast.success(`${coupon.code} applied!`); setShowCoupon(false); };
@@ -184,15 +182,19 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
     ? coupon.type === 'percent' ? displayPrice - (displayPrice * coupon.value / 100) : Math.max(0, displayPrice - coupon.value)
     : displayPrice;
 
-  const isOutOfStock = activeVariant ? activeVariant.stock === false : product.stock === false;
-  const rating = Number(product.ratingsAverage) || 0;
-  const reviewCount = Number(product.ratingsCount) || 0;
-  const isCakeCategory = String(product.category || '').toLowerCase().includes('cake') || !!product.cakeType;
+  const isOutOfStock = activeVariant ? activeVariant.stock === false : product?.stock === false;
+  const rating = Number(product?.ratingsAverage) || 0;
+  const reviewCount = Number(product?.ratingsCount) || 0;
+  const isCakeCategory = String(product?.category || '').toLowerCase().includes('cake') || !!product?.cakeType;
+
+  // SAFE IMAGE VALIDATION
+  const hasValidImage = typeof product?.image === 'string' && product.image.trim() !== '' && product.image !== 'none';
 
   const handleQuantityChange = (e, newQty) => {
     e.preventDefault(); e.stopPropagation();
     if (newQty < 0) return;
-    const matchId = currentCartItem?._id || product._id;
+    const matchId = currentCartItem?._id || product?._id;
+    if (!matchId) return;
     if (newQty === 0) { 
       dispatch(removeFromCart(matchId)); 
       toast.success('Removed from bag'); 
@@ -203,7 +205,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
 
   const handleInitialAdd = async (e) => {
     e.preventDefault(); e.stopPropagation();
-    if (isOutOfStock) return;
+    if (isOutOfStock || !product) return;
     try {
       setAddingToCart(true);
       dispatch(addToCart({
@@ -216,7 +218,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
     } catch (err) { toast.error('Failed to add'); } finally { setTimeout(() => setAddingToCart(false), 300); }
   };
 
-  const wish = (e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product._id); };
+  const wish = (e) => { e.preventDefault(); e.stopPropagation(); if (product?._id) toggleWishlist(product._id); };
 
   const QuantitySelector = () => (
     <div className="flex items-center justify-between rounded-xl font-bold h-11 w-full bg-[#261f1a] border border-[#3d3026] text-white" onClick={(e) => e.stopPropagation()}>
@@ -230,6 +232,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
     </div>
   );
 
+  if (!product) return null;
+
   // ─── Horizontal Layout ──────────────────────────────────────────────────
   if (layout === 'horizontal') {
     return (
@@ -240,14 +244,12 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
         <div className="relative w-32 h-32 shrink-0 rounded-xl overflow-hidden bg-[#241b15]">
           {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover object-center" loading="lazy" /> : <ImagePlaceholder />}
           
-          {/* Veg Icon Fixed to Bottom Left corner over image */}
           {isCakeCategory && (
             <div className="absolute bottom-2 left-2 z-10">
               <ProductBadge type="veg" />
             </div>
           )}
 
-          {/* Solid Opaque White Circle for Heart Button */}
           <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-md z-10 bg-[#ffffff] hover:bg-gray-100 transition-colors">
             <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : '#1a110b' }} />
           </button>
@@ -317,29 +319,25 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
     );
   }
 
-  // ─── Vertical Layout (Grid View matched to App Screenshot) ───────────────────
+  // ─── Vertical Layout ─────────────────────────────────────────────────────
   return (
     <motion.div
       layout onClick={() => navigate(`/product/${product.slug}`)}
       className={`group h-full flex flex-col transition-all duration-300 overflow-hidden w-full ${cardStyleMap[cardStyle]} bg-[#16110e] border border-[#261e19]`}
     >
-      {/* Image Container */}
       <div className="relative aspect-square overflow-hidden shrink-0 w-full bg-[#241b15]">
         {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500" loading="lazy" /> : <ImagePlaceholder />}
         
-        {/* CONFLICT FIXED: Veg Badge locked safely to the bottom left edge of image */}
         {isCakeCategory && (
           <div className="absolute bottom-2 left-2 z-10">
             <ProductBadge type="veg" />
           </div>
         )}
 
-        {/* SOLID SOLID SOLID: No transparent backgrounds to break contrast over dark cakes */}
         <button onClick={wish} className="absolute top-2 right-2 p-2 rounded-full shadow-md z-10 bg-[#ffffff] hover:bg-gray-100 transition-colors">
           <Heart size={15} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : '#1a110b' }} />
         </button>
 
-        {/* Top-Left Banner Stack */}
         {product.bestseller && <ProductBadge type="bestseller" absolute />}
         {!product.bestseller && product.featured && <ProductBadge type="featured" absolute />}
         {!product.bestseller && !product.featured && product.new && <ProductBadge type="new" absolute />}
@@ -351,13 +349,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
         )}
       </div>
 
-      {/* Info Context Area */}
       <div className="p-3 flex flex-col flex-1 text-left">
         <h3 className="text-[14px] font-bold leading-tight text-gray-100 line-clamp-1 mb-1">
           {product.name}
         </h3>
 
-        {/* Pricing Segment */}
         <div className="flex items-center gap-1.5 flex-wrap mb-2">
           <span className="text-[16px] font-black text-white">₹{Math.round(finalPrice)}</span>
           {(hasOffer || isCouponApplied) && (
@@ -368,7 +364,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
           )}
         </div>
 
-        {/* Weight Selector Configuration */}
         {hasVariants && product.variants.length > 1 && (
           <div className="flex items-center gap-1 flex-wrap mb-2" onClick={(e) => e.stopPropagation()}>
             {product.variants.map((v, idx) => (
@@ -385,7 +380,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
           </div>
         )}
 
-        {/* Active Promotional Coupons */}
         {isCouponActive && (
           <div className="mb-2 flex flex-col items-start w-full" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowCoupon(!showCoupon)} className="flex items-center gap-1 text-[10px] font-bold text-green-400 bg-[#1e2c1e] px-2 py-0.5 rounded-md border border-green-900/50 cursor-pointer">
@@ -399,7 +393,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
           </div>
         )}
 
-        {/* Review Indicator Layer */}
         <div className="flex items-center gap-1.5 mb-2">
           {rating > 0 ? (
             <>
@@ -413,7 +406,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
           )}
         </div>
 
-        {/* Location Row */}
         <div className="flex items-center gap-1 mt-auto pb-3 border-b border-[#261f1a]">
            <MapPin size={12} className="text-gray-500 shrink-0" />
            <span className="text-[11px] text-gray-400 font-medium capitalize">
@@ -421,7 +413,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-xl' })
            </span>
         </div>
 
-        {/* Interaction Elements Row */}
         <div className="flex items-center gap-2 w-full mt-3">
           <QuickViewBtn onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.slug}`); }} />
           {cartQuantity > 0 ? (

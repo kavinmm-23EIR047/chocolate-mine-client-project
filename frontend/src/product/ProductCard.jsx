@@ -95,7 +95,7 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied, onClose }) => {
       initial={{ opacity: 0, height: 0, y: -10 }}
       animate={{ opacity: 1, height: 'auto', y: 0 }}
       exit={{ opacity: 0, height: 0, y: -10 }}
-      className="relative rounded-lg overflow-hidden border-l-4 mt-1.5"
+      className="relative rounded-lg overflow-hidden border-l-4 mt-1.5 w-full"
       style={{
         background: isApplied ? 'var(--badge-stock-bg)' : 'var(--badge-coupon-bg)',
         borderLeftColor: isApplied ? 'var(--success)' : 'var(--accent)',
@@ -112,9 +112,9 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied, onClose }) => {
             </div>
           </div>
           {isApplied ? (
-            <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="text-[8px] font-bold text-red-500">Remove</button>
+            <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="text-[8px] font-bold text-red-500 cursor-pointer">Remove</button>
           ) : (
-            <button onClick={(e) => { e.stopPropagation(); onApply(); }} className="px-2 py-0.5 text-[8px] font-black rounded-md" style={{ background: 'var(--accent)', color: 'var(--button-text)' }}>Apply</button>
+            <button onClick={(e) => { e.stopPropagation(); onApply(); }} className="px-2 py-0.5 text-[8px] font-black rounded-md cursor-pointer" style={{ background: 'var(--accent)', color: 'var(--button-text)' }}>Apply</button>
           )}
         </div>
       </div>
@@ -149,7 +149,7 @@ const AddToCartBtn = ({ onClick, disabled, isOutOfStock, addingToCart, needsVari
 const QuickViewBtn = ({ onClick }) => (
   <button
     onClick={onClick}
-    className="flex items-center justify-center gap-1 rounded-lg h-10 sm:h-11 shrink-0 px-2.5 sm:px-3.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide transition-all active:scale-95"
+    className="flex items-center justify-center gap-1 rounded-lg h-10 sm:h-11 shrink-0 px-2.5 sm:px-3.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide transition-all active:scale-95 cursor-pointer"
     style={{
       background: 'var(--button-alt-bg)',
       color: 'var(--button-alt-text)',
@@ -165,11 +165,27 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  
   const [addingToCart, setAddingToCart] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
+
+  // 1. Full Variant Tracking Setup
+  const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const activeVariant = hasVariants && product.variants ? product.variants[selectedVariantIndex] : null;
 
   const cartItems = useSelector((state) => state.cart?.items || []);
-  const currentCartItem = cartItems.find(item => item.product?._id === product._id || item._id === product._id);
+  
+  // Track cart matching variant dimensions if applicable
+  const currentCartItem = cartItems.find(item => {
+    const standardMatch = item.product?._id === product._id || item._id === product._id;
+    if (standardMatch && activeVariant) {
+      return item.options?.flavor === activeVariant.flavor && item.options?.weight === activeVariant.weight;
+    }
+    return standardMatch;
+  });
+  
   const cartQuantity = currentCartItem ? currentCartItem.qty : 0;
   const isLiked = isInWishlist(product._id);
 
@@ -180,16 +196,18 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
     'rounded-xl': 'rounded-xl',
   };
 
-  const hasVariants = product.hasVariants || (product.variants && product.variants.length > 0);
-  const needsVariantSelection = hasVariants && product.variants?.length > 1;
-  const hasOffer = !hasVariants && product.offerPrice && product.offerPrice < product.price;
-  const displayPrice = hasOffer ? product.offerPrice : product.price;
-  const mrp = product.price;
+  // 2. Pricing Calculations based on regular vs variant architecture
+  const baseMrp = activeVariant ? activeVariant.price : product.price;
+  const baseOfferPrice = !activeVariant && product.offerPrice ? product.offerPrice : null;
+  
+  const hasOffer = baseOfferPrice && baseOfferPrice < baseMrp;
+  const displayPrice = hasOffer ? baseOfferPrice : baseMrp;
+  const mrp = baseMrp;
   const discountPct = hasOffer ? Math.round(((mrp - displayPrice) / mrp) * 100) : 0;
 
+  // Coupon configuration
   const coupon = product.coupon;
   const isCouponActive = coupon?.enabled && coupon?.code && (!coupon.endDate || new Date(coupon.endDate) > new Date());
-  const [isCouponApplied, setIsCouponApplied] = useState(false);
 
   const handleApplyCoupon = () => { setIsCouponApplied(true); toast.success(`${coupon.code} applied!`); setShowCoupon(false); };
   const handleRemoveCoupon = () => { setIsCouponApplied(false); toast.success(`${coupon.code} removed`); };
@@ -198,29 +216,40 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
     ? coupon.type === 'percent' ? displayPrice - (displayPrice * coupon.value / 100) : Math.max(0, displayPrice - coupon.value)
     : displayPrice;
 
-  const isOutOfStock = product.stock === false;
+  // 3. Stock computation linked to active variant status
+  const isOutOfStock = activeVariant ? activeVariant.stock === false : product.stock === false;
+  
   const rating = Number(product.ratingsAverage) || 0;
   const reviewCount = Number(product.ratingsCount) || 0;
+
+  // Cake-specific checks
+  const isCakeCategory = String(product.category || '').toLowerCase().includes('cake') || !!product.cakeType;
 
   const handleQuantityChange = (e, newQty) => {
     e.preventDefault(); e.stopPropagation();
     if (newQty < 0) return;
     try {
-      if (newQty === 0) { dispatch(removeFromCart(product._id)); toast.success('Removed from bag'); }
-      else { dispatch(updateCartQty({ productId: product._id, qty: newQty })); }
+      const matchId = currentCartItem?._id || product._id;
+      if (newQty === 0) { 
+        dispatch(removeFromCart(matchId)); 
+        toast.success('Removed from bag'); 
+      } else { 
+        dispatch(updateCartQty({ productId: matchId, qty: newQty })); 
+      }
     } catch (err) { toast.error('Could not update bag'); }
   };
 
   const handleInitialAdd = async (e) => {
     e.preventDefault(); e.stopPropagation();
     if (isOutOfStock) return;
-    if (needsVariantSelection) { navigate(`/product/${product.slug}`); return; }
+    
     try {
       setAddingToCart(true);
       dispatch(addToCart({
-        product: product, qty: 1,
-        options: hasVariants && product.variants ? { flavor: product.variants[0].flavor, weight: product.variants[0].weight } : null,
-        variantPrice: hasVariants && product.variants ? product.variants[0].price : null
+        product: product, 
+        qty: 1,
+        options: activeVariant ? { flavor: activeVariant.flavor, weight: activeVariant.weight } : null,
+        variantPrice: activeVariant ? activeVariant.price : null
       }));
       toast.success('Added to bag');
     } catch (err) { toast.error('Failed to add'); } finally { setTimeout(() => setAddingToCart(false), 300); }
@@ -233,11 +262,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const QuantitySelector = () => (
     <div className="flex items-center justify-between rounded-lg font-bold h-10 sm:h-11 w-full" style={{ background: 'var(--card)', border: `1px solid var(--border)`, color: 'var(--heading)' }} onClick={(e) => e.stopPropagation()}>
-      <button onClick={(e) => handleQuantityChange(e, cartQuantity - 1)} className="h-full px-3 sm:px-4 flex items-center justify-center transition-colors rounded-l-lg" style={{ borderRight: `1px solid var(--border)` }}>
+      <button onClick={(e) => handleQuantityChange(e, cartQuantity - 1)} className="h-full px-3 sm:px-4 flex items-center justify-center transition-colors rounded-l-lg cursor-pointer" style={{ borderRight: `1px solid var(--border)` }}>
         <Minus size={12} />
       </button>
       <span className="text-[12px] px-2 font-black">{cartQuantity}</span>
-      <button onClick={(e) => handleQuantityChange(e, cartQuantity + 1)} className="h-full px-3 sm:px-4 flex items-center justify-center transition-colors rounded-r-lg" style={{ borderLeft: `1px solid var(--border)` }}>
+      <button onClick={(e) => handleQuantityChange(e, cartQuantity + 1)} className="h-full px-3 sm:px-4 flex items-center justify-center transition-colors rounded-r-lg cursor-pointer" style={{ borderLeft: `1px solid var(--border)` }}>
         <Plus size={12} />
       </button>
     </div>
@@ -253,6 +282,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       >
         <div className="relative w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-lg overflow-hidden" style={{ background: 'var(--surface)' }}>
           {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover object-center" loading="lazy" /> : <ImagePlaceholder />}
+          
+          <div className="absolute top-1.5 left-1.5 flex flex-col gap-1 z-10">
+            {isCakeCategory && <ProductBadge type="veg" />}
+          </div>
+
           <button onClick={wish} className="absolute top-1.5 right-1.5 p-1.5 rounded-full shadow-sm z-10 bg-white/80 hover:bg-white transition-colors">
             <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : '#666' }} />
           </button>
@@ -261,6 +295,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         <div className="flex flex-col flex-1 min-w-0 justify-between py-0.5">
           <div className="space-y-1">
             <h3 className="text-[13px] sm:text-[14px] font-semibold leading-snug line-clamp-2" style={{ color: 'var(--heading)' }}>{productName}</h3>
+            
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[14px] sm:text-[15px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
               {(hasOffer || isCouponApplied) && (
@@ -271,10 +306,34 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
               )}
             </div>
 
-            {/* Coupon tag inside horizontal layout if available */}
+            {/* Live Variant Weight Badges/Selectors */}
+            {hasVariants && product.variants.length > 1 && (
+              <div className="flex items-center gap-1 flex-wrap py-0.5" onClick={(e) => e.stopPropagation()}>
+                {product.variants.map((v, idx) => (
+                  <button key={idx} onClick={() => setSelectedVariantIndex(idx)}
+                    className="px-1.5 py-0.5 rounded text-[8px] font-bold border transition-all"
+                    style={{
+                      background: selectedVariantIndex === idx ? 'var(--primary)' : 'var(--card-soft)',
+                      color: selectedVariantIndex === idx ? 'var(--button-text)' : 'var(--heading)',
+                      borderColor: selectedVariantIndex === idx ? 'var(--primary)' : 'var(--border)'
+                    }}>
+                    {v.weight}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isCouponActive && (
-              <div className="inline-flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded">
-                <Ticket size={10} /> Use code: {coupon.code}
+              <div className="flex flex-col gap-1 items-start">
+                <button onClick={(e) => { e.stopPropagation(); setShowCoupon(!showCoupon); }} 
+                  className="inline-flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded cursor-pointer">
+                  <Ticket size={10} /> {isCouponApplied ? 'Coupon Applied! 🎉' : `Use code: ${coupon.code}`} <ChevronDown size={8} />
+                </button>
+                <AnimatePresence>
+                  {showCoupon && (
+                    <CouponCard coupon={coupon} onApply={handleApplyCoupon} onRemove={handleRemoveCoupon} isApplied={isCouponApplied} />
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
@@ -286,13 +345,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
                 {reviewCount > 0 && <span className="text-[10px] text-gray-500 font-medium">({reviewCount} Reviews)</span>}
               </div>
             )}
+
             <div className="flex items-center gap-1 text-[10px] text-gray-500 font-medium mt-1">
               <MapPin size={10} className="text-gray-400 shrink-0" />
               <span className="capitalize">{product.location || 'coimbatore'}</span>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
-             {cartQuantity > 0 && !needsVariantSelection ? <div className="flex-1"><QuantitySelector /></div> : <AddToCartBtn onClick={handleInitialAdd} disabled={isOutOfStock} isOutOfStock={isOutOfStock} addingToCart={addingToCart} needsVariantSelection={needsVariantSelection} />}
+             {cartQuantity > 0 ? <div className="flex-1"><QuantitySelector /></div> : <AddToCartBtn onClick={handleInitialAdd} disabled={isOutOfStock} isOutOfStock={isOutOfStock} addingToCart={addingToCart} needsVariantSelection={false} />}
           </div>
         </div>
       </motion.div>
@@ -310,6 +370,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden shrink-0 w-full" style={{ background: 'var(--surface)' }}>
         {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" loading="lazy" /> : <ImagePlaceholder />}
         
+        {/* Cake classification type identifiers */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          {isCakeCategory && <ProductBadge type="veg" />}
+        </div>
+
         {/* Floating Heart Top Right */}
         <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-sm z-10 bg-white/80 hover:bg-white transition-colors">
           <Heart size={16} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : '#666' }} />
@@ -345,11 +410,36 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           )}
         </div>
 
-        {/* Coupon Indicator Tag */}
+        {/* Inline Weight Toggles */}
+        {hasVariants && product.variants.length > 1 && (
+          <div className="flex items-center gap-1 flex-wrap mb-1.5" onClick={(e) => e.stopPropagation()}>
+            {product.variants.map((v, idx) => (
+              <button key={idx} onClick={() => setSelectedVariantIndex(idx)}
+                className="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-black border transition-all cursor-pointer"
+                style={{
+                  background: selectedVariantIndex === idx ? 'var(--primary)' : 'var(--card-soft)',
+                  color: selectedVariantIndex === idx ? 'var(--button-text)' : 'var(--heading)',
+                  borderColor: selectedVariantIndex === idx ? 'var(--primary)' : 'var(--border)'
+                }}>
+                {v.weight}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Coupon Interactive View */}
         {isCouponActive && (
-          <div className="mb-1.5 flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded self-start">
-            <Ticket size={11} className="shrink-0" />
-            <span>Use code: {coupon.code}</span>
+          <div className="mb-1.5 flex flex-col items-start w-full" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowCoupon(!showCoupon)} className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded self-start cursor-pointer">
+              <Ticket size={11} className="shrink-0" />
+              <span>{isCouponApplied ? 'Code Applied! 🎉' : `Use code: ${coupon.code}`}</span>
+              <ChevronDown size={8} />
+            </button>
+            <AnimatePresence>
+              {showCoupon && (
+                <CouponCard coupon={coupon} onApply={handleApplyCoupon} onRemove={handleRemoveCoupon} isApplied={isCouponApplied} />
+              )}
+            </AnimatePresence>
           </div>
         )}
 
@@ -367,7 +457,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           )}
         </div>
 
-        {/* Location Info (Swapped out estimated hours info) */}
+        {/* Location Info */}
         <div className="flex items-center gap-1 mt-auto pb-2 border-b border-gray-100 dark:border-gray-800">
            <MapPin size={11} className="text-gray-400 shrink-0" />
            <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium capitalize">
@@ -378,10 +468,10 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         {/* Action Buttons Row */}
         <div className="flex items-center gap-1.5 sm:gap-2 w-full mt-2">
           <QuickViewBtn onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.slug}`); }} />
-          {cartQuantity > 0 && !needsVariantSelection ? (
+          {cartQuantity > 0 ? (
             <div className="flex-1"><QuantitySelector /></div>
           ) : (
-            <AddToCartBtn onClick={handleInitialAdd} disabled={isOutOfStock} isOutOfStock={isOutOfStock} addingToCart={addingToCart} needsVariantSelection={needsVariantSelection} />
+            <AddToCartBtn onClick={handleInitialAdd} disabled={isOutOfStock} isOutOfStock={isOutOfStock} addingToCart={addingToCart} needsVariantSelection={false} />
           )}
         </div>
       </div>

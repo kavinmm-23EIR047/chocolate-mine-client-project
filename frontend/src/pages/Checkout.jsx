@@ -150,6 +150,18 @@ const safeFormatNotes = (notes) => {
 };
 
 /* ─────────────────────────────────────────────
+   HELPER: Safely extract coupon code string
+───────────────────────────────────────────── */
+const getCouponCodeString = (coupon) => {
+  if (!coupon) return '';
+  if (typeof coupon === 'string') return coupon;
+  if (typeof coupon === 'object') {
+    return coupon.code || coupon.couponCode || coupon.name || '';
+  }
+  return '';
+};
+
+/* ─────────────────────────────────────────────
    STEP BADGE (with improved UX)
 ───────────────────────────────────────────── */
 const StepBadge = ({ n, label, isActive, isCompleted, onEdit, summary }) => (
@@ -199,9 +211,12 @@ const Checkout = () => {
     directItem?.coupon?.code ? directItem.coupon : ''
   );
 
-  const appliedCouponDisplay = directItem
-    ? normalizeCartCoupon(localCoupon)
-    : normalizeCartCoupon(appliedCouponFromRedux);
+  // FIXED: Safely extract coupon code string
+  const appliedCouponDisplay = useMemo(() => {
+    const rawCoupon = directItem ? localCoupon : appliedCouponFromRedux;
+    return getCouponCodeString(rawCoupon);
+  }, [directItem, localCoupon, appliedCouponFromRedux]);
+
   const hasAppliedCoupon = appliedCouponDisplay !== '';
 
   const [showMap, setShowMap] = useState(false);
@@ -404,10 +419,10 @@ const Checkout = () => {
 
   const getItemCouponDiscount = (item) => {
     const code = directItem
-      ? normalizeCartCoupon(localCoupon)
-      : normalizeCartCoupon(appliedCouponFromRedux);
+      ? getCouponCodeString(localCoupon)
+      : getCouponCodeString(appliedCouponFromRedux);
     if (!code || !item.coupon?.enabled) return 0;
-    if (code !== normalizeCartCoupon(item.coupon.code)) return 0;
+    if (code !== getCouponCodeString(item.coupon.code)) return 0;
     return getCouponUnitDiscount(getItemBasePrice(item), item.coupon);
   };
 
@@ -548,7 +563,7 @@ const Checkout = () => {
     const code = (presetCode != null ? String(presetCode) : couponInput).trim().toUpperCase();
     if (!code) return toast.error('Enter coupon code');
     if (directItem) {
-      if (directItem.coupon?.enabled && directItem.coupon.code.toUpperCase() === code) {
+      if (directItem.coupon?.enabled && getCouponCodeString(directItem.coupon.code).toUpperCase() === code) {
         setLocalCoupon(code);
         toast.success(`Coupon ${code} applied`);
         setCouponInput('');
@@ -558,7 +573,7 @@ const Checkout = () => {
       return;
     }
     const isValid = cartItemsFromRedux.some(
-      (i) => normalizeCartCoupon(i.coupon?.code) === code
+      (i) => getCouponCodeString(i.coupon?.code).toUpperCase() === code
     );
     if (isValid) {
       dispatch(setCoupon(code));
@@ -785,7 +800,12 @@ const Checkout = () => {
 
   const availableCoupons = useMemo(() => {
     const s = new Set();
-    cartItems.forEach((i) => { if (i.coupon?.enabled) s.add(i.coupon.code); });
+    cartItems.forEach((i) => { 
+      if (i.coupon?.enabled) {
+        const code = getCouponCodeString(i.coupon.code);
+        if (code) s.add(code);
+      }
+    });
     return Array.from(s);
   }, [cartItems]);
 

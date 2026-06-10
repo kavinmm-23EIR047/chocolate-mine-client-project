@@ -106,7 +106,7 @@ const saveAdminWebNotification = async (title, message, type = 'admin_general', 
  */
 const saveBroadcastWebNotification = async (title, message, type = 'broadcast', metadata = {}) => {
   try {
-    const users = await User.find({ active: { $ne: false } }, '_id');
+    const users = await User.find({ role: 'user', active: true }, '_id');
     
     // Save DB record for each user
     for (const user of users) {
@@ -152,16 +152,25 @@ exports.notifyOrderSuccess = async (order) => {
     const populatedOrder = await order.populate('userId');
     const trackingNumber = populatedOrder.orderNumber || populatedOrder._id.toString();
 
-    // 1. NOTIFY USER (SOCKET, EMAIL, WHATSAPP)
+    // ✅ FIXED: Send detailed WhatsApp to customer with FULL ORDER OBJECT
+    if (populatedOrder.userId.phone) {
+      await whatsappService.sendOrderPlaced(
+        populatedOrder.userId.phone, 
+        trackingNumber, 
+        populatedOrder  // Pass the complete order object for detailed template
+      );
+    }
+
+    // ✅ FIXED: Send detailed WhatsApp to admin with FULL ORDER OBJECT
+    const adminPhone = process.env.ADMIN_PHONE || '9363265477';
+    await whatsappService.sendInternalOrderAlert(adminPhone, populatedOrder);
+
+    // 1. NOTIFY USER (SOCKET, EMAIL)
     socketService.emitToUser(populatedOrder.userId._id, 'order_confirmed', { orderNumber: trackingNumber });
     
     if (populatedOrder.userId.email) {
       emailService.sendOrderConfirmed(populatedOrder.userId.email, populatedOrder)
         .catch(e => logger.error('Order Email Failed:', e.message));
-    }
-    
-    if (populatedOrder.userId.phone) {
-      whatsappService.sendOrderPlaced(populatedOrder.userId.phone, trackingNumber);
     }
 
     const userTitle = '✅ Order Confirmed';
@@ -181,7 +190,7 @@ exports.notifyOrderSuccess = async (order) => {
 
     if (!isAlreadyAlerted) {
       await cacheService.set(alertLockKey, 'true', 60);
-      await telegramService.sendInternalOrderAlert(populatedOrder);
+      await telegramService.sendInternalOrderAlert(adminPhone, populatedOrder);
     }
 
     // 3. EMIT Socket + Push/DB Notification to all admins
@@ -216,6 +225,8 @@ exports.notifyOrderSuccess = async (order) => {
       await exports.notifyCustomCakeRequest(populatedOrder.address.fullName);
     }
 
+    logger.info(`✅ All notifications sent for order ${trackingNumber}`);
+
   } catch (err) {
     logger.error('Notification Manager Error (notifyOrderSuccess):', err.message);
   }
@@ -238,8 +249,11 @@ exports.handleStatusChange = async (order, status) => {
     // WEB UPDATE (SOCKET)
     socketService.emitToUser(populatedOrder.userId._id, 'status_changed', { orderId: populatedOrder._id, status });
 
-    // EMAIL & TELEGRAM FOR SPECIFIC STATUSES
+    // WHATSAPP & EMAIL FOR SPECIFIC STATUSES
     if (status === 'out_for_delivery') {
+      if (userPhone) {
+        await whatsappService.sendOutForDelivery(userPhone, trackingNumber);
+      }
       if (populatedOrder.userId.email) {
         emailService.sendDispatched(populatedOrder.userId.email, populatedOrder).catch(e => logger.error('Dispatch Email Failed:', e.message));
       }
@@ -247,6 +261,9 @@ exports.handleStatusChange = async (order, status) => {
         await telegramService.sendOutForDelivery(userPhone, trackingNumber, trackingLink, populatedOrder.userId._id);
       }
     } else if (status === 'delivered') {
+      if (userPhone) {
+        await whatsappService.sendDelivered(userPhone, trackingNumber);
+      }
       logger.info(`Processing Delivered Email + Invoice for ${trackingNumber}`);
       const invoiceService = require('./invoiceService');
       await invoiceService.sendInvoiceAfterDelivery(populatedOrder._id, true);
@@ -255,20 +272,18 @@ exports.handleStatusChange = async (order, status) => {
       }
     }
 
-    // WHATSAPP & PUSH/DB NOTIFICATIONS FOR USER
+    // PUSH/DB NOTIFICATIONS FOR USER
     let title = '';
     let msg = '';
     let type = 'status_changed';
 
     switch (status) {
       case 'out_for_delivery':
-        if (userPhone) whatsappService.sendOutForDelivery(userPhone, trackingNumber);
         title = '🚚 Out For Delivery';
         msg = `Your order #${trackingNumber} is on the way.`;
         type = 'out_for_delivery';
         break;
       case 'delivered':
-        if (userPhone) whatsappService.sendDelivered(userPhone, trackingNumber);
         title = '✅ Delivered';
         msg = `Your order #${trackingNumber} has been delivered.`;
         type = 'delivered';
@@ -277,6 +292,9 @@ exports.handleStatusChange = async (order, status) => {
         title = '❌ Order Cancelled';
         msg = `Your order #${trackingNumber} has been cancelled.`;
         type = 'order_cancelled';
+        if (userPhone) {
+          await whatsappService.sendWhatsApp(userPhone, `❌ Order Cancelled\n\nYour order #${trackingNumber} has been cancelled.`, 'user');
+        }
         break;
       default:
         break;
@@ -299,6 +317,16 @@ exports.notifyOrderCancelled = async (order) => {
   try {
     const populatedOrder = await order.populate('userId');
     const trackingNumber = populatedOrder.orderNumber || populatedOrder._id.toString();
+    const userPhone = populatedOrder.userId.phone || populatedOrder.address?.phone;
+
+    // Send WhatsApp cancellation notification
+    if (userPhone) {
+      const message = `❌ *Order Cancelled*\n\n` +
+        `🆔 Order: *${trackingNumber}*\n` +
+        `Your order has been cancelled.\n\n` +
+        `For any queries, please contact support.`;
+      await whatsappService.sendWhatsApp(userPhone, message, 'user');
+    }
 
     // 1. Notify User
     const userTitle = '❌ Order Cancelled';
@@ -344,7 +372,11 @@ exports.notifyPaymentFailure = async (order, reason) => {
       }
       
       if (populatedOrder.userId.phone) {
-        whatsappService.sendPaymentFailure(populatedOrder.userId.phone, populatedOrder.total, populatedOrder.address.fullName);
+        await whatsappService.sendPaymentFailure(
+          populatedOrder.userId.phone, 
+          populatedOrder.total, 
+          populatedOrder.address.fullName
+        );
       }
 
       const userTitle = 'Payment Failed 🔴';
@@ -358,7 +390,7 @@ exports.notifyPaymentFailure = async (order, reason) => {
       await saveWebNotification(populatedOrder.userId._id, userTitle, userMsg, 'payment_failed', userMetadata);
     }
 
-    // 2. NOTIFY ADMINS (Preserve Telegram and Email)
+    // 2. NOTIFY ADMINS
     await telegramService.sendAdminPaymentFailure(null, populatedOrder.address.fullName, populatedOrder.total);
 
     const admins = await User.find({ role: 'admin' });
@@ -368,7 +400,11 @@ exports.notifyPaymentFailure = async (order, reason) => {
           .catch(e => logger.error('Admin Payment Failed Email Error:', e.message));
       }
       if (admin.phone) {
-        whatsappService.sendAdminPaymentFailure(admin.phone, populatedOrder.address.fullName, populatedOrder.total);
+        await whatsappService.sendAdminPaymentFailure(
+          admin.phone, 
+          populatedOrder.address.fullName, 
+          populatedOrder.total
+        );
       }
     }
 
@@ -478,6 +514,9 @@ exports.notifyCustomCakeRequest = async (customerName) => {
 
 exports.notifyLowStockAlert = async (productName, quantity) => {
   try {
+    const adminPhone = process.env.ADMIN_PHONE || '9363265477';
+    await whatsappService.sendLowStockAlert(adminPhone, productName, quantity);
+    
     const adminTitle = '📦 Low Stock Alert';
     const adminMsg = `${productName}\nRemaining: ${quantity}`;
     const adminMetadata = {
@@ -493,6 +532,10 @@ exports.notifyLowStockAlert = async (productName, quantity) => {
 
 exports.notifyOutOfStockAlert = async (productName) => {
   try {
+    const adminPhone = process.env.ADMIN_PHONE || '9363265477';
+    const message = `🚨 *OUT OF STOCK*\n\nProduct: ${productName}\nStatus: Completely out of stock!\n⚠️ Immediate restock required!`;
+    await whatsappService.sendWhatsApp(adminPhone, message, 'admin');
+    
     const adminTitle = '🚨 Product Out Of Stock';
     const adminMsg = `${productName}`;
     const adminMetadata = {

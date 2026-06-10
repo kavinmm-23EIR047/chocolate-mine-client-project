@@ -307,11 +307,6 @@ const Checkout = () => {
   const [backendTotal, setBackendTotal] = useState(null);
 
   useEffect(() => {
-    const saved = loadCustomCakeRequest();
-    if (saved && typeof saved === 'object') setCustomCakeRequest(saved);
-  }, []);
-
-  useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -398,7 +393,112 @@ const Checkout = () => {
     validate();
   }, [deliveryInfo.position]);
 
-  const cartItems = directItem ? [directItem] : cartItemsFromRedux;
+  const cartItems = useMemo(
+    () => (directItem ? [directItem] : cartItemsFromRedux),
+    [directItem, cartItemsFromRedux]
+  );
+
+  const normalizeCustomValue = (value) => String(value || '').trim().toLowerCase();
+
+  const extractCustomCakeMessage = (request) => {
+    const rawMessage = request?.message || request?.messageOnCake || '';
+    const match = String(rawMessage).match(/message:\s*(.*)$/i);
+    return normalizeCustomValue(match ? match[1] : rawMessage);
+  };
+
+  const isCustomCakeItem = (item) => (
+    item?.productId?.startsWith?.('custom-') || item?.category === 'Custom Cakes'
+  );
+
+  const doesCustomCakeRequestMatchItem = (request, item) => {
+    if (!request || !item || !isCustomCakeItem(item)) return false;
+
+    const itemOptions = item.options || {};
+    const itemFlavor = itemOptions.flavor || item.selectedFlavor;
+    const itemWeight = itemOptions.weight || item.selectedWeight;
+    const itemColor = itemOptions.color || item.themeColor;
+    const itemMessage = itemOptions.message || item.message;
+
+    return (
+      normalizeCustomValue(request.flavour || request.flavor) === normalizeCustomValue(itemFlavor) &&
+      normalizeCustomValue(request.servingWeight || request.weight) === normalizeCustomValue(itemWeight) &&
+      normalizeCustomValue(request.themeColor || request.color) === normalizeCustomValue(itemColor) &&
+      extractCustomCakeMessage(request) === normalizeCustomValue(itemMessage)
+    );
+  };
+
+  const matchedCustomCakeItem = useMemo(() => {
+    if (!customCakeRequest) return null;
+    return cartItems.find((item) => doesCustomCakeRequestMatchItem(customCakeRequest, item)) || null;
+  }, [customCakeRequest, cartItems]);
+
+  const shouldShowCustomCakeRequest = !!customCakeRequest && !!matchedCustomCakeItem;
+
+  useEffect(() => {
+    const saved = loadCustomCakeRequest();
+    if (!saved || typeof saved !== 'object') {
+      setCustomCakeRequest(null);
+      return;
+    }
+
+    const hasMatchingCustomCakeItem = cartItems.some((item) =>
+      doesCustomCakeRequestMatchItem(saved, item)
+    );
+
+    if (hasMatchingCustomCakeItem) {
+      setCustomCakeRequest(saved);
+    } else {
+      clearCustomCakeRequest();
+      setCustomCakeRequest(null);
+    }
+  }, [cartItems]);
+
+  const [productDescriptions, setProductDescriptions] = useState({});
+
+  useEffect(() => {
+    const missingIds = cartItems
+      .filter((item) => !item.description && item.productId && !item.productId?.startsWith?.('custom-'))
+      .map((item) => item.productId);
+
+    const uniqueMissingIds = [...new Set(missingIds)].filter(
+      (id) => !Object.prototype.hasOwnProperty.call(productDescriptions, id)
+    );
+
+    if (uniqueMissingIds.length === 0) return;
+
+    let cancelled = false;
+    const fetchDescriptions = async () => {
+      const entries = await Promise.all(
+        uniqueMissingIds.map(async (id) => {
+          try {
+            const res = await api.get(`/products/${id}`);
+            return [id, res.data?.data?.description || ''];
+          } catch {
+            return [id, ''];
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setProductDescriptions((prev) => ({
+          ...prev,
+          ...Object.fromEntries(entries),
+        }));
+      }
+    };
+
+    fetchDescriptions();
+    return () => {
+      cancelled = true;
+    };
+  }, [cartItems, productDescriptions]);
+
+  const getItemDescription = (item) => (
+    item.description ||
+    item.productDescription ||
+    productDescriptions[item.productId] ||
+    ''
+  );
 
   const getItemOriginalPrice = (item) => {
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
@@ -631,8 +731,8 @@ const Checkout = () => {
         return;
       }
 
-      const cakeMessage = customCakeRequest?.messageOnCake?.trim() || '';
-      const builderNotes = customCakeRequest ? safeFormatNotes(formatCustomCakeNotes(customCakeRequest)) : '';
+      const cakeMessage = shouldShowCustomCakeRequest ? customCakeRequest?.messageOnCake?.trim() || '' : '';
+      const builderNotes = shouldShowCustomCakeRequest ? safeFormatNotes(formatCustomCakeNotes(customCakeRequest)) : '';
       const notesMerged = [builderNotes, orderNotesExtra.trim()].filter(Boolean).join('\n\n');
 
       const res = await api.post(
@@ -702,6 +802,7 @@ const Checkout = () => {
               dispatch(clearCart());
             }
             clearCustomCakeRequest();
+            setCustomCakeRequest(null);
             setLoading(false);
             isProcessingPayment.current = false;
             toast.success("Payment successful! 🎉");
@@ -1150,6 +1251,11 @@ const Checkout = () => {
                           <img src={item.image} className="w-16 h-16 rounded-2xl object-cover border border-border/10 shrink-0" alt={item.name} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
+                            {getItemDescription(item) && (
+                              <p className="text-xs text-muted font-medium mt-1 leading-relaxed line-clamp-2">
+                                {getItemDescription(item)}
+                              </p>
+                            )}
                             <div className="flex flex-wrap gap-2 mt-1">
                               {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
                                 <>
@@ -1172,7 +1278,7 @@ const Checkout = () => {
                         </div>
                       ))}
                       <div className="p-4 sm:p-5 space-y-4">
-                        {customCakeRequest ? (
+                        {shouldShowCustomCakeRequest ? (
                           <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 space-y-3">
                             <div className="flex items-start justify-between gap-3">
                               <p className="text-xs font-black uppercase tracking-widest text-primary">From custom cake builder</p>
@@ -1324,6 +1430,11 @@ const Checkout = () => {
                       <img src={item.image} className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-border/10 shrink-0" alt={item.name} />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
+                        {getItemDescription(item) && (
+                          <p className="text-[11px] text-muted/80 font-medium mt-0.5 leading-snug line-clamp-2">
+                            {getItemDescription(item)}
+                          </p>
+                        )}
                         {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
                           <>
                             {(item.options?.color || item.selectedFlavor) && <p className="text-[11px] text-muted font-bold mt-0.5">Color: {item.options?.color || item.selectedFlavor}</p>}

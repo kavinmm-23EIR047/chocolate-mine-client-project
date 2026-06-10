@@ -349,6 +349,7 @@ const ProductDetails = () => {
     const directItem = {
       productId: productId,
       name: productName,
+      description: product.description,
       image: displayImage || product.image,
       price: productPrice,
       offerPrice: productOfferPrice,

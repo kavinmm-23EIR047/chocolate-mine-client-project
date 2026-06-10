@@ -6,47 +6,48 @@ const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
 
-// ─── Brand Palette ────────────────────────────────────────────────────────────
+// ─── Brand Palette (Mapped from theme.css Light Theme) ────────────────────────
 const COLORS = {
-  brand:        '#5C3317',
-  brandLight:   '#7B4A2D',
-  brandBg:      '#FDF6F0',
-  accent:       '#C8956C',
-  accentLight:  '#EDD5BE',
-  text:         '#2C1A0E',
-  textMuted:    '#7A6055',
-  divider:      '#D9C4B5',
+  brandBg:      '#EBDEDA', // --background (Soft Rose Cream)
+  brandCard:    '#F1E6E2', // --card
+  brandPrimary: '#4E2820', // --primary (Deep Cocoa)
+  brandText:    '#2D1B17', // --foreground
+  brandMuted:   '#7C6660', // --muted
+  brandAccent:  '#C98F45', // --accent (Caramel Gold)
+  border:       '#D5C0BA', // --border
   white:        '#FFFFFF',
-  grandTotalBg: '#5C3317',
 };
 
-// ─── Layout constants ─────────────────────────────────────────────────────────
-const PAGE_W    = 595.28;
-const PAGE_H    = 841.89;
+// ─── Layout Constants ─────────────────────────────────────────────────────────
+const PAGE_W    = 595.28; // A4 Width
+const PAGE_H    = 841.89; // A4 Height
 const MARGIN    = 45;
 const CONTENT_W = PAGE_W - MARGIN * 2;   // 505.28 pt
 
-// Table columns — QTY(40) + DESC(270) + UNIT PRICE(100) + AMOUNT(95) = 505 ✓
+// Table Columns configuration
 const COL = {
   qty:       MARGIN,
-  desc:      MARGIN + 40,
-  unitPrice: MARGIN + 310,
-  amount:    MARGIN + 410,
+  desc:      MARGIN + 45,
+  unitPrice: MARGIN + 315,
+  amount:    MARGIN + 415,
 };
 const COL_W = {
-  qty:       40,
+  qty:       45,
   desc:      270,
   unitPrice: 100,
-  amount:    95,   // right edge = 45 + 410 + 95 = 550 ≤ 550.28 ✓
+  amount:    90,
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function hRule(doc, y, color, thickness) {
-  color     = color     || '#D9C4B5';
-  thickness = thickness || 0.75;
+  color     = color     || COLORS.border;
+  thickness = thickness || 1;
   doc.save()
-     .moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y)
-     .lineWidth(thickness).strokeColor(color).stroke()
+     .moveTo(MARGIN, y)
+     .lineTo(PAGE_W - MARGIN, y)
+     .lineWidth(thickness)
+     .strokeColor(color)
+     .stroke()
      .restore();
 }
 
@@ -64,154 +65,165 @@ exports.generateInvoiceBuffer = async (orderId) => {
     const buffers = [];
     doc.on('data', buffers.push.bind(buffers));
 
-    // ── Cream background ──────────────────────────────────────────────────────
+    // ── Cream Background Surface ──────────────────────────────────────────────
     doc.rect(0, 0, PAGE_W, PAGE_H).fill(COLORS.brandBg);
 
-    // ── Top brand bar ─────────────────────────────────────────────────────────
-    doc.rect(0, 0, PAGE_W, 7).fill(COLORS.brand);
+    // ── Top Aesthetic Structural Border Bar ───────────────────────────────────
+    doc.rect(MARGIN, 20, CONTENT_W, 4).fill(COLORS.brandPrimary);
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  HEADER  (logo + name LEFT  |  INVOICE meta RIGHT)
+    //  HEADER SECTION (Text-Logo Left | Invoice Meta Details Right)
     // ─────────────────────────────────────────────────────────────────────────
-    const HEADER_TOP = 24;
+    const HEADER_TOP = 42;
 
-    // Logo — search standard location first, then sibling of this file
-    const candidatePaths = [
-      path.join(process.cwd(), 'public', 'logo.png'),
-      path.join(__dirname, 'logo.png'),
-    ];
-    const logoPath = candidatePaths.find(function(p){ return fs.existsSync(p); });
-    if (logoPath) {
-      doc.image(logoPath, MARGIN, HEADER_TOP, { width: 58, height: 58 });
-    }
+    // Render Text-Logo mimicking requested font style & matching exact widths
+    doc.save();
+    // Layer 1: "THE CHOCOLATE"
+    doc.font('Helvetica-Bold')
+       .fontSize(12)
+       .fillColor(COLORS.brandAccent)
+       .text('T H E   C H O C O L A T E', MARGIN, HEADER_TOP, { lineBreak: false });
+    
+    // Layer 2: "MINE" scaled up to match structural text block width bounds
+    doc.font('Helvetica-Bold')
+       .fontSize(38)
+       .fillColor(COLORS.brandPrimary)
+       .text('MINE', MARGIN, HEADER_TOP + 12, { lineBreak: false });
+    
+    // Sub-label tagline description
+    doc.font('Helvetica-Oblique')
+       .fontSize(9)
+       .fillColor(COLORS.brandMuted)
+       .text('Premium Artisan Bakery', MARGIN, HEADER_TOP + 54, { lineBreak: false });
+    doc.restore();
 
-    const brandX = logoPath ? MARGIN + 68 : MARGIN;
-    doc.font('Helvetica-Bold').fontSize(17).fillColor(COLORS.brand)
-       .text('THE CHOCOLATE MINE', brandX, HEADER_TOP + 6, { lineBreak: false });
-    doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.textMuted)
-       .text('Premium Artisan Bakery',         brandX, HEADER_TOP + 28, { lineBreak: false })
-       .text('Freshly baked with love & care', brandX, HEADER_TOP + 41, { lineBreak: false });
-
-    // Right: large INVOICE label
-    const INV_W = 170;
+    // Right Side Metadata Block
+    const INV_W = 180;
     const INV_X = PAGE_W - MARGIN - INV_W;
-    doc.font('Helvetica-Bold').fontSize(30).fillColor(COLORS.brand)
+    
+    doc.font('Helvetica-Bold').fontSize(26).fillColor(COLORS.brandPrimary)
        .text('INVOICE', INV_X, HEADER_TOP, { width: INV_W, align: 'right', lineBreak: false });
 
     const invoiceDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
       day: '2-digit', month: 'long', year: 'numeric',
     });
-    doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.textMuted)
-       .text('Invoice No.', INV_X, HEADER_TOP + 44, { width: INV_W, align: 'right', lineBreak: false });
-    doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.text)
-       .text(order.invoiceNumber, INV_X, HEADER_TOP + 56, { width: INV_W, align: 'right', lineBreak: false });
-    doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.textMuted)
-       .text('Date', INV_X, HEADER_TOP + 70, { width: INV_W, align: 'right', lineBreak: false });
-    doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.text)
-       .text(invoiceDate, INV_X, HEADER_TOP + 82, { width: INV_W, align: 'right', lineBreak: false });
 
-    // Divider
-    hRule(doc, 108, COLORS.brand, 1.5);
+    doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.brandMuted)
+       .text('Invoice No:', INV_X, HEADER_TOP + 36, { width: 65, align: 'left' });
+    doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.brandText)
+       .text(order.invoiceNumber, INV_X + 65, HEADER_TOP + 36, { width: INV_W - 65, align: 'right' });
+
+    doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.brandMuted)
+       .text('Date:', INV_X, HEADER_TOP + 48, { width: 65, align: 'left' });
+    doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.brandText)
+       .text(invoiceDate, INV_X + 65, HEADER_TOP + 48, { width: INV_W - 65, align: 'right' });
+
+    // Divider separating header structures cleanly
+    hRule(doc, 118, COLORS.brandPrimary, 1.5);
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  BILL TO
+    //  CLIENT DETAILS (BILL TO)
     // ─────────────────────────────────────────────────────────────────────────
-    const BILL_TOP = 122;
+    const BILL_TOP = 132;
 
-    doc.font('Helvetica-Bold').fontSize(8).fillColor(COLORS.accent)
+    doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.brandAccent)
        .text('BILL TO', MARGIN, BILL_TOP);
 
-    var addrLine = [
+    const addrLine = [
       order.address && order.address.houseNo,
       order.address && order.address.street,
       order.address && order.address.city,
       order.address && order.address.pincode,
     ].filter(Boolean).join(', ');
 
-    const BILL_NAME_Y  = BILL_TOP + 13;
-    const BILL_TEXT_W  = 280;
+    const BILL_NAME_Y = BILL_TOP + 14;
+    const BILL_TEXT_W = 280;
 
-    doc.font('Helvetica-Bold').fontSize(12).fillColor(COLORS.text)
+    doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.brandText)
        .text((order.address && order.address.fullName) || '—', MARGIN, BILL_NAME_Y, { width: BILL_TEXT_W });
 
-    var nameH = doc.heightOfString((order.address && order.address.fullName) || '—',
-                  { font: 'Helvetica-Bold', fontSize: 12, width: BILL_TEXT_W });
+    const nameH = doc.heightOfString((order.address && order.address.fullName) || '—',
+                  { font: 'Helvetica-Bold', fontSize: 11, width: BILL_TEXT_W });
 
-    doc.font('Helvetica').fontSize(9.5).fillColor(COLORS.textMuted)
-       .text((order.address && order.address.phone) || '—', MARGIN, BILL_NAME_Y + nameH + 2,  { width: BILL_TEXT_W })
-       .text(addrLine || '—',                               MARGIN, BILL_NAME_Y + nameH + 16, { width: BILL_TEXT_W });
+    doc.font('Helvetica').fontSize(9).fillColor(COLORS.brandMuted)
+       .text('Phone: ' + ((order.address && order.address.phone) || '—'), MARGIN, BILL_NAME_Y + nameH + 3, { width: BILL_TEXT_W })
+       .text(addrLine || '—', MARGIN, BILL_NAME_Y + nameH + 16, { width: BILL_TEXT_W });
 
-    // Payment badge
-    const BADGE_W = 155;
+    // Status / Payment Badge Content block
+    const BADGE_W = 160;
     const BADGE_X = PAGE_W - MARGIN - BADGE_W;
-    doc.roundedRect(BADGE_X, BILL_TOP + 10, BADGE_W, 24, 4).fill(COLORS.accentLight);
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.brandLight)
-       .text('Payment: ' + (order.paymentMethod || '—'), BADGE_X, BILL_TOP + 18,
+    doc.roundedRect(BADGE_X, BILL_TOP + 12, BADGE_W, 26, 6).fill(COLORS.brandCard);
+    doc.rect(BADGE_X, BILL_TOP + 12, BADGE_W, 26).lineWidth(1).strokeColor(COLORS.border).stroke();
+    
+    doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.brandPrimary)
+       .text('PAYMENT: ' + (order.paymentMethod || '—').toUpperCase(), BADGE_X, BILL_TOP + 21,
              { width: BADGE_W, align: 'center', lineBreak: false });
 
-    hRule(doc, 206, COLORS.divider);
+    // Clean structural separation row line
+    hRule(doc, 215, COLORS.border, 1);
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  TABLE HEADER
+    //  INVOICE ITEM DETAILS TABLE
     // ─────────────────────────────────────────────────────────────────────────
-    const TABLE_TOP = 220;
-    const HEADER_H  = 28;
+    const TABLE_TOP = 230;
+    const HEADER_H  = 26;
 
-    doc.rect(MARGIN, TABLE_TOP, CONTENT_W, HEADER_H).fill(COLORS.brand);
+    // Table primary heading background accent fill
+    doc.rect(MARGIN, TABLE_TOP, CONTENT_W, HEADER_H).fill(COLORS.brandPrimary);
 
-    var HL_Y = TABLE_TOP + 9;
+    const HL_Y = TABLE_TOP + 8;
     doc.font('Helvetica-Bold').fontSize(8.5).fillColor(COLORS.white);
-    doc.text('QTY',         COL.qty,       HL_Y, { width: COL_W.qty,       align: 'center', lineBreak: false });
-    doc.text('DESCRIPTION', COL.desc,      HL_Y, { width: COL_W.desc,      align: 'left',   lineBreak: false });
-    doc.text('UNIT PRICE',  COL.unitPrice, HL_Y, { width: COL_W.unitPrice, align: 'right',  lineBreak: false });
-    doc.text('AMOUNT',      COL.amount,    HL_Y, { width: COL_W.amount,    align: 'right',  lineBreak: false });
+    doc.text('QTY',         COL.qty,       HL_Y, { width: COL_W.qty,       align: 'center' });
+    doc.text('DESCRIPTION', COL.desc,      HL_Y, { width: COL_W.desc,      align: 'left' });
+    doc.text('UNIT PRICE',  COL.unitPrice, HL_Y, { width: COL_W.unitPrice, align: 'right' });
+    doc.text('AMOUNT',      COL.amount,    HL_Y, { width: COL_W.amount,    align: 'right' });
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  PRODUCT ROWS
-    // ─────────────────────────────────────────────────────────────────────────
-    var rowY   = TABLE_TOP + HEADER_H;
-    var ROW_PAD = 8;
+    // Render Product Row Loop
+    let rowY   = TABLE_TOP + HEADER_H;
+    const ROW_PAD = 8;
 
     order.items.forEach(function(item, idx) {
-      var qty   = Number(item.qty   || 0);
-      var price = Number(item.price || 0);
-      var total = qty * price;
+      const qty   = Number(item.qty   || 0);
+      const price = Number(item.price || 0);
+      const total = qty * price;
+      const nameText = item.name || '—';
+      
+      const descH = doc.heightOfString(nameText, { font: 'Helvetica', fontSize: 9, width: COL_W.desc });
+      const rowH = Math.max(descH + ROW_PAD * 2, 26);
 
-      var nameText = item.name || '—';
-      var descH = doc.heightOfString(nameText,
-                    { font: 'Helvetica', fontSize: 9.5, width: COL_W.desc });
-      var rowH = Math.max(descH + ROW_PAD * 2, 28);
-
+      // Explicit alternate background tracking row strips
       doc.rect(MARGIN, rowY, CONTENT_W, rowH)
-         .fill(idx % 2 === 0 ? COLORS.white : COLORS.accentLight);
+         .fill(idx % 2 === 0 ? COLORS.white : COLORS.brandCard);
 
-      var cy = rowY + ROW_PAD;
-      doc.font('Helvetica').fontSize(9.5).fillColor(COLORS.text);
-      doc.text(qty.toString(),              COL.qty,       cy, { width: COL_W.qty,       align: 'center', lineBreak: false });
-      doc.text(nameText,                    COL.desc,      cy, { width: COL_W.desc,      align: 'left'   });
-      doc.text('Rs. ' + price.toFixed(2),   COL.unitPrice, cy, { width: COL_W.unitPrice, align: 'right',  lineBreak: false });
-      doc.text('Rs. ' + total.toFixed(2),   COL.amount,    cy, { width: COL_W.amount,    align: 'right',  lineBreak: false });
+      // Row inline borders bounds fix
+      doc.rect(MARGIN, rowY, CONTENT_W, rowH).lineWidth(0.5).strokeColor(COLORS.border).stroke();
+
+      const cy = rowY + ROW_PAD;
+      doc.font('Helvetica').fontSize(9).fillColor(COLORS.brandText);
+      doc.text(qty.toString(),             COL.qty,       cy, { width: COL_W.qty,       align: 'center' });
+      doc.text(nameText,                    COL.desc,      cy, { width: COL_W.desc,      align: 'left' });
+      doc.text('Rs. ' + price.toFixed(2),   COL.unitPrice, cy, { width: COL_W.unitPrice, align: 'right' });
+      doc.text('Rs. ' + total.toFixed(2),   COL.amount,    cy, { width: COL_W.amount,    align: 'right' });
 
       rowY += rowH;
     });
 
-    hRule(doc, rowY, COLORS.brand, 1.5);
-
     // ─────────────────────────────────────────────────────────────────────────
-    //  TOTALS  (right-side summary, values right-aligned inside safe bounds)
+    //  SUMMARY CALCULATIONS & TOTALS CLOSING
     // ─────────────────────────────────────────────────────────────────────────
-    var TOT_LBL_X  = PAGE_W - MARGIN - 230;   // label column start
-    var TOT_LBL_W  = 130;
-    var TOT_VAL_X  = TOT_LBL_X + TOT_LBL_W;
-    var TOT_VAL_W  = 100;                      // right edge = TOT_VAL_X + 100 ≤ PAGE_W-MARGIN ✓
-    var LINE_H     = 22;
+    const TOT_LBL_X  = PAGE_W - MARGIN - 240;
+    const TOT_LBL_W  = 130;
+    const TOT_VAL_X  = TOT_LBL_X + TOT_LBL_W;
+    const TOT_VAL_W  = 110;
+    const LINE_H     = 20;
 
-    var ty = rowY + 18;
+    let ty = rowY + 15;
 
     function summaryLine(label, value) {
-      doc.font('Helvetica').fontSize(9.5).fillColor(COLORS.textMuted)
-         .text(label, TOT_LBL_X, ty, { width: TOT_LBL_W, align: 'left',  lineBreak: false })
-         .text(value, TOT_VAL_X, ty, { width: TOT_VAL_W, align: 'right', lineBreak: false });
+      doc.font('Helvetica').fontSize(9).fillColor(COLORS.brandMuted)
+         .text(label, TOT_LBL_X, ty, { width: TOT_LBL_W, align: 'left' });
+      doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.brandText)
+         .text(value, TOT_VAL_X, ty, { width: TOT_VAL_W, align: 'right' });
       ty += LINE_H;
     }
 
@@ -219,40 +231,35 @@ exports.generateInvoiceBuffer = async (orderId) => {
     if (order.discount > 0) {
       summaryLine('Discount',      '-Rs. ' + Number(order.discount      || 0).toFixed(2));
     }
-    summaryLine('Delivery',        'Rs. ' + Number(order.deliveryCharge || 0).toFixed(2));
+    summaryLine('Delivery Charge', 'Rs. ' + Number(order.deliveryCharge || 0).toFixed(2));
     summaryLine('Convenience Fee', 'Rs. ' + Number(order.convenienceFee || 0).toFixed(2));
     summaryLine('GST',             'Rs. ' + Number(order.gst            || 0).toFixed(2));
 
-    hRule(doc, ty, COLORS.divider);
+    ty += 4;
+    hRule(doc, ty, COLORS.brandPrimary, 1);
     ty += 6;
 
-    // Grand total — full content width, impossible to clip
-    var GT_H = 34;
-    doc.rect(MARGIN, ty, CONTENT_W, GT_H).fill(COLORS.grandTotalBg);
+    // Grand Total Clean Display Row
+    const GT_H = 32;
+    doc.rect(MARGIN, ty, CONTENT_W, GT_H).fill(COLORS.brandPrimary);
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.white)
-       .text('GRAND TOTAL',
-             MARGIN + 12, ty + 11,
-             { width: CONTENT_W * 0.55, align: 'left',  lineBreak: false })
-       .text('Rs. ' + Number(order.total || 0).toFixed(2),
-             MARGIN + CONTENT_W * 0.55, ty + 11,
-             { width: CONTENT_W * 0.45 - 12, align: 'right', lineBreak: false });
+    doc.font('Helvetica-Bold').fontSize(10).fillColor(COLORS.white)
+       .text('GRAND TOTAL', MARGIN + 12, ty + 11, { width: CONTENT_W * 0.5, align: 'left' })
+       .text('Rs. ' + Number(order.total || 0).toFixed(2), MARGIN + CONTENT_W * 0.5, ty + 11, { width: CONTENT_W * 0.5 - 24, align: 'right' });
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  FOOTER
+    //  STABLE FOOTER RUNTIME DESIGN
     // ─────────────────────────────────────────────────────────────────────────
-    var FOOTER_TOP = PAGE_H - 68;
-    hRule(doc, FOOTER_TOP, COLORS.divider);
+    const FOOTER_TOP = PAGE_H - 70;
+    hRule(doc, FOOTER_TOP, COLORS.border, 1);
 
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.brand)
-       .text('Thank you for choosing The Chocolate Mine!',
-             MARGIN, FOOTER_TOP + 12, { width: CONTENT_W, align: 'center' });
-    doc.font('Helvetica').fontSize(8.5).fillColor(COLORS.textMuted)
-       .text('Freshly baked with care  ·  Every bite tells a story',
-             MARGIN, FOOTER_TOP + 30, { width: CONTENT_W, align: 'center' });
+    doc.font('Helvetica-Bold').fontSize(10).fillColor(COLORS.brandPrimary)
+       .text('Thank you for choosing The Chocolate Mine!', MARGIN, FOOTER_TOP + 14, { width: CONTENT_W, align: 'center' });
+    doc.font('Helvetica').fontSize(8).fillColor(COLORS.brandMuted)
+       .text('Freshly baked with care  ·  Every bite tells a story', MARGIN, FOOTER_TOP + 28, { width: CONTENT_W, align: 'center' });
 
-    // Bottom brand bar
-    doc.rect(0, PAGE_H - 7, PAGE_W, 7).fill(COLORS.brand);
+    // Decorative baseline border ring
+    doc.rect(MARGIN, PAGE_H - 20, CONTENT_W, 4).fill(COLORS.brandPrimary);
 
     doc.end();
 
@@ -270,34 +277,19 @@ exports.sendInvoiceAfterDelivery = async (orderId, forceResend) => {
   forceResend = forceResend || false;
   try {
     const order = await Order.findById(orderId).populate('userId');
-
     if (!order) return false;
-
     if (order.invoiceSent && !forceResend) return true;
 
     const pdfBuffer = await exports.generateInvoiceBuffer(orderId);
-
-    const emailInfo = await emailService.sendInvoiceEmail(
-      order.userId.email,
-      order,
-      pdfBuffer
-    );
+    const emailInfo = await emailService.sendInvoiceEmail(order.userId.email, order, pdfBuffer);
 
     if (emailInfo) {
-      await telegramService.sendInvoiceReady(
-        order.userId.phone,
-        order.orderNumber,
-        'Email Sent'
-      );
-
+      await telegramService.sendInvoiceReady(order.userId.phone, order.orderNumber, 'Email Sent');
       order.invoiceSent = true;
       order.invoiceSentAt = new Date();
-
       await order.save();
-
       return true;
     }
-
     return false;
   } catch (err) {
     logger.error('Send Invoice Error:', err.message);

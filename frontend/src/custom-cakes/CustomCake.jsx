@@ -212,6 +212,7 @@ export default function CustomCake() {
         product: {
           _id: baseCakeId,
           name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+          description: theme.description,
           image: selectedFlavor.image,
           price: grandTotal, stock: 5, category: 'Custom Cakes',
         },
@@ -255,6 +256,7 @@ export default function CustomCake() {
       const directItem = {
         productId: baseCakeId,
         name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+        description: theme.description,
         image: selectedFlavor.image,
         category: 'Custom Cakes',
         price: grandTotal,

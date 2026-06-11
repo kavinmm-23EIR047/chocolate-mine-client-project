@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart, Star, Tag, Eye, CheckCircle2, XCircle, ShoppingBag, Plus, Minus,
-  Ticket, Gift, Sparkles, ChevronDown, Truck, Flame, Crown, Zap,
-  Shield, Clock, Package, TrendingUp, Info, MapPin
+  Heart, Star, ShoppingBag, Plus, Minus, Ticket, ChevronDown, MapPin,
+  Flame, Sparkles, Percent, Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,55 +19,40 @@ const ImagePlaceholder = () => (
   </div>
 );
 
-// Swiggy Veg Icon Box (Matches exactly without using breaking light background utilities)
-const ProductBadge = ({ type, value = "", absolute = false }) => {
+// Animated Badge Component using Lucide Icons instead of Emojis
+const AnimatedProductBadge = ({ type, value = "" }) => {
   const badgeStyles = {
     veg: {
-      className: "inline-flex items-center justify-center shrink-0 p-0.5 rounded border border-[#3a3028]",
-      style: { background: 'var(--card)' }
+      className: "inline-flex items-center justify-center shrink-0 p-0.5 rounded border border-green-600 bg-white shadow-sm"
     },
     bestseller: {
-      className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[9px] font-black tracking-wider uppercase shadow-sm",
       style: { background: 'var(--badge-bestseller-bg)', color: 'var(--badge-bestseller-text)' },
-      text: "Best Seller"
+      text: "Best Seller",
+      icon: <Flame size={10} className="fill-current shrink-0" />
     },
     featured: {
-      className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[9px] font-black tracking-wider uppercase shadow-sm",
       style: { background: 'var(--badge-featured-bg)', color: 'var(--badge-featured-text)' },
-      text: "Featured"
+      text: "Featured",
+      icon: <Sparkles size={10} className="shrink-0" />
     },
     discount: {
-      className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider",
       style: { background: 'var(--badge-discount-bg)', color: 'var(--badge-discount-text)' },
-      text: `${value}% OFF`
+      text: `${value}% OFF`,
+      icon: <Percent size={9} strokeWidth={3} className="shrink-0" />
     },
     new: {
-      className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[9px] font-black tracking-wider uppercase shadow-sm",
       style: { background: 'var(--badge-new-bg)', color: 'var(--badge-new-text)' },
-      text: "New"
-    },
-    limited: {
-      className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider",
-      style: { background: 'var(--badge-limited-bg)', color: 'var(--badge-limited-text)' },
-      text: "Limited"
-    },
-    eggless: {
-      className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider",
-      style: { background: 'var(--badge-stock-bg)', color: 'var(--badge-stock-text)' },
-      text: "Eggless"
-    },
-    premium: {
-      className: "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-wider",
-      style: { background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: 'white' },
-      text: "Premium"
+      text: "New",
+      icon: <Zap size={10} className="fill-current shrink-0" />
     }
   };
 
+  // Safe theme-proof container for Indian Veg Mark referencing 1781174176555.jpg
   if (type === 'veg') {
     return (
-      <div className={badgeStyles.veg.className} style={badgeStyles.veg.style}>
-        <div className="w-3 h-3 border-2 border-green-600 flex items-center justify-center bg-transparent rounded-[2px] p-[1px]">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-600 shrink-0" />
+      <div className={badgeStyles.veg.className}>
+        <div className="w-3.5 h-3.5 border border-green-600 flex items-center justify-center bg-white p-[1px]">
+          <div className="w-2 h-2 rounded-full bg-green-600 shrink-0" />
         </div>
       </div>
     );
@@ -78,12 +62,23 @@ const ProductBadge = ({ type, value = "", absolute = false }) => {
   if (!badge) return null;
 
   return (
-    <div
-      className={`${badge.className} ${absolute ? 'absolute top-2 left-2 z-10' : ''}`}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 2 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      whileHover={{ scale: 1.05, y: -1 }}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase shadow-sm relative overflow-hidden"
       style={badge.style}
     >
-      <span>{badge.text}</span>
-    </div>
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+        animate={{ x: ['-100%', '200%'] }}
+        transition={{ repeat: Infinity, duration: 2.5, ease: "linear", repeatDelay: 1 }}
+      />
+      <span className="relative z-10 flex items-center gap-1">
+        {badge.icon}
+        {badge.text}
+      </span>
+    </motion.div>
   );
 };
 
@@ -116,9 +111,6 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied }) => {
   );
 };
 
-// ─── Swiggy Custom Overlay Action Button Unit ──────────────────────────────────────
-// This renders overlapping the bottom center edge of the item image.
-// Safely checks quantity value and hooks up handlers.
 const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart }) => {
   const label = addingToCart ? '...' : 'ADD';
   
@@ -133,11 +125,10 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
     );
   }
 
-  // Active Increment/Decrement Mode (Triggers immediately when item added)
   if (cartQuantity > 0) {
     return (
       <div 
-        className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between border shadow-lg rounded-md h-7.5 w-[84px] font-bold overflow-hidden transition-all duration-200"
+        className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between border shadow-lg rounded-md h-7.5 w-[84px] font-bold overflow-hidden"
         style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -160,7 +151,6 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
     );
   }
 
-  // Baseline resting state
   return (
     <button
       onClick={handleInitialAdd}
@@ -263,50 +253,43 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   if (!product) return null;
 
-  // ─── Swiggy Mobile Layout (Horizontal Single-Row Card Stream) ─────────────────────
+  // ─── Swiggy Mobile Layout (Horizontal Card) ─────────────────────
   if (layout === 'horizontal') {
     return (
       <motion.div
         layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => navigate(`/product/${product.slug}`)}
-        className="flex flex-row p-4 gap-4 items-start cursor-pointer w-full border-b transition-colors"
+        className="flex flex-row p-4 gap-4 items-stretch cursor-pointer w-full border-b transition-colors"
         style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
       >
-        {/* Descriptive Text Meta Columns */}
-        <div className="flex flex-col flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
-            {isCakeCategory && <ProductBadge type="veg" />}
-            {product.bestseller && (
-              <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wide">★ Bestseller</span>
-            )}
-          </div>
-
-          <h3 className="text-[14px] font-bold leading-tight line-clamp-2" style={{ color: 'var(--heading)' }}>
-            {product.name}
-          </h3>
-
-          {/* Pricing Row */}
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-[14px] font-extrabold" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
-            {(hasOffer || isCouponApplied) && (
-              <>
-                <span className="text-[10px] line-through" style={{ color: 'var(--muted)' }}>₹{isCouponApplied ? displayPrice : mrp}</span>
-                {discountPct > 0 && <span className="text-[10px] font-bold text-orange-400">{discountPct}% OFF</span>}
-              </>
-            )}
-          </div>
-
-          {/* Quality Indicator Row */}
-          {rating > 0 ? (
-            <div className="flex items-center gap-0.5 mt-1 text-[11px] font-bold text-green-500">
-              <Star size={11} fill="currentColor" />
-              <span>{rating.toFixed(1)}</span>
-              {reviewCount > 0 && <span className="font-medium text-[10px] ml-1" style={{ color: 'var(--muted)' }}>({reviewCount})</span>}
+        <div className="flex flex-col flex-1 min-w-0 justify-between">
+          <div>
+            <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+              {isCakeCategory && <AnimatedProductBadge type="veg" />}
+              {product.bestseller && <AnimatedProductBadge type="bestseller" />}
+              {!product.bestseller && product.featured && <AnimatedProductBadge type="featured" />}
+              {discountPct > 0 && <AnimatedProductBadge type="discount" value={discountPct} />}
             </div>
-          ) : (
-            <div className="text-[11px] mt-1" style={{ color: 'var(--muted)' }}>Unrated</div>
-          )}
 
-          {/* Sizing Controls and Promotional Links */}
+            <h3 className="text-[14px] font-bold leading-tight break-words" style={{ color: 'var(--heading)' }}>
+              {product.name}
+            </h3>
+
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              <span className="text-[14px] font-extrabold" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
+              {(hasOffer || isCouponApplied) && (
+                <span className="text-[10px] line-through" style={{ color: 'var(--muted)' }}>₹{isCouponApplied ? displayPrice : mrp}</span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-0.5 mt-1 text-[11px] font-bold text-green-500">
+              <Star size={11} fill={rating > 0 ? "currentColor" : "none"} />
+              <span>{rating > 0 ? rating.toFixed(1) : '0'}</span>
+              <span className="font-medium text-[10px] ml-1" style={{ color: 'var(--muted)' }}>
+                ({reviewCount === 1 ? '1 review' : `${reviewCount} reviews`})
+              </span>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-1.5 mt-2">
             {hasVariants && product.variants.length > 1 && (
               <div className="flex items-center gap-1 flex-wrap" onClick={(e) => e.stopPropagation()}>
@@ -337,13 +320,12 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
             <div className="flex items-center gap-1 text-[10px] mt-0.5" style={{ color: 'var(--muted)' }}>
               <MapPin size={10} />
-              <span className="capitalize">{product.location || 'coimbatore'}</span>
+              <span className="capitalize break-all">{product.location || 'coimbatore'}</span>
             </div>
           </div>
         </div>
 
-        {/* Floating Right Image Cover Module */}
-        <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+        <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl self-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
           <div className="w-full h-full overflow-hidden rounded-xl">
             {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" /> : <ImagePlaceholder />}
           </div>
@@ -352,7 +334,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             <Heart size={12} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }} />
           </button>
 
-          {/* Dynamic Quantity Overlay Action Area */}
           <SwiggyCartAction 
             cartQuantity={cartQuantity}
             handleQuantityChange={handleQuantityChange}
@@ -365,73 +346,66 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
     );
   }
 
-  // ─── Swiggy Desktop Layout (Grid Display Structure) ───────────────────────────────
+  // ─── Swiggy Desktop Layout (Grid Display) ───────────────────────────────
   return (
     <motion.div
       layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => navigate(`/product/${product.slug}`)}
-      className={`group h-full flex flex-col cursor-pointer transition-all duration-200 p-3 ${cardStyleMap[cardStyle]}`}
+      className={`group w-full h-full flex flex-col justify-between cursor-pointer transition-all duration-200 p-3 ${cardStyleMap[cardStyle]}`}
       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
     >
-      {/* Top Image Framing Workspace */}
-      <div className="relative aspect-square overflow-visible shrink-0 w-full mb-5" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
-        <div className="w-full h-full overflow-hidden rounded-xl">
-          {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
-        </div>
-        
-        {/* Dynamic Category Badging Layer */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {isCakeCategory && <ProductBadge type="veg" />}
-          {product.bestseller && <ProductBadge type="bestseller" />}
-          {!product.bestseller && product.featured && <ProductBadge type="featured" />}
+      <div>
+        <div className="relative aspect-square overflow-visible shrink-0 w-full mb-5" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
+          <div className="w-full h-full overflow-hidden rounded-xl">
+            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
+          </div>
+
+          <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-sm z-10 transition-all border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+            <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }} />
+          </button>
+
+          <SwiggyCartAction 
+            cartQuantity={cartQuantity}
+            handleQuantityChange={handleQuantityChange}
+            handleInitialAdd={handleInitialAdd}
+            isOutOfStock={isOutOfStock}
+            addingToCart={addingToCart}
+          />
         </div>
 
-        {/* Bookmark/Wishlist Element */}
-        <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-sm z-10 transition-all border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-          <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }} />
-        </button>
+        <div className="flex flex-col text-left mt-1">
+          <div className="flex items-center gap-1.5 flex-wrap mb-2">
+            {isCakeCategory && <AnimatedProductBadge type="veg" />}
+            {product.bestseller && <AnimatedProductBadge type="bestseller" />}
+            {!product.bestseller && product.featured && <AnimatedProductBadge type="featured" />}
+            {discountPct > 0 && <AnimatedProductBadge type="discount" value={discountPct} />}
+          </div>
 
-        {/* Dynamic Overlay Control */}
-        <SwiggyCartAction 
-          cartQuantity={cartQuantity}
-          handleQuantityChange={handleQuantityChange}
-          handleInitialAdd={handleInitialAdd}
-          isOutOfStock={isOutOfStock}
-          addingToCart={addingToCart}
-        />
+          <h3 className="text-[14px] font-bold leading-tight mb-1 break-words" style={{ color: 'var(--heading)' }}>
+            {product.name}
+          </h3>
+
+          <div className="flex items-center gap-1 text-[12px] font-medium mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
+            <div className="flex items-center gap-0.5 font-bold text-green-500">
+              <Star size={12} fill={rating > 0 ? "currentColor" : "none"} />
+              <span>{rating > 0 ? rating.toFixed(1) : '0'}</span>
+              <span className="font-normal text-[11px] ml-0.5" style={{ color: 'var(--muted)' }}>
+                ({reviewCount === 1 ? '1 review' : `${reviewCount} reviews`})
+              </span>
+            </div>
+            <span>•</span>
+            <span className="capitalize break-all">{product.location || 'coimbatore'}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Typography Description Segment */}
-      <div className="flex flex-col flex-1 text-left mt-1">
-        <h3 className="text-[14px] font-bold leading-tight line-clamp-1 mb-0.5" style={{ color: 'var(--heading)' }}>
-          {product.name}
-        </h3>
-
-        {/* Location & Rating Headers */}
-        <div className="flex items-center gap-1 text-[12px] font-medium mb-1" style={{ color: 'var(--muted)' }}>
-          {rating > 0 ? (
-            <div className="flex items-center gap-0.5 font-bold text-green-500">
-              <Star size={12} fill="currentColor" />
-              <span>{rating.toFixed(1)}</span>
-            </div>
-          ) : (
-            <span>Unrated</span>
-          )}
-          <span>•</span>
-          <span className="capitalize truncate">{product.location || 'coimbatore'}</span>
-        </div>
-
-        {/* Pricing Layout Block */}
-        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+      <div className="flex flex-col text-left mt-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[15px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
           {(hasOffer || isCouponApplied) && (
-            <>
-              <span className="text-[11px] line-through" style={{ color: 'var(--muted)' }}>₹{isCouponApplied ? displayPrice : mrp}</span>
-              {discountPct > 0 && <span className="text-[11px] font-bold text-orange-400">{discountPct}% OFF</span>}
-            </>
+            <span className="text-[11px] line-through" style={{ color: 'var(--muted)' }}>₹{isCouponApplied ? displayPrice : mrp}</span>
           )}
         </div>
 
-        {/* Sub-variant Selector Panels */}
         {hasVariants && product.variants.length > 1 && (
           <div className="flex items-center gap-1 flex-wrap mt-2" onClick={(e) => e.stopPropagation()}>
             {product.variants.map((v, idx) => (
@@ -448,7 +422,6 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           </div>
         )}
 
-        {/* Micro Coupon Controls */}
         {isCouponActive && (
           <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowCoupon(!showCoupon)} className="flex items-center gap-1 text-[9px] font-bold text-green-500 bg-green-950/20 px-1.5 py-0.5 rounded border cursor-pointer" style={{ borderColor: 'var(--border)' }}>

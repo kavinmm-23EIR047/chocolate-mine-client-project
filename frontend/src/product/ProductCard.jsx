@@ -20,10 +20,12 @@ const ImagePlaceholder = () => (
   </div>
 );
 
+// Swiggy Veg Icon Box (Matches exactly without using breaking light background utilities)
 const ProductBadge = ({ type, value = "", absolute = false }) => {
   const badgeStyles = {
     veg: {
-      className: "inline-flex items-center justify-center shrink-0 p-0.5 rounded bg-white shadow-sm border border-gray-100",
+      className: "inline-flex items-center justify-center shrink-0 p-0.5 rounded border border-[#3a3028]",
+      style: { background: 'var(--card)' }
     },
     bestseller: {
       className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[9px] font-black tracking-wider uppercase shadow-sm",
@@ -64,7 +66,7 @@ const ProductBadge = ({ type, value = "", absolute = false }) => {
 
   if (type === 'veg') {
     return (
-      <div className={badgeStyles.veg.className}>
+      <div className={badgeStyles.veg.className} style={badgeStyles.veg.style}>
         <div className="w-3 h-3 border-2 border-green-600 flex items-center justify-center bg-transparent rounded-[2px] p-[1px]">
           <div className="w-1.5 h-1.5 rounded-full bg-green-600 shrink-0" />
         </div>
@@ -100,7 +102,7 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied }) => {
       <div className="p-2 flex items-center justify-between gap-1.5">
         <div className="min-w-0 flex-1">
           <div className="text-[9px] font-mono font-black tracking-wide" style={{ color: 'var(--heading)' }}>{coupon.code}</div>
-          <div className="text-[8px] font-medium text-gray-400 mt-0.5">
+          <div className="text-[8px] font-medium mt-0.5" style={{ color: 'var(--muted)' }}>
             {coupon.type === 'percent' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`}
           </div>
         </div>
@@ -114,45 +116,56 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied }) => {
   );
 };
 
-// Swiggy Styled Clean Dynamic Button Overlay
-const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart, currentCartItem, product }) => {
+// ─── Swiggy Custom Overlay Action Button Unit ──────────────────────────────────────
+// This renders overlapping the bottom center edge of the item image.
+// Safely checks quantity value and hooks up handlers.
+const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart }) => {
   const label = addingToCart ? '...' : 'ADD';
   
   if (isOutOfStock) {
     return (
-      <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 bg-white border shadow-md rounded-md px-4 py-1 text-[10px] font-black text-gray-400 whitespace-nowrap tracking-wide">
-        OUT OF STOCK
+      <div 
+        className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 z-20 border text-[9px] font-black px-3 py-1 rounded shadow-md whitespace-nowrap uppercase tracking-wider"
+        style={{ background: 'var(--card-soft)', borderColor: 'var(--border)', color: 'var(--muted)' }}
+      >
+        Sold Out
       </div>
     );
   }
 
+  // Active Increment/Decrement Mode (Triggers immediately when item added)
   if (cartQuantity > 0) {
     return (
       <div 
-        className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between bg-white border border-gray-200 shadow-md rounded-md h-7 w-[76px] font-bold text-green-600 overflow-hidden"
+        className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-between border shadow-lg rounded-md h-7.5 w-[84px] font-bold overflow-hidden transition-all duration-200"
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button 
           onClick={(e) => handleQuantityChange(e, cartQuantity - 1)} 
-          className="h-full px-2 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          className="h-full px-2 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
+          style={{ color: 'var(--accent)' }}
         >
-          <Minus size={10} strokeWidth={3} />
+          <Minus size={11} strokeWidth={3} />
         </button>
-        <span className="text-[11px] font-black">{cartQuantity}</span>
+        <span className="text-[12px] font-black" style={{ color: 'var(--accent)' }}>{cartQuantity}</span>
         <button 
           onClick={(e) => handleQuantityChange(e, cartQuantity + 1)} 
-          className="h-full px-2 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          className="h-full px-2 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
+          style={{ color: 'var(--accent)' }}
         >
-          <Plus size={10} strokeWidth={3} />
+          <Plus size={11} strokeWidth={3} />
         </button>
       </div>
     );
   }
 
+  // Baseline resting state
   return (
     <button
       onClick={handleInitialAdd}
-      className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center bg-white border border-gray-200 shadow-md hover:shadow-lg rounded-md h-7 w-[76px] text-[11px] font-black text-green-600 tracking-wide transition-all active:scale-95 cursor-pointer hover:bg-gray-50"
+      className="absolute -bottom-3.5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center border shadow-md hover:shadow-lg rounded-md h-7.5 w-[84px] text-[12px] font-extrabold tracking-wider transition-all active:scale-95 cursor-pointer"
+      style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--accent)' }}
     >
       <span>{label}</span>
     </button>
@@ -250,20 +263,20 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   if (!product) return null;
 
-  // ─── Swiggy Unified Horizontal / Mobile List View Layout ───────────────────
+  // ─── Swiggy Mobile Layout (Horizontal Single-Row Card Stream) ─────────────────────
   if (layout === 'horizontal') {
     return (
       <motion.div
         layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => navigate(`/product/${product.slug}`)}
-        className="flex flex-row p-4 gap-4 items-start cursor-pointer w-full border-b border-gray-100 dark:border-gray-800/60 transition-colors"
-        style={{ background: 'var(--card)' }}
+        className="flex flex-row p-4 gap-4 items-start cursor-pointer w-full border-b transition-colors"
+        style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
       >
-        {/* Left Side Content */}
+        {/* Descriptive Text Meta Columns */}
         <div className="flex flex-col flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             {isCakeCategory && <ProductBadge type="veg" />}
             {product.bestseller && (
-              <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wide">★ Bestseller</span>
+              <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wide">★ Bestseller</span>
             )}
           </div>
 
@@ -271,31 +284,35 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             {product.name}
           </h3>
 
+          {/* Pricing Row */}
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-[13px] font-bold" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
+            <span className="text-[14px] font-extrabold" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
             {(hasOffer || isCouponApplied) && (
               <>
-                <span className="text-[10px] line-through text-gray-400">₹{isCouponApplied ? displayPrice : mrp}</span>
+                <span className="text-[10px] line-through" style={{ color: 'var(--muted)' }}>₹{isCouponApplied ? displayPrice : mrp}</span>
                 {discountPct > 0 && <span className="text-[10px] font-bold text-orange-400">{discountPct}% OFF</span>}
               </>
             )}
           </div>
 
-          {rating > 0 && (
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-green-700 dark:text-green-500">
+          {/* Quality Indicator Row */}
+          {rating > 0 ? (
+            <div className="flex items-center gap-0.5 mt-1 text-[11px] font-bold text-green-500">
               <Star size={11} fill="currentColor" />
               <span>{rating.toFixed(1)}</span>
-              {reviewCount > 0 && <span className="text-gray-400 font-medium text-[10px]">({reviewCount})</span>}
+              {reviewCount > 0 && <span className="font-medium text-[10px] ml-1" style={{ color: 'var(--muted)' }}>({reviewCount})</span>}
             </div>
+          ) : (
+            <div className="text-[11px] mt-1" style={{ color: 'var(--muted)' }}>Unrated</div>
           )}
 
-          {/* Quick Info & Variants */}
+          {/* Sizing Controls and Promotional Links */}
           <div className="flex flex-col gap-1.5 mt-2">
             {hasVariants && product.variants.length > 1 && (
               <div className="flex items-center gap-1 flex-wrap" onClick={(e) => e.stopPropagation()}>
                 {product.variants.map((v, idx) => (
                   <button key={idx} onClick={() => setSelectedVariantIndex(idx)}
-                    className="px-2 py-0.5 rounded text-[9px] font-semibold border transition-all"
+                    className="px-2 py-0.5 rounded text-[9px] font-semibold border transition-all cursor-pointer"
                     style={{
                       background: selectedVariantIndex === idx ? 'var(--primary)' : 'var(--card-soft)',
                       color: selectedVariantIndex === idx ? 'var(--button-text)' : 'var(--heading)',
@@ -310,31 +327,32 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             {isCouponActive && (
               <div className="inline-block mt-1" onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => setShowCoupon(!showCoupon)} 
-                  className="inline-flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-950/30 px-1.5 py-0.5 rounded">
+                  className="inline-flex items-center gap-1 text-[9px] font-bold text-green-500 bg-green-950/20 px-1.5 py-0.5 rounded border"
+                  style={{ borderColor: 'var(--border)' }}>
                   <Ticket size={10} /> {isCouponApplied ? 'Applied' : `Use: ${coupon.code}`} <ChevronDown size={8} />
                 </button>
                 <AnimatePresence>{showCoupon && <CouponCard coupon={coupon} onApply={handleApplyCoupon} onRemove={handleRemoveCoupon} isApplied={isCouponApplied} />}</AnimatePresence>
               </div>
             )}
 
-            <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
+            <div className="flex items-center gap-1 text-[10px] mt-0.5" style={{ color: 'var(--muted)' }}>
               <MapPin size={10} />
               <span className="capitalize">{product.location || 'coimbatore'}</span>
             </div>
           </div>
         </div>
 
-        {/* Right Side Image & Floating Button */}
-        <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl" style={{ background: 'var(--surface)' }}>
+        {/* Floating Right Image Cover Module */}
+        <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
           <div className="w-full h-full overflow-hidden rounded-xl">
             {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" /> : <ImagePlaceholder />}
           </div>
           
-          <button onClick={wish} className="absolute top-1.5 right-1.5 p-1 rounded-full shadow-sm z-10 bg-white/90 backdrop-blur-sm hover:bg-white transition-all">
-            <Heart size={13} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : '#666' }} />
+          <button onClick={wish} className="absolute top-1.5 right-1.5 p-1.5 rounded-full shadow-sm z-10 transition-all border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+            <Heart size={12} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }} />
           </button>
 
-          {/* Swiggy Bottom Layer Overlapped Sticky Button */}
+          {/* Dynamic Quantity Overlay Action Area */}
           <SwiggyCartAction 
             cartQuantity={cartQuantity}
             handleQuantityChange={handleQuantityChange}
@@ -347,30 +365,32 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
     );
   }
 
-  // ─── Swiggy Grid View Layout (PC / Desktop Grid Structure) ─────────────────
+  // ─── Swiggy Desktop Layout (Grid Display Structure) ───────────────────────────────
   return (
     <motion.div
       layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => navigate(`/product/${product.slug}`)}
-      className={`group h-full flex flex-col cursor-pointer transition-all duration-200 border border-transparent hover:border-gray-100 dark:hover:border-gray-800/80 p-2 ${cardStyleMap[cardStyle]}`}
-      style={{ background: 'var(--card)' }}
+      className={`group h-full flex flex-col cursor-pointer transition-all duration-200 p-3 ${cardStyleMap[cardStyle]}`}
+      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
     >
-      {/* Dynamic Swiggy Modern Image Base Frame */}
-      <div className="relative aspect-square overflow-visible shrink-0 w-full mb-4" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
-        <div className="w-full h-full overflow-hidden rounded-xl shadow-sm">
-          {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
+      {/* Top Image Framing Workspace */}
+      <div className="relative aspect-square overflow-visible shrink-0 w-full mb-5" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
+        <div className="w-full h-full overflow-hidden rounded-xl">
+          {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
         </div>
         
-        {/* High contrast contextual absolute overlay elements */}
+        {/* Dynamic Category Badging Layer */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           {isCakeCategory && <ProductBadge type="veg" />}
           {product.bestseller && <ProductBadge type="bestseller" />}
+          {!product.bestseller && product.featured && <ProductBadge type="featured" />}
         </div>
 
-        <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-sm z-10 bg-white/90 backdrop-blur-sm hover:bg-white transition-all">
-          <Heart size={15} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : '#666' }} />
+        {/* Bookmark/Wishlist Element */}
+        <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-sm z-10 transition-all border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+          <Heart size={14} fill={isLiked ? '#ef4444' : 'none'} style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }} />
         </button>
 
-        {/* Dynamic Center Swiggy Interaction Point */}
+        {/* Dynamic Overlay Control */}
         <SwiggyCartAction 
           cartQuantity={cartQuantity}
           handleQuantityChange={handleQuantityChange}
@@ -380,38 +400,38 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         />
       </div>
 
-      {/* Typography Block */}
-      <div className="flex flex-col flex-1 text-left px-1">
+      {/* Typography Description Segment */}
+      <div className="flex flex-col flex-1 text-left mt-1">
         <h3 className="text-[14px] font-bold leading-tight line-clamp-1 mb-0.5" style={{ color: 'var(--heading)' }}>
           {product.name}
         </h3>
 
-        {/* Dynamic Meta Indicators */}
-        <div className="flex items-center gap-1.5 mb-1.5">
+        {/* Location & Rating Headers */}
+        <div className="flex items-center gap-1 text-[12px] font-medium mb-1" style={{ color: 'var(--muted)' }}>
           {rating > 0 ? (
-            <div className="flex items-center gap-0.5 text-[12px] font-bold text-green-700 dark:text-green-500">
+            <div className="flex items-center gap-0.5 font-bold text-green-500">
               <Star size={12} fill="currentColor" />
               <span>{rating.toFixed(1)}</span>
             </div>
           ) : (
-            <span className="text-[11px] text-gray-400">Unrated</span>
+            <span>Unrated</span>
           )}
-          <span className="text-gray-300 dark:text-gray-700 text-[10px]">•</span>
-          <span className="text-[11px] text-gray-500 font-medium capitalize truncate">{product.location || 'coimbatore'}</span>
+          <span>•</span>
+          <span className="capitalize truncate">{product.location || 'coimbatore'}</span>
         </div>
 
-        {/* Pricing Layout Structure */}
-        <div className="flex items-center gap-1.5 flex-wrap mt-auto">
-          <span className="text-[14px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
+        {/* Pricing Layout Block */}
+        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+          <span className="text-[15px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
           {(hasOffer || isCouponApplied) && (
             <>
-              <span className="text-[11px] line-through text-gray-400">₹{isCouponApplied ? displayPrice : mrp}</span>
+              <span className="text-[11px] line-through" style={{ color: 'var(--muted)' }}>₹{isCouponApplied ? displayPrice : mrp}</span>
               {discountPct > 0 && <span className="text-[11px] font-bold text-orange-400">{discountPct}% OFF</span>}
             </>
           )}
         </div>
 
-        {/* Variant Selectors Block inside Information Stream */}
+        {/* Sub-variant Selector Panels */}
         {hasVariants && product.variants.length > 1 && (
           <div className="flex items-center gap-1 flex-wrap mt-2" onClick={(e) => e.stopPropagation()}>
             {product.variants.map((v, idx) => (
@@ -428,10 +448,10 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           </div>
         )}
 
-        {/* Swiggy Micro Coupon Dropdown */}
+        {/* Micro Coupon Controls */}
         {isCouponActive && (
           <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setShowCoupon(!showCoupon)} className="flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 dark:bg-green-950/20 px-1.5 py-0.5 rounded cursor-pointer">
+            <button onClick={() => setShowCoupon(!showCoupon)} className="flex items-center gap-1 text-[9px] font-bold text-green-500 bg-green-950/20 px-1.5 py-0.5 rounded border cursor-pointer" style={{ borderColor: 'var(--border)' }}>
               <Ticket size={10} className="shrink-0" />
               <span>{isCouponApplied ? 'Code Active! 🎉' : `Code: ${coupon.code}`}</span>
               <ChevronDown size={8} />

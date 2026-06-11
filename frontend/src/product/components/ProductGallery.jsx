@@ -34,7 +34,6 @@ const ProductGallery = ({
     <div className="w-full space-y-4 sm:space-y-6">
       
       {/* ── MAIN IMAGE WRAPPER ── */}
-      {/* Adjusted aspect-ratio to aspect-square on desktop/tablet to keep it clean, aspect-[4/5] on mobile for premium vertical depth */}
       <div 
         className="relative aspect-[4/5] sm:aspect-square w-full bg-[#e3cbb3] lg:rounded-[2.5rem] overflow-hidden border-b lg:border border-border/50 cursor-zoom-in group shadow-premium transition-all duration-500" 
         onClick={() => setIsLightboxOpen(true)}
@@ -59,7 +58,6 @@ const ProductGallery = ({
               transition={{ duration: 0.4 }}
               src={displayImage || undefined}
               onError={(e) => { e.target.src = product?.image && product.image !== 'none' ? product.image : ''; }}
-              {/* CHANGED: Switched to object-cover to completely stretch the image across the full width edge-to-edge */}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           )}
@@ -110,7 +108,6 @@ const ProductGallery = ({
             <button
               key={idx}
               onClick={() => setDisplayImage(img)}
-              {/* CHANGED: Switched to object-cover here too to make previews look uniform */}
               className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 bg-[#e3cbb3] snap-start ${
                 displayImage === img ? 'border-primary shadow-md scale-95' : 'border-border hover:border-primary/50 opacity-80'
               }`}
@@ -163,7 +160,6 @@ const ProductGallery = ({
             </div>
 
             {/* Lightbox Main Card Box Container */}
-            {/* KEEPS object-contain so users can still see the entire uncropped image & text branding safely on full screen */}
             <motion.div
               initial={{ scale: 0.93, y: 15 }}
               animate={{ scale: 1, y: 0 }}

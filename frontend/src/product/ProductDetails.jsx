@@ -82,7 +82,6 @@ const ProductDetails = () => {
   // ─── INITIALIZE SELECTIONS ─────────────────────────────
   useEffect(() => {
     if (product) {
-      // Initialize cake selections if product has variants
       if (product.category === 'cakes' && product.hasVariants && product.variants && product.variants.length > 0) {
         const initialVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
 
@@ -116,12 +115,10 @@ const ProductDetails = () => {
       const found = prod.weightPrices.find(wp => Number(wp.weight) === num);
       if (found) return found.price;
     }
-    // fallback: try to find in variants
     const variantFallback = prod.variants?.find(v => v.weight === weightStr);
     return variantFallback ? variantFallback.price : null;
   };
 
-  // Handle flavor change
   const handleFlavorChange = (flavor) => {
     setSelectedFlavor(flavor);
     setShowCustomFlavorInput(false);
@@ -138,7 +135,6 @@ const ProductDetails = () => {
       setSelectedPrice(priceFromWeights !== null ? priceFromWeights : variant.price);
       setSelectedStock(variant.stock);
     } else {
-      // Try weightPrices
       const priceFromWeights = getPriceForWeight(product, selectedWeight);
       if (priceFromWeights !== null) setSelectedPrice(priceFromWeights);
     }
@@ -148,7 +144,6 @@ const ProductDetails = () => {
     }
   };
 
-  // Handle weight change
   const handleWeightChange = (weight) => {
     setSelectedWeight(weight);
     setShowCustomWeightInput(false);
@@ -168,7 +163,6 @@ const ProductDetails = () => {
     }
   };
 
-  // Handle custom flavor input
   const handleCustomFlavorSubmit = () => {
     if (customFlavor.trim()) {
       setSelectedFlavor({ name: customFlavor.trim(), images: [] });
@@ -177,7 +171,6 @@ const ProductDetails = () => {
     }
   };
 
-  // Handle custom weight input
   const handleCustomWeightSubmit = () => {
     if (customWeight.trim()) {
       setSelectedWeight(customWeight.trim());
@@ -192,7 +185,6 @@ const ProductDetails = () => {
   const productStock = Number(product?.stock ?? 0);
   const productCategory = product?.category;
 
-  // ─── CART / WISHLIST STATE ──────────────────────────────
   const currentVariantFlavor = productCategory === 'cakes'
     ? (showCustomFlavorInput ? customFlavor : selectedFlavor?.name)
     : null;
@@ -200,7 +192,6 @@ const ProductDetails = () => {
     ? (showCustomWeightInput ? customWeight : selectedWeight)
     : null;
 
-  // Find cart item with same variant
   const cartItem = cartItems?.find(i =>
     idsMatch(i.productId, productId) &&
     (productCategory !== 'cakes' || (i.selectedFlavor === currentVariantFlavor && i.selectedWeight === currentVariantWeight))
@@ -224,7 +215,6 @@ const ProductDetails = () => {
 
   const normalizeCouponCode = (c) => (c != null && String(c).trim() !== '' ? String(c).trim().toUpperCase() : '');
 
-  // Cart coupon matches this product's offer
   const isCouponApplied =
     !!normalizeCouponCode(appliedCoupon) &&
     !!normalizeCouponCode(product?.coupon?.code) &&
@@ -246,10 +236,7 @@ const ProductDetails = () => {
   const finalPrice = totalFinalPrice;
   const couponSavings = couponSavingsPerUnit * quantity;
 
-  // Check if variant is in stock
-  const isInStock = productCategory === 'cakes'
-    ? (selectedStock > 0)
-    : (productStock > 0);
+  const isInStock = productCategory === 'cakes' ? (selectedStock > 0) : (productStock > 0);
 
   // ─── ACTIONS ───────────────────────────────────────────
   const handleApplyCoupon = async () => {
@@ -270,16 +257,11 @@ const ProductDetails = () => {
       if (!isInCart && quantity > 0) {
         const options = {};
         if (product?.category === 'cakes') {
-          if (showCustomFlavorInput && customFlavor) {
-            options.flavor = customFlavor;
-          } else if (selectedFlavor) {
-            options.flavor = selectedFlavor.name;
-          }
-          if (showCustomWeightInput && customWeight) {
-            options.weight = customWeight;
-          } else if (selectedWeight) {
-            options.weight = selectedWeight;
-          }
+          if (showCustomFlavorInput && customFlavor) options.flavor = customFlavor;
+          else if (selectedFlavor) options.flavor = selectedFlavor.name;
+          
+          if (showCustomWeightInput && customWeight) options.weight = customWeight;
+          else if (selectedWeight) options.weight = selectedWeight;
         }
         dispatch(addToCart({ product, qty: quantity, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
         toast.success(`${quantity} item(s) added to cart`);
@@ -287,7 +269,6 @@ const ProductDetails = () => {
 
       dispatch(setCoupon(product.coupon.code));
       toast.success(`${product.coupon.code} applied`);
-
     } catch (err) {
       console.error('Coupon application error:', err);
       toast.error(err?.response?.data?.message || err?.message || 'Failed to apply coupon.');
@@ -369,7 +350,6 @@ const ProductDetails = () => {
     return flavor.images.filter(img => img && !img.startsWith('blob:'));
   };
 
-  // ─── LOADER ────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -411,11 +391,11 @@ const ProductDetails = () => {
       </div>
 
       <div className="max-w-[1400px] w-full mx-auto px-4 lg:px-8 xl:px-12 lg:py-10">
-
         {/* ── TOP SECTION: Gallery + Pricing ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-start mb-12">
-
+          
           {/* ── LEFT — IMAGE SECTION ── */}
+          {/* Note: Ensure inside your internal ProductGallery component, the root layout handles aspect-[9/16] or aspect-[3/4] using object-contain with background #e3cbb3 */}
           <div className="w-full space-y-6">
             <ProductGallery
               product={product}
@@ -518,7 +498,7 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* ✅ FULL WIDTH SIMILAR PRODUCTS SECTION (Desktop + Mobile) */}
+        {/* FULL WIDTH SIMILAR PRODUCTS SECTION (Desktop + Mobile) */}
         <div className="mt-16 px-4 lg:px-0">
           <ProductSimilar relatedProducts={relatedProducts} />
         </div>

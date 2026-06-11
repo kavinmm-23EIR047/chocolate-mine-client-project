@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
-  Star, Heart, ChevronDown, Layers, Filter, Eye
+  Star, Heart, ChevronDown, Layers, Filter, Eye, Search
 } from 'lucide-react';
 import { addToCart } from '../redux/slices/cartSlice';
 import { saveCustomCakeRequest } from '../utils/customCake';
@@ -31,15 +31,19 @@ export default function CustomCake() {
   // ── STATE ──────────────────────────────────────────────────
   const [selectedTier, setSelectedTier] = useState(null);   
   const [themeIdx, setThemeIdx] = useState(null);            
-  const [selectedFlavor, setSelectedFlavor] = useState(null);
+  const [selectedFlavor, setSelectedFlavor] = useState(null); // Visual Color
+  const [selectedDbFlavor, setSelectedDbFlavor] = useState(null); // Internal Sponge Flavour
   const [weightIdx, setWeightIdx] = useState(0);
   const [customerName, setCustomerName] = useState('');
   const [age, setAge] = useState('1');
   const [message, setMessage] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  
+  // Flavour Dropdown State
   const [flavorDropdownOpen, setFlavorDropdownOpen] = useState(false);
   const [flavorSearch, setFlavorSearch] = useState('');
+  
   const [dbThemes, setDbThemes] = useState([]);
 
   useEffect(() => {
@@ -121,6 +125,7 @@ export default function CustomCake() {
   const currentTier = getTierById(selectedTier || 1);
   
   useEffect(() => {
+    // Set Visual Color
     if (theme && theme.flavors?.length) {
       const existing = theme.flavors.find(f => f.name === selectedFlavor?.name);
       setSelectedFlavor(existing || theme.flavors[0]);
@@ -128,9 +133,12 @@ export default function CustomCake() {
       setSelectedFlavor(null);
     }
 
+    // Set Internal Sponge Flavour
     if (theme && theme.dbFlavors?.length) {
-      const existing = theme.dbFlavors.find(f => f.name === selectedFlavor?.name);
-      setSelectedFlavor(existing || theme.flavors[0]);
+      const existing = theme.dbFlavors.find(f => f.name === selectedDbFlavor?.name);
+      setSelectedDbFlavor(existing || theme.dbFlavors[0]);
+    } else {
+      setSelectedDbFlavor(null);
     }
   }, [themeIdx, selectedTier, theme]);
 
@@ -158,11 +166,11 @@ export default function CustomCake() {
 
   // ── PRICE CALCULATION ──────────────────────────────────────
   const getFlavorWeightPrice = (w) => {
-    if (!selectedFlavor || !selectedFlavor.weights) return 1120;
+    if (!selectedDbFlavor || !selectedDbFlavor.weights) return 1120;
     const weightVal = parseFloat(w.label);
-    const weightObj = selectedFlavor.weights.find(x => x.kg === weightVal);
+    const weightObj = selectedDbFlavor.weights.find(x => x.kg === weightVal);
     if (weightObj) return weightObj.price;
-    const baseObj = selectedFlavor.weights.find(x => x.kg === 1);
+    const baseObj = selectedDbFlavor.weights.find(x => x.kg === 1);
     return baseObj ? baseObj.price : 1120;
   };
 
@@ -189,11 +197,12 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
-      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}`;
+      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}`;
+      
       dispatch(addToCart({
         product: {
           _id: baseCakeId,
-          name: `Custom Cake — ${theme.name} (${tierLabel})`,
+          name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
           description: theme.description,
           image: selectedFlavor.image,
           price: grandTotal, stock: 5, category: 'Custom Cakes',
@@ -203,6 +212,7 @@ export default function CustomCake() {
           theme: theme.name, 
           tier: tierLabel, 
           color: selectedFlavor.name, 
+          flavor: selectedDbFlavor?.name || 'Classic Vanilla',
           weight: weight.label, 
           name: customerName, 
           age, 
@@ -210,15 +220,17 @@ export default function CustomCake() {
         },
         variantPrice: grandTotal,
       }));
+      
       saveCustomCakeRequest({
         designTheme: theme.name, 
         tier: tierLabel, 
         servingWeight: weight.label, 
         themeColor: selectedFlavor.name,
-        flavour: selectedFlavor.name,
+        flavour: selectedDbFlavor?.name || 'Classic Vanilla',
         messageOnCake: `Name: ${customerName}, Age: ${age}, Message: ${message || 'None'}`,
         estimatedPrice: grandTotal,
       });
+      
       toast.success('🎂 Dream cake added to bag!');
     } catch { toast.error('Failed to add. Please try again.'); }
     finally { setIsAdding(false); }
@@ -231,11 +243,11 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
-      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}`;
+      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}`;
       
       const directItem = {
         productId: baseCakeId,
-        name: `Custom Cake — ${theme.name} (${tierLabel})`,
+        name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
         description: theme.description,
         image: selectedFlavor.image,
         category: 'Custom Cakes',
@@ -248,6 +260,7 @@ export default function CustomCake() {
           theme: theme.name, 
           tier: tierLabel, 
           color: selectedFlavor.name, 
+          flavor: selectedDbFlavor?.name || 'Classic Vanilla',
           weight: weight.label, 
           name: customerName, 
           age, 
@@ -260,7 +273,7 @@ export default function CustomCake() {
         tier: tierLabel, 
         servingWeight: weight.label, 
         themeColor: selectedFlavor.name,
-        flavour: selectedFlavor.name,
+        flavour: selectedDbFlavor?.name || 'Classic Vanilla',
         messageOnCake: `Name: ${customerName}, Age: ${age}, Message: ${message || 'None'}`,
         estimatedPrice: grandTotal,
       });
@@ -279,6 +292,7 @@ export default function CustomCake() {
     setThemeIdx(idx);
     const t = filteredThemes[idx];
     if (t && t.flavors.length) setSelectedFlavor(t.flavors[0]);
+    if (t && t.dbFlavors?.length) setSelectedDbFlavor(t.dbFlavors[0]);
   };
 
   const renderPersonalizeForm = () => (
@@ -288,6 +302,100 @@ export default function CustomCake() {
         <span className="text-[11px] font-black text-emerald-700 uppercase tracking-wider">100% Pure Veg & Eggless</span>
       </div>
 
+      {/* ── DOMINO'S STYLE SEARCHABLE FLAVOUR DROPDOWN ── */}
+      <div className="relative z-40">
+        <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
+          Inside Cake Flavour <span className="text-red-500">*</span>
+        </label>
+        
+        <button
+          type="button"
+          onClick={() => setFlavorDropdownOpen(!flavorDropdownOpen)}
+          className={`w-full bg-[var(--card)] border-2 ${flavorDropdownOpen ? 'border-[var(--primary)]' : 'border-[var(--border)]'} text-[var(--foreground)] rounded-xl px-4 py-3.5 text-sm focus:outline-none flex items-center justify-between transition-all font-black shadow-sm`}
+        >
+          {selectedDbFlavor ? (
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wide leading-none mb-1">Selected</span>
+              <span className="leading-none">{selectedDbFlavor.name}</span>
+            </div>
+          ) : (
+            <span className="text-[var(--muted)] font-bold">Select a flavour...</span>
+          )}
+          <ChevronDown size={18} className={`transition-transform duration-200 text-[var(--primary)] ${flavorDropdownOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        <AnimatePresence>
+          {flavorDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-40 bg-black/0" onClick={() => setFlavorDropdownOpen(false)} />
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+                className="absolute left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[320px] flex flex-col"
+              >
+                <div className="p-3 border-b border-[var(--border)] bg-[var(--background)] flex-shrink-0 relative z-50">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+                    <input
+                      type="text"
+                      placeholder="Search flavours..."
+                      value={flavorSearch}
+                      onChange={(e) => setFlavorSearch(e.target.value)}
+                      className="w-full bg-[var(--input)] border border-[var(--input-border)] pl-9 pr-3 py-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[var(--primary)] font-bold text-[var(--foreground)] transition-all"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-y-auto flex-1 relative z-50 pb-2">
+                  {theme && Array.from(new Set(theme.dbFlavors.map(f => f.category))).map(category => {
+                    const categoryFlavors = theme.dbFlavors.filter(
+                      f => f.category === category && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
+                    );
+                    if (categoryFlavors.length === 0) return null;
+
+                    return (
+                      <div key={category} className="mt-2">
+                        <div className="text-[10px] font-black text-[var(--muted)] uppercase tracking-wider px-4 py-1.5 select-none bg-[var(--card-soft)]">
+                          {category}
+                        </div>
+                        <div className="px-2 pt-1 space-y-1">
+                          {categoryFlavors.map(flavor => {
+                            const isSelected = selectedDbFlavor?._id === flavor._id;
+                            return (
+                              <button
+                                key={flavor._id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedDbFlavor(flavor);
+                                  setFlavorDropdownOpen(false);
+                                  setFlavorSearch('');
+                                }}
+                                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center justify-between font-bold transition-all ${
+                                  isSelected 
+                                    ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20' 
+                                    : 'hover:bg-[var(--input-hover)] text-[var(--foreground)] border border-transparent'
+                                }`}
+                              >
+                                <span>{flavor.name}</span>
+                                {isSelected && <Check size={16} className="text-[var(--primary)]" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── CUSTOM CONFIGURATION INPUTS ── */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
@@ -299,7 +407,7 @@ export default function CustomCake() {
               placeholder="e.g. Kavin"
               value={customerName}
               onChange={e => setCustomerName(e.target.value)}
-              className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] pr-12 transition-all"
+              className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] pr-12 transition-all font-bold"
             />
             <span className="absolute right-3 top-2.5 text-[10px] text-[var(--muted)] font-bold">{customerName.length}/20</span>
           </div>
@@ -310,7 +418,7 @@ export default function CustomCake() {
             <select
               value={age}
               onChange={e => setAge(e.target.value)}
-              className="w-full appearance-none bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] cursor-pointer pr-8"
+              className="w-full appearance-none bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] cursor-pointer pr-8 font-bold"
             >
               {Array.from({ length: 100 }, (_, i) => i + 1).map(v => (
                 <option key={v} value={v}>{v} {v === 1 ? 'Yr' : 'Yrs'}</option>
@@ -330,7 +438,7 @@ export default function CustomCake() {
             placeholder="Happy Birthday!"
             value={message}
             onChange={e => setMessage(e.target.value)}
-            className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] pr-14 transition-all"
+            className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] pr-14 transition-all font-bold"
           />
           <span className="absolute right-3 top-2.5 text-[10px] text-[var(--muted)] font-bold">{message.length}/60</span>
         </div>
@@ -492,10 +600,10 @@ export default function CustomCake() {
                   </div>
                 </div>
 
-                {/* Color Strip Configuration */}
+                {/* Visual Theme Color Strip Configuration */}
                 {theme.enabled && (
                   <div>
-                    <p className="text-sm font-black text-[var(--heading)] mb-2.5">Choose Your Color</p>
+                    <p className="text-sm font-black text-[var(--heading)] mb-2.5">Choose Outer Visual Color</p>
                     <div className="grid grid-cols-4 gap-2.5">
                       {theme.flavors.map(flavor => {
                         const isSel = selectedFlavor?.id === flavor.id;
@@ -537,7 +645,7 @@ export default function CustomCake() {
                   </div>
 
                   <div className="mt-4 flex items-baseline gap-1.5">
-                    <span className="text-xs text-[var(--muted)] font-bold">Total configuration value:</span>
+                    <span className="text-xs text-[var(--muted)] font-bold">Total estimated value:</span>
                     <span className="text-3xl font-black text-[var(--heading)]">₹{theme.enabled ? grandTotal : '—'}</span>
                   </div>
                 </div>
@@ -568,7 +676,7 @@ export default function CustomCake() {
 
                 {/* Personalization Inputs */}
                 {theme.enabled && (
-                  <div className="bg-[var(--card)] border border-[var(--border)] p-4 rounded-2xl space-y-4">
+                  <div className="bg-[var(--card-soft)] border border-[var(--border)] p-4 rounded-2xl space-y-4">
                     <p className="font-black text-sm text-[var(--heading)] border-b border-[var(--border)] pb-2">Custom Configuration Specifications</p>
                     {renderPersonalizeForm()}
                   </div>
@@ -577,7 +685,7 @@ export default function CustomCake() {
                 {/* Summary Box */}
                 {theme.enabled && (
                   <div className="bg-[var(--card-soft)] rounded-2xl border border-[var(--border)] p-4 space-y-2 text-xs">
-                    <div className="flex justify-between"><span>Base Cake Weight Layer Weight</span><span className="font-bold">₹{basePrice}</span></div>
+                    <div className="flex justify-between"><span>Base Cake & Flavour Weight Price</span><span className="font-bold">₹{basePrice}</span></div>
                     <div className="flex justify-between"><span>Tier & Structural Frame Pricing</span><span className="font-bold">+₹{tierPrice}</span></div>
                     <div className="flex justify-between"><span>Theme Color Modification Addon</span><span className="font-bold">+₹{themePrice}</span></div>
                     <div className="border-t border-[var(--border)] pt-2 flex justify-between text-sm font-black text-[var(--primary)]"><span>Grand Valuation Total:</span><span>₹{grandTotal}</span></div>
@@ -586,10 +694,10 @@ export default function CustomCake() {
 
                 {/* Desktop Buttons */}
                 <div className="hidden md:grid grid-cols-2 gap-3 mt-2">
-                  <button onClick={handleAddToCart} disabled={isAdding} className="h-14 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--primary)]/5">
+                  <button onClick={handleAddToCart} disabled={isAdding} className="h-14 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--primary)]/5 transition-colors">
                     <ShoppingCart size={18} /> ADD TO CART
                   </button>
-                  <button onClick={handleBuyNow} disabled={isAdding} className="h-14 bg-[var(--secondary)] text-[var(--button-text)] font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg">
+                  <button onClick={handleBuyNow} disabled={isAdding} className="h-14 bg-[var(--secondary)] text-[var(--button-text)] font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg hover:brightness-110 transition-all">
                     BUY NOW <ArrowRight size={18} />
                   </button>
                 </div>

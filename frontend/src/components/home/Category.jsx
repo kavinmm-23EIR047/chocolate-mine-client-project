@@ -21,7 +21,7 @@ const HighlightCircle = ({ image, name, isActive, onClick, size = "md" }) => {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-2 group outline-none shrink-0 snap-start transition-transform active:scale-95"
+      className="flex flex-col items-center gap-2 group outline-none shrink-0 snap-start transition-transform active:scale-95 min-w-[88px] sm:min-w-[118px] lg:min-w-[136px]"
     >
       <div className={`${sizeClasses[size]} ${ringClass} transition-all duration-300 ${!isActive && 'hover:scale-105'}`}>
         <div className="w-full h-full rounded-full overflow-hidden bg-muted/10 shadow-inner">
@@ -79,12 +79,12 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
   if (loading) return null;
 
   return (
-    <section className="py-6 relative w-full max-w-7xl mx-auto">
+    <section className="py-6 relative w-full mx-auto overflow-hidden">
 
       {/* UNIFIED SCROLL CONTAINER (Mobile & PC) */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-5 md:gap-8 px-6 md:px-10 pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden items-start"
+        className="flex overflow-x-auto gap-5 md:gap-8 tv:gap-12 px-1 md:px-10 pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden items-start"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {categories.map(cat => (
@@ -103,7 +103,7 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
       <div className="flex justify-center items-center gap-4 mt-2 mb-2">
         <button
           onClick={() => scrollHoriz('left')}
-          className="p-2 text-muted-foreground/60 hover:text-primary transition-colors hover:scale-110 active:scale-95"
+          className="p-2 text-muted-foreground/60 hover:text-primary transition-colors hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px]"
           aria-label="Scroll left"
         >
           <ChevronLeft size={18} strokeWidth={2.5} />
@@ -115,7 +115,7 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
 
         <button
           onClick={() => scrollHoriz('right')}
-          className="p-2 text-muted-foreground/60 hover:text-primary transition-colors hover:scale-110 active:scale-95"
+          className="p-2 text-muted-foreground/60 hover:text-primary transition-colors hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px]"
           aria-label="Scroll right"
         >
           <ChevronRight size={18} strokeWidth={2.5} />

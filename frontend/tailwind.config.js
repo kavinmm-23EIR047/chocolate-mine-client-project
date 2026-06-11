@@ -8,6 +8,19 @@ export default {
   ],
 
   theme: {
+    screens: {
+      "mobile-lg": "481px",
+      "tablet": "768px",
+      "tablet-landscape": "1025px",
+      "desktop": "1200px",
+      "desktop-large": "1440px",
+      "tv": "1920px",
+      sm: "481px",
+      md: "768px",
+      lg: "1025px",
+      xl: "1200px",
+      "2xl": "1440px",
+    },
     extend: {
       colors: {
         // Core Layout

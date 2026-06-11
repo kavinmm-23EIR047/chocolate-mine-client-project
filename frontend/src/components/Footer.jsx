@@ -42,10 +42,10 @@ const Footer = () => {
         <IceCream size={100} strokeWidth={1.5} />
       </div>
 
-      <div className="w-full mx-auto px-6 sm:px-12 lg:px-20 relative z-10">
+      <div className="responsive-container relative z-10">
 
         {/* ─── TOP BLOCK: BRANDING & WHATSAPP ROW ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-16 sm:mb-24 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 tv:gap-24 mb-16 sm:mb-24 tv:mb-32 items-center">
 
           {/* Left Side Layout */}
           <div className="space-y-6 text-left flex flex-col items-start w-full lg:col-span-6 xl:col-span-5">
@@ -103,7 +103,7 @@ const Footer = () => {
           {/* Right Side - WhatsApp Join Section */}
           <div className="lg:col-span-6 xl:col-span-7 w-full flex flex-col justify-center items-start lg:items-end">
             <div className="w-full max-w-xl text-left lg:text-right mb-4">
-              <h3 className="text-2xl sm:text-4xl font-black text-heading uppercase tracking-tighter mb-2 flex items-center lg:justify-end gap-3">
+              <h3 className="text-2xl sm:text-4xl tv:text-5xl font-black text-heading uppercase mb-2 flex flex-wrap items-center lg:justify-end gap-3">
                 <Whatsapp className="text-[#25D366]" size={36} />
                 Join the Club
               </h3>
@@ -148,7 +148,7 @@ const Footer = () => {
         </div>
 
         {/* ─── MIDDLE LINKS GRID ─── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mb-16 sm:mb-20 text-left border-t border-border pt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 tv:gap-x-16 gap-y-12 mb-16 sm:mb-20 tv:mb-28 text-left border-t border-border pt-12 tv:pt-16">
 
           <div>
             <h4 className="text-[11px] font-black uppercase tracking-[0.35em] mb-6 text-accent">Navigation</h4>

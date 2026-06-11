@@ -130,7 +130,7 @@ const NotificationDropdown = () => {
         onClick={toggleDropdown}
         className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       >
-        <Bell size={20} className="text-heading" />
+        <Bell size={24} className="text-heading" />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-card flex items-center justify-center text-[8px] font-black text-white px-0.5 leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}

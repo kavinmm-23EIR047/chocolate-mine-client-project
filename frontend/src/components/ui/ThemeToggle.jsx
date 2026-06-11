@@ -21,9 +21,9 @@ const ThemeToggle = () => {
                    text-foreground hover:bg-background transition-all active:scale-95"
         aria-label="Change theme"
       >
-        {themeMode === 'light' && <Sun size={20} />}
-        {themeMode === 'dark' && <Moon size={20} />}
-        {themeMode === 'system' && <Monitor size={20} />}
+        {themeMode === 'light' && <Sun size={24} />}
+        {themeMode === 'dark' && <Moon size={24} />}
+        {themeMode === 'system' && <Monitor size={24} />}
       </button>
 
       {isOpen && (

@@ -81,6 +81,10 @@ const userSchema = new mongoose.Schema({
   wishlist: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product'
+  }],
+  customCakeWishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CustomCakeTheme'
   }]
 }, {
   timestamps: true

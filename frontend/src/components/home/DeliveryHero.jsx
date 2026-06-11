@@ -15,10 +15,11 @@ import {
   Leaf,
   Sparkles
 } from 'lucide-react';
+import api from '../../utils/api';
+import { useTheme } from '../../context/ThemeContext';
 
 import ScooterLightImg from '../../assets/scooter-light.png';
 import ScooterDarkImg from '../../assets/scooter-dark.png';
-import CakeImg from '../../assets/cake.png'; // Placeholder for themes
 
 const DELIVERY_FEATURES = [
   { icon: <Clock size={20} />, label: 'Same-Day', sub: 'Delivery' },
@@ -35,27 +36,40 @@ const STATS = [
   { icon: <Phone size={20} />, stat: '24/7', label: 'Customer Support' },
 ];
 
-const CAKE_THEMES = [
-  { id: 'wedding', title: 'Wedding Elegance', img: CakeImg, link: '/custom-cake/wedding' },
-  { id: 'birthday', title: 'Fun Birthdays', img: CakeImg, link: '/custom-cake/birthday' },
-  { id: 'anniversary', title: 'Anniversaries', img: CakeImg, link: '/custom-cake/anniversary' },
-  { id: 'kids', title: 'Kids Specials', img: CakeImg, link: '/custom-cake/kids' },
-  { id: 'corporate', title: 'Corporate Events', img: CakeImg, link: '/custom-cake/corporate' },
-];
-
 const DeliveryHero = () => {
+  const [themes, setThemes] = useState([]);
   const [activeThemeIndex, setActiveThemeIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const sliderRef = useRef(null);
+  const { isDark } = useTheme();
+
+  // Determine which scooter to use based on theme
+  const scooterImg = isDark ? ScooterDarkImg : ScooterLightImg;
+
+  // Fetch real themes from backend
+  useEffect(() => {
+    const fetchThemes = async () => {
+      try {
+        const response = await api.get('/custom-cakes/themes');
+        const result = response.data;
+        if (result.status === 'success') {
+          setThemes(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch themes", err);
+      }
+    };
+    fetchThemes();
+  }, []);
 
   // Auto-slider logic (updated to scroll by full container width)
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || themes.length === 0) return;
 
     const timer = setInterval(() => {
       if (!sliderRef.current) return;
 
-      const nextIndex = (activeThemeIndex + 1) % CAKE_THEMES.length;
+      const nextIndex = (activeThemeIndex + 1) % themes.length;
       const containerWidth = sliderRef.current.clientWidth;
 
       sliderRef.current.scrollTo({
@@ -67,14 +81,14 @@ const DeliveryHero = () => {
     }, 3000);
 
     return () => clearInterval(timer);
-  }, [activeThemeIndex, isHovered]);
+  }, [activeThemeIndex, isHovered, themes.length]);
 
   // Sync pagination dots with manual scroll/swipe
   const handleScroll = (e) => {
-    if (!sliderRef.current) return;
+    if (!sliderRef.current || themes.length === 0) return;
     const containerWidth = sliderRef.current.clientWidth;
     const newIndex = Math.round(e.target.scrollLeft / containerWidth);
-    if (newIndex !== activeThemeIndex && newIndex < CAKE_THEMES.length) {
+    if (newIndex !== activeThemeIndex && newIndex < themes.length) {
       setActiveThemeIndex(newIndex);
     }
   };
@@ -196,27 +210,16 @@ const DeliveryHero = () => {
           </div>
 
           {/* SCOOTER IMAGE */}
-          <div className="relative order-1 lg:order-2 flex items-center justify-center p-6 lg:p-10 z-20">
+          <div className="relative order-1 lg:order-2 flex items-end justify-end pt-8 lg:pt-12 overflow-visible z-20 min-h-[200px] lg:min-h-0">
             <motion.img
-              src={ScooterLightImg}
+              src={scooterImg}
               alt="Chocolate Mine Delivery"
               initial={{ opacity: 0, x: 30, scale: 0.96 }}
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-[320px] sm:max-w-[400px] lg:max-w-[450px] h-auto object-contain dark:hidden"
-              style={{ filter: 'drop-shadow(0 20px 40px rgba(61,31,26,0.15))' }}
-              draggable={false}
-            />
-            <motion.img
-              src={ScooterDarkImg}
-              alt="Chocolate Mine Delivery"
-              initial={{ opacity: 0, x: 30, scale: 0.96 }}
-              whileInView={{ opacity: 1, x: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-[320px] sm:max-w-[400px] lg:max-w-[450px] h-auto object-contain hidden dark:block"
-              style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
+              className="relative z-10 w-full lg:w-[120%] lg:max-w-none h-auto object-contain object-right-bottom origin-bottom-right scale-110 lg:scale-100 pr-2 pb-2 lg:pr-6 lg:pb-6"
+              style={{ filter: isDark ? 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' : 'drop-shadow(0 20px 40px rgba(61,31,26,0.15))' }}
               draggable={false}
             />
           </div>
@@ -319,45 +322,50 @@ const DeliveryHero = () => {
             className="flex overflow-x-auto snap-x snap-mandatory w-full [&::-webkit-scrollbar]:hidden"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {CAKE_THEMES.map((theme) => (
-              <div
-                key={theme.id}
-                className="w-full shrink-0 snap-center px-6" // Padding is inside the 100% width slide now
-              >
-                <div className="relative rounded-2xl overflow-hidden group border border-border/10 flex flex-col items-center justify-between bg-primary/5 pb-4">
-                  <div className="p-4 w-full flex justify-center items-center h-[140px] sm:h-[150px]">
-                    <img
-                      src={theme.img}
-                      alt={theme.title}
-                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                      style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.15))' }}
-                    />
-                  </div>
+            {themes.length > 0 ? (
+              themes.map((theme) => (
+                <div
+                  key={theme._id}
+                  className="w-full shrink-0 snap-center px-6" // Padding is inside the 100% width slide now
+                >
+                  <div className="relative rounded-2xl overflow-hidden group border border-border/10 flex flex-col items-center justify-between bg-primary/5 pb-4 h-full">
+                    <div className="p-4 w-full flex justify-center items-center h-[140px] sm:h-[150px] overflow-hidden">
+                      <img
+                        src={theme.colors?.[0]?.images?.tier1 || '/default-cake.png'}
+                        alt={theme.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
 
-                  <div className="px-4 w-full flex flex-col items-center gap-3">
-                    <p className="text-[12px] sm:text-sm font-black uppercase tracking-wider text-center" style={{ color: 'var(--heading)' }}>
-                      {theme.title}
-                    </p>
+                    <div className="px-4 w-full flex flex-col items-center gap-3">
+                      <p className="text-[12px] sm:text-sm font-black uppercase tracking-wider text-center" style={{ color: 'var(--heading)' }}>
+                        {theme.name}
+                      </p>
 
-                    <Link
-                      to={theme.link}
-                      className="w-full text-center py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95"
-                      style={{
-                        background: 'var(--primary)',
-                        color: 'var(--button-text)',
-                      }}
-                    >
-                      Order Now
-                    </Link>
+                      <Link
+                        to={`/custom-cake?theme=${theme._id}`}
+                        className="w-full text-center py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95"
+                        style={{
+                          background: 'var(--primary)',
+                          color: 'var(--button-text)',
+                        }}
+                      >
+                        Order Now
+                      </Link>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="w-full flex justify-center p-6">
+                <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
               </div>
-            ))}
+            )}
           </div>
 
           {/* Pagination Dots */}
           <div className="flex items-center justify-center gap-1.5 mt-3">
-            {CAKE_THEMES.map((_, index) => (
+            {themes.map((_, index) => (
               <button
                 key={index}
                 onClick={() => scrollToSlide(index)}
@@ -402,7 +410,7 @@ const DeliveryHero = () => {
         {/* BOTTOM BUTTON */}
         <div className="px-6 pb-8 pt-4 mt-auto">
           <Link
-            to="/custom-cakes"
+            to="/custom-cake"
             className="inline-flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 active:scale-95"
             style={{
               background: 'var(--foreground)',

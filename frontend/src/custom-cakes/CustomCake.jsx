@@ -4,9 +4,7 @@ import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
-  Star, Shield, Leaf, Clock, Heart, Share2, ChevronDown, X,
-  ChevronUp, Sparkles, BadgeCheck, Cake, Palette, Weight, 
-  UserCircle, ReceiptText, Layers, Filter, Eye
+  Star, Heart, ChevronDown, Layers, Filter, Eye
 } from 'lucide-react';
 import { addToCart } from '../redux/slices/cartSlice';
 import { saveCustomCakeRequest } from '../utils/customCake';
@@ -16,7 +14,7 @@ import PureVegIcon from '../assets/pure veg.webp';
 
 // ── Import separated data ────────────────────────────────────────────────
 import {
-  TIERS, WEIGHTS, TRUST, getTierById
+  TIERS, WEIGHTS, getTierById
 } from './customCakeData';
 
 // ─── SVG ICONS ────────────────────────────────────────────────
@@ -31,8 +29,8 @@ export default function CustomCake() {
   const [searchParams] = useSearchParams();
 
   // ── STATE ──────────────────────────────────────────────────
-  const [selectedTier, setSelectedTier] = useState(null);   // null = all, 1/2/3
-  const [themeIdx, setThemeIdx] = useState(null);            // null = browse mode (no theme picked)
+  const [selectedTier, setSelectedTier] = useState(null);   
+  const [themeIdx, setThemeIdx] = useState(null);            
   const [selectedFlavor, setSelectedFlavor] = useState(null);
   const [weightIdx, setWeightIdx] = useState(0);
   const [customerName, setCustomerName] = useState('');
@@ -40,11 +38,8 @@ export default function CustomCake() {
   const [message, setMessage] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
-  const [dbFlavors, setDbFlavors] = useState([]);
-  const [selectedDbFlavor, setSelectedDbFlavor] = useState(null);
   const [flavorDropdownOpen, setFlavorDropdownOpen] = useState(false);
   const [flavorSearch, setFlavorSearch] = useState('');
-
   const [dbThemes, setDbThemes] = useState([]);
 
   useEffect(() => {
@@ -134,10 +129,8 @@ export default function CustomCake() {
     }
 
     if (theme && theme.dbFlavors?.length) {
-      const existing = theme.dbFlavors.find(f => f.name === selectedDbFlavor?.name);
-      setSelectedDbFlavor(existing || theme.dbFlavors[0]);
-    } else {
-      setSelectedDbFlavor(null);
+      const existing = theme.dbFlavors.find(f => f.name === selectedFlavor?.name);
+      setSelectedFlavor(existing || theme.flavors[0]);
     }
   }, [themeIdx, selectedTier, theme]);
 
@@ -165,11 +158,11 @@ export default function CustomCake() {
 
   // ── PRICE CALCULATION ──────────────────────────────────────
   const getFlavorWeightPrice = (w) => {
-    if (!selectedDbFlavor || !selectedDbFlavor.weights) return 1120;
+    if (!selectedFlavor || !selectedFlavor.weights) return 1120;
     const weightVal = parseFloat(w.label);
-    const weightObj = selectedDbFlavor.weights.find(x => x.kg === weightVal);
+    const weightObj = selectedFlavor.weights.find(x => x.kg === weightVal);
     if (weightObj) return weightObj.price;
-    const baseObj = selectedDbFlavor.weights.find(x => x.kg === 1);
+    const baseObj = selectedFlavor.weights.find(x => x.kg === 1);
     return baseObj ? baseObj.price : 1120;
   };
 
@@ -196,11 +189,11 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
-      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}`;
+      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}`;
       dispatch(addToCart({
         product: {
           _id: baseCakeId,
-          name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+          name: `Custom Cake — ${theme.name} (${tierLabel})`,
           description: theme.description,
           image: selectedFlavor.image,
           price: grandTotal, stock: 5, category: 'Custom Cakes',
@@ -210,7 +203,6 @@ export default function CustomCake() {
           theme: theme.name, 
           tier: tierLabel, 
           color: selectedFlavor.name, 
-          flavor: selectedDbFlavor?.name || 'Classic Vanilla', 
           weight: weight.label, 
           name: customerName, 
           age, 
@@ -223,7 +215,7 @@ export default function CustomCake() {
         tier: tierLabel, 
         servingWeight: weight.label, 
         themeColor: selectedFlavor.name,
-        flavour: selectedDbFlavor?.name || 'Classic Vanilla',
+        flavour: selectedFlavor.name,
         messageOnCake: `Name: ${customerName}, Age: ${age}, Message: ${message || 'None'}`,
         estimatedPrice: grandTotal,
       });
@@ -239,11 +231,11 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
-      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}`;
+      const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}`;
       
       const directItem = {
         productId: baseCakeId,
-        name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+        name: `Custom Cake — ${theme.name} (${tierLabel})`,
         description: theme.description,
         image: selectedFlavor.image,
         category: 'Custom Cakes',
@@ -256,7 +248,6 @@ export default function CustomCake() {
           theme: theme.name, 
           tier: tierLabel, 
           color: selectedFlavor.name, 
-          flavor: selectedDbFlavor?.name || 'Classic Vanilla', 
           weight: weight.label, 
           name: customerName, 
           age, 
@@ -269,7 +260,7 @@ export default function CustomCake() {
         tier: tierLabel, 
         servingWeight: weight.label, 
         themeColor: selectedFlavor.name,
-        flavour: selectedDbFlavor?.name || 'Classic Vanilla',
+        flavour: selectedFlavor.name,
         messageOnCake: `Name: ${customerName}, Age: ${age}, Message: ${message || 'None'}`,
         estimatedPrice: grandTotal,
       });
@@ -288,93 +279,13 @@ export default function CustomCake() {
     setThemeIdx(idx);
     const t = filteredThemes[idx];
     if (t && t.flavors.length) setSelectedFlavor(t.flavors[0]);
-    if (t && t.dbFlavors?.length) setSelectedDbFlavor(t.dbFlavors[0]);
   };
 
-  // ── SHARED PERSONALIZATION WORKFLOW ───────────────────────
-  const renderPersonalizeForm = (compact = false) => (
-    <div className={compact ? 'space-y-3' : 'space-y-4'}>
+  const renderPersonalizeForm = () => (
+    <div className="space-y-4">
       <div className="flex items-center gap-2 bg-emerald-50/50 border border-emerald-100 rounded-xl px-3 py-2">
         <VegIcon />
         <span className="text-[11px] font-black text-emerald-700 uppercase tracking-wider">100% Pure Veg & Eggless</span>
-      </div>
-
-      <div className="relative">
-        <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
-          Choose Your Flavour <span className="text-red-500">*</span>
-        </label>
-        
-        <button
-          type="button"
-          onClick={() => setFlavorDropdownOpen(!flavorDropdownOpen)}
-          className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] flex items-center justify-between transition-all font-bold"
-        >
-          {selectedDbFlavor ? <span>{selectedDbFlavor.name}</span> : <span className="text-[var(--muted)]">No flavours mapped</span>}
-          <ChevronDown size={16} className={`transition-transform duration-200 ${flavorDropdownOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        <AnimatePresence>
-          {flavorDropdownOpen && (
-            <>
-              <div className="fixed inset-0 z-40 bg-black/0" onClick={() => setFlavorDropdownOpen(false)} />
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className="absolute left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl z-50 overflow-hidden max-h-[300px] flex flex-col"
-              >
-                <div className="p-3 border-b border-[var(--border)] bg-[var(--card-soft)] flex-shrink-0 relative z-50">
-                  <input
-                    type="text"
-                    placeholder="Search flavours..."
-                    value={flavorSearch}
-                    onChange={(e) => setFlavorSearch(e.target.value)}
-                    className="w-full bg-[var(--input)] border border-[var(--input-border)] px-3 py-2 rounded-lg text-xs outline-none focus:ring-1 focus:ring-[var(--primary)] font-semibold text-[var(--foreground)]"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-
-                <div className="overflow-y-auto flex-1 divide-y divide-[var(--border)] relative z-50">
-                  {theme && Array.from(new Set(theme.dbFlavors.map(f => f.category))).map(category => {
-                    const categoryFlavors = theme.dbFlavors.filter(
-                      f => f.category === category && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
-                    );
-                    if (categoryFlavors.length === 0) return null;
-
-                    return (
-                      <div key={category} className="p-2">
-                        <div className="text-[10px] font-black text-[var(--muted)] uppercase tracking-wider px-2 py-1 select-none">
-                          {category}
-                        </div>
-                        <div className="space-y-0.5 mt-1">
-                          {categoryFlavors.map(flavor => {
-                            const isSelected = selectedDbFlavor?._id === flavor._id;
-                            return (
-                              <button
-                                key={flavor._id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedDbFlavor(flavor);
-                                  setFlavorDropdownOpen(false);
-                                  setFlavorSearch('');
-                                }}
-                                className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between font-bold transition-all ${
-                                  isSelected ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'hover:bg-[var(--input-hover)] text-[var(--foreground)]'
-                                }`}
-                              >
-                                <span>{flavor.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -477,10 +388,10 @@ export default function CustomCake() {
       </div>
 
       {/* ── MAIN ── */}
-      <main className="max-w-[1380px] mx-auto px-4 sm:px-8 lg:px-12 py-6 pb-32 lg:pb-8">
+      <main className="max-w-[1380px] mx-auto px-4 sm:px-8 lg:px-12 py-6 pb-40 lg:pb-8">
         {themeIdx === null ? (
           /* ══════════════════════════════════════════════════════
-              BROWSE MODE — Grid of available items
+              BROWSE MODE — Grid View
           ══════════════════════════════════════════════════════ */
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -506,7 +417,6 @@ export default function CustomCake() {
                     onClick={() => selectTheme(i)}
                     className="relative group flex flex-col rounded-3xl border-2 border-[var(--border)] overflow-hidden transition-all duration-300 hover:border-[var(--primary)] hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] text-left bg-[var(--card)] cursor-pointer"
                   >
-                    {/* Portrait Frame Aspect Ratio mapping 70278.jpg correctly */}
                     <div className="relative w-full overflow-hidden aspect-[3/4]" style={{ background: t.bg }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         {t.enabled && t.flavors[0]
@@ -537,19 +447,17 @@ export default function CustomCake() {
           </div>
         ) : (
           /* ══════════════════════════════════════════════════════
-              CUSTOMIZER MODE — Unified PC & Mobile Detail Form View
+              CUSTOMIZER MODE — Unified Double Column Layout
           ══════════════════════════════════════════════════════ */
           <div>
             <button onClick={goBackToBrowse} className="flex items-center gap-2 mb-5 text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors">
               <ArrowLeft size={16} /> Back to All Themes
             </button>
 
-            {/* Always Dual-Column Layout across Mobile, Tablet, and Laptop */}
             <div className="grid grid-cols-1 md:grid-cols-[1fr_420px] lg:grid-cols-[1fr_440px] xl:grid-cols-[1fr_480px] gap-6 lg:gap-8 items-start">
               
-              {/* ── LEFT CONTAINER: Main Structural Image Framing ── */}
+              {/* ── LEFT COLUMN: Framing Media ── */}
               <div className="space-y-5">
-                {/* Fixed Portrait Frame Box with dynamic bounds preventing crop issues */}
                 <div 
                   className="relative aspect-[3/4] max-w-[450px] mx-auto w-full rounded-3xl overflow-hidden border border-[var(--border)] shadow-sm"
                   style={{ background: theme.enabled ? (selectedFlavor?.bg || theme.bg) : theme.bg }}
@@ -607,7 +515,7 @@ export default function CustomCake() {
                 )}
               </div>
 
-              {/* ── RIGHT CONTAINER: Form details display structural parity on mobile ── */}
+              {/* ── RIGHT COLUMN: Configuration Forms ── */}
               <div className="flex flex-col gap-5">
                 <div>
                   <h1 className="font-black text-2xl lg:text-3xl text-[var(--heading)] leading-tight">{theme.name} Cake</h1>
@@ -634,7 +542,7 @@ export default function CustomCake() {
                   </div>
                 </div>
 
-                {/* Weight selection configuration setup */}
+                {/* Weight Selection */}
                 {theme.enabled && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -658,15 +566,15 @@ export default function CustomCake() {
                   </div>
                 )}
 
-                {/* Main Custom Details Form Fields Render */}
+                {/* Personalization Inputs */}
                 {theme.enabled && (
                   <div className="bg-[var(--card)] border border-[var(--border)] p-4 rounded-2xl space-y-4">
                     <p className="font-black text-sm text-[var(--heading)] border-b border-[var(--border)] pb-2">Custom Configuration Specifications</p>
-                    {renderPersonalizeForm(false)}
+                    {renderPersonalizeForm()}
                   </div>
                 )}
 
-                {/* Config Breakdown Summary Receipt Area */}
+                {/* Summary Box */}
                 {theme.enabled && (
                   <div className="bg-[var(--card-soft)] rounded-2xl border border-[var(--border)] p-4 space-y-2 text-xs">
                     <div className="flex justify-between"><span>Base Cake Weight Layer Weight</span><span className="font-bold">₹{basePrice}</span></div>
@@ -676,7 +584,7 @@ export default function CustomCake() {
                   </div>
                 )}
 
-                {/* Structural Grid Buttons (Visible on desktop view models natively) */}
+                {/* Desktop Buttons */}
                 <div className="hidden md:grid grid-cols-2 gap-3 mt-2">
                   <button onClick={handleAddToCart} disabled={isAdding} className="h-14 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--primary)]/5">
                     <ShoppingCart size={18} /> ADD TO CART
@@ -691,9 +599,9 @@ export default function CustomCake() {
         )}
       </main>
 
-      {/* ── FOOTER VIEWPORT FLOATING MOBILE INTERACTION BUTTONS ── */}
+      {/* ── FIXED FLOATING MOBILE ACTIONS (LIFTED FOR NAVIGATION SAFETY) ── */}
       {theme && theme.enabled && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--card)]/95 backdrop-blur-md border-t border-[var(--border)] px-4 py-3 shadow-2xl flex gap-3">
+        <div className="md:hidden fixed bottom-24 left-4 right-4 z-40 bg-[var(--card)]/95 backdrop-blur-md border border-[var(--border)] p-3 rounded-2xl shadow-2xl flex gap-3">
           <button 
             onClick={handleAddToCart} 
             disabled={isAdding} 

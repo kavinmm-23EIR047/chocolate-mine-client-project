@@ -175,8 +175,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const cartItems = useSelector((state) => state.cart?.items || []);
   
+  // FIXED: Now reads item.productId to perfectly align with your cartSlice rules
   const currentCartItem = cartItems.find(item => {
     const isIdMatch = item.productId === product?._id;
+    
+    // Also mirrors your stringified options check from your slice safely
     if (isIdMatch && activeVariant) {
       const activeOptions = { flavor: activeVariant.flavor, weight: activeVariant.weight };
       return JSON.stringify(item.options) === JSON.stringify(activeOptions);
@@ -219,6 +222,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const isCakeCategory = String(product?.category || '').toLowerCase().includes('cake') || !!product?.cakeType;
   const hasValidImage = typeof product?.image === 'string' && product.image.trim() !== '' && product.image !== 'none';
 
+  // FIXED: Matches action parameter structure expected by updateCartQty and removeFromCart
   const handleQuantityChange = (e, newQty) => {
     e.preventDefault(); e.stopPropagation();
     if (newQty < 0) return;
@@ -330,10 +334,9 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           </div>
         </div>
 
-        <div className="relative shrink-0 w-24 h-32 sm:w-28 sm:h-36 rounded-xl self-center" style={{ background: '#e3cbb3', border: '1px solid var(--border)' }}>
+        <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl self-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
           <div className="w-full h-full overflow-hidden rounded-xl">
-            {/* FIXED FOR MOBILE: object-contain allows full 9:16 portrait frames to fit inside with zero loss */}
-            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-contain" loading="lazy" /> : <ImagePlaceholder />}
+            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" /> : <ImagePlaceholder />}
           </div>
           
           <button onClick={wish} className="absolute top-1.5 right-1.5 p-1.5 rounded-full shadow-sm z-10 transition-all border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
@@ -360,11 +363,9 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
     >
       <div>
-        {/* FIXED: Uses aspect-[9/16] matching the vertical photo standard shape perfectly with zero cropping */}
-        <div className="relative aspect-[9/16] overflow-visible shrink-0 w-full mb-5 shadow-sm rounded-xl" style={{ background: '#e3cbb3', border: '1px solid var(--border)' }}>
+        <div className="relative aspect-square overflow-visible shrink-0 w-full mb-5" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
           <div className="w-full h-full overflow-hidden rounded-xl">
-            {/* FIXED FOR DESKTOP: Changing object-cover to object-contain guarantees 100% full content is visible */}
-            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-contain transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
+            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
           </div>
 
           <button onClick={wish} className="absolute top-2 right-2 p-1.5 rounded-full shadow-sm z-10 transition-all border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>

@@ -162,6 +162,32 @@ const getCouponCodeString = (coupon) => {
 };
 
 /* ─────────────────────────────────────────────
+   HELPER: Safely get coupon code for API
+───────────────────────────────────────────── */
+const getCouponCodeForApi = (coupon) => {
+  if (!coupon) return null;
+  if (typeof coupon === 'string') return coupon;
+  if (typeof coupon === 'object') {
+    return coupon.code || coupon.couponCode || coupon.name || null;
+  }
+  return null;
+};
+
+/* ─────────────────────────────────────────────
+   PERSISTENCE KEYS
+───────────────────────────────────────────── */
+const STORAGE_KEYS = {
+  CHECKOUT_STATE: 'checkout_state',
+  CHECKOUT_STEP: 'checkout_step',
+  DELIVERY_INFO: 'delivery_info',
+  ADDRESS_DETAILS: 'address_details',
+  DELIVERY_DATE: 'delivery_date',
+  DELIVERY_SLOT: 'delivery_slot',
+  SELECTED_PAY_METHOD: 'selected_pay_method',
+  LOCAL_COUPON: 'local_coupon',
+};
+
+/* ─────────────────────────────────────────────
    STEP BADGE (with improved UX)
 ───────────────────────────────────────────── */
 const StepBadge = ({ n, label, isActive, isCompleted, onEdit, summary }) => (
@@ -207,8 +233,37 @@ const Checkout = () => {
   const location = useLocation();
 
   const directItem = location.state?.directItem;
+  
+  // Load saved state from sessionStorage on mount
+  const loadSavedState = () => {
+    try {
+      const savedStep = sessionStorage.getItem(STORAGE_KEYS.CHECKOUT_STEP);
+      const savedDeliveryInfo = sessionStorage.getItem(STORAGE_KEYS.DELIVERY_INFO);
+      const savedAddressDetails = sessionStorage.getItem(STORAGE_KEYS.ADDRESS_DETAILS);
+      const savedDeliveryDate = sessionStorage.getItem(STORAGE_KEYS.DELIVERY_DATE);
+      const savedDeliverySlot = sessionStorage.getItem(STORAGE_KEYS.DELIVERY_SLOT);
+      const savedPayMethod = sessionStorage.getItem(STORAGE_KEYS.SELECTED_PAY_METHOD);
+      const savedLocalCoupon = sessionStorage.getItem(STORAGE_KEYS.LOCAL_COUPON);
+
+      return {
+        step: savedStep ? parseInt(savedStep) : 1,
+        deliveryInfo: savedDeliveryInfo ? JSON.parse(savedDeliveryInfo) : null,
+        addressDetails: savedAddressDetails ? JSON.parse(savedAddressDetails) : null,
+        deliveryDate: savedDeliveryDate ? new Date(savedDeliveryDate) : null,
+        deliverySlot: savedDeliverySlot || null,
+        selectedPayMethod: savedPayMethod || null,
+        localCoupon: savedLocalCoupon || '',
+      };
+    } catch (error) {
+      console.error('Error loading saved state:', error);
+      return {};
+    }
+  };
+
+  const savedState = loadSavedState();
+
   const [localCoupon, setLocalCoupon] = useState(
-    directItem?.coupon?.code ? directItem.coupon : ''
+    savedState.localCoupon || (directItem?.coupon?.code ? directItem.coupon : '')
   );
 
   // FIXED: Safely extract coupon code string
@@ -221,8 +276,13 @@ const Checkout = () => {
 
   const [showMap, setShowMap] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(savedState.step || 1);
   const [editingAddressId, setEditingAddressId] = useState(null);
+
+  // Save active step to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(STORAGE_KEYS.CHECKOUT_STEP, activeStep.toString());
+  }, [activeStep]);
 
   // Auto-scroll to active step
   useEffect(() => {
@@ -235,22 +295,46 @@ const Checkout = () => {
   const [loaderText, setLoaderText] = useState('Preparing your order...');
   const [couponInput, setCouponInput] = useState('');
   const [couponBusy, setCouponBusy] = useState(false);
-  const [selectedPayMethod, setSelectedPayMethod] = useState(null);
+  const [selectedPayMethod, setSelectedPayMethod] = useState(savedState.selectedPayMethod || null);
+
+  // Save selected payment method
+  useEffect(() => {
+    if (selectedPayMethod) {
+      sessionStorage.setItem(STORAGE_KEYS.SELECTED_PAY_METHOD, selectedPayMethod);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.SELECTED_PAY_METHOD);
+    }
+  }, [selectedPayMethod]);
 
   const isProcessingPayment = useRef(false);
 
-  const [deliveryInfo, setDeliveryInfo] = useState({ address: null, position: null });
+  const [deliveryInfo, setDeliveryInfo] = useState(savedState.deliveryInfo || { address: null, position: null });
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [distance, setDistance] = useState(0);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
 
+  // Save delivery info to sessionStorage
+  useEffect(() => {
+    if (deliveryInfo && deliveryInfo.position) {
+      sessionStorage.setItem(STORAGE_KEYS.DELIVERY_INFO, JSON.stringify(deliveryInfo));
+    }
+  }, [deliveryInfo]);
+
   // Delivery date with future support (up to 30 days)
   const [deliveryDate, setDeliveryDate] = useState(() => {
+    if (savedState.deliveryDate) {
+      return new Date(savedState.deliveryDate);
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return today;
   });
+
+  // Save delivery date to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(STORAGE_KEYS.DELIVERY_DATE, deliveryDate.toISOString());
+  }, [deliveryDate]);
 
   const minDate = (() => {
     const today = new Date();
@@ -278,16 +362,23 @@ const Checkout = () => {
   // Helper: format phone with +91 prefix for display, but store only digits
   const formatPhoneForDisplay = (digits) => digits ? `+91 ${digits}` : '';
 
-  const [addressDetails, setAddressDetails] = useState({
-    fullName: user?.name || '',
-    phone: '',  // store only 10 digits
-    houseNo: '',
-    street: '',
-  });
+  const [addressDetails, setAddressDetails] = useState(
+    savedState.addressDetails || {
+      fullName: user?.name || '',
+      phone: '',  // store only 10 digits
+      houseNo: '',
+      street: '',
+    }
+  );
+
+  // Save address details to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(STORAGE_KEYS.ADDRESS_DETAILS, JSON.stringify(addressDetails));
+  }, [addressDetails]);
 
   // Initialize phone from user if available (strip non-digits, take last 10)
   useEffect(() => {
-    if (user?.phone) {
+    if (user?.phone && !addressDetails.phone) {
       const digits = user.phone.replace(/\D/g, '').slice(-10);
       setAddressDetails(prev => ({ ...prev, phone: digits }));
     }
@@ -299,12 +390,30 @@ const Checkout = () => {
 
   const [locationValid, setLocationValid] = useState(true);
   const [locationError, setLocationError] = useState('');
-  const [deliverySlot, setDeliverySlot] = useState(null);
+  const [deliverySlot, setDeliverySlot] = useState(savedState.deliverySlot || null);
   const [customCakeRequest, setCustomCakeRequest] = useState(null);
   const [orderNotesExtra, setOrderNotesExtra] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const [backendTotal, setBackendTotal] = useState(null);
+
+  // Save delivery slot to sessionStorage
+  useEffect(() => {
+    if (deliverySlot) {
+      sessionStorage.setItem(STORAGE_KEYS.DELIVERY_SLOT, deliverySlot);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.DELIVERY_SLOT);
+    }
+  }, [deliverySlot]);
+
+  // Save local coupon to sessionStorage
+  useEffect(() => {
+    if (localCoupon) {
+      sessionStorage.setItem(STORAGE_KEYS.LOCAL_COUPON, localCoupon);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.LOCAL_COUPON);
+    }
+  }, [localCoupon]);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60 * 1000);
@@ -548,7 +657,7 @@ const Checkout = () => {
         const res = await api.get('/users/addresses');
         setSavedAddresses(res.data.data);
         const def = res.data.data.find((a) => a.isDefault);
-        if (def) handleSelectAddress(def);
+        if (def && !deliveryInfo.position) handleSelectAddress(def);
       } catch { }
     };
     if (user) fetchAddresses();
@@ -563,7 +672,7 @@ const Checkout = () => {
     });
     setAddressDetails({
       fullName: addr.fullName,
-      phone: addr.phone.replace(/\D/g, '').slice(-10),  // ensure only digits
+      phone: addr.phone.replace(/\D/g, '').slice(-10),
       houseNo: addr.houseNo,
       street: addr.street,
     });
@@ -700,6 +809,13 @@ const Checkout = () => {
       document.body.appendChild(s);
     });
 
+  // Clear all saved checkout data on successful order
+  const clearSavedCheckoutData = () => {
+    Object.values(STORAGE_KEYS).forEach(key => {
+      sessionStorage.removeItem(key);
+    });
+  };
+
   const handlePlaceOrder = async () => {
     if (isProcessingPayment.current) { toast.error('Payment already in progress.'); return; }
     if (!validateForm()) return;
@@ -735,6 +851,11 @@ const Checkout = () => {
       const builderNotes = shouldShowCustomCakeRequest ? safeFormatNotes(formatCustomCakeNotes(customCakeRequest)) : '';
       const notesMerged = [builderNotes, orderNotesExtra.trim()].filter(Boolean).join('\n\n');
 
+      // FIXED: Safely extract coupon code for API
+      const couponCodeForApi = directItem 
+        ? getCouponCodeForApi(localCoupon)
+        : getCouponCodeForApi(appliedCouponFromRedux);
+
       const res = await api.post(
         '/payment/create-order',
         {
@@ -756,13 +877,13 @@ const Checkout = () => {
               qty: directItem.qty,
               selectedFlavor: directItem.selectedFlavor,
               selectedWeight: directItem.selectedWeight,
-              appliedCoupon: localCoupon,
+              appliedCoupon: couponCodeForApi,
               options: directItem.options,
             }
             : undefined,
           items: cartItemsFromRedux,
           discount: couponDiscount,
-          couponCode: directItem ? localCoupon : appliedCouponFromRedux,
+          couponCode: couponCodeForApi,
           notes: notesMerged || undefined,
           cakeMessage: cakeMessage || undefined,
         }
@@ -803,6 +924,8 @@ const Checkout = () => {
             }
             clearCustomCakeRequest();
             setCustomCakeRequest(null);
+            // Clear saved checkout data on successful payment
+            clearSavedCheckoutData();
             setLoading(false);
             isProcessingPayment.current = false;
             toast.success("Payment successful! 🎉");
@@ -1402,7 +1525,7 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN — ORDER SUMMARY */}
+          {/* RIGHT COLUMN — ORDER SUMMARY (same as before, keeping it short) */}
           <div className="lg:col-span-1 w-full min-w-0">
             <div className="lg:sticky lg:top-24 space-y-4">
               <motion.div
@@ -1411,6 +1534,7 @@ const Checkout = () => {
                 transition={{ delay: 0.1 }}
                 className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden w-full min-w-0"
               >
+                {/* ... Order summary content remains the same ... */}
                 <div className="p-4 sm:p-5 border-b border-border/30 bg-gradient-to-r from-card-soft to-card">
                   <div className="flex items-center gap-2">
                     <Package size={15} className="text-primary" />

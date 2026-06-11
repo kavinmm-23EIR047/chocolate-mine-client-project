@@ -109,7 +109,6 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied }) => {
   );
 };
 
-// Swiggy Action Button that displays exact real-time quantities
 const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart }) => {
   const label = addingToCart ? '...' : 'ADD';
   
@@ -124,7 +123,6 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
     );
   }
 
-  // Shows current quantity number inside the product card immediately
   if (cartQuantity > 0) {
     return (
       <div 
@@ -177,14 +175,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const cartItems = useSelector((state) => state.cart?.items || []);
   
-  // Checks and catches standard IDs or variant IDs cleanly to output counts correctly
+  // FIXED: Now reads item.productId to perfectly align with your cartSlice rules
   const currentCartItem = cartItems.find(item => {
-    const itemProdId = item.product?._id || item.product || item._id;
-    const targetProdId = product?._id;
-    const isIdMatch = itemProdId === targetProdId;
+    const isIdMatch = item.productId === product?._id;
     
+    // Also mirrors your stringified options check from your slice safely
     if (isIdMatch && activeVariant) {
-      return item.options?.flavor === activeVariant.flavor && item.options?.weight === activeVariant.weight;
+      const activeOptions = { flavor: activeVariant.flavor, weight: activeVariant.weight };
+      return JSON.stringify(item.options) === JSON.stringify(activeOptions);
     }
     return isIdMatch;
   });
@@ -224,6 +222,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const isCakeCategory = String(product?.category || '').toLowerCase().includes('cake') || !!product?.cakeType;
   const hasValidImage = typeof product?.image === 'string' && product.image.trim() !== '' && product.image !== 'none';
 
+  // FIXED: Matches action parameter structure expected by updateCartQty and removeFromCart
   const handleQuantityChange = (e, newQty) => {
     e.preventDefault(); e.stopPropagation();
     if (newQty < 0) return;

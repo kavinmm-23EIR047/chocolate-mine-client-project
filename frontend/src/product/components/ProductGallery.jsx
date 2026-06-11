@@ -23,7 +23,6 @@ const ProductGallery = ({
   selectedFlavor,
   getFlavorImages,
 }) => {
-  // Lightbox view state
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Dynamic image resolution fallback array
@@ -35,10 +34,6 @@ const ProductGallery = ({
     <div className="w-full space-y-4 sm:space-y-6">
       
       {/* ── MAIN PORTRAIT IMAGE WRAPPER ── */}
-      {/* 
-        FIXED: Swapped 'aspect-square' with vertical portrait 'aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4]' 
-        and added canvas coloring 'bg-[#e3cbb3]' to match your original photo backdrops exactly.
-      */}
       <div 
         className="relative aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4] w-full bg-[#e3cbb3] lg:rounded-[2.5rem] overflow-hidden border-b lg:border border-border/50 cursor-zoom-in group shadow-premium transition-all duration-500" 
         onClick={() => setIsLightboxOpen(true)}
@@ -63,7 +58,6 @@ const ProductGallery = ({
               transition={{ duration: 0.4 }}
               src={displayImage || undefined}
               onError={(e) => { e.target.src = product?.image && product.image !== 'none' ? product.image : ''; }}
-              {/* FIXED: Swapped 'object-cover' to 'object-contain' so text logo branding is preserved perfectly without truncation */}
               className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
             />
           )}
@@ -86,7 +80,7 @@ const ProductGallery = ({
         {/* Wishlist Toggle Action Button */}
         <button
           onClick={(e) => { 
-            e.stopPropagation(); // Prevents launching full-screen lightbox when clicking Wishlist heart
+            e.stopPropagation(); 
             toggleWishlist(product?._id?.$oid || product?._id); 
           }}
           className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-card/85 backdrop-blur-md shadow-xl p-2.5 sm:p-3 rounded-full hover:scale-110 transition-all z-20 group/heart border border-border/50"
@@ -156,7 +150,6 @@ const ProductGallery = ({
                 <h3 className="text-sm sm:text-base font-black capitalize tracking-tight text-white">{product?.name}</h3>
               </div>
               
-              {/* Functional Close Button */}
               <button
                 onClick={() => setIsLightboxOpen(false)}
                 className="p-3 mr-2 bg-white/10 hover:bg-white/20 active:scale-95 rounded-full border border-white/10 text-white transition-all shadow-2xl"
@@ -172,7 +165,7 @@ const ProductGallery = ({
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.93, y: 15 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              onClick={(e) => e.stopPropagation()} // Prevents tapping the image frame directly from mistakenly closing the gallery view
+              onClick={(e) => e.stopPropagation()} 
               className="relative w-full max-w-md sm:max-w-lg max-h-[78vh] sm:max-h-[82vh] aspect-[3/4] sm:aspect-[9/16] rounded-2xl overflow-hidden bg-[#e3cbb3] shadow-2xl border border-white/5"
             >
               <img
@@ -183,7 +176,6 @@ const ProductGallery = ({
               />
             </motion.div>
 
-            {/* Quick Touch/Mouse Action Helper Prompt */}
             <p className="mt-4 text-center text-[10px] text-white/40 uppercase font-black tracking-[0.2em] pointer-events-none">
               Tap anywhere outside or click close button to exit
             </p>

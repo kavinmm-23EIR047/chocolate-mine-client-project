@@ -50,6 +50,7 @@ export default function CustomCake() {
 
   const [dbThemes, setDbThemes] = useState([]);
   const [dbThemeColors, setDbThemeColors] = useState([]);
+  const [loadedImages, setLoadedImages] = useState({});
 
   useEffect(() => {
     const loadDbData = async () => {
@@ -305,6 +306,11 @@ export default function CustomCake() {
     if (t && t.dbFlavors?.length) setSelectedDbFlavor(t.dbFlavors[0]);
   };
 
+  // Image loading handler
+  const handleImageLoad = (id) => {
+    setLoadedImages(prev => ({ ...prev, [id]: true }));
+  };
+
   // ── Personalize Form ──────────────────────────────────────
   const renderPersonalizeForm = (compact = false) => (
     <div className={compact ? 'space-y-3' : 'space-y-4'}>
@@ -544,7 +550,7 @@ export default function CustomCake() {
         </motion.div>
       )}
 
-      {/* Theme grid */}
+      {/* Theme grid - UPDATED with FULL COVER images */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <AnimatePresence mode="popLayout">
           {filteredThemes.map((t, i) => (
@@ -558,15 +564,42 @@ export default function CustomCake() {
               onClick={() => selectTheme(i)}
               className="relative group flex flex-col rounded-3xl border-2 border-[var(--border)] overflow-hidden transition-all duration-300 hover:border-[var(--primary)] hover:shadow-xl hover:shadow-[var(--primary)]/5 hover:scale-[1.02] active:scale-[0.98] text-left bg-[var(--card)] cursor-pointer"
             >
-              {/* Image area */}
-              <div className="relative w-full overflow-hidden" style={{ paddingBottom: '85%', background: t.bg }}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {t.enabled && t.flavors[0]
-                    ? <img src={t.flavors[0].image} alt={t.name} className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-700" />
-                    : t.image
-                      ? <img src={t.image} alt={t.name} className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-700" />
-                      : <span className="text-6xl">{t.emoji}</span>
-                  }
+              {/* Image area - FULL COVER with no padding */}
+              <div className="relative w-full overflow-hidden bg-cover bg-center" style={{ paddingBottom: '85%' }}>
+                <div className="absolute inset-0">
+                  {t.enabled && t.flavors[0] ? (
+                    <>
+                      {!loadedImages[`browse-${t.id}`] && (
+                        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                          <span className="text-4xl">🎂</span>
+                        </div>
+                      )}
+                      <img 
+                        src={t.flavors[0].image} 
+                        alt={t.name} 
+                        className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${loadedImages[`browse-${t.id}`] ? 'opacity-100' : 'opacity-0'}`}
+                        onLoad={() => handleImageLoad(`browse-${t.id}`)}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
+                        }}
+                      />
+                    </>
+                  ) : t.image ? (
+                    <img 
+                      src={t.image} 
+                      alt={t.name} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-6xl">{t.emoji}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Badge */}
@@ -722,14 +755,33 @@ export default function CustomCake() {
                     }`}
                   style={{ background: t.bg }}
                 >
-                  {/* Theme image thumbnail */}
-                  <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center bg-white/40 border border-white/60">
-                    {t.enabled && t.flavors[0]
-                      ? <img src={t.flavors[0].image} alt={t.name} className="w-full h-full object-contain p-1" />
-                      : t.image
-                        ? <img src={t.image} alt={t.name} className="w-full h-full object-contain p-1" />
-                        : <span className="text-3xl">{t.emoji}</span>
-                    }
+                  {/* Theme image thumbnail - FULL COVER */}
+                  <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                    {t.enabled && t.flavors[0] ? (
+                      <img 
+                        src={t.flavors[0].image} 
+                        alt={t.name} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://via.placeholder.com/64x64?text=No+Image';
+                        }}
+                      />
+                    ) : t.image ? (
+                      <img 
+                        src={t.image} 
+                        alt={t.name} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://via.placeholder.com/64x64?text=No+Image';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-3xl">{t.emoji}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
@@ -782,14 +834,22 @@ export default function CustomCake() {
                         : 'border-[var(--border)]'
                         }`}
                     >
-                      <div className="relative w-full" style={{ paddingBottom: '80%', background: flavor.bg }}>
+                      <div className="relative w-full overflow-hidden" style={{ paddingBottom: '100%' }}>
                         <img
                           src={flavor.image}
                           alt={flavor.name}
-                          className="absolute inset-0 w-full h-full object-contain p-3"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            const parent = e.target.parentElement;
+                            if (parent) {
+                              parent.style.backgroundColor = flavor.hexCode || '#ddd';
+                              e.target.style.display = 'none';
+                            }
+                          }}
                         />
                         {isSel && (
-                          <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center shadow">
+                          <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center shadow z-10">
                             <Check size={11} className="text-white" />
                           </span>
                         )}
@@ -863,13 +923,20 @@ export default function CustomCake() {
           <div className="space-y-4">
             <p className="text-xs font-black text-[var(--muted)] uppercase tracking-wider">Order Summary</p>
 
-            {/* Cake preview */}
-            <div
-              className="rounded-2xl flex items-center gap-4 p-4 border border-[var(--border)]"
-              style={{ background: selectedFlavor?.bg }}
-            >
-              <img src={selectedFlavor?.image} alt="" className="h-20 w-20 object-contain shrink-0 drop-shadow-lg" />
-              <div>
+            {/* Cake preview - FULL COVER */}
+            <div className="rounded-2xl overflow-hidden border border-[var(--border)]">
+              <div className="relative w-full" style={{ paddingBottom: '75%', background: selectedFlavor?.bg }}>
+                <img 
+                  src={selectedFlavor?.image} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </div>
+              <div className="p-4">
                 <p className="font-black text-base text-[var(--heading)]">{theme?.name}</p>
                 <p className="text-sm text-[var(--muted)]">{selectedFlavor?.name} · {weight.label} · {currentTier?.shortName}</p>
                 <p className="text-xl font-black text-[var(--heading)] mt-1">₹{grandTotal}</p>
@@ -989,9 +1056,9 @@ export default function CustomCake() {
               {/* ── LEFT COLUMN ── */}
               <div className="space-y-5">
 
-                {/* ✅ FIXED: Main image card - LARGER IMAGE */}
+                {/* MAIN IMAGE CARD - FULL COVER with no white space */}
                 <div
-                  className="relative rounded-3xl overflow-hidden border border-[var(--border)] shadow-sm"
+                  className="relative rounded-3xl overflow-hidden border border-[var(--border)] shadow-sm min-h-[380px] sm:min-h-[450px]"
                   style={{ background: theme.enabled ? (selectedFlavor?.bg || theme.bg) : theme.bg }}
                 >
                   {/* Coming soon blurred bg image */}
@@ -999,7 +1066,7 @@ export default function CustomCake() {
                     <img
                       src={theme.image}
                       alt={theme.name}
-                      className="absolute inset-0 w-full h-full object-contain p-8 opacity-25"
+                      className="absolute inset-0 w-full h-full object-cover opacity-25"
                     />
                   )}
 
@@ -1028,8 +1095,8 @@ export default function CustomCake() {
                     <ChevronRight size={20} className="text-[var(--primary)]" />
                   </button>
 
-                  {/* ✅ FIXED: Larger image container - removed max-h constraint */}
-                  <div className="flex items-center justify-center min-h-[380px] sm:min-h-[450px]">
+                  {/* MAIN IMAGE - FULL COVER */}
+                  <div className="w-full h-full min-h-[380px] sm:min-h-[450px]">
                     <AnimatePresence mode="wait">
                       {theme.enabled ? (
                         <motion.img
@@ -1040,10 +1107,16 @@ export default function CustomCake() {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.25 }}
-                          className="w-full h-full max-h-[420px] object-contain drop-shadow-2xl p-3"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://via.placeholder.com/600x450?text=No+Image';
+                          }}
                         />
                       ) : (
-                        <div style={{ height: 420 }} />
+                        <div className="w-full h-full min-h-[380px] flex items-center justify-center">
+                          <span className="text-6xl">{theme?.emoji}</span>
+                        </div>
                       )}
                     </AnimatePresence>
                   </div>
@@ -1060,7 +1133,7 @@ export default function CustomCake() {
                   </div>
                 </div>
 
-                {/* Color strip (desktop) */}
+                {/* Color strip (desktop) - FULL COVER thumbnails */}
                 {theme.enabled && (
                   <div>
                     <div className="flex items-center justify-between mb-2.5">
@@ -1081,14 +1154,22 @@ export default function CustomCake() {
                               : 'border-[var(--border)] hover:border-[var(--primary)] hover:shadow-sm'
                               }`}
                           >
-                            <div className="relative w-full" style={{ paddingBottom: '100%', background: flavor.bg }}>
+                            <div className="relative w-full overflow-hidden" style={{ paddingBottom: '100%', background: flavor.bg }}>
                               <img
                                 src={flavor.image}
                                 alt={flavor.name}
-                                className="absolute inset-0 w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  const parent = e.target.parentElement;
+                                  if (parent) {
+                                    parent.style.backgroundColor = flavor.hexCode || '#ddd';
+                                    e.target.style.display = 'none';
+                                  }
+                                }}
                               />
                               {isSel && (
-                                <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center shadow">
+                                <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center shadow z-10">
                                   <Check size={11} className="text-white" />
                                 </span>
                               )}
@@ -1104,7 +1185,7 @@ export default function CustomCake() {
                   </div>
                 )}
 
-                {/* Theme strip */}
+                {/* Theme strip - FULL COVER thumbnails */}
                 <div>
                   <div className="flex items-center justify-between mb-2.5">
                     <p className="text-sm font-black text-[var(--heading)]">Choose Your Theme</p>
@@ -1125,14 +1206,33 @@ export default function CustomCake() {
                           : 'border-[var(--border)] hover:border-[var(--primary)] hover:shadow-sm'
                           }`}
                       >
-                        <div className="relative w-full flex items-center justify-center" style={{ paddingBottom: '100%', background: t.bg }}>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            {t.enabled && t.flavors[0]
-                              ? <img src={t.flavors[0].image} alt={t.name} className="w-full h-full object-contain p-2" />
-                              : t.image
-                                ? <img src={t.image} alt={t.name} className="w-full h-full object-contain p-2" />
-                                : <span className="text-3xl">{t.emoji}</span>
-                            }
+                        <div className="relative w-full overflow-hidden" style={{ paddingBottom: '100%', background: t.bg }}>
+                          <div className="absolute inset-0">
+                            {t.enabled && t.flavors[0] ? (
+                              <img 
+                                src={t.flavors[0].image} 
+                                alt={t.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = t.image || 'https://via.placeholder.com/100x100?text=No+Image';
+                                }}
+                              />
+                            ) : t.image ? (
+                              <img 
+                                src={t.image} 
+                                alt={t.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = 'https://via.placeholder.com/100x100?text=No+Image';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-3xl">{t.emoji}</span>
+                              </div>
+                            )}
                           </div>
                           {i === themeIdx && (
                             <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--primary)] flex items-center justify-center z-10">
@@ -1278,8 +1378,16 @@ export default function CustomCake() {
                 {theme.enabled && (
                   <div className="bg-[var(--card-soft)] rounded-2xl border border-[var(--border)] p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl shrink-0 overflow-hidden border border-[var(--border)] flex items-center justify-center" style={{ background: selectedFlavor?.bg }}>
-                        <img src={selectedFlavor?.image} alt="" className="w-full h-full object-contain p-1.5" />
+                      <div className="w-14 h-14 rounded-xl shrink-0 overflow-hidden border border-[var(--border)]">
+                        <img 
+                          src={selectedFlavor?.image} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://via.placeholder.com/56x56?text=No+Image';
+                          }}
+                        />
                       </div>
                       <div className="flex-1 grid grid-cols-5 gap-2 text-center divide-x divide-[var(--border)]">
                         {[
@@ -1365,17 +1473,33 @@ export default function CustomCake() {
           className="lg:hidden fixed bottom-[60px] left-0 right-0 z-40 bg-[var(--card)] border-t border-[var(--border)] px-4 py-2.5 shadow-2xl"
         >
           <div className="flex items-center gap-3">
-            {/* Cake thumbnail */}
-            <div
-              className="w-11 h-11 rounded-xl shrink-0 border border-[var(--border)] overflow-hidden flex items-center justify-center"
-              style={{ background: selectedFlavor?.bg || theme.bg }}
-            >
-              {theme.enabled && selectedFlavor
-                ? <img src={selectedFlavor.image} alt="" className="w-full h-full object-contain p-1" />
-                : theme.image
-                  ? <img src={theme.image} alt="" className="w-full h-full object-contain p-1 opacity-70" />
-                  : <span className="text-xl">{theme.emoji}</span>
-              }
+            {/* Cake thumbnail - FULL COVER */}
+            <div className="w-11 h-11 rounded-xl shrink-0 border border-[var(--border)] overflow-hidden">
+              {theme.enabled && selectedFlavor ? (
+                <img 
+                  src={selectedFlavor.image} 
+                  alt="" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : theme.image ? (
+                <img 
+                  src={theme.image} 
+                  alt="" 
+                  className="w-full h-full object-cover opacity-70"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-xl">{theme.emoji}</span>
+                </div>
+              )}
             </div>
 
             {/* Info */}

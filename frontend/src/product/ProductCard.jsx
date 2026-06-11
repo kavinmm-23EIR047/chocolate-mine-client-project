@@ -19,7 +19,6 @@ const ImagePlaceholder = () => (
   </div>
 );
 
-// Animated Badge Component using Lucide Icons instead of Emojis
 const AnimatedProductBadge = ({ type, value = "" }) => {
   const badgeStyles = {
     veg: {
@@ -47,7 +46,6 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
     }
   };
 
-  // Safe theme-proof container for Indian Veg Mark referencing 1781174176555.jpg
   if (type === 'veg') {
     return (
       <div className={badgeStyles.veg.className}>
@@ -111,6 +109,7 @@ const CouponCard = ({ coupon, onApply, onRemove, isApplied }) => {
   );
 };
 
+// Swiggy Action Button that displays exact real-time quantities
 const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart }) => {
   const label = addingToCart ? '...' : 'ADD';
   
@@ -125,6 +124,7 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
     );
   }
 
+  // Shows current quantity number inside the product card immediately
   if (cartQuantity > 0) {
     return (
       <div 
@@ -177,12 +177,16 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const cartItems = useSelector((state) => state.cart?.items || []);
   
+  // Checks and catches standard IDs or variant IDs cleanly to output counts correctly
   const currentCartItem = cartItems.find(item => {
-    const standardMatch = item.product?._id === product?._id || item._id === product?._id;
-    if (standardMatch && activeVariant) {
+    const itemProdId = item.product?._id || item.product || item._id;
+    const targetProdId = product?._id;
+    const isIdMatch = itemProdId === targetProdId;
+    
+    if (isIdMatch && activeVariant) {
       return item.options?.flavor === activeVariant.flavor && item.options?.weight === activeVariant.weight;
     }
-    return standardMatch;
+    return isIdMatch;
   });
   
   const cartQuantity = currentCartItem ? currentCartItem.qty : 0;
@@ -223,13 +227,15 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const handleQuantityChange = (e, newQty) => {
     e.preventDefault(); e.stopPropagation();
     if (newQty < 0) return;
-    const matchId = currentCartItem?._id || product?._id;
-    if (!matchId) return;
+    
+    const targetId = product?._id;
+    if (!targetId) return;
+
     if (newQty === 0) { 
-      dispatch(removeFromCart(matchId)); 
+      dispatch(removeFromCart(targetId)); 
       toast.success('Removed from bag'); 
     } else { 
-      dispatch(updateCartQty({ productId: matchId, qty: newQty })); 
+      dispatch(updateCartQty({ productId: targetId, qty: newQty })); 
     }
   };
 
@@ -246,7 +252,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         variantPrice: activeVariant ? activeVariant.price : null
       }));
       toast.success('Added to bag');
-    } catch (err) { toast.error('Failed to add'); } finally { setTimeout(() => setAddingToCart(false), 300); }
+    } catch (err) { 
+      toast.error('Failed to add'); 
+    } finally { 
+      setTimeout(() => setAddingToCart(false), 200); 
+    }
   };
 
   const wish = (e) => { e.preventDefault(); e.stopPropagation(); if (product?._id) toggleWishlist(product._id); };

@@ -88,6 +88,7 @@ const SocketInitializer = ({ children }) => {
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminGoogleReviews from './pages/admin/AdminGoogleReviews';
 import AdminProducts from './pages/admin/AdminProducts';
 import ProductForm from './pages/admin/ProductForm';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -253,6 +254,7 @@ function App() {
                   <Route path="banners" element={<AdminBanner />} />
                   <Route path="custom-cakes" element={<AdminCustomCakes />} />
                   <Route path="reviews" element={<AdminReviews />} />
+                  <Route path="google-reviews" element={<AdminGoogleReviews />} />
                   <Route path="settings" element={<AdminDashboard />} />
                 </Route>
 

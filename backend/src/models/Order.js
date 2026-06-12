@@ -197,18 +197,26 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-// Generate user-friendly order number (format: K001, K002, etc.)
-function generateOrderNumber() {
-  const random = Math.floor(100 + Math.random() * 900);
-  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  return `${letter}${random}${Date.now().toString().slice(-3)}`;
-}
-
 // Generate SKU for each item before saving
-orderSchema.pre('save', function() {
-  // Generate order number if not exists
+orderSchema.pre('save', async function(next) {
+  // Generate TCM formatted order number if not exists
   if (!this.orderNumber) {
-    this.orderNumber = generateOrderNumber();
+    try {
+      const year = new Date().getFullYear();
+      const orderCount = await this.constructor.countDocuments({ 
+        createdAt: { 
+          $gte: new Date(`${year}-01-01`), 
+          $lt: new Date(`${year + 1}-01-01`) 
+        } 
+      });
+      const nextNum = (orderCount + 1).toString().padStart(4, '0');
+      const tcmCode = `TCM-${year}-${nextNum}`;
+      
+      this.orderNumber = tcmCode;
+      this.trackingCode = tcmCode;
+    } catch (err) {
+      console.error('Error generating TCM order number:', err);
+    }
   }
   
   // Generate SKU for each item
@@ -224,6 +232,8 @@ orderSchema.pre('save', function() {
       );
     }
   });
+  
+  next();
 });
 
 // Method to get SKU for tracking
@@ -240,5 +250,58 @@ orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ createdAt: -1 });
 
+// ==========================================
+// Excel Synchronization Hooks
+// ==========================================
+const excelService = require('../services/excelService');
+
+orderSchema.post('save', async function(doc) {
+  console.log('🟢 SAVE hook triggered for Order:', doc._id);
+  try {
+    await excelService.appendToExcel('Order', doc);
+    console.log('✅ Excel updated for new order');
+  } catch (err) {
+    console.error('❌ Excel update failed:', err.message);
+  }
+});
+
+orderSchema.post(['findOneAndUpdate', 'updateOne', 'findByIdAndUpdate'], async function(doc) {
+  console.log('🟡 UPDATE hook triggered for Order');
+  try {
+    const modelName = 'Order';
+    const query = this.getQuery();
+    if (doc && doc._id) {
+      await excelService.updateInExcel(modelName, doc._id, doc);
+      console.log('✅ Excel updated for modified order:', doc._id);
+    } else if (query && query._id) {
+      const updatedDoc = await this.model.findOne(query).lean();
+      if (updatedDoc) {
+        await excelService.updateInExcel(modelName, query._id, updatedDoc);
+        console.log('✅ Excel updated for modified order (via query):', query._id);
+      }
+    }
+  } catch (err) {
+    console.error('❌ Excel update failed:', err.message);
+  }
+});
+
+orderSchema.post(['findOneAndDelete', 'deleteOne', 'findByIdAndDelete'], async function(doc) {
+  console.log('🔴 DELETE hook triggered for Order');
+  try {
+    const modelName = 'Order';
+    if (doc && doc._id) {
+      await excelService.deleteFromExcel(modelName, doc._id);
+      console.log('✅ Excel updated, order deleted:', doc._id);
+    } else {
+      const query = this.getQuery();
+      if (query && query._id) {
+         await excelService.deleteFromExcel(modelName, query._id);
+         console.log('✅ Excel updated, order deleted (via query):', query._id);
+      }
+    }
+  } catch (err) {
+    console.error('❌ Excel sync error for delete:', err.message);
+  }
+});
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -12,6 +12,8 @@ require('dotenv').config();
 const connectDB = require('./src/config/db');
 const errorHandler = require('./src/middleware/errorHandler');
 const logger = require('./src/utils/logger');
+const mongoose = require('mongoose');
+const excelService = require('./src/services/excelService');
 
 const app = express();
 
@@ -19,6 +21,12 @@ const app = express();
    DATABASE CONNECT
 ================================== */
 connectDB();
+
+mongoose.connection.once('open', async () => {
+  console.log('MongoDB connected');
+  await excelService.initializeExcel();
+  console.log('✅ Excel sync ready - hooks active');
+});
 
 /* ==================================
    TRUST PROXY
@@ -138,6 +146,8 @@ app.use('/api/v1/notifications', require('./src/routes/notificationRoutes'));
 app.use('/api/v1/admin', require('./src/routes/adminRoutes'));
 app.use('/api/v1/staff', require('./src/routes/staffRoutes'));
 app.use('/api/v1/analytics', require('./src/routes/analyticsRoutes'));
+app.use('/api/v1/export', require('./src/routes/exportRoutes'));
+app.use('/api/v1/google-reviews', require('./src/routes/googleReviewsRoutes'));
 
 /* ==================================
    404 ROUTE HANDLER
@@ -210,6 +220,9 @@ server.listen(PORT, () => {
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`Allowed origins: ${allowedOrigins.join(', ')}`);
   logger.info(`WebSocket ready for real-time updates`);
+  
+  // Initialize scheduled jobs for Google Reviews
+  require('./src/jobs/googleReviewsSyncJob').initScheduledJobs();
 });
 
 /* ==================================

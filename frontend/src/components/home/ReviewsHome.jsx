@@ -5,7 +5,7 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-import { useGetLatestReviewsQuery } from '../../services/api/reviewApi';
+import { useGoogleReviews } from '../../hooks/useGoogleReviews';
 
 const REVIEWS_PER_PAGE = 6;
 
@@ -29,28 +29,28 @@ const ReviewsHome = () => {
   const [page, setPage] = useState(1);
   const [displayedReviews, setDisplayedReviews] = useState([]);
 
-  const { data: reviewRes, isLoading, isFetching, error, refetch } = useGetLatestReviewsQuery();
-  const allReviews = reviewRes?.data?.reviews || [];
+  const { reviews: allReviews, stats, loading: isLoading, refetch, error } = useGoogleReviews({ type: 'latest' });
 
   useEffect(() => {
     const start = 0;
     const end = page * REVIEWS_PER_PAGE;
-    setDisplayedReviews(allReviews.slice(start, end));
+    if (allReviews) {
+      setDisplayedReviews(allReviews.slice(start, end));
+    }
   }, [allReviews, page]);
 
   const hasMore = displayedReviews.length < allReviews.length;
 
   const loadMore = () => {
-    if (!isFetching && hasMore) {
+    if (!isLoading && hasMore) {
       setPage(prev => prev + 1);
     }
   };
 
   if (!isLoading && allReviews.length === 0) return null;
 
-  const avgRating = allReviews.length
-    ? (allReviews.reduce((acc, r) => acc + r.rating, 0) / allReviews.length).toFixed(1)
-    : '5.0';
+  const avgRating = stats?.averageRating || '5.0';
+  const totalReviews = stats?.totalReviews || 0;
 
   // Stars using theme accent color
   const RenderStars = ({ rating, size = 18 }) => {
@@ -129,7 +129,7 @@ const ReviewsHome = () => {
                 <RenderStars rating={parseFloat(avgRating)} size={18} />
               </div>
               <p className="text-xs text-muted mt-3 font-bold uppercase tracking-wider">
-                {allReviews.length}+ Verified Reviews
+                {totalReviews}+ Verified Reviews
               </p>
             </div>
 
@@ -214,31 +214,35 @@ const ReviewsHome = () => {
 
                       {/* Review Text - Larger & Clearer */}
                       <p className="text-base font-medium leading-relaxed text-foreground/80 mb-6 line-clamp-4">
-                        "{review.comment}"
+                        "{review.text}"
                       </p>
                     </div>
 
                     {/* User Info Section */}
                     <div className="flex items-center gap-4 mt-auto pt-4 border-t border-border/30">
                       {/* Avatar - Neumorphic pressed style */}
-                      <div className={`w-11 h-11 rounded-full bg-card flex items-center justify-center font-black text-base uppercase text-primary shrink-0 ${NEUMORPHIC_INNER}`}>
-                        {review.userName?.charAt(0) || 'U'}
-                      </div>
+                      {review.profilePhotoUrl ? (
+                        <img src={review.profilePhotoUrl} alt={review.authorName} className={`w-11 h-11 rounded-full shrink-0 ${NEUMORPHIC_INNER}`} />
+                      ) : (
+                        <div className={`w-11 h-11 rounded-full bg-card flex items-center justify-center font-black text-base uppercase text-primary shrink-0 ${NEUMORPHIC_INNER}`}>
+                          {review.authorName?.charAt(0) || 'U'}
+                        </div>
+                      )}
 
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-black text-heading truncate">
-                          {review.userName}
+                          {review.authorName}
                         </p>
                         <div className="flex items-center gap-1.5 mt-1">
                           <ThumbsUp size={10} className="text-primary" />
                           <p className="text-[9px] font-bold tracking-wide uppercase text-muted">
-                            Verified Buyer
+                            Verified Reviewer
                           </p>
-                          {review.createdAt && (
+                          {review.time && (
                             <>
                               <span className="text-[9px] text-muted/40">•</span>
                               <p className="text-[9px] font-medium text-muted">
-                                {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                {new Date(review.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                               </p>
                             </>
                           )}
@@ -270,10 +274,10 @@ const ReviewsHome = () => {
               <div className="flex justify-center mt-12">
                 <button
                   onClick={loadMore}
-                  disabled={isFetching}
+                  disabled={isLoading}
                   className={`px-10 py-4 rounded-full bg-card text-heading text-sm font-black uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} disabled:opacity-50`}
                 >
-                  {isFetching ? (
+                  {isLoading ? (
                     <span className="flex items-center gap-2">
                       <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />

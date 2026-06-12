@@ -7,6 +7,12 @@ const adminService = {
   getDashboard: () => api.get('/admin/dashboard'),
 
   /* ----------------------------------------
+     Export Data
+  ---------------------------------------- */
+  downloadMasterExport: () => api.get('/export/download', { responseType: 'blob' }),
+  syncMasterExport: () => api.post('/export/sync'),
+
+  /* ----------------------------------------
      Staff Management
   ---------------------------------------- */
   createStaff: (data) => api.post('/admin/staff/create', data),

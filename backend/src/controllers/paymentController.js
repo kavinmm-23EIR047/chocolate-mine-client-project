@@ -447,9 +447,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     notes: typeof notes === 'string' && notes.trim() ? notes.trim() : undefined,
     cakeMessage: typeof cakeMessage === 'string' && cakeMessage.trim() ? cakeMessage.trim().slice(0, 500) : undefined,
     razorpayOrderId: razorpayOrder.id,
-    paymentAttemptAt: new Date(),
-    orderNumber: generateOrderNumber(),
-    trackingCode: undefined
+    paymentAttemptAt: new Date()
   });
 
   await Payment.create({ orderId: order._id, razorpayOrderId: razorpayOrder.id, amount: total, status: 'created' });
@@ -484,16 +482,9 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
   const order = await Order.findById(orderId).populate('userId');
   if (!order) throw new AppError('Order not found', 404);
 
-  const year = new Date().getFullYear();
-  const orderCount = await Order.countDocuments({ createdAt: { $gte: new Date(`${year}-01-01`), $lt: new Date(`${year + 1}-01-01`) } });
-  const nextNum = (orderCount + 1).toString().padStart(4, '0');
-  const trackingCode = `TCM-${year}-${nextNum}`;
-
   order.paymentStatus = 'paid';
   order.razorpayPaymentId = razorpay_payment_id;
   order.razorpaySignature = razorpay_signature;
-  order.trackingCode = trackingCode;
-  order.orderNumber = trackingCode;
   await order.save();
 
   await Payment.findOneAndUpdate({ orderId }, { razorpayPaymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, status: 'paid' });

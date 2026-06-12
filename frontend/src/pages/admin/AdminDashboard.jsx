@@ -9,8 +9,10 @@ import {
   Package,
   TrendingUp,
   ArrowUpRight,
+  Download,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useGoogleReviews } from '../../hooks/useGoogleReviews';
 import adminService from '../../services/adminService';
 import analyticsService from '../../services/analyticsService';
 import { formatCurrency } from '../../utils/helpers';
@@ -31,6 +33,8 @@ const AdminDashboard = () => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30days');
+  const [exporting, setExporting] = useState(false);
+  const { stats: googleReviewsStats } = useGoogleReviews({ type: 'stats' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,9 +62,40 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome */}
-      <div>
-        <h2 className="text-2xl font-black text-heading">Dashboard Overview</h2>
-        <p className="text-muted text-sm mt-1">Welcome back! Here's what's happening today.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-heading">Dashboard Overview</h2>
+          <p className="text-muted text-sm mt-1">Welcome back! Here's what's happening today.</p>
+        </div>
+        
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={async () => {
+            try {
+              setExporting(true);
+              const response = await adminService.downloadMasterExport();
+              const url = window.URL.createObjectURL(new Blob([response.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `Master_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              toast.success('Export downloaded successfully!');
+            } catch (err) {
+              console.error(err);
+              toast.error('Failed to download export');
+            } finally {
+              setExporting(false);
+            }
+          }}
+          disabled={exporting}
+          className="flex items-center gap-2 bg-primary text-primary-content px-5 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download size={20} />
+          {exporting ? 'Exporting...' : 'Export All Data'}
+        </motion.button>
       </div>
 
       {/* Stats Grid */}
@@ -83,6 +118,25 @@ const AdminDashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Google Reviews Summary */}
+      {googleReviewsStats && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
+            <p className="text-sm text-muted font-medium">Google Average</p>
+            <p className="text-3xl font-black text-heading mt-2">{googleReviewsStats.averageRating} ⭐</p>
+          </div>
+          <div className="bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 rounded-2xl p-6">
+            <p className="text-sm text-muted font-medium">Total Google Reviews</p>
+            <p className="text-3xl font-black text-heading mt-2">{googleReviewsStats.totalReviews}</p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Sales Chart */}
       {chartData.length > 0 && (

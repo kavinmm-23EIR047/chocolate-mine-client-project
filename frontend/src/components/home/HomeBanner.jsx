@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, ArrowRight } from 'lucide-react';
 import api from '../../utils/api';
-import toast from 'react-hot-toast';
 
 const HomeBanner = () => {
   const [banners, setBanners] = useState([]);
@@ -35,17 +34,13 @@ const HomeBanner = () => {
   const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
-  // Absolute fallback click routing calculation based on viewport width segmentation
   const handleBannerClick = (e) => {
     if (!slide?.link) return;
-
-    // Prevent accidental triggers if clicking interactive text elements or actionable buttons
     if (e.target.closest('.interactive-action-node')) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
 
-    // Split viewport: left 35% goes backward, right 65% advances forward / executes call-to-action link
     if (banners.length > 1 && clickX < rect.width * 0.35) {
       prevSlide();
     } else {
@@ -55,14 +50,14 @@ const HomeBanner = () => {
 
   if (loading) {
     return (
-      <div className="w-full rounded-2xl sm:rounded-3xl bg-muted/10 animate-pulse border border-border/20"
+      <div className="w-full rounded-3xl bg-muted/10 animate-pulse border border-border/20"
         style={{ aspectRatio: '16/5' }} />
     );
   }
 
   if (banners.length === 0) {
     return (
-      <div className="w-full rounded-2xl sm:rounded-3xl overflow-hidden relative border border-border/20"
+      <div className="w-full rounded-3xl overflow-hidden relative border border-border/20"
         style={{ aspectRatio: '16/5' }}>
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-chocolate to-espresso flex items-center justify-center">
           <img src="/logo.png" alt="Logo" className="w-32 object-contain" />
@@ -75,54 +70,70 @@ const HomeBanner = () => {
 
   return (
     <div
-      className="banner-root relative w-full overflow-hidden rounded-2xl sm:rounded-3xl group border border-white/10 shadow-premium select-none"
+      className="banner-root relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] shadow-premium select-none"
       style={{ aspectRatio: 'var(--banner-ratio, 16/9)' }}
     >
-      {/* Premium Running Border Styles */}
       <style>{`
+        @media (max-width: 480px) {
+          .banner-root { aspect-ratio: 16/6.5 !important; }
+        }
         @media (min-width: 481px) {
           .banner-root { aspect-ratio: 16/4.8 !important; }
         }
         @media (min-width: 1920px) {
           .banner-root { aspect-ratio: 16/4.2 !important; }
         }
-        @keyframes aiBorderRun {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+
+        @property --border-angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
         }
-        .ai-running-border {
-          background: linear-gradient(90deg, #ff007f, #7928ca, #00dfd8, #ff007f);
-          background-size: 400% 400%;
-          animation: aiBorderRun 6s ease infinite;
+
+        .banner-root {
+          border: 3px solid transparent;
+          background: 
+            linear-gradient(#121212, #121212) padding-box, 
+            conic-gradient(from var(--border-angle), #fccc63, #fba650, #f15f53, #e2336b, #b9359a, #62529c, #fccc63) border-box;
+          animation: spinInstagramBorder 3s linear infinite;
         }
-        .ai-btn-glow {
-          background: linear-gradient(90deg, #ff007f, #ffaa00, #00dfd8, #ff007f);
-          background-size: 400% 400%;
-          animation: aiBorderRun 5s ease infinite;
+
+        @keyframes spinInstagramBorder {
+          to {
+            --border-angle: 360deg;
+          }
+        }
+
+        .premium-glass {
+          background: rgba(15, 15, 15, 0.65);
+          backdrop-filter: blur(12px) saturate(140%);
+          -webkit-backdrop-filter: blur(12px) saturate(140%);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
       `}</style>
 
+      {/* Solid dark base layer behind transitions */}
+      <div className="absolute inset-0 bg-[#121212] -z-10" />
+
+      {/* Slide transition zone */}
       <AnimatePresence mode="wait">
         <motion.div
           key={slide._id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.45 }}
-          className="absolute inset-0"
+          transition={{ duration: 0.35 }}
+          className="absolute inset-0 w-full h-full"
           onClick={handleBannerClick}
           style={{ cursor: slide.link ? 'pointer' : 'default' }}
         >
-          {/* Background Image with optimized filter for readability */}
+          {/* Background Image - Filters Removed */}
           <img
             src={slide.image}
-            alt={slide.title}
+            alt={slide.title || "Banner Image"}
             className="absolute inset-0 w-full h-full select-none object-cover"
-            style={{
-              objectPosition: 'center center',
-              filter: 'brightness(0.7) contrast(1.02)'
-            }}
+            style={{ objectPosition: 'center center' }}
             draggable={false}
           />
 
@@ -131,110 +142,85 @@ const HomeBanner = () => {
             className="absolute inset-0 pointer-events-none"
             style={{
               background: [
-                'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.3) 100%)',
-                'linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 70%)',
+                'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.5) 100%)',
+                'linear-gradient(to right, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 70%)',
               ].join(', '),
             }}
           />
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TOP-LEFT: AI Running Border Badge & Title       */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TOP-LEFT: Dynamic Title Badge */}
           <div
             className="absolute top-0 left-0 right-0 z-10 flex flex-col items-start justify-start pointer-events-none"
-            style={{ padding: 'clamp(12px, 3.5vw, 28px)' }}
+            style={{ padding: 'clamp(10px, 3vw, 20px)' }}
           >
-            <div className="max-w-[70%] flex flex-col gap-1.5">
-
-              {/* Subtitle Line */}
+            <div className="max-w-[85%] flex flex-col gap-1">
               {(slide.cornerText || slide.subtitle) && (
-                <span className="font-bold uppercase tracking-widest text-[8px] sm:text-[10px] text-white/30 pl-0.5 select-none">
+                <span className="font-semibold uppercase tracking-widest text-[8px] sm:text-[9px] text-white/40 pl-0.5 select-none">
                   {slide.cornerText || slide.subtitle}
                 </span>
               )}
 
-              {/* Title Container with AI Animated Running Border */}
-              <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.4 }}
-                className="ai-running-border p-[1.2px] rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.4)] w-fit"
-              >
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full"
-                  style={{ background: 'rgba(10, 10, 10, 0.82)', backdropFilter: 'blur(10px)' }}
+              {/* Added light opacity (opacity-80) to container elements */}
+              <div className="premium-glass flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit pointer-events-auto opacity-80">
+                <Gift size={12} className="text-white shrink-0" />
+                <h2
+                  style={{
+                    fontSize: 'clamp(10px, 2vw, 13px)',
+                    fontWeight: 600,
+                    lineHeight: 1.2,
+                    letterSpacing: '0.01em',
+                    color: '#ffffff',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    margin: 0,
+                  }}
                 >
-                  <Gift size={13} className="text-white/80 shrink-0" />
-                  <h2
-                    style={{
-                      fontSize: 'clamp(11px, 2.2vw, 16px)',
-                      fontWeight: 700,
-                      lineHeight: 1.2,
-                      letterSpacing: '0.02em',
-                      color: 'rgba(245, 245, 245, 0.95)',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      margin: 0,
-                    }}
-                  >
-                    {slide.title}
-                  </h2>
-                </div>
-              </motion.div>
-
+                  {slide.title || 'Special Offer'}
+                </h2>
+              </div>
             </div>
           </div>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* BOTTOM-RIGHT: Premium Interactive Action Button  */}
-          {/* ═══════════════════════════════════════════════ */}
-          {slide.link && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="interactive-action-node ai-btn-glow absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-20 p-[1.5px] rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.5)] group/btn transition-transform duration-300 hover:scale-[1.03] pointer-events-auto"
+          {/* BOTTOM-RIGHT: Action Button */}
+          {/* Added text-white/80 to give the text and icon a soft opacity */}
+          <div className="interactive-action-node absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-20 transition-transform duration-300 hover:scale-[1.02] pointer-events-auto">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (slide.link) window.location.href = slide.link;
+              }}
+              className="premium-glass flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full font-bold uppercase tracking-wider text-white/80 transition-all duration-200 active:scale-95 hover:bg-white/10 hover:text-white"
+              style={{
+                fontSize: 'clamp(8px, 1.2vw, 10px)',
+                minWidth: 0,
+                minHeight: 0
+              }}
             >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = slide.link;
-                }}
-                className="flex items-center justify-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full font-black uppercase tracking-wider text-white transition-colors duration-300 active:scale-95"
-                style={{
-                  background: '#0d0d0d',
-                  fontSize: 'clamp(9px, 1.4vw, 11px)',
-                }}
-              >
-                <span>{slide.buttonText || 'Explore Now'}</span>
-                <ArrowRight
-                  size={12}
-                  className="text-white transition-transform duration-300 group-hover/btn:translate-x-1"
-                />
-              </button>
-            </motion.div>
-          )}
+              <span>{slide.buttonText || 'Explore Now'}</span>
+              <ArrowRight size={10} className="shrink-0" />
+            </button>
+          </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Smooth Pagination Dots Indicator */}
+      {/* Pagination Dots */}
       {banners.length > 1 && (
-        <div className="absolute bottom-3 left-3 sm:left-5 flex gap-1 z-20 items-center interactive-action-node">
+        <div className="absolute bottom-3 left-3 sm:left-4 flex gap-1.5 z-20 items-center interactive-action-node">
           {banners.map((_, i) => (
-            <button
+            <div
               key={i}
+              role="button"
+              tabIndex={0}
               onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
               aria-label={`Go to slide ${i + 1}`}
-              className="touch-compact"
               style={{
-                width: current === i ? '14px' : '4px',
-                height: '4px',
+                width: current === i ? '16px' : '6px',
+                height: '6px',
                 borderRadius: '999px',
-                background: current === i ? '#fff' : 'rgba(255,255,255,0.3)',
+                background: current === i ? '#fff' : 'rgba(255,255,255,0.4)',
                 border: 'none',
-                padding: 0,
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}

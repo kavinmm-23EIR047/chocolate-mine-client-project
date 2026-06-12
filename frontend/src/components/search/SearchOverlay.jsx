@@ -93,8 +93,8 @@ const SearchOverlay = ({ isOpen, onClose }) => {
               {/* Premium Search Input Section */}
               <div className="flex items-center gap-4 mb-10">
                 <div className="flex-1 relative group">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">
-                    <Search size={24} strokeWidth={2.5} />
+                  <div className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">
+                    <Search size={20} className="sm:w-6 sm:h-6" strokeWidth={2.5} />
                   </div>
                   <input
                     autoFocus
@@ -103,7 +103,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                     onChange={(e) => handleSearch(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && onSelect(query)}
                     placeholder="Search for premium delicacies..."
-                    className="w-full bg-card/50 border-2 border-border/40 text-sm sm:text-xl font-black text-heading pl-10 sm:pl-16 pr-12 py-3 sm:py-5 rounded-2xl sm:rounded-3xl outline-none transition-all focus:border-primary/50 focus:bg-card focus:shadow-2xl shadow-inner placeholder:text-muted/30 uppercase tracking-tight"
+                    className="w-full bg-card/80 border-0 text-sm sm:text-xl font-black text-heading pl-12 sm:pl-16 pr-12 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2rem] outline-none transition-all shadow-[inset_4px_4px_8px_rgba(0,0,0,0.6),inset_-2px_-2px_6px_rgba(255,255,255,0.04)] focus:shadow-[inset_6px_6px_12px_rgba(0,0,0,0.8),inset_-2px_-2px_8px_rgba(255,255,255,0.06)] placeholder:text-muted/30 uppercase tracking-tight"
                   />
                   {loading && (
                     <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2">
@@ -113,9 +113,9 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                 </div>
                 <button 
                   onClick={onClose}
-                  className="flex w-10 h-10 sm:w-16 sm:h-16 items-center justify-center rounded-xl sm:rounded-3xl bg-primary/5 text-primary hover:bg-primary hover:text-button-text transition-all duration-300 border border-primary/10"
+                  className="flex w-12 h-12 sm:w-16 sm:h-16 items-center justify-center rounded-2xl sm:rounded-[2rem] bg-card text-primary transition-all duration-300 shadow-[4px_4px_10px_rgba(0,0,0,0.6),-3px_-3px_8px_rgba(255,255,255,0.04)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.6),inset_-3px_-3px_8px_rgba(255,255,255,0.04)]"
                 >
-                  <X size={20} sm:size={28} />
+                  <X size={20} className="sm:w-7 sm:h-7" />
                 </button>
               </div>
 

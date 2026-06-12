@@ -26,7 +26,7 @@ const NAV_LINKS = [
 
 const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.items);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
@@ -299,12 +299,12 @@ const Navbar = () => {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110]"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[210]"
             />
             <motion.div
               initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-full sm:w-[82%] sm:max-w-[360px] bg-card z-[120] shadow-2xl flex flex-col"
+              className="fixed top-0 left-0 bottom-0 w-full sm:w-[82%] sm:max-w-[360px] bg-card z-[220] shadow-2xl flex flex-col"
             >
               <div className="p-4 border-b border-border/15">
                 <div className="flex justify-between items-start mb-4">
@@ -322,25 +322,48 @@ const Navbar = () => {
                   { label: 'My Cart', icon: ShoppingCart, path: '/cart', badge: cartCount },
                   { label: 'My Wishlist', icon: Heart, path: '/account/wishlist' },
                   { label: 'Manage Profile', icon: User, path: '/account/profile' },
-                  { label: user ? 'Logout' : 'Login / Register', icon: LogIn, path: user ? '/logout' : '/login' },
-                ].map((item, i) => (
-                  <Link
-                    key={i}
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/8 transition-colors group min-h-[48px]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
-                        <item.icon size={15} className="text-primary" />
+                  { label: user ? 'Logout' : 'Login / Register', icon: LogIn, path: user ? '#' : '/login', isLogout: !!user },
+                ].map((item, i) => {
+                  const content = (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+                          <item.icon size={15} className="text-primary" />
+                        </div>
+                        <span className="font-bold text-[11px] uppercase tracking-wide text-heading">{item.label}</span>
                       </div>
-                      <span className="font-bold text-[11px] uppercase tracking-wide text-heading">{item.label}</span>
-                    </div>
-                    {item.badge > 0 && (
-                      <span className="bg-accent text-[#120807] text-[9px] font-black px-1.5 py-0.5 rounded-md">{item.badge}</span>
-                    )}
-                  </Link>
-                ))}
+                      {item.badge > 0 && (
+                        <span className="bg-accent text-[#120807] text-[9px] font-black px-1.5 py-0.5 rounded-md">{item.badge}</span>
+                      )}
+                    </>
+                  );
+
+                  if (item.isLogout) {
+                    return (
+                      <button
+                        key={i}
+                        onClick={async () => {
+                          setIsMenuOpen(false);
+                          await logout();
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-primary/8 transition-colors group min-h-[48px]"
+                      >
+                        {content}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={i}
+                      to={item.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/8 transition-colors group min-h-[48px]"
+                    >
+                      {content}
+                    </Link>
+                  );
+                })}
               </div>
             </motion.div>
           </>

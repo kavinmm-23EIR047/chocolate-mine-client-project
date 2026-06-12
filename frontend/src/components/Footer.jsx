@@ -18,7 +18,7 @@ import PureVegBadge from './ui/PureVegBadge';
 
 const Footer = () => {
   return (
-    <footer className="bg-footer text-footer-text pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden relative transition-colors duration-300">
+    <footer className="dark bg-footer text-footer-text pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden relative transition-colors duration-300">
 
       {/* ─── AMBIENT BACKGROUND WATERMARKS & BLURS ─── */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -mr-64 -mt-64 pointer-events-none" />

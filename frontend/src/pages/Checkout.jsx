@@ -1149,9 +1149,10 @@ const Checkout = () => {
 
                       <button
                         onClick={() => setShowMap(true)}
-                        className="w-full p-3 sm:p-4 border-2 border-dashed border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/40 transition-all"
+                        className="w-full p-2.5 sm:p-4 border-2 border-dashed border-primary/30 dark:border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/50 transition-all"
                       >
-                        <MapPin size={15} /> Add / Update Location on Map
+                        <MapPin size={15} className="shrink-0" /> 
+                        <span className="truncate">Add / Update Location on Map</span>
                       </button>
 
                       {deliveryInfo.position && (
@@ -1334,12 +1335,12 @@ const Checkout = () => {
                           No delivery slots are available for the selected date. Please choose another day.
                         </p>
                       )}
-                      <div className="pt-4 flex justify-between gap-3">
-                        <Button onClick={() => setActiveStep(1)} className="btn-secondary px-6">Back</Button>
+                      <div className="pt-4 flex justify-between gap-2 sm:gap-3">
+                        <Button onClick={() => setActiveStep(1)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
                         <Button
                           onClick={handleSlotConfirmed}
                           disabled={!deliverySlot || !availableSlots.some((s) => s.value === deliverySlot && s.available)}
-                          className="btn-primary px-8"
+                          className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
                         >
                           Continue
                         </Button>
@@ -1415,11 +1416,11 @@ const Checkout = () => {
                           <p className="text-xs text-muted font-bold uppercase tracking-widest text-center opacity-40">No custom notes added</p>
                         )}
 
-                        <div className="pt-4 flex justify-between items-center border-t border-border/20 pt-5">
-                          <p className="text-xs text-muted font-bold uppercase tracking-widest">Review items before payment</p>
-                          <div className="flex gap-3">
-                            <Button onClick={() => setActiveStep(2)} className="btn-secondary px-6">Back</Button>
-                            <Button onClick={() => setActiveStep(4)} className="btn-primary px-8">Confirm Order</Button>
+                        <div className="pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-3 border-t border-border/20 pt-5">
+                          <p className="text-[10px] sm:text-xs text-muted font-bold uppercase tracking-widest">Review items before payment</p>
+                          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                            <Button onClick={() => setActiveStep(2)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
+                            <Button onClick={() => setActiveStep(4)} className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm">Confirm Order</Button>
                           </div>
                         </div>
                       </div>
@@ -1508,14 +1509,16 @@ const Checkout = () => {
                         Selecting a method pre-fills its tab in Razorpay checkout
                       </p>
 
-                      <div className="pt-4 flex justify-between gap-3">
-                        <Button onClick={() => setActiveStep(3)} className="btn-secondary px-6">Back</Button>
+                      <div className="pt-4 flex justify-between gap-2 sm:gap-3">
+                        <Button onClick={() => setActiveStep(3)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
                         <Button
-                          onClick={handlePlaceOrder}
-                          className="btn-primary px-8"
+                          onClick={() => {
+                            document.getElementById('order-summary-section')?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
                           disabled={!selectedPayMethod}
                         >
-                          Pay Now
+                          Order Summary
                         </Button>
                       </div>
                     </div>
@@ -1532,6 +1535,7 @@ const Checkout = () => {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
+                id="order-summary-section"
                 className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden w-full min-w-0"
               >
                 {/* ... Order summary content remains the same ... */}
@@ -1718,8 +1722,8 @@ const Checkout = () => {
                       { icon: Sparkles, label: 'Handcrafted' },
                     ].map(({ icon: Icon, label }) => (
                       <div key={label} className="flex flex-col items-center gap-1 p-2 rounded-xl bg-surface/30 border-2 border-border-muted">
-                        <Icon size={13} className="text-primary/60 shrink-0" />
-                        <span className="text-[10px] font-black text-muted/60 uppercase tracking-widest text-center leading-tight">{label}</span>
+                        <Icon size={13} className="text-primary shrink-0" />
+                        <span className="text-[10px] font-black text-primary/80 uppercase tracking-widest text-center leading-tight">{label}</span>
                       </div>
                     ))}
                   </div>

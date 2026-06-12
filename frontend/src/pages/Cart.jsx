@@ -208,8 +208,8 @@ const Cart = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-card rounded-2xl shadow-card border border-border/50 p-3 sm:p-6"
                 >
-                  <div className="flex flex-row gap-4 sm:gap-6">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40 relative">
+                  <div className="flex flex-row gap-3 sm:gap-6">
+                    <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40 relative">
                       {(!item.image || item.image === 'none' || item.image.trim() === '') ? (
                         <ImagePlaceholder />
                       ) : (
@@ -319,27 +319,27 @@ const Cart = () => {
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/30">
-                        <div className="flex items-center gap-3 border border-border rounded-xl bg-surface shadow-soft">
+                      <div className="flex items-end sm:items-center justify-between mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border/30 flex-wrap gap-3">
+                        <div className="flex items-center border border-border rounded-xl bg-surface shadow-soft">
                           <button
                             type="button"
                             onClick={() => handleQuantityUpdate(item.productId, item.qty - 1, item)}
-                            className="p-2 hover:bg-card-soft transition rounded-l-xl text-foreground"
+                            className="p-1.5 sm:p-2 hover:bg-card-soft transition rounded-l-xl text-foreground"
                           >
-                            <Minus size={16} />
+                            <Minus size={14} className="sm:w-4 sm:h-4" />
                           </button>
-                          <span className="w-12 text-center font-black text-foreground">{item.qty}</span>
+                          <span className="w-8 sm:w-12 text-center text-sm sm:text-base font-black text-foreground">{item.qty}</span>
                           <button
                             type="button"
                             onClick={() => handleQuantityUpdate(item.productId, item.qty + 1, item)}
-                            className="p-2 hover:bg-card-soft transition rounded-r-xl text-foreground"
+                            className="p-1.5 sm:p-2 hover:bg-card-soft transition rounded-r-xl text-foreground"
                           >
-                            <Plus size={16} />
+                            <Plus size={14} className="sm:w-4 sm:h-4" />
                           </button>
                         </div>
 
                         <div className="text-right">
-                          <p className="text-[10px] text-muted font-black uppercase tracking-widest">Line total</p>
+                          <p className="text-[9px] sm:text-[10px] text-muted font-black uppercase tracking-widest">Line total</p>
                           <p className="font-black text-heading text-lg tabular-nums">
                             {formatCurrency(finalPrice * item.qty)}
                           </p>

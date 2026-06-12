@@ -269,28 +269,18 @@ const ReviewsHome = () => {
             {/* Pagination */}
             <div className="custom-swiper-pagination flex justify-center items-center gap-3 mt-10"></div>
 
-            {/* Load More Button - Neumorphic Style */}
-            {hasMore && (
-              <div className="flex justify-center mt-12">
-                <button
-                  onClick={loadMore}
-                  disabled={isLoading}
-                  className={`px-10 py-4 rounded-full bg-card text-heading text-sm font-black uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} disabled:opacity-50`}
-                >
-                  {isLoading ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Loading...
-                    </span>
-                  ) : (
-                    'Load More Reviews'
-                  )}
-                </button>
-              </div>
-            )}
+            {/* Read More on Google Button - Neumorphic Style */}
+            <div className="flex justify-center mt-12">
+              <a
+                href="https://www.google.com/maps/place/The+Chocolate+Mine+(Cakes+%26+Cafe)/@11.0043294,76.9719553,17z/data=!4m18!1m9!3m8!1s0x3ba8591d53333f03:0xd0f9437d533a60fc!2sThe+Chocolate+Mine+(Cakes+%26+Cafe)!8m2!3d11.0043294!4d76.9745302!9m1!1b1!16s%2Fg%2F11vjy0ffth!3m7!1s0x3ba8591d53333f03:0xd0f9437d533a60fc!8m2!3d11.0043294!4d76.9745302!9m1!1b1!16s%2Fg%2F11vjy0ffth?entry=ttu&g_ep=EgoyMDI2MDYwOS4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-10 py-4 rounded-full bg-card text-heading text-sm font-black uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} flex items-center gap-2`}
+              >
+                <GoogleLogo size={16} />
+                View All Reviews on Google
+              </a>
+            </div>
           </div>
         )}
       </div>

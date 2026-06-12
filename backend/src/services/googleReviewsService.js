@@ -1,38 +1,17 @@
-const axios = require('axios');
-const config = require('../config/googlePlaces');
-const { normalizeGoogleReview } = require('../utils/googleReviewsHelper');
+const apifyReviewsService = require('./apifyReviewsService');
 
 exports.fetchReviewsFromGoogle = async () => {
-  if (!config.ENABLED || !config.API_KEY || !config.PLACE_ID) {
-    throw new Error('Google Places API is disabled or missing credentials in environment');
-  }
-
   try {
-    const response = await axios.get(config.BASE_URL, {
-      params: {
-        place_id: config.PLACE_ID,
-        fields: 'reviews,user_ratings_total,rating',
-        key: config.API_KEY,
-        reviews_sort: 'newest'
-      }
-    });
-
-    if (response.data.status !== 'OK') {
-      throw new Error(`Google API Error: ${response.data.status} - ${response.data.error_message || ''}`);
-    }
-
-    const { result } = response.data;
+    // Try to fetch real reviews from Apify
+    const reviews = await apifyReviewsService.fetchReviews();
     
-    // Normalize reviews
-    const reviews = (result.reviews || []).map(normalizeGoogleReview);
-
-    return {
-      reviews,
-      placeRating: result.rating,
-      totalRatings: result.user_ratings_total
-    };
+    if (reviews && reviews.length > 0) {
+      return { reviews };
+    }
+    
+    return { reviews: [] };
   } catch (error) {
-    console.error('Error fetching Google Reviews:', error.message);
+    console.error('Error fetching reviews from Apify (googleReviewsService.js):', error.message);
     throw error;
   }
 };

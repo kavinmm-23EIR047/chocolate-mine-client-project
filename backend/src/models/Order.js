@@ -250,57 +250,48 @@ orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ createdAt: -1 });
 
+
 // ==========================================
 // Excel Synchronization Hooks
 // ==========================================
 const excelService = require('../services/excelService');
 
 orderSchema.post('save', async function(doc) {
-  console.log('🟢 SAVE hook triggered for Order:', doc._id);
   try {
-    await excelService.appendToExcel('Order', doc);
-    console.log('✅ Excel updated for new order');
+    if (doc) await excelService.appendToExcel(this.constructor.modelName || this.modelName, doc);
   } catch (err) {
-    console.error('❌ Excel update failed:', err.message);
+    console.error("Excel sync error for save:", err.message);
   }
 });
 
 orderSchema.post(['findOneAndUpdate', 'updateOne', 'findByIdAndUpdate'], async function(doc) {
-  console.log('🟡 UPDATE hook triggered for Order');
   try {
-    const modelName = 'Order';
+    const modelName = this.model.modelName;
     const query = this.getQuery();
     if (doc && doc._id) {
       await excelService.updateInExcel(modelName, doc._id, doc);
-      console.log('✅ Excel updated for modified order:', doc._id);
     } else if (query && query._id) {
       const updatedDoc = await this.model.findOne(query).lean();
-      if (updatedDoc) {
-        await excelService.updateInExcel(modelName, query._id, updatedDoc);
-        console.log('✅ Excel updated for modified order (via query):', query._id);
-      }
+      if (updatedDoc) await excelService.updateInExcel(modelName, query._id, updatedDoc);
     }
   } catch (err) {
-    console.error('❌ Excel update failed:', err.message);
+    console.error("Excel sync error for update:", err.message);
   }
 });
 
 orderSchema.post(['findOneAndDelete', 'deleteOne', 'findByIdAndDelete'], async function(doc) {
-  console.log('🔴 DELETE hook triggered for Order');
   try {
-    const modelName = 'Order';
+    const modelName = this.model.modelName;
     if (doc && doc._id) {
       await excelService.deleteFromExcel(modelName, doc._id);
-      console.log('✅ Excel updated, order deleted:', doc._id);
     } else {
       const query = this.getQuery();
       if (query && query._id) {
          await excelService.deleteFromExcel(modelName, query._id);
-         console.log('✅ Excel updated, order deleted (via query):', query._id);
       }
     }
   } catch (err) {
-    console.error('❌ Excel sync error for delete:', err.message);
+    console.error("Excel sync error for delete:", err.message);
   }
 });
 

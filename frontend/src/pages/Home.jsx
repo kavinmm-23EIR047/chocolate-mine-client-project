@@ -20,6 +20,11 @@ import { CategoryCircles } from '../components/home/Category';
 
 import ReviewsHome from '../components/home/ReviewsHome';
 import BottomBanner from '../components/home/BottomBanner';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { FreeMode } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import { Grid } from 'lucide-react';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -111,8 +116,8 @@ const Home = () => {
 
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore | Pan India Delivery | Pure Veg & Eggless Cakes</h1>
 
-      <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-32">
-        <div className="max-w-[1400px] mx-auto space-y-10 sm:space-y-12">
+      <main className="responsive-container py-6 pb-32">
+        <div className="mx-auto space-y-10 sm:space-y-12 tv:space-y-16">
           {!query ? (
             <>
               <TrustBar />
@@ -133,46 +138,81 @@ const Home = () => {
               {/* Delivery Hero Section */}
               <DeliveryHero />
 
-
-
               <OccasionSection />
             </>
           ) : null}
 
-          {/* Product Grid */}
-          <section className="pt-6" id="main-catalog">
-            <div className="flex flex-col gap-8">
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter uppercase">Our Collections</h2>
-                <div className="h-1 w-12 bg-primary rounded-full" />
-              </div>
+          {/* Product Grid / Our Collections */}
+          <section className="pt-6 tv:pt-10 border-b border-border/20 overflow-hidden" id="main-catalog">
+            <div className="flex flex-col gap-5 lg:gap-8">
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6">
-                {loading && products.length === 0 ? (
-                  Array(4).fill(0).map((_, i) => <CardSkeleton key={i} />)
-                ) : products.length > 0 ? (
-                  products.map((p, i) => (
-                    <motion.div
-                      key={p._id}
-                      variants={fadeUp}
-                      initial="hidden"
-                      whileInView="show"
-                      viewport={{ once: true }}
-                      custom={i % 4}
-                    >
-                      <ProductCard product={p} />
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="col-span-full py-32 text-center bg-card rounded-2xl border-2 border-dashed border-border/50">
-                    <Search size={48} className="mx-auto mb-6 text-primary/20" />
-                    <p className="text-2xl font-black text-heading">No delicacies found</p>
-                    <p className="text-xs font-semibold text-muted mt-2 uppercase tracking-wider">Adjust your filters</p>
+              <div className="flex flex-row items-end justify-between gap-3 w-full px-4 sm:px-0">
+                <div className="space-y-1 lg:space-y-2 shrink-0">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 lg:px-4 lg:py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-[9px] lg:text-xs font-black uppercase tracking-wider">
+                    <Grid size={10} className="lg:w-3 lg:h-3" /> Our Collections
                   </div>
+                  <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-heading uppercase">
+                    Our Collections
+                  </h2>
+                </div>
+
+                {!loading && products.length > 0 && (
+                  <Link
+                    to="/shop"
+                    className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs lg:text-sm font-black text-primary hover:text-primary-hover uppercase tracking-widest border-b-2 border-primary/20 pb-0.5 transition-all hover:gap-2 whitespace-nowrap mb-1"
+                  >
+                    View All
+                  </Link>
                 )}
               </div>
 
-              <div className="mt-6 flex justify-center">
+              {loading && products.length === 0 ? (
+                <div className="flex overflow-x-hidden gap-3 sm:gap-4 lg:gap-6 tv:gap-8 pb-4 lg:pb-6 px-4 sm:px-0">
+                  {Array(4).fill(0).map((_, i) => (
+                    <div key={`col-skel-${i}`} className="shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px]">
+                      <CardSkeleton />
+                    </div>
+                  ))}
+                </div>
+              ) : products.length > 0 ? (
+                <div className="px-4 sm:px-0 pb-2">
+                  <Swiper
+                    modules={[FreeMode]}
+                    freeMode={true}
+                    slidesPerView={'auto'}
+                    spaceBetween={16}
+                    className="!pb-2 !overflow-visible"
+                    breakpoints={{
+                      640: { spaceBetween: 16 },
+                      1024: { spaceBetween: 24 },
+                      1536: { spaceBetween: 32 }
+                    }}
+                  >
+                    {products.map((p, i) => (
+                      <SwiperSlide key={p._id} className="!w-[min(78vw,220px)] md:!w-[260px] lg:!w-[300px] tv:!w-[360px] !h-auto flex flex-col">
+                        <motion.div
+                          variants={fadeUp}
+                          initial="hidden"
+                          whileInView="show"
+                          viewport={{ once: true }}
+                          custom={i % 4}
+                          className="h-full flex flex-col"
+                        >
+                          <ProductCard product={p} />
+                        </motion.div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+              ) : (
+                <div className="mx-4 sm:mx-0 py-20 text-center bg-card rounded-2xl border-2 border-dashed border-border/50">
+                  <Search size={48} className="mx-auto mb-6 text-primary/20" />
+                  <p className="text-2xl font-black text-heading">No delicacies found</p>
+                  <p className="text-xs font-semibold text-muted mt-2 uppercase tracking-wider">Adjust your filters</p>
+                </div>
+              )}
+
+              <div className="mt-2 mb-6 flex justify-center">
                 <Link
                   to="/shop"
                   className="text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] bg-primary text-button-text px-10 py-3.5 rounded-full hover:scale-105 transition-all shadow-lg shadow-primary/20"

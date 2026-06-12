@@ -62,8 +62,11 @@ const HomeBanner = () => {
     >
       {/* AI Premium Running Border Styles */}
       <style>{`
-        @media (min-width: 640px) {
+        @media (min-width: 481px) {
           .banner-root { aspect-ratio: 16/4.8 !important; }
+        }
+        @media (min-width: 1920px) {
+          .banner-root { aspect-ratio: 16/4.2 !important; }
         }
         @keyframes aiBorderRun {
           0% { background-position: 0% 50%; }
@@ -205,8 +208,7 @@ const HomeBanner = () => {
           <button
             onClick={(e) => { e.stopPropagation(); prevSlide(); }}
             aria-label="Previous slide"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/45 text-white backdrop-blur-sm border border-white/5 opacity-0 group-hover:opacity-100 transition-all duration-200"
-            style={{ width: 'clamp(24px, 4vw, 34px)', height: 'clamp(24px, 4vw, 34px)' }}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/45 text-white backdrop-blur-sm border border-white/5 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 min-w-[44px] min-h-[44px]"
           >
             <ChevronLeft size={14} />
           </button>
@@ -214,8 +216,7 @@ const HomeBanner = () => {
           <button
             onClick={(e) => { e.stopPropagation(); nextSlide(); }}
             aria-label="Next slide"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/45 text-white backdrop-blur-sm border border-white/5 opacity-0 group-hover:opacity-100 transition-all duration-200"
-            style={{ width: 'clamp(24px, 4vw, 34px)', height: 'clamp(24px, 4vw, 34px)' }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/45 text-white backdrop-blur-sm border border-white/5 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 min-w-[44px] min-h-[44px]"
           >
             <ChevronRight size={14} />
           </button>
@@ -227,6 +228,7 @@ const HomeBanner = () => {
                 key={i}
                 onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
                 aria-label={`Go to slide ${i + 1}`}
+                className="touch-compact"
                 style={{
                   width: current === i ? '14px' : '4px',
                   height: '4px',

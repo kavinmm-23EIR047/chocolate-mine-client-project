@@ -145,25 +145,34 @@ exports.deleteAddress = asyncHandler(async (req, res, next) => {
 // @desc    Toggle wishlist item
 // @route   POST /api/v1/users/wishlist/toggle
 exports.toggleWishlist = asyncHandler(async (req, res, next) => {
-  const { productId } = req.body;
+  const { productId, type } = req.body; // type = 'product' or 'customCake'
   const user = await User.findById(req.user._id);
 
-  const index = user.wishlist.indexOf(productId);
-  if (index > -1) {
-    user.wishlist.splice(index, 1);
+  if (type === 'customCake') {
+    const index = user.customCakeWishlist.indexOf(productId);
+    if (index > -1) {
+      user.customCakeWishlist.splice(index, 1);
+    } else {
+      user.customCakeWishlist.push(productId);
+    }
   } else {
-    user.wishlist.push(productId);
+    const index = user.wishlist.indexOf(productId);
+    if (index > -1) {
+      user.wishlist.splice(index, 1);
+    } else {
+      user.wishlist.push(productId);
+    }
   }
 
   await user.save();
-  res.status(200).json({ status: 'success', data: user.wishlist });
+  res.status(200).json({ status: 'success', data: { wishlist: user.wishlist, customCakes: user.customCakeWishlist } });
 });
 
 // @desc    Get user wishlist
 // @route   GET /api/v1/users/wishlist
 exports.getWishlist = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).populate('wishlist');
-  res.status(200).json({ status: 'success', data: user.wishlist });
+  const user = await User.findById(req.user._id).populate('wishlist').populate('customCakeWishlist');
+  res.status(200).json({ status: 'success', data: user.wishlist, customCakes: user.customCakeWishlist });
 });
 
 // @desc    Update FCM Token

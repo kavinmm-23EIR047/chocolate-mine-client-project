@@ -14,20 +14,20 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   }
 
   return (
-    <div className="flex items-center justify-center gap-1.5 mt-8">
+    <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 mt-6 sm:mt-8">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-xl hover:bg-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg hover:bg-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={15} />
       </button>
 
       {start > 1 && (
         <>
           <button
             onClick={() => onPageChange(1)}
-            className="w-10 h-10 rounded-xl text-sm font-semibold hover:bg-border transition-colors"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-semibold hover:bg-border transition-colors"
           >
             1
           </button>
@@ -39,9 +39,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
+          className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-bold transition-all ${
             page === currentPage
-              ? 'bg-button-bg text-button-text shadow-lg'
+              ? 'bg-button-bg text-button-text shadow-md'
               : 'hover:bg-border'
           }`}
         >
@@ -54,7 +54,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           {end < totalPages - 1 && <span className="text-muted px-1">...</span>}
           <button
             onClick={() => onPageChange(totalPages)}
-            className="w-10 h-10 rounded-xl text-sm font-semibold hover:bg-border transition-colors"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-semibold hover:bg-border transition-colors"
           >
             {totalPages}
           </button>
@@ -64,9 +64,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-xl hover:bg-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg hover:bg-border disabled:opacity-30 disabled:cursor-not-allowed transition-colors inline-flex items-center justify-center"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={15} />
       </button>
     </div>
   );

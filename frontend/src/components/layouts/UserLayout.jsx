@@ -29,7 +29,7 @@ const UserLayout = () => {
       <div className="bg-success/10 border-y border-success/20 text-success py-2 sm:py-2.5 px-4 overflow-hidden">
         
         {/* DESKTOP LAYOUT (lg and up) */}
-        <div className="hidden lg:flex items-center justify-between max-w-[1400px] mx-auto w-full">
+        <div className="hidden lg:flex items-center justify-between responsive-container">
           {/* Left: Pure Veg & Eggless */}
           <div className="flex items-center gap-3">
             <PureVegBadge className="px-2 py-0.5 rounded-full" size={10} />
@@ -81,7 +81,7 @@ const UserLayout = () => {
         </div>
       </div>
 
-      <main className="flex-grow">
+      <main className="flex-grow min-w-0">
         <Outlet />
       </main>
       <div className={isProductPage ? "hidden lg:block" : "block"}>

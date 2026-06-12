@@ -56,8 +56,8 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Shared SVG Logo Markup - Added controlled top padding & margin adjustments
-  const LogoMark = ({ containerClass = "w-[105px] sm:w-[125px] lg:w-[135px]" }) => (
+  // Shared SVG Logo Markup
+  const LogoMark = ({ containerClass = "w-[105px] sm:w-[125px] lg:w-[135px] tv:w-[170px]" }) => (
     <div className={`flex flex-col items-center text-heading font-sans py-1 my-auto ${containerClass}`}>
 
       {/* "THE CHOCOLATE" - Flush alignment layout */}
@@ -84,20 +84,20 @@ const Navbar = () => {
   return (
     <>
       <nav className={`sticky top-0 left-0 right-0 z-[100] bg-navbar transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
-        <div className="w-full px-4 sm:px-6 lg:px-10">
+        <div className="responsive-container">
 
-          {/* MAIN ROW - flex items-center ensures clean mid-row alignment */}
-          <div className="relative flex items-center justify-between gap-4 py-3 min-h-[65px]">
+          {/* MAIN ROW */}
+          <div className="relative flex items-center justify-between gap-3 sm:gap-4 py-3 min-h-[65px] tv:min-h-[84px]">
 
             {/* Mobile Hamburger */}
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0"
+              className="lg:hidden p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0 min-w-[48px] min-h-[48px]"
             >
               <Menu size={22} className="text-heading" />
             </button>
 
-            {/* Left Block: Logo + Location Selector grouped neatly on the left side */}
+            {/* Left Block: Logo + Location Selector */}
             <div className="flex items-center gap-4 lg:gap-6 shrink-0 static">
               <Link to="/" className="shrink-0 block select-none group pr-1">
                 <LogoMark />
@@ -107,7 +107,7 @@ const Navbar = () => {
               <div className="hidden lg:block relative shrink-0" ref={locationDropdownRef}>
                 <button
                   onClick={() => setIsLocationOpen(!isLocationOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[140px]"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[140px] tv:min-w-[180px]"
                 >
                   <MapPin size={14} className="text-primary shrink-0" />
                   <div className="flex flex-col items-start">
@@ -127,7 +127,7 @@ const Navbar = () => {
                       transition={{ duration: 0.15 }}
                       className="absolute top-full left-0 mt-1.5 w-44 bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden z-50"
                     >
-                      {['coimbatore', 'pan india'].map((city, i) => (
+                      {['coimbatore', 'pan india'].map((city) => (
                         <button
                           key={city}
                           onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
@@ -144,7 +144,7 @@ const Navbar = () => {
 
             {/* Search Bar – Desktop */}
             <div
-              className="hidden lg:flex flex-1 max-w-md xl:max-w-xl mx-auto cursor-pointer px-2"
+              className="hidden lg:flex flex-1 max-w-md xl:max-w-xl tv:max-w-3xl mx-auto cursor-pointer px-2"
               onClick={() => setIsSearchOverlayOpen(true)}
             >
               <div className="relative w-full">
@@ -165,19 +165,19 @@ const Navbar = () => {
             <div className="hidden lg:flex items-center gap-1 shrink-0">
               {/* Notification Bell Dropdown */}
               {user ? (
-                <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 min-w-[64px]">
+                <div className="flex flex-col items-center gap-0.5 px-2 py-1 min-w-[64px]">
                   <NotificationDropdown />
-                  <span className="text-[9px] font-bold text-muted uppercase tracking-wide whitespace-nowrap mt-0.5">Alerts</span>
+                  <span className="text-[11px] font-bold text-muted uppercase tracking-wide whitespace-nowrap mt-0.5">Alerts</span>
                 </div>
               ) : (
                 <button 
                   onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
-                  className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]"
+                  className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]"
                 >
                   <div className="relative">
-                    <Bell size={19} className="text-heading group-hover:text-primary transition-colors" />
+                    <Bell size={24} className="text-heading group-hover:text-primary transition-colors" />
                   </div>
-                  <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
+                  <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
                 </button>
               )}
               {[
@@ -185,23 +185,23 @@ const Navbar = () => {
                   ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' }
                   : { icon: LogIn, label: 'Sign In', to: '/login' },
               ].map(({ icon: Icon, label, to }) => (
-                <Link key={label} to={to} className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]">
-                  <Icon size={19} className="text-heading group-hover:text-primary transition-colors" />
-                  <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">{label}</span>
+                <Link key={label} to={to} className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]">
+                  <Icon size={24} className="text-heading group-hover:text-primary transition-colors" />
+                  <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">{label}</span>
                 </Link>
               ))}
 
               {/* Cart */}
-              <Link to="/cart" className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/8 group transition-colors relative min-w-[64px]">
+              <Link to="/cart" className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl hover:bg-primary/8 group transition-colors relative min-w-[64px]">
                 <div className="relative">
-                  <ShoppingCart size={19} className="text-heading group-hover:text-primary transition-colors" />
+                  <ShoppingCart size={24} className="text-heading group-hover:text-primary transition-colors" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2.5 bg-accent text-[#120807] text-[9px] font-black w-4.5 h-4.5 min-w-[18px] min-h-[18px] flex items-center justify-center rounded-full leading-none px-1">
+                    <span className="absolute -top-2 -right-2.5 bg-accent text-[#120807] text-[10px] font-black w-5 h-5 min-w-[20px] min-h-[20px] flex items-center justify-center rounded-full leading-none px-1">
                       {cartCount}
                     </span>
                   )}
                 </div>
-                <span className="text-[9px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
+                <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
               </Link>
 
               {/* Theme Toggle – Desktop */}
@@ -215,9 +215,9 @@ const Navbar = () => {
               ) : (
                 <button 
                   onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))}
-                  className="p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0"
+                  className="p-2 rounded-lg hover:bg-primary/8 transition-colors shrink-0 min-w-[48px] min-h-[48px]"
                 >
-                  <Bell size={20} className="text-heading" />
+                  <Bell size={24} className="text-heading" />
                 </button>
               )}
               <ThemeToggle />
@@ -240,7 +240,7 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Search Input */}
-            <div className="relative mx-auto max-w-sm" onClick={() => setIsSearchOverlayOpen(true)}>
+            <div className="relative mx-auto w-full max-w-sm" onClick={() => setIsSearchOverlayOpen(true)}>
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-heading/70 dark:text-foreground/80" />
               <input
                 type="text"
@@ -257,7 +257,7 @@ const Navbar = () => {
         </div>
 
         {/* BOTTOM DESKTOP NAVIGATION ROW */}
-        <div className="hidden lg:flex items-center justify-start gap-10 py-2.5 px-4 sm:px-6 lg:px-10 border-t border-border/10 bg-navbar max-w-[1400px] mx-auto w-full">
+        <div className="hidden lg:flex items-center justify-start gap-8 xl:gap-10 tv:gap-14 py-2.5 tv:py-4 border-t border-border/10 bg-navbar responsive-container">
           <Link to="/shop" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">All</Link>
           <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Custom Cakes</Link>
           <Link to="/occasion/anniversary" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Anniversary</Link>
@@ -278,12 +278,12 @@ const Navbar = () => {
             <motion.div
               initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-[75%] max-w-[280px] bg-card z-[120] shadow-2xl flex flex-col"
+              className="fixed top-0 left-0 bottom-0 w-full sm:w-[82%] sm:max-w-[360px] bg-card z-[120] shadow-2xl flex flex-col"
             >
               <div className="p-4 border-b border-border/15">
                 <div className="flex justify-between items-start mb-4">
                   <LogoMark containerClass="w-[115px]" />
-                  <button onClick={() => setIsMenuOpen(false)} className="p-1.5 rounded-lg hover:bg-primary/8 text-heading">
+                  <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg hover:bg-primary/8 text-heading min-w-[48px] min-h-[48px]">
                     <X size={18} />
                   </button>
                 </div>
@@ -302,7 +302,7 @@ const Navbar = () => {
                     key={i}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-primary/8 transition-colors group"
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/8 transition-colors group min-h-[48px]"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">

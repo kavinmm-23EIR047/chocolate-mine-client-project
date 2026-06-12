@@ -48,10 +48,11 @@ const TrustBar = () => {
               return (
                 <button
                   key={i}
+                  aria-label={`View slide ${i + 1}`}
                   onClick={() => setActiveTrustIndex(i)}
-                  className={`h-1 rounded-full transition-all duration-300 ${activeTrustIndex === i
-                    ? (isVeg ? 'w-5 bg-emerald-500' : 'w-5 bg-primary')
-                    : (isVeg ? 'w-1 bg-emerald-200' : 'w-1 bg-primary/20')
+                  className={`!p-0 !m-0 !border-none !outline-none !min-w-0 !min-h-0 h-1.5 rounded-full transition-all duration-300 ${activeTrustIndex === i
+                    ? (isVeg ? 'w-6 bg-emerald-500' : 'w-6 bg-primary')
+                    : (isVeg ? 'w-1.5 bg-emerald-200' : 'w-1.5 bg-primary/20')
                     }`}
                 />
               );

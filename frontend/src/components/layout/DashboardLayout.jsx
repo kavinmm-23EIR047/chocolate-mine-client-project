@@ -53,22 +53,22 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen bg-background pt-0 pb-20 lg:pt-32">
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+      <div className="responsive-container">
 
         {/* Sticky Profile Header (Mobile) */}
-        <div className="lg:hidden sticky top-0 z-[110] flex items-center justify-between bg-card/95 backdrop-blur-xl p-4 shadow-premium mb-6 border-b border-border/50">
-          <div className="flex items-center gap-3">
+        <div className="lg:hidden sticky top-0 z-[110] flex items-center justify-between gap-3 bg-card/95 backdrop-blur-xl p-4 shadow-premium mb-6 border-b border-border/50">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-full bg-secondary text-button-text flex items-center justify-center font-black text-sm">
               {getInitials(user?.name)}
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] text-muted font-black uppercase tracking-widest">Account Overview</p>
               <p className="text-sm font-black text-heading line-clamp-1">{user?.name}</p>
             </div>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-10 h-10 bg-surface text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-button-text transition-all shadow-sm border border-border/50"
+            className="w-12 h-12 bg-surface text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-button-text transition-all shadow-sm border border-border/50 shrink-0"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -78,10 +78,10 @@ const DashboardLayout = () => {
 
           {/* Sidebar Navigation */}
           <aside className={`
-            lg:w-[300px] shrink-0 w-full
+            lg:w-[300px] tv:w-[360px] shrink-0 w-full
             ${mobileMenuOpen ? 'block' : 'hidden lg:block'}
           `}>
-            <div className="sticky top-28 bg-card rounded-2xl lg:rounded-[2rem] p-6 shadow-sm border border-border/50 overflow-hidden relative">
+            <div className="sticky top-28 bg-card rounded-2xl lg:rounded-3xl p-4 sm:p-6 tv:p-8 shadow-sm border border-border/50 overflow-hidden relative">
               {/* Decorative Blur */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
@@ -140,7 +140,7 @@ const DashboardLayout = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="bg-card rounded-2xl lg:rounded-[2.5rem] p-4 sm:p-6 lg:p-10 shadow-sm border border-border/50 min-h-[600px]"
+                className="bg-card rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-10 tv:p-14 shadow-sm border border-border/50 min-h-[520px] lg:min-h-[600px]"
               >
                 <Outlet />
               </motion.div>

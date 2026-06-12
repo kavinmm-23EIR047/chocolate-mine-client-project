@@ -105,37 +105,37 @@
    --button-alt-hover-rgb: 228 212 207;
 
    /* ─── BADGE COLORS - Light Theme ─── */
-   --badge-bestseller-bg: #FEF3C7;
-   --badge-bestseller-text: #D97706;
-   --badge-bestseller-border: #FDE68A;
+   --badge-bestseller-bg: var(--accent);
+   --badge-bestseller-text: var(--heading);
+   --badge-bestseller-border: var(--accent-hover);
 
-   --badge-featured-bg: #FCE7F3;
-   --badge-featured-text: #BE185D;
-   --badge-featured-border: #FBCFE8;
+   --badge-featured-bg: var(--secondary);
+   --badge-featured-text: var(--background);
+   --badge-featured-border: var(--primary);
 
-   --badge-discount-bg: #FEE2E2;
-   --badge-discount-text: #DC2626;
-   --badge-discount-border: #FECACA;
+   --badge-discount-bg: var(--primary);
+   --badge-discount-text: var(--background);
+   --badge-discount-border: var(--primary-hover);
 
-   --badge-stock-bg: #E6F7EE;
-   --badge-stock-text: #0B5334;
-   --badge-stock-border: #C2EAD5;
+   --badge-stock-bg: var(--success-light);
+   --badge-stock-text: var(--success-text);
+   --badge-stock-border: var(--success);
 
-   --badge-soldout-bg: #F3F4F6;
-   --badge-soldout-text: #4B5563;
-   --badge-soldout-border: #E5E7EB;
+   --badge-soldout-bg: var(--card-soft);
+   --badge-soldout-text: var(--heading);
+   --badge-soldout-border: var(--border);
 
-   --badge-coupon-bg: #E0E7FF;
-   --badge-coupon-text: #4338CA;
-   --badge-coupon-border: #C7D2FE;
+   --badge-coupon-bg: var(--card-soft);
+   --badge-coupon-text: var(--primary);
+   --badge-coupon-border: var(--primary);
 
-   --badge-new-bg: #E6F7EE;
-   --badge-new-text: #0B5334;
-   --badge-new-border: #C2EAD5;
+   --badge-new-bg: var(--accent);
+   --badge-new-text: var(--heading);
+   --badge-new-border: var(--accent-hover);
 
-   --badge-limited-bg: #FEF3C7;
-   --badge-limited-text: #D97706;
-   --badge-limited-border: #FDE68A;
+   --badge-limited-bg: var(--secondary);
+   --badge-limited-text: var(--background);
+   --badge-limited-border: var(--primary);
 
    /* Semantic Colors */
    --success: #2E7D32;
@@ -280,37 +280,37 @@
    --button-alt-hover-rgb: 42 24 19;
 
    /* ─── BADGE COLORS - Dark Theme Solid Block Overrides ─── */
-   --badge-bestseller-bg: #332200;
-   --badge-bestseller-text: #FBBF24;
-   --badge-bestseller-border: rgba(251, 191, 36, 0.5);
+   --badge-bestseller-bg: var(--accent);
+   --badge-bestseller-text: var(--background);
+   --badge-bestseller-border: var(--accent-hover);
 
-   --badge-featured-bg: #3D0C23;
-   --badge-featured-text: #F472B6;
-   --badge-featured-border: rgba(236, 72, 153, 0.5);
+   --badge-featured-bg: var(--secondary);
+   --badge-featured-text: var(--background);
+   --badge-featured-border: var(--primary);
 
-   --badge-discount-bg: #450A0A;
-   --badge-discount-text: #F87171;
-   --badge-discount-border: rgba(239, 68, 68, 0.5);
+   --badge-discount-bg: var(--primary);
+   --badge-discount-text: var(--background);
+   --badge-discount-border: var(--primary-hover);
 
-   --badge-stock-bg: #062F1E;
-   --badge-stock-text: #34D399;
-   --badge-stock-border: rgba(16, 185, 129, 0.5);
+   --badge-stock-bg: var(--success-light);
+   --badge-stock-text: var(--success-text);
+   --badge-stock-border: var(--success);
 
-   --badge-soldout-bg: #1F2226;
-   --badge-soldout-text: #9CA3AF;
-   --badge-soldout-border: rgba(107, 114, 128, 0.5);
+   --badge-soldout-bg: var(--card-soft);
+   --badge-soldout-text: var(--heading);
+   --badge-soldout-border: var(--border);
 
-   --badge-coupon-bg: #111338;
-   --badge-coupon-text: #A5B4FC;
-   --badge-coupon-border: rgba(99, 102, 241, 0.5);
+   --badge-coupon-bg: var(--card-soft);
+   --badge-coupon-text: var(--primary);
+   --badge-coupon-border: var(--primary);
 
-   --badge-new-bg: #062F1E;
-   --badge-new-text: #34D399;
-   --badge-new-border: rgba(16, 185, 129, 0.5);
+   --badge-new-bg: var(--accent);
+   --badge-new-text: var(--background);
+   --badge-new-border: var(--accent-hover);
 
-   --badge-limited-bg: #332200;
-   --badge-limited-text: #FBBF24;
-   --badge-limited-border: rgba(251, 191, 36, 0.5);
+   --badge-limited-bg: var(--secondary);
+   --badge-limited-text: var(--background);
+   --badge-limited-border: var(--primary);
 
    /* Semantic Colors */
    --success: #66BB6A;

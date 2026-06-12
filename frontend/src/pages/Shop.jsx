@@ -19,16 +19,15 @@ const Shop = () => {
   const [categories, setCategories] = useState([]);
   const [occasions, setOccasions] = useState([]);
   // Mobile layout toggle: 'list' (horizontal, 1-col) or 'grid' (vertical, 2-col)
-  // Defaulting to grid as it matches your reference image better
   const [mobileLayout, setMobileLayout] = useState('grid');
 
   const activeCategory = searchParams.get('category') || 'all';
   const activeOccasion = searchParams.get('occasion') || 'all';
-  const activeRating   = Number(searchParams.get('rating')) || 0;
-  const sortBy         = searchParams.get('sort') || 'newest';
-  const searchQuery    = searchParams.get('search') || '';
-  const isBestseller   = searchParams.get('bestseller') === 'true';
-  const isFeatured     = searchParams.get('featured') === 'true';
+  const activeRating = Number(searchParams.get('rating')) || 0;
+  const sortBy = searchParams.get('sort') || 'newest';
+  const searchQuery = searchParams.get('search') || '';
+  const isBestseller = searchParams.get('bestseller') === 'true';
+  const isFeatured = searchParams.get('featured') === 'true';
 
   const [priceRange, setPriceRange] = useState([
     Number(searchParams.get('minPrice')) || 10,
@@ -71,10 +70,10 @@ const Shop = () => {
         setCategories([
           { name: 'all', label: 'All' },
           { name: 'chocolate-cakes', label: 'Chocolate Cakes' },
-          { name: 'bento-cakes',     label: 'Bento Cakes' },
-          { name: 'flowers',         label: 'Flowers' },
-          { name: 'chocolates',      label: 'Chocolates' },
-          { name: 'candles',         label: 'Candles' },
+          { name: 'bento-cakes', label: 'Bento Cakes' },
+          { name: 'flowers', label: 'Flowers' },
+          { name: 'chocolates', label: 'Chocolates' },
+          { name: 'candles', label: 'Candles' },
         ]);
         setOccasions([{ name: 'all', label: 'All' }]);
       }
@@ -95,13 +94,13 @@ const Shop = () => {
       products = products.filter(p => p.name?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
     }
     if (isBestseller) products = products.filter(p => p.bestseller === true);
-    if (isFeatured)   products = products.filter(p => p.featured   === true);
+    if (isFeatured) products = products.filter(p => p.featured === true);
 
     const sorted = [...products];
-    if (sortBy === 'price-low')  sorted.sort((a, b) => a.price - b.price);
+    if (sortBy === 'price-low') sorted.sort((a, b) => a.price - b.price);
     if (sortBy === 'price-high') sorted.sort((a, b) => b.price - a.price);
-    if (sortBy === 'rating')     sorted.sort((a, b) => b.ratingsAverage - a.ratingsAverage);
-    if (sortBy === 'newest')     sorted.sort((a, b) => {
+    if (sortBy === 'rating') sorted.sort((a, b) => b.ratingsAverage - a.ratingsAverage);
+    if (sortBy === 'newest') sorted.sort((a, b) => {
       const da = a.createdAt?.$date ? new Date(a.createdAt.$date) : new Date(a.createdAt || 0);
       const db = b.createdAt?.$date ? new Date(b.createdAt.$date) : new Date(b.createdAt || 0);
       return db - da;
@@ -113,8 +112,8 @@ const Shop = () => {
 
   const getPageTitle = () => {
     if (isBestseller) return 'Best Sellers';
-    if (isFeatured)   return 'Featured Delights';
-    if (searchQuery)  return `"${searchQuery}"`;
+    if (isFeatured) return 'Featured Delights';
+    if (searchQuery) return `"${searchQuery}"`;
     if (activeCategory !== 'all') {
       const sel = categories.find(c => c.name === activeCategory);
       return sel ? sel.label : activeCategory;
@@ -178,7 +177,7 @@ const Shop = () => {
                   <Star key={i} size={12} className={i < r ? 'fill-[#FBBF24] text-[#FBBF24]' : 'text-[var(--heading)]/30'} />
                 ))}
               </div>
-              <span className="text-[11px] font-bold">& up</span>
+              <span className="text-[11px] font-bold">&amp; up</span>
             </button>
           ))}
         </div>
@@ -296,11 +295,11 @@ const Shop = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pt-16 pb-20">
-      <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--background)] pt-8 sm:pt-12 lg:pt-16 pb-24">
+      <div className="responsive-container">
 
         {/* ── Desktop Page Header ── */}
-        <div className="hidden sm:block relative mb-8 overflow-hidden rounded-2xl bg-[var(--footer)] p-6 sm:p-10 border border-white/5 shadow-xl">
+        <div className="hidden sm:block relative mb-8 overflow-hidden rounded-2xl bg-[var(--footer)] p-6 sm:p-10 tv:p-14 border border-white/5 shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/8 via-transparent to-[var(--accent)]/8 pointer-events-none" />
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div>
@@ -309,11 +308,11 @@ const Shop = () => {
                 <span className="text-white/40">/</span>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-white">{getPageTitle()}</span>
               </nav>
-              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">{getPageTitle()}</h1>
+              <h1 className="text-3xl sm:text-4xl tv:text-6xl font-black text-white leading-tight mb-2">{getPageTitle()}</h1>
               <p className="text-sm text-white/80 font-medium max-w-md">Premium handcrafted confectionery, customized with passion and delivered fresh to your door.</p>
             </div>
             <div className="flex flex-col items-end gap-3">
-              <div className="relative w-72 group">
+              <div className="relative w-full sm:w-72 desktop-large:w-96 group">
                 <input type="text" placeholder="Search products..." value={searchQuery}
                   onChange={(e) => updateSearchParam('search', e.target.value)}
                   className="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all backdrop-blur-md placeholder:text-white/40"
@@ -333,8 +332,8 @@ const Shop = () => {
         </div>
 
         {/* ── Mobile: compact title ── */}
-        <div className="sm:hidden flex items-center justify-between mb-3 pt-1">
-          <div>
+        <div className="sm:hidden flex items-start justify-between gap-3 mb-3 pt-1">
+          <div className="min-w-0">
             <h1 className="text-xl font-black text-[var(--heading)] leading-none">{getPageTitle()}</h1>
             <p className="text-[11px] text-[var(--muted)] mt-1 font-medium">Discover our artisan cakes made with love.</p>
           </div>
@@ -347,15 +346,15 @@ const Shop = () => {
         <MobileTopBar />
 
         {/* ── Layout Body ── */}
-        <div className="flex gap-6 lg:gap-8">
+        <div className="flex gap-6 lg:gap-8 tv:gap-12">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-64 shrink-0">
+          <aside className="hidden lg:block w-64 tv:w-80 shrink-0">
             <div className="sticky top-20"><FilterPanel /></div>
           </aside>
 
           <main className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-5">
+              <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6">
                 {[...Array(8)].map((_, i) => <CardSkeleton key={i} />)}
               </div>
             ) : filteredProducts.length > 0 ? (
@@ -363,7 +362,7 @@ const Shop = () => {
                 {/* ── Mobile: list (1-col horizontal) or grid (2-col vertical) ── */}
                 <div className="sm:hidden">
                   {mobileLayout === 'list' ? (
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-1.5">
                       {filteredProducts.map((product, i) => (
                         <motion.div key={product._id?.$oid || product._id}
                           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
@@ -372,8 +371,7 @@ const Shop = () => {
                       ))}
                     </div>
                   ) : (
-                    // Tight 2-column grid matching the reference image perfectly
-                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                    <div className="grid grid-cols-2 gap-1.5">
                       {filteredProducts.map((product, i) => (
                         <motion.div key={product._id?.$oid || product._id}
                           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
@@ -384,8 +382,8 @@ const Shop = () => {
                   )}
                 </div>
 
-                {/* ── Desktop: 3-col (lg) -> 4-col (xl) vertical grid ── */}
-                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {/* ── Desktop/Tablet: 4-col vertical grid ── */}
+                <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-6">
                   {filteredProducts.map((product, i) => (
                     <motion.div key={product._id?.$oid || product._id}
                       initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
@@ -414,7 +412,7 @@ const Shop = () => {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]" />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28 }}
-              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-l border-[var(--border)]">
+              className="fixed right-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-l border-[var(--border)]">
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
                 <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
                 <button onClick={() => setIsFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">

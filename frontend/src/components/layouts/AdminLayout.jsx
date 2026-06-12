@@ -134,7 +134,7 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
+    <div className="flex flex-col min-h-screen h-dvh bg-background overflow-hidden">
       <NotificationBanner />
       <div className="flex flex-1 overflow-hidden">
       {/* Desktop Sidebar */}
@@ -164,7 +164,7 @@ const AdminLayout = () => {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25 }}
-              className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 lg:hidden"
+              className="fixed left-0 top-0 bottom-0 w-full sm:w-80 bg-card border-r border-border z-50 lg:hidden"
             >
               <SidebarContent />
             </motion.aside>
@@ -175,19 +175,19 @@ const AdminLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 flex-shrink-0">
+        <header className="min-h-16 bg-card border-b border-border flex items-center justify-between gap-3 px-4 lg:px-6 flex-shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
                 if (window.innerWidth < 1024) setMobileOpen(!mobileOpen);
                 else setSidebarOpen(!sidebarOpen);
               }}
-              className="p-2 hover:bg-border rounded-xl transition-colors"
+              className="p-2 hover:bg-border rounded-xl transition-colors min-w-[48px] min-h-[48px]"
             >
               <Menu size={20} />
             </button>
             <div>
-              <h1 className="text-lg font-bold text-heading">
+              <h1 className="text-base sm:text-lg font-bold text-heading break-words">
                 {menuItems.find((m) => location.pathname.startsWith(m.path))?.label || 'Admin'}
               </h1>
             </div>
@@ -204,7 +204,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 tv:p-10 min-w-0">
           <Outlet />
         </main>
       </div>

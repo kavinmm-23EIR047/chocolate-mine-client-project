@@ -9,6 +9,7 @@ import EmptyState from '../components/ui/EmptyState';
 import { useGetProductsQuery } from '../product/productApi';
 import api from '../utils/api';
 import ProductCard from '../product/ProductCard';
+import { useDeliveryLocation } from '../context/LocationContext';
 
 /* ═══════════════════════════════════════════════════════
    MAIN SHOP PAGE
@@ -20,6 +21,8 @@ const Shop = () => {
   const [occasions, setOccasions] = useState([]);
   // Mobile layout toggle: 'list' (horizontal, 1-col) or 'grid' (vertical, 2-col)
   const [mobileLayout, setMobileLayout] = useState('grid');
+  
+  const { location } = useDeliveryLocation();
 
   const activeCategory = searchParams.get('category') || 'all';
   const activeOccasion = searchParams.get('occasion') || 'all';
@@ -85,6 +88,12 @@ const Shop = () => {
 
   const filteredProducts = useMemo(() => {
     let products = productRes?.data ? [...productRes.data] : [];
+    
+    // Location Filtering
+    if (location === 'pan india') {
+      products = products.filter(p => p.location === 'pan-india' || p.location === 'pan india');
+    }
+
     if (activeCategory !== 'all') products = products.filter(p => p.category === activeCategory);
     if (activeOccasion !== 'all') products = products.filter(p => p.occasion?.some(o => o.toLowerCase() === activeOccasion.toLowerCase()));
     if (activeRating > 0) products = products.filter(p => p.ratingsAverage >= activeRating);
@@ -106,7 +115,7 @@ const Shop = () => {
       return db - da;
     });
     return sorted;
-  }, [productRes?.data, activeCategory, activeOccasion, activeRating, priceRange, searchQuery, isBestseller, isFeatured, sortBy]);
+  }, [productRes?.data, activeCategory, activeOccasion, activeRating, priceRange, searchQuery, isBestseller, isFeatured, sortBy, location]);
 
   const clearFilters = () => { setSearchParams(new URLSearchParams(), { replace: true }); setPriceRange([10, 10000]); };
 

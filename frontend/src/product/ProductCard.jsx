@@ -12,10 +12,10 @@ import toast from 'react-hot-toast';
 
 const ImagePlaceholder = () => (
   <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: 'var(--card-soft)' }}>
-    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-      <ShoppingBag className="w-3.5 h-3.5" style={{ color: 'var(--muted)' }} />
+    <div className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+      <ShoppingBag className="w-3 h-3 md:w-3.5 md:h-3.5" strokeWidth={2.5} style={{ color: 'var(--muted)' }} />
     </div>
-    <span className="text-[8px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--muted)' }}>Artisan</span>
+    <span className="text-[7px] md:text-[8px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--muted)' }}>Artisan</span>
   </div>
 );
 
@@ -27,22 +27,22 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
     bestseller: {
       style: { background: 'var(--badge-bestseller-bg)', color: 'var(--badge-bestseller-text)', borderColor: 'var(--badge-bestseller-border)' },
       text: "Best Seller",
-      icon: <Flame className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current shrink-0" />
+      icon: <Flame className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current shrink-0" strokeWidth={2.5} />
     },
     featured: {
       style: { background: 'var(--badge-featured-bg)', color: 'var(--badge-featured-text)', borderColor: 'var(--badge-featured-border)' },
       text: "Featured",
-      icon: <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" />
+      icon: <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" strokeWidth={2.5} />
     },
     discount: {
       style: { background: 'var(--badge-discount-bg)', color: 'var(--badge-discount-text)', borderColor: 'var(--badge-discount-border)' },
       text: `${value}% OFF`,
-      icon: <Percent strokeWidth={3} className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" />
+      icon: <Percent strokeWidth={3.5} className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" />
     },
     new: {
       style: { background: 'var(--badge-new-bg)', color: 'var(--badge-new-text)', borderColor: 'var(--badge-new-border)' },
       text: "New",
-      icon: <Zap className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current shrink-0" />
+      icon: <Zap className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current shrink-0" strokeWidth={2.5} />
     }
   };
 
@@ -80,7 +80,6 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
   );
 };
 
-// ─── VIEW-ONLY SMALL LOTTERY STYLE COUPON ────────────────────────────────────
 const LotteryCoupon = ({ coupon }) => {
   if (!coupon) return null;
 
@@ -93,13 +92,12 @@ const LotteryCoupon = ({ coupon }) => {
         minHeight: '32px'
       }}
     >
-      {/* Lottery Ticket Cutouts */}
       <div className="absolute -left-1.5 w-3 h-3 rounded-full border border-dashed border-r-0" style={{ background: 'var(--card)', borderColor: 'var(--accent)' }} />
       <div className="absolute -right-1.5 w-3 h-3 rounded-full border border-dashed border-l-0" style={{ background: 'var(--card)', borderColor: 'var(--accent)' }} />
 
       <div className="flex flex-col items-center justify-center py-1 w-full">
         <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--badge-coupon-text)' }}>
-          <Ticket size={10} />
+          <Ticket size={11} strokeWidth={2.5} />
           {coupon.code}
         </div>
         <div className="text-[8px] font-bold mt-[1px]" style={{ color: 'var(--muted)' }}>
@@ -110,44 +108,44 @@ const LotteryCoupon = ({ coupon }) => {
   );
 };
 
-// ─── UPDATED CART ACTION BUTTON (WITH REMOVE ICON REPLACED WITH TRASH) ─────────────────────────────────
+// ─── COMPACT CART ACTION BUTTON (WITH GRADIENT BORDER ANIMATION) ─────────────
 const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart }) => {
   const label = addingToCart ? '...' : 'ADD';
 
   if (isOutOfStock) {
     return (
       <div
-        className="absolute -bottom-3 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 border text-[9px] md:text-[10px] font-black px-3 py-1.5 rounded-md shadow-md whitespace-nowrap uppercase tracking-wider min-h-[28px] md:min-h-[32px] flex items-center gap-1"
+        className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 border text-[9px] md:text-[10px] font-black px-1.5 py-1 md:px-3 md:py-1.5 rounded-md shadow-md whitespace-nowrap uppercase tracking-wider min-h-[24px] md:min-h-[32px] flex items-center justify-center gap-1"
         style={{ background: 'var(--card-soft)', borderColor: 'var(--border)', color: 'var(--muted)' }}
       >
-        <AlertCircle size={12} />
-        Sold Out
+        <AlertCircle size={11} strokeWidth={2.5} className="md:size-[13px]" />
+        <span className="hidden md:inline">Sold Out</span>
       </div>
     );
   }
 
   if (cartQuantity > 0) {
     return (
-      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] bg-gradient-to-r from-[var(--accent)] to-[var(--secondary)] shadow-lg transition-all hover:scale-105">
+      <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1px] bg-gradient-to-r from-[var(--accent)] to-[var(--secondary)] shadow-lg transition-all">
         <div
-          className="flex items-center justify-between rounded-[4.5px] h-7 md:h-9 w-[88px] md:w-[112px] font-bold overflow-hidden"
+          className="flex items-center justify-between rounded-[5px] h-6 w-16 md:h-9 md:w-[112px] font-bold overflow-hidden"
           style={{ background: 'var(--button-bg)' }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={(e) => handleQuantityChange(e, cartQuantity - 1)}
-            className="h-full min-h-0 min-w-[28px] md:min-w-[34px] px-2 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
+            className="touch-compact h-full min-h-0 !min-w-[20px] md:!min-w-[34px] px-0.5 md:px-2 flex items-center justify-center transition-colors cursor-pointer"
             style={{ color: 'var(--button-text)' }}
           >
-            <Trash2 size={12} strokeWidth={2} className="md:w-[13px] md:h-[13px]" />
+            <Trash2 size={11} strokeWidth={2.5} className="md:w-[14px] md:h-[14px]" />
           </button>
-          <span className="text-[11px] md:text-[13px] font-black" style={{ color: 'var(--button-text)' }}>{cartQuantity}</span>
+          <span className="text-[10px] md:text-[13px] font-black" style={{ color: 'var(--button-text)' }}>{cartQuantity}</span>
           <button
             onClick={(e) => handleQuantityChange(e, cartQuantity + 1)}
-            className="h-full min-h-0 min-w-[28px] md:min-w-[34px] px-2 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
+            className="touch-compact h-full min-h-0 !min-w-[20px] md:!min-w-[34px] px-0.5 md:px-2 flex items-center justify-center transition-colors cursor-pointer"
             style={{ color: 'var(--button-text)' }}
           >
-            <Plus size={12} strokeWidth={3} className="md:w-[13px] md:h-[13px]" />
+            <Plus size={11} strokeWidth={3.5} className="md:w-[14px] md:h-[14px]" />
           </button>
         </div>
       </div>
@@ -155,14 +153,21 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
   }
 
   return (
-    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] bg-gradient-to-r from-[var(--accent)] to-[var(--secondary)] shadow-md hover:shadow-lg transition-all active:scale-95">
+    <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] overflow-hidden shadow-md">
+      {/* Moving Linear Gradient Border Backdrop Background */}
+      <motion.div
+        className="absolute inset-0 w-[200%] h-[200%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,var(--accent)_0%,var(--secondary)_50%,transparent_100%)]"
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+        style={{ transformOrigin: 'center' }}
+      />
       <button
         onClick={handleInitialAdd}
-        className="flex items-center justify-center gap-1.5 rounded-[4.5px] h-7 md:h-9 w-[80px] md:w-[104px] text-[12px] md:text-[14px] font-extrabold tracking-wider cursor-pointer"
+        className="touch-compact relative z-10 flex items-center justify-center rounded-[5px] h-6 w-6 md:h-9 md:w-[104px] text-[12px] md:text-[14px] font-extrabold tracking-wider cursor-pointer"
         style={{ background: 'var(--button-bg)', color: 'var(--button-text)' }}
       >
-        {!addingToCart && <ShoppingBag size={12} className="md:w-[14px] md:h-[14px]" />}
-        <span>{label}</span>
+        <Plus size={12} strokeWidth={3.5} className="md:w-[15px] md:h-[15px]" />
+        <span className="hidden md:inline ml-1">{label}</span>
       </button>
     </div>
   );
@@ -219,6 +224,10 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const reviewCount = Number(product?.ratingsCount) || 0;
   const isCakeCategory = String(product?.category || '').toLowerCase().includes('cake') || !!product?.cakeType;
   const hasValidImage = typeof product?.image === 'string' && product.image.trim() !== '' && product.image !== 'none';
+
+  const locationDisplay = (product?.location === 'pan-india' || product?.location === 'pan india' || product?.location === 'both')
+    ? 'Coimbatore & Pan India'
+    : 'Coimbatore Only';
 
   const handleQuantityChange = (e, newQty) => {
     e.preventDefault(); e.stopPropagation();
@@ -288,7 +297,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             </div>
 
             <div className="flex items-center gap-0.5 mt-1 text-[11px] font-bold text-green-500">
-              <Star size={11} fill={rating > 0 ? "currentColor" : "none"} />
+              <Star size={12} fill={rating > 0 ? "currentColor" : "none"} strokeWidth={2.5} />
               <span>{rating > 0 ? rating.toFixed(1) : '0'}</span>
               <span className="font-medium text-[10px] ml-1" style={{ color: 'var(--muted)' }}>
                 ({reviewCount === 1 ? '1 review' : `${reviewCount} reviews`})
@@ -299,7 +308,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           <div className="flex flex-col gap-1.5 mt-2 pr-2">
             {hasVariants && product.variants.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                <Scale size={12} style={{ color: 'var(--muted)' }} />
+                <Scale size={13} strokeWidth={2.5} style={{ color: 'var(--muted)' }} />
                 {product.variants.map((v, idx) => (
                   <button key={idx} onClick={() => setSelectedVariantIndex(idx)}
                     className="px-2 py-0.5 rounded text-[9px] font-semibold border transition-all cursor-pointer"
@@ -321,8 +330,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             )}
 
             <div className="flex items-center gap-1 text-[10px] mt-1" style={{ color: 'var(--muted)' }}>
-              <MapPin size={10} />
-              <span className="capitalize break-all">{product.location || 'coimbatore'}</span>
+              <MapPin size={11} strokeWidth={2.5} />
+              <span className="capitalize break-all">{locationDisplay}</span>
             </div>
           </div>
         </div>
@@ -332,10 +341,9 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" /> : <ImagePlaceholder />}
           </div>
 
-          {/* Heart Icon - Top Right Corner with matching background */}
           <button
             onClick={wish}
-            className="absolute top-2 right-2 flex items-center justify-center rounded-full shadow-md z-10 transition-all w-8 h-8 md:w-9 md:h-9 border"
+            className="touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 !w-5 !h-5 !min-w-0 !min-h-0 md:!w-9 md:!h-9 border"
             style={{
               background: 'var(--card)',
               borderColor: 'var(--border)',
@@ -343,8 +351,9 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             }}
           >
             <Heart
-              size={16}
+              className="w-2.5 h-2.5 md:w-[16px] md:h-[16px]"
               fill={isLiked ? '#ef4444' : 'none'}
+              strokeWidth={2.5}
               style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }}
             />
           </button>
@@ -374,10 +383,9 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
           </div>
 
-          {/* Heart Icon - Top Right Corner with matching background */}
           <button
             onClick={wish}
-            className="absolute top-2 right-2 flex items-center justify-center rounded-full shadow-md z-10 transition-all w-8 h-8 md:w-9 md:h-9 border"
+            className="touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 !w-6 !h-6 !min-w-0 !min-h-0 md:!w-9 md:!h-9 border"
             style={{
               background: 'var(--card)',
               borderColor: 'var(--border)',
@@ -385,8 +393,9 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             }}
           >
             <Heart
-              size={16}
+              className="w-3 h-3 md:w-[16px] md:h-[16px]"
               fill={isLiked ? '#ef4444' : 'none'}
+              strokeWidth={2.5}
               style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }}
             />
           </button>
@@ -414,7 +423,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
           <div className="flex items-center gap-1 text-[12px] font-medium mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
             <div className="flex items-center gap-0.5 font-bold text-green-500">
-              <Star size={12} fill={rating > 0 ? "currentColor" : "none"} />
+              <Star size={13} fill={rating > 0 ? "currentColor" : "none"} strokeWidth={2.5} />
               <span>{rating > 0 ? rating.toFixed(1) : '0'}</span>
               <span className="font-normal text-[11px] ml-0.5" style={{ color: 'var(--muted)' }}>
                 ({reviewCount === 1 ? '1 review' : `${reviewCount} reviews`})
@@ -422,8 +431,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             </div>
             <span>•</span>
             <div className="flex items-center gap-0.5">
-              <MapPin size={10} />
-              <span className="capitalize break-all">{product.location || 'coimbatore'}</span>
+              <MapPin size={11} strokeWidth={2.5} />
+              <span className="capitalize break-all">{locationDisplay}</span>
             </div>
           </div>
         </div>
@@ -439,7 +448,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
         {hasVariants && product.variants.length > 1 && (
           <div className="flex items-center gap-1.5 flex-wrap mt-2" onClick={(e) => e.stopPropagation()}>
-            <Scale size={12} style={{ color: 'var(--muted)' }} />
+            <Scale size={13} strokeWidth={2.5} style={{ color: 'var(--muted)' }} />
             {product.variants.map((v, idx) => (
               <button key={idx} onClick={() => setSelectedVariantIndex(idx)}
                 className="px-1.5 py-0.5 rounded text-[8px] md:text-[10px] font-black border transition-all cursor-pointer"

@@ -35,6 +35,7 @@ const Navbar = () => {
   const { location: deliveryCity, setLocation: setDeliveryCity } = useDeliveryLocation();
   const location = useLocation();
   const locationDropdownRef = useRef(null);
+  const mobileLocationDropdownRef = useRef(null);
 
   const cartCount = cartItems ? cartItems.reduce((acc, item) => acc + item.qty, 0) : 0;
 
@@ -48,9 +49,13 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (locationDropdownRef.current && !locationDropdownRef.current.contains(e.target)) {
-        setIsLocationOpen(false);
+      if (
+        (locationDropdownRef.current && locationDropdownRef.current.contains(e.target)) ||
+        (mobileLocationDropdownRef.current && mobileLocationDropdownRef.current.contains(e.target))
+      ) {
+        return; // clicked inside
       }
+      setIsLocationOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -226,7 +231,7 @@ const Navbar = () => {
 
           {/* Mobile Search Bar + Location Selector (Secondary Row) */}
           <div className="lg:hidden pb-3 space-y-2">
-            <div className="flex justify-center" ref={locationDropdownRef}>
+            <div className="flex justify-center relative" ref={mobileLocationDropdownRef}>
               <button
                 onClick={() => setIsLocationOpen(!isLocationOpen)}
                 className="flex items-center gap-2 px-5 py-2 rounded-full border border-border/60 bg-surface hover:border-primary/30 transition-colors"
@@ -237,6 +242,27 @@ const Navbar = () => {
                 </span>
                 <ChevronDown size={13} className="text-heading transition-transform duration-200" style={{ transform: isLocationOpen ? 'rotate(180deg)' : 'none' }} />
               </button>
+              <AnimatePresence>
+                {isLocationOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden z-[100]"
+                  >
+                    {['coimbatore', 'pan india'].map((city) => (
+                      <button
+                        key={city}
+                        onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
+                        className="w-full text-left px-5 py-3 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors"
+                      >
+                        {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Mobile Search Input */}

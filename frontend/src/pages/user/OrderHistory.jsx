@@ -177,11 +177,10 @@ const OrderCard = ({ order, index, canReview = false }) => {
           />
         </div>
 
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-            <div className="flex-1 min-w-0 flex items-center gap-6">
-               <div className="w-20 h-20 bg-card-soft rounded-2xl flex items-center justify-center p-2 border border-border/50 shrink-0 shadow-sm relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-4 sm:gap-6">
+            <div className="flex-1 min-w-0 flex items-start sm:items-center gap-4 sm:gap-6 w-full">
+               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-card-soft rounded-2xl flex items-center justify-center p-1.5 sm:p-2 border border-border/50 shrink-0 shadow-sm relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
                   {order.items[0]?.image ? (
                     <img src={order.items[0].image} alt="product" className="w-full h-full object-cover rounded-xl" />
                   ) : (
@@ -189,19 +188,19 @@ const OrderCard = ({ order, index, canReview = false }) => {
                   )}
                </div>
                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h3 className="text-lg font-black text-heading uppercase tracking-tighter truncate">
+                  <div className="flex flex-col xl:flex-row xl:items-center gap-2 xl:gap-3 mb-2 items-start">
+                    <h3 className="text-sm sm:text-lg font-black text-heading uppercase tracking-tighter truncate w-full">
                       #{order.orderNumber || order.trackingCode || 'Order'}
                     </h3>
-                    <OrderStatusBadge status={order.orderStatus} />
+                    <div className="shrink-0"><OrderStatusBadge status={order.orderStatus} /></div>
                   </div>
-                  <p className="text-sm font-bold text-heading truncate mb-1">
+                  <p className="text-xs sm:text-sm font-bold text-heading line-clamp-2 mb-1 sm:mb-1.5 leading-tight">
                     {order.items?.map(i => i.name).join(', ')}
                   </p>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-muted uppercase tracking-[0.1em]">
-                    {new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black text-muted uppercase tracking-[0.1em] flex-wrap">
+                    <span>{new Date(order.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     <span className="text-border">•</span>
-                    {order.items?.length} Item{order.items?.length > 1 ? 's' : ''}
+                    <span>{order.items?.length} Item{order.items?.length > 1 ? 's' : ''}</span>
                   </div>
                </div>
             </div>

@@ -328,27 +328,27 @@ const DeliveryHero = () => {
                   key={theme._id}
                   className="w-full shrink-0 snap-center px-6" // Padding is inside the 100% width slide now
                 >
-                  <div className="relative rounded-2xl overflow-hidden group border border-border/10 flex flex-col items-center justify-between bg-primary/5 pb-4 h-full">
-                    <div className="p-4 w-full flex justify-center items-center h-[140px] sm:h-[150px] overflow-hidden">
-                      {theme.image || theme.colors?.[0]?.images?.tier1 ? (
+                  <div className="relative rounded-2xl overflow-hidden group border border-border/10 flex flex-col items-center justify-between bg-primary/5 pb-3 h-full">
+                    <div className="px-3 pt-4 w-full flex justify-center items-center h-[160px] sm:h-[180px] overflow-hidden">
+                      {theme.image || theme.colors?.[0]?.images?.tier1 || theme.colors?.[0]?.images?.tier2 || theme.colors?.[0]?.images?.tier3 ? (
                         <img
-                          src={theme.image || theme.colors?.[0]?.images?.tier1}
+                          src={theme.image || theme.colors?.[0]?.images?.tier1 || theme.colors?.[0]?.images?.tier2 || theme.colors?.[0]?.images?.tier3}
                           alt={theme.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <span className="flex items-center justify-center h-full text-5xl">{theme.emoji}</span>
+                        <span className="flex items-center justify-center h-full text-5xl">{theme.emoji || '🎂'}</span>
                       )}
                     </div>
 
-                    <div className="px-4 w-full flex flex-col items-center gap-3">
+                    <div className="px-4 w-full flex flex-col items-center gap-1.5">
                       <p className="text-[12px] sm:text-sm font-black uppercase tracking-wider text-center" style={{ color: 'var(--heading)' }}>
                         {theme.name}
                       </p>
 
                       <Link
                         to={`/custom-cake?theme=${theme._id}`}
-                        className="w-full text-center py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95"
+                        className="w-full text-center py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95"
                         style={{
                           background: 'var(--primary)',
                           color: 'var(--button-text)',
@@ -373,7 +373,7 @@ const DeliveryHero = () => {
               <button
                 key={index}
                 onClick={() => scrollToSlide(index)}
-                className={`transition-all duration-300 rounded-full ${index === activeThemeIndex
+                className={`transition-all duration-300 rounded-full !min-w-0 !min-h-0 p-0 ${index === activeThemeIndex
                     ? 'w-4 h-1.5 opacity-100'
                     : 'w-1.5 h-1.5 opacity-30 hover:opacity-60'
                   }`}

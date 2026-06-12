@@ -28,6 +28,12 @@ import Cart from './pages/Cart';
 import ForgotPassword from './pages/ForgotPassword';
 import OAuthCallback from './pages/OAuthCallback';
 import ReviewPage from './pages/ReviewPage';
+import Contact from './pages/Contact';
+import Help from './pages/Help';
+import Stores from './pages/Stores';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import RefundPolicy from './pages/RefundPolicy';
 
 // Premium User Dashboard Layout
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -210,6 +216,12 @@ function App() {
                   <Route path="/track/:orderId?" element={<OrderTracking />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
                   <Route path="/oauth-callback" element={<OAuthCallback />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/help" element={<Help />} />
+                  <Route path="/stores" element={<Stores />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsConditions />} />
+                  <Route path="/refund" element={<RefundPolicy />} />
 
                   {/* Guest only */}
                   <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />

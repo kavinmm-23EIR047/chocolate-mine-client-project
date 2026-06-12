@@ -39,8 +39,8 @@ const cartSlice = createSlice({
       // Automatically apply the coupon to the cart if the product has one and no other coupon is currently applied
       if (product.coupon && product.coupon.code) {
         if (!state.appliedCoupon) {
-          state.appliedCoupon = product.coupon;
-          localStorage.setItem('appliedCoupon', JSON.stringify(product.coupon));
+          state.appliedCoupon = String(product.coupon.code).trim().toUpperCase();
+          localStorage.setItem('appliedCoupon', JSON.stringify(state.appliedCoupon));
         }
       }
 

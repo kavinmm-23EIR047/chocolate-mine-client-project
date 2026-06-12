@@ -232,9 +232,9 @@ const OrderDetails = () => {
           )}
         </div>
 
-        <div className="ml-auto flex gap-3">
+        <div className="ml-auto flex gap-2 sm:gap-3 items-center">
           {/* Status Badge */}
-          <div className={`px-4 py-2 rounded-full text-xs font-bold uppercase ${STATUS_MAP[order.orderStatus]?.color || 'bg-gray-100 text-gray-600'}`}>
+          <div className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-black uppercase text-center whitespace-nowrap shrink-0 ${STATUS_MAP[order.orderStatus]?.color || 'bg-gray-100 text-gray-600'}`}>
             {STATUS_MAP[order.orderStatus]?.label || order.orderStatus.replace(/_/g, ' ')}
           </div>
 
@@ -264,48 +264,49 @@ const OrderDetails = () => {
         <div className="lg:col-span-2 space-y-8">
 
           {/* Delivery Timeline */}
-          <div className="card-premium p-8 bg-card rounded-3xl border border-border">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-10">
+          <div className="card-premium p-4 sm:p-8 bg-card rounded-[2rem] border border-border overflow-hidden">
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest mb-6 sm:mb-10 pl-1 sm:pl-2">
               Delivery Status
             </h3>
 
-            <div className="relative">
-              {/* Progress line */}
-              <div className="absolute left-5 top-5 bottom-5 w-[3px] rounded-full bg-border/30" />
-              
-              <div
-                className="absolute left-5 top-5 w-[3px] rounded-full bg-secondary transition-all duration-500"
-                style={{ height: `calc(${progressPercent}% * (100% - 2rem) / 100)` }}
-              />
-
+            <div className="relative pl-1 sm:pl-2">
               <div className="space-y-0">
                 {timelineSteps.map((step, index) => {
                   const isCompleted = step.completed;
                   const isCurrent = index === activeStep;
 
                   return (
-                    <div key={step.id} className="relative flex gap-6 mb-6">
-                      <div className="flex flex-col items-center z-10">
+                    <div key={step.id} className="relative flex gap-3 sm:gap-6 mb-6 last:mb-0">
+                      <div className="relative flex flex-col items-center z-10 w-8 sm:w-10 shrink-0">
+                        {/* Background connecting line */}
+                        {index !== timelineSteps.length - 1 && (
+                          <div className="absolute top-8 sm:top-10 -bottom-6 left-1/2 -translate-x-1/2 w-[2px] sm:w-[3px] bg-border/30 -z-10" />
+                        )}
+                        {/* Filled connecting line */}
+                        {index !== timelineSteps.length - 1 && activeStep > index && (
+                          <div className="absolute top-8 sm:top-10 -bottom-6 left-1/2 -translate-x-1/2 w-[2px] sm:w-[3px] bg-secondary -z-10" />
+                        )}
+
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-card shadow-lg transition-all duration-300 ${
+                          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-[3px] sm:border-4 border-card shadow-sm transition-all duration-300 ${
                             isCompleted || isCurrent
                               ? "bg-secondary text-white"
                               : "bg-card text-muted border-border"
                           } ${isCurrent ? "ring-4 ring-secondary/20 scale-110" : ""}`}
                         >
-                          <step.icon size={16} />
+                          <step.icon size={14} className="sm:w-4 sm:h-4" />
                         </div>
                       </div>
 
-                      <div className={`flex-1 p-5 rounded-2xl border transition-all ${
+                      <div className={`flex-1 p-3 sm:p-5 rounded-2xl border transition-all ${
                         isCurrent ? "border-secondary bg-secondary/5" : "border-border"
                       }`}>
-                        <div className="flex justify-between flex-wrap gap-2">
-                          <h4 className={`text-sm font-black uppercase ${isCurrent ? "text-secondary" : ""}`}>
+                        <div className="flex justify-between items-start flex-wrap gap-1 sm:gap-2">
+                          <h4 className={`text-[11px] sm:text-sm font-black uppercase whitespace-nowrap sm:whitespace-normal ${isCurrent ? "text-secondary" : ""}`}>
                             {step.label}
                           </h4>
                           {step.time && (
-                            <span className="text-[10px] text-muted">
+                            <span className="text-[9px] sm:text-[10px] text-muted">
                               {new Date(step.time).toLocaleString()}
                             </span>
                           )}

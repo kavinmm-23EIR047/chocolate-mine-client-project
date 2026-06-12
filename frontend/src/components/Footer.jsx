@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Mail, Phone, MapPin, ShieldCheck, CreditCard, Truck,
@@ -22,25 +23,49 @@ const Footer = () => {
       {/* ─── AMBIENT BACKGROUND WATERMARKS & BLURS ─── */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -mr-64 -mt-64 pointer-events-none" />
 
-      {/* Floating Scattered Icons */}
-      <div className="absolute top-10 left-[8%] opacity-[0.04] pointer-events-none text-current transform -rotate-12 hidden md:block">
+      {/* Floating Scattered Icons - Animated */}
+      <motion.div 
+        animate={{ y: [0, -20, 0], x: [0, 15, 0], rotate: [-12, -2, -12] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-10 left-[8%] opacity-15 pointer-events-none text-amber-500"
+      >
         <Cake size={90} strokeWidth={1.5} />
-      </div>
-      <div className="absolute bottom-32 right-[8%] opacity-[0.04] pointer-events-none text-current transform rotate-45 hidden md:block">
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 25, 0], x: [0, -20, 0], rotate: [45, 60, 45] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-32 right-[8%] opacity-15 pointer-events-none text-yellow-600"
+      >
         <Cookie size={80} strokeWidth={1.5} />
-      </div>
-      <div className="absolute top-[40%] left-[45%] opacity-[0.03] pointer-events-none text-current transform -rotate-45 hidden lg:block">
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -30, 0], x: [0, 25, 0], rotate: [-45, -30, -45] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute top-[40%] left-[45%] opacity-10 pointer-events-none text-pink-500"
+      >
         <Candy size={120} strokeWidth={1} />
-      </div>
-      <div className="absolute top-16 right-[20%] opacity-[0.04] pointer-events-none text-current transform rotate-12 hidden md:block">
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 20, 0], x: [0, 30, 0], rotate: [12, 25, 12] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        className="absolute top-16 right-[20%] opacity-15 pointer-events-none text-rose-400"
+      >
         <Flower2 size={85} strokeWidth={1.5} />
-      </div>
-      <div className="absolute bottom-20 left-[25%] opacity-[0.04] pointer-events-none text-current transform -rotate-6 hidden lg:block">
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -25, 0], x: [0, -15, 0], rotate: [-6, 10, -6] }}
+        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        className="absolute bottom-20 left-[25%] opacity-15 pointer-events-none text-orange-500"
+      >
         <Flame size={65} strokeWidth={1.5} />
-      </div>
-      <div className="absolute top-[20%] right-[3%] opacity-[0.04] pointer-events-none text-current transform -rotate-12 hidden xl:block">
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 35, 0], x: [0, -25, 0], rotate: [-12, 5, -12] }}
+        transition={{ duration: 13, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
+        className="absolute top-[20%] right-[3%] opacity-15 pointer-events-none text-purple-400"
+      >
         <IceCream size={100} strokeWidth={1.5} />
-      </div>
+      </motion.div>
 
       <div className="responsive-container relative z-10">
 
@@ -52,8 +77,8 @@ const Footer = () => {
 
             {/* Logo */}
             <Link to="/" className="block select-none group">
-              <div className="flex flex-col items-center font-sans w-[150px] sm:w-[170px]">
-                <div className="w-full flex justify-between text-[7px] sm:text-[8px] font-black uppercase leading-none tracking-normal mb-1.5 px-[0.5px] text-current">
+              <div className="flex flex-col items-center font-sans w-[130px] sm:w-[150px]">
+                <div className="w-full flex justify-between text-[9px] sm:text-[10px] font-black uppercase leading-none tracking-normal mb-1.5 px-[0.5px] text-current">
                   <span>T</span><span>H</span><span>E</span>
                   <span className="w-[8%]"></span>
                   <span>C</span><span>H</span><span>O</span><span>C</span><span>O</span><span>L</span><span>A</span><span>T</span><span>E</span>
@@ -77,18 +102,18 @@ const Footer = () => {
 
             {/* Badges */}
             <div className="flex flex-wrap items-center justify-start gap-3 max-w-md text-left">
-              <div className="flex gap-2">
-                <PureVegBadge className="bg-success/10 border-success/20 text-success font-extrabold shrink-0" />
-                <EgglessBadge className="bg-success/10 border-success/20 text-success font-extrabold shrink-0" />
+              <div className="flex gap-3">
+                <PureVegBadge size={28} className="bg-transparent shadow-none p-0" hideText={true} />
+                <EgglessBadge size={28} className="bg-transparent shadow-none p-0" hideText={true} />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 block w-full mt-1">
-                Delicious Pure Veg & Eggless cakes made for every celebration.
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 block w-full mt-1.5 leading-relaxed">
+                100% Pure Veg & Eggless artisanal desserts, masterfully crafted for every celebration.
               </span>
             </div>
 
             {/* Social Icons - Neumorphic Style */}
             <div className="flex justify-start gap-4 w-full pt-1">
-              {[InstagramIcon, Facebook, Twitter, Youtube].map((Icon, i) => (
+              {[InstagramIcon, Whatsapp, Youtube, Facebook].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
@@ -112,27 +137,27 @@ const Footer = () => {
               </p>
             </div>
 
-            {/* Animated Gradient Border Form */}
+            {/* Animated Gradient Border Form Framework */}
             <div className="w-full max-w-xl relative overflow-hidden p-[3px] rounded-[2.5rem_0.75rem_2.5rem_0.75rem] shadow-lg group">
 
-              {/* Animated Gradient Border */}
+              {/* Animated Accent Gradient Edge Line */}
               <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#ec4899_0%,var(--accent)_33%,#25D366_66%,#ec4899_100%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
 
-              {/* Form */}
+              {/* Form Base — Clear Layout Free of Neumorphism */}
               <form
-                className="relative flex flex-col sm:flex-row items-stretch bg-card rounded-[2.4rem_0.65rem_2.4rem_0.65rem] overflow-hidden shadow-[var(--nm-sunken)]"
+                className="relative flex flex-col sm:flex-row items-stretch bg-card rounded-[2.4rem_0.65rem_2.4rem_0.65rem] overflow-hidden"
                 onSubmit={(e) => {
                   e.preventDefault();
                   window.open('https://chat.whatsapp.com/', '_blank');
                 }}
               >
-                <div className="relative flex-1 flex items-center px-6 py-2">
+                <div className="relative flex-1 flex items-center px-6 py-2 bg-transparent">
                   <input
                     type="tel"
                     placeholder="Enter WhatsApp Number"
                     required
                     pattern="[0-9]{10}"
-                    className="w-full bg-transparent text-foreground outline-none focus:ring-0 font-bold placeholder:text-muted/40 text-sm sm:text-base py-3"
+                    className="w-full !bg-transparent text-foreground outline-none border-none focus:outline-none focus:ring-0 font-bold placeholder:text-muted/40 text-sm sm:text-base py-3 !shadow-none !border-none"
                   />
                 </div>
 
@@ -174,8 +199,10 @@ const Footer = () => {
               {[
                 { name: 'My Account', path: '/account/dashboard' },
                 { name: 'My Orders', path: '/account/orders' },
-                { name: 'Wishlist', path: '/account/wishlist' },
-                { name: 'Contact Us', path: '/contact' }
+                { name: 'Contact Us', path: '/contact' },
+                { name: 'Privacy Policy', path: '/privacy' },
+                { name: 'Terms & Conditions', path: '/terms' },
+                { name: 'Refund Policy', path: '/refund' }
               ].map((item, i) => (
                 <li key={i}>
                   <Link to={item.path} className="text-muted hover:text-primary transition-all text-xs uppercase tracking-wider block font-medium hover:translate-x-1 duration-200">

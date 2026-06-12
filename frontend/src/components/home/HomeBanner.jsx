@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Gift, ArrowRight } from 'lucide-react';
+import { Gift, ArrowRight } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
@@ -35,6 +35,24 @@ const HomeBanner = () => {
   const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
+  // Absolute fallback click routing calculation based on viewport width segmentation
+  const handleBannerClick = (e) => {
+    if (!slide?.link) return;
+
+    // Prevent accidental triggers if clicking interactive text elements or actionable buttons
+    if (e.target.closest('.interactive-action-node')) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+
+    // Split viewport: left 35% goes backward, right 65% advances forward / executes call-to-action link
+    if (banners.length > 1 && clickX < rect.width * 0.35) {
+      prevSlide();
+    } else {
+      window.location.href = slide.link;
+    }
+  };
+
   if (loading) {
     return (
       <div className="w-full rounded-2xl sm:rounded-3xl bg-muted/10 animate-pulse border border-border/20"
@@ -57,10 +75,10 @@ const HomeBanner = () => {
 
   return (
     <div
-      className="banner-root relative w-full overflow-hidden rounded-2xl sm:rounded-3xl group border border-white/10 shadow-premium"
+      className="banner-root relative w-full overflow-hidden rounded-2xl sm:rounded-3xl group border border-white/10 shadow-premium select-none"
       style={{ aspectRatio: 'var(--banner-ratio, 16/9)' }}
     >
-      {/* AI Premium Running Border Styles */}
+      {/* Premium Running Border Styles */}
       <style>{`
         @media (min-width: 481px) {
           .banner-root { aspect-ratio: 16/4.8 !important; }
@@ -93,16 +111,15 @@ const HomeBanner = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.45 }}
           className="absolute inset-0"
-          onClick={() => slide.link && (window.location.href = slide.link)}
+          onClick={handleBannerClick}
           style={{ cursor: slide.link ? 'pointer' : 'default' }}
         >
           {/* Background Image with optimized filter for readability */}
           <img
             src={slide.image}
             alt={slide.title}
-            className="absolute inset-0 w-full h-full select-none"
+            className="absolute inset-0 w-full h-full select-none object-cover"
             style={{
-              objectFit: 'cover',
               objectPosition: 'center center',
               filter: 'brightness(0.7) contrast(1.02)'
             }}
@@ -129,7 +146,7 @@ const HomeBanner = () => {
           >
             <div className="max-w-[70%] flex flex-col gap-1.5">
 
-              {/* Subtitle Line (Optional) */}
+              {/* Subtitle Line */}
               {(slide.cornerText || slide.subtitle) && (
                 <span className="font-bold uppercase tracking-widest text-[8px] sm:text-[10px] text-white/30 pl-0.5 select-none">
                   {slide.cornerText || slide.subtitle}
@@ -178,7 +195,7 @@ const HomeBanner = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
-              className="ai-btn-glow absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-20 p-[1.5px] rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.5)] group/btn transition-transform duration-300 hover:scale-[1.03] pointer-events-auto"
+              className="interactive-action-node ai-btn-glow absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-20 p-[1.5px] rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.5)] group/btn transition-transform duration-300 hover:scale-[1.03] pointer-events-auto"
             >
               <button
                 onClick={(e) => {
@@ -202,47 +219,28 @@ const HomeBanner = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Slide Navigation Controls */}
+      {/* Smooth Pagination Dots Indicator */}
       {banners.length > 1 && (
-        <>
-          <button
-            onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-            aria-label="Previous slide"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/45 text-white backdrop-blur-sm border border-white/5 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 min-w-[44px] min-h-[44px]"
-          >
-            <ChevronLeft size={14} />
-          </button>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-            aria-label="Next slide"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/45 text-white backdrop-blur-sm border border-white/5 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 min-w-[44px] min-h-[44px]"
-          >
-            <ChevronRight size={14} />
-          </button>
-
-          {/* Smooth Pagination Dots */}
-          <div className="absolute bottom-3 left-3 sm:left-5 flex gap-1 z-20 items-center">
-            {banners.map((_, i) => (
-              <button
-                key={i}
-                onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
-                aria-label={`Go to slide ${i + 1}`}
-                className="touch-compact"
-                style={{
-                  width: current === i ? '14px' : '4px',
-                  height: '4px',
-                  borderRadius: '999px',
-                  background: current === i ? '#fff' : 'rgba(255,255,255,0.3)',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              />
-            ))}
-          </div>
-        </>
+        <div className="absolute bottom-3 left-3 sm:left-5 flex gap-1 z-20 items-center interactive-action-node">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+              aria-label={`Go to slide ${i + 1}`}
+              className="touch-compact"
+              style={{
+                width: current === i ? '14px' : '4px',
+                height: '4px',
+                borderRadius: '999px',
+                background: current === i ? '#fff' : 'rgba(255,255,255,0.3)',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

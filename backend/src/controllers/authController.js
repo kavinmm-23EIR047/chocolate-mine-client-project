@@ -30,20 +30,18 @@ const sendTokenResponse = (user, statusCode, res) => {
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
 
-  // Set HttpOnly access token cookie
+  // Set HttpOnly access token cookie (Session cookie - deleted on browser close)
   res.cookie('jwt', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 1000 * 60 * 15 // 15 minutes
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   });
 
-  // Set HttpOnly refresh token cookie
+  // Set HttpOnly refresh token cookie (Session cookie - deleted on browser close)
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   });
 
   res.status(statusCode).json({
@@ -180,20 +178,18 @@ exports.googleSuccess = asyncHandler(async (req, res) => {
     const accessToken = generateAccessToken(req.user._id);
     const refreshToken = generateRefreshToken(req.user._id);
 
-    // Set HttpOnly access token cookie for auto-login
+    // Set HttpOnly access token cookie (Session cookie)
     res.cookie('jwt', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 1000 * 60 * 15 // 15 mins
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
 
-    // Set HttpOnly refresh token cookie
+    // Set HttpOnly refresh token cookie (Session cookie)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
 
     res.redirect(

@@ -71,6 +71,12 @@ const safeWriteExcel = (wb, targetPath) => {
       console.error(`\n🚨 EXCEL LOCK ERROR: Cannot update ${targetPath}`);
       console.error(`👉 PLEASE CLOSE MICROSOFT EXCEL OR OTHER PROGRAMS USING THIS FILE!`);
     }
+    // Attempt to clean up temp file so it doesn't pollute the directory
+    try {
+      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    } catch (cleanupErr) {
+      // Ignore cleanup error
+    }
     throw err;
   }
 };

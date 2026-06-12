@@ -330,11 +330,15 @@ const DeliveryHero = () => {
                 >
                   <div className="relative rounded-2xl overflow-hidden group border border-border/10 flex flex-col items-center justify-between bg-primary/5 pb-4 h-full">
                     <div className="p-4 w-full flex justify-center items-center h-[140px] sm:h-[150px] overflow-hidden">
-                      <img
-                        src={theme.colors?.[0]?.images?.tier1 || '/default-cake.png'}
-                        alt={theme.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      {theme.image || theme.colors?.[0]?.images?.tier1 ? (
+                        <img
+                          src={theme.image || theme.colors?.[0]?.images?.tier1}
+                          alt={theme.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <span className="flex items-center justify-center h-full text-5xl">{theme.emoji}</span>
+                      )}
                     </div>
 
                     <div className="px-4 w-full flex flex-col items-center gap-3">

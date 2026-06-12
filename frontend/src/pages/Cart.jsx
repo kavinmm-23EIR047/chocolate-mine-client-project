@@ -208,8 +208,8 @@ const Cart = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-card rounded-2xl shadow-card border border-border/50 p-3 sm:p-6"
                 >
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
-                    <div className="w-full sm:w-32 h-40 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40 relative">
+                  <div className="flex flex-row gap-4 sm:gap-6">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-surface flex-shrink-0 border border-border/40 relative">
                       {(!item.image || item.image === 'none' || item.image.trim() === '') ? (
                         <ImagePlaceholder />
                       ) : (
@@ -224,10 +224,10 @@ const Cart = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0">
-                          <p className="text-[10px] text-muted uppercase font-black tracking-widest mb-1">
+                          <p className="text-[9px] sm:text-[10px] text-muted uppercase font-black tracking-widest mb-1">
                             {item.category}
                           </p>
-                          <h3 className="font-black text-heading text-lg capitalize mb-2">
+                          <h3 className="font-black text-heading text-sm sm:text-lg capitalize mb-1.5 sm:mb-2 leading-tight pr-2">
                             {item.name}
                           </h3>
                           {item.category === 'Custom Cakes' ? (

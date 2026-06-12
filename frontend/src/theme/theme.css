@@ -202,10 +202,10 @@
    --card-soft-rgb: 42 24 19;
 
    /* Typography */
-   --foreground: #F2E2DB;
-   --foreground-rgb: 242 226 219;
-   --heading: #FFF4EE;
-   --heading-rgb: 255 244 238;
+   --foreground: #EBDEDA;
+   --foreground-rgb: 235 222 218;
+   --heading: #EBDEDA;
+   --heading-rgb: 235 222 218;
    --body: #D4C0BA;
    --body-rgb: 212 192 186;
    --muted: #A18881;
@@ -228,14 +228,14 @@
    /* Navigation */
    --navbar: #120806;
    --navbar-rgb: 18 8 6;
-   --navbar-text: #F2E2DB;
-   --navbar-text-rgb: 242 226 219;
+   --navbar-text: #EBDEDA;
+   --navbar-text-rgb: 235 222 218;
 
    /* Footer */
    --footer: #0A0403;
    --footer-rgb: 10 4 3;
-   --footer-text: #F2E2DB;
-   --footer-text-rgb: 242 226 219;
+   --footer-text: #EBDEDA;
+   --footer-text-rgb: 235 222 218;
 
    /* Borders */
    --border: #3A211B;

@@ -62,11 +62,11 @@ const Navbar = () => {
   }, []);
 
   // Shared SVG Logo Markup
-  const LogoMark = ({ containerClass = "w-[105px] sm:w-[125px] lg:w-[135px] tv:w-[170px]" }) => (
+  const LogoMark = ({ containerClass = "w-[95px] sm:w-[110px] lg:w-[120px] tv:w-[150px]" }) => (
     <div className={`flex flex-col items-center text-heading font-sans py-1 my-auto ${containerClass}`}>
 
       {/* "THE CHOCOLATE" - Flush alignment layout */}
-      <div className="w-full flex justify-between text-[5px] sm:text-[6.5px] lg:text-[7.5px] font-bold uppercase leading-none select-none text-heading/90 tracking-normal mb-1 px-[0.5px]">
+      <div className="w-full flex justify-between text-[7px] sm:text-[8.5px] lg:text-[9.5px] font-black uppercase leading-none select-none text-heading/90 tracking-normal mb-1 px-[0.5px]">
         <span>T</span><span>H</span><span>E</span>
         <span className="w-[8%]"></span>
         <span>C</span><span>H</span><span>O</span><span>C</span><span>O</span><span>L</span><span>A</span><span>T</span><span>E</span>
@@ -88,7 +88,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`sticky top-0 left-0 right-0 z-[100] bg-navbar transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
+      <nav className={`sticky top-0 left-0 right-0 z-[200] bg-navbar transition-all duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
         <div className="responsive-container">
 
           {/* MAIN ROW */}

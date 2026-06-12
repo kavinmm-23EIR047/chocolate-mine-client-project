@@ -10,7 +10,6 @@ const MobileBottomNav = () => {
   const cartCount = cartItems?.reduce((acc, item) => acc + item.qty, 0) || 0;
   const [isFooterVisible, setIsFooterVisible] = useState(false);
 
-  // Observe footer to hide bottom nav when footer is in view
   useEffect(() => {
     const footer = document.querySelector('footer');
     if (!footer) return;
@@ -35,7 +34,6 @@ const MobileBottomNav = () => {
     { label: 'Profile', icon: User, path: '/account/dashboard' },
   ];
 
-  // Hide on checkout and product details pages
   const hideOn = ['/product', '/checkout'];
   if (hideOn.some(path => location.pathname.startsWith(path))) return null;
 
@@ -49,67 +47,130 @@ const MobileBottomNav = () => {
           transition={{ type: 'spring', stiffness: 260, damping: 25 }}
           className="lg:hidden fixed bottom-5 left-0 right-0 z-[100] px-4 pointer-events-none"
         >
-          <nav className="bg-surface/80 backdrop-blur-lg border border-border/40 rounded-2xl flex items-center justify-between p-1.5 pointer-events-auto max-w-md mx-auto shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)]">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className="flex-1 my-0.5"
-              >
-                {({ isActive }) => (
-                  <motion.div
-                    whileTap={{ scale: 0.92 }}
-                    className={`flex flex-col items-center justify-center py-2 rounded-xl relative transition-colors duration-300 ${isActive ? 'text-primary' : 'text-muted/80'
-                      }`}
-                  >
-                    {/* Sliding Glass Capsule Highlight Behind Active Item */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNavigationPill"
-                        className="absolute inset-0 bg-primary/8 dark:bg-primary/15 rounded-xl -z-10"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
+          {/* Fully-Bend Pill Base with Dynamic Inner Element Shaping */}
+          <style>{`
+            @keyframes mobileSweep {
+              0% { transform: translate(-50%, -50%) rotate(0deg); }
+              100% { transform: translate(-50%, -50%) rotate(360deg); }
+            }
 
-                    {/* Icon Container */}
-                    <div className="relative flex items-center justify-center">
-                      <item.icon
-                        size={19}
-                        className="transition-transform duration-200"
-                        strokeWidth={isActive ? 2.5 : 2}
-                      />
+            .neo-bottom-nav-container {
+              position: relative;
+              padding: 2.5px;
+              overflow: hidden;
+              isolation: isolate;
+              border-radius: 9999px; /* Outer frame remains fully bent */
+            }
 
-                      {/* Cart Notification Badge */}
-                      {item.badge > 0 && (
-                        <span className="absolute -top-1.5 -right-2 bg-accent text-[#120807] text-[9px] font-black min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow-md border border-surface">
-                          {item.badge}
-                        </span>
-                      )}
-                    </div>
+            /* Infinite Instagram Gradient Core Wrapper */
+            .neo-bottom-nav-container::before {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              width: 170%;
+              height: 340%;
+              background: conic-gradient(
+                #f58529, #dd2a7b, #8134af, #515bd4, #dd2a7b, #f58529
+              );
+              animation: mobileSweep 4s linear infinite;
+              z-index: -1;
+              transform-origin: center center;
+            }
 
-                    {/* Smooth Fade/Slide Label Text */}
-                    <span
-                      className={`text-[9px] font-bold tracking-wide mt-0.5 transition-all duration-200 origin-center ${isActive
+            /* Main Bar Panel Frame (Fully Capsule Shaped) */
+            .neo-bottom-nav {
+              width: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 5px 8px; /* Balanced horizontal offset */
+              backdrop-filter: blur(12px);
+              -webkit-backdrop-filter: blur(12px);
+              border-radius: 9999px; /* Inner container matches outer bar shape perfectly */
+            }
+
+            /* Custom Geometric Shape for Internal Active & Hover Elements */
+            .neo-bottom-nav .nav-item-element {
+              border-radius: 14px !important; /* Forces a beautiful soft inner rounded square */
+            }
+
+            /* ─── LIGHT THEME STYLE ─── */
+            .neo-bottom-nav {
+              background-color: rgba(18, 8, 6, 0.92); 
+            }
+            .neo-bottom-nav .nav-item-active {
+              background-color: #EBDEDA; 
+              color: #120806;            
+            }
+            .neo-bottom-nav .nav-item-inactive {
+              color: #A18881;            
+            }
+
+            /* ─── DARK THEME STYLE ─── */
+            .dark .neo-bottom-nav {
+              background-color: rgba(235, 222, 218, 0.9); 
+            }
+            .dark .neo-bottom-nav .nav-item-active {
+              background-color: #120806; 
+              color: #F2E2DB;            
+            }
+            .dark .neo-bottom-nav .nav-item-inactive {
+              color: #7C6660;            
+            }
+          `}</style>
+
+          <div
+            className="neo-bottom-nav-container max-w-md mx-auto pointer-events-auto"
+            style={{ boxShadow: 'var(--nm-extruded)' }}
+          >
+            <nav className="neo-bottom-nav transition-colors duration-300">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className="flex-1 mx-0.5"
+                >
+                  {({ isActive }) => (
+                    <motion.div
+                      whileTap={{ scale: 0.95 }}
+                      className={`flex flex-col items-center justify-center py-2 nav-item-element relative transition-all duration-300
+                        ${isActive ? 'nav-item-active font-bold' : 'nav-item-inactive hover:bg-white/5 dark:hover:bg-black/5 hover:opacity-90'}`}
+                      style={{
+                        boxShadow: isActive ? 'var(--nm-button-pressed)' : 'none',
+                      }}
+                    >
+                      {/* Icon Base Frame */}
+                      <div className="relative flex items-center justify-center">
+                        <item.icon
+                          size={16}
+                          className="transition-transform duration-200"
+                          strokeWidth={isActive ? 2.5 : 2}
+                        />
+
+                        {/* Notification Counter Badge */}
+                        {item.badge > 0 && (
+                          <span className="absolute -top-1.5 -right-2 bg-[var(--accent)] text-[#120807] text-[8px] font-black min-w-[14px] h-3.5 px-1 rounded-full flex items-center justify-center shadow-md border border-transparent">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Micro Fluid Text Label */}
+                      <span
+                        className={`text-[9px] tracking-wide mt-0.5 transition-all duration-200 origin-center ${isActive
                           ? 'opacity-100 scale-100 max-h-3 dynamic-text'
                           : 'opacity-0 scale-90 max-h-0 overflow-hidden pointer-events-none'
-                        }`}
-                    >
-                      {item.label}
-                    </span>
-
-                    {/* Small Premium Active Dot Dot Indicator */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeIndicatorDot"
-                        className="w-1 h-1 bg-primary rounded-full absolute bottom-1"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </motion.div>
-                )}
-              </NavLink>
-            ))}
-          </nav>
+                          }`}
+                      >
+                        {item.label}
+                      </span>
+                    </motion.div>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

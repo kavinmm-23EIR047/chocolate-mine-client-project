@@ -60,11 +60,13 @@ export const getCouponUnitDiscount = (basePrice, coupon) => {
 
 export const idsMatch = (a, b) => String(a ?? '') === String(b ?? '');
 
-/** Normalize coupon code from API/state (trim + uppercase). Empty string if missing. */
 export const normalizeCartCoupon = (raw) => {
   if (raw == null) return '';
+  if (typeof raw === 'object' && raw.code) {
+    raw = raw.code;
+  }
   const s = String(raw).trim();
-  return s === '' ? '' : s.toUpperCase();
+  return s === '' || s === '[object Object]' ? '' : s.toUpperCase();
 };
 
 export const calculateDistance = (lat1, lon1, lat2, lon2) => {

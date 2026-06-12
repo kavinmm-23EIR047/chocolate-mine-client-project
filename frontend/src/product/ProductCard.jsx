@@ -109,7 +109,7 @@ const LotteryCoupon = ({ coupon }) => {
 };
 
 // ─── COMPACT CART ACTION BUTTON (WITH GRADIENT BORDER ANIMATION) ─────────────
-const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart }) => {
+const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd, isOutOfStock, addingToCart, isHome }) => {
   const label = addingToCart ? '...' : 'ADD';
 
   if (isOutOfStock) {
@@ -128,24 +128,24 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
     return (
       <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1px] bg-gradient-to-r from-[var(--accent)] to-[var(--secondary)] shadow-lg transition-all">
         <div
-          className="flex items-center justify-between rounded-[5px] h-6 w-16 md:h-9 md:w-[112px] font-bold overflow-hidden"
+          className={`flex items-center justify-between rounded-[5px] ${isHome ? 'h-7 w-[72px]' : 'h-6 w-16'} md:h-9 md:w-[112px] font-bold overflow-hidden`}
           style={{ background: 'var(--button-bg)' }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={(e) => handleQuantityChange(e, cartQuantity - 1)}
-            className="touch-compact h-full min-h-0 !min-w-[20px] md:!min-w-[34px] px-0.5 md:px-2 flex items-center justify-center transition-colors cursor-pointer"
+            className={`touch-compact h-full min-h-0 ${isHome ? '!min-w-[24px]' : '!min-w-[20px]'} md:!min-w-[34px] px-0.5 md:px-2 flex items-center justify-center transition-colors cursor-pointer`}
             style={{ color: 'var(--button-text)' }}
           >
-            <Trash2 size={11} strokeWidth={2.5} className="md:w-[14px] md:h-[14px]" />
+            <Trash2 size={isHome ? 13 : 11} strokeWidth={2.5} className="md:w-[14px] md:h-[14px]" />
           </button>
-          <span className="text-[10px] md:text-[13px] font-black" style={{ color: 'var(--button-text)' }}>{cartQuantity}</span>
+          <span className={`${isHome ? 'text-[11px]' : 'text-[10px]'} md:text-[13px] font-black`} style={{ color: 'var(--button-text)' }}>{cartQuantity}</span>
           <button
             onClick={(e) => handleQuantityChange(e, cartQuantity + 1)}
-            className="touch-compact h-full min-h-0 !min-w-[20px] md:!min-w-[34px] px-0.5 md:px-2 flex items-center justify-center transition-colors cursor-pointer"
+            className={`touch-compact h-full min-h-0 ${isHome ? '!min-w-[24px]' : '!min-w-[20px]'} md:!min-w-[34px] px-0.5 md:px-2 flex items-center justify-center transition-colors cursor-pointer`}
             style={{ color: 'var(--button-text)' }}
           >
-            <Plus size={11} strokeWidth={3.5} className="md:w-[14px] md:h-[14px]" />
+            <Plus size={isHome ? 13 : 11} strokeWidth={3.5} className="md:w-[14px] md:h-[14px]" />
           </button>
         </div>
       </div>
@@ -163,10 +163,10 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
       />
       <button
         onClick={handleInitialAdd}
-        className="touch-compact relative z-10 flex items-center justify-center rounded-[5px] h-6 w-6 md:h-9 md:w-[104px] text-[12px] md:text-[14px] font-extrabold tracking-wider cursor-pointer"
+        className={`touch-compact relative z-10 flex items-center justify-center rounded-[5px] ${isHome ? 'h-7 w-7' : 'h-6 w-6'} md:h-9 md:w-[104px] text-[12px] md:text-[14px] font-extrabold tracking-wider cursor-pointer`}
         style={{ background: 'var(--button-bg)', color: 'var(--button-text)' }}
       >
-        <Plus size={12} strokeWidth={3.5} className="md:w-[15px] md:h-[15px]" />
+        <Plus size={isHome ? 14 : 12} strokeWidth={3.5} className="md:w-[15px] md:h-[15px]" />
         <span className="hidden md:inline ml-1">{label}</span>
       </button>
     </div>
@@ -177,6 +177,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const isHome = window.location.pathname === '/';
 
   const [addingToCart, setAddingToCart] = useState(false);
 
@@ -343,7 +344,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
           <button
             onClick={wish}
-            className="touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 !w-5 !h-5 !min-w-0 !min-h-0 md:!w-9 md:!h-9 border"
+            className={`touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 ${isHome ? '!w-7 !h-7' : '!w-5 !h-5'} !min-w-0 !min-h-0 md:!w-9 md:!h-9 border`}
             style={{
               background: 'var(--card)',
               borderColor: 'var(--border)',
@@ -351,7 +352,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             }}
           >
             <Heart
-              className="w-2.5 h-2.5 md:w-[16px] md:h-[16px]"
+              className={`${isHome ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'} md:w-[16px] md:h-[16px]`}
               fill={isLiked ? '#ef4444' : 'none'}
               strokeWidth={2.5}
               style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }}
@@ -364,6 +365,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             handleInitialAdd={handleInitialAdd}
             isOutOfStock={isOutOfStock}
             addingToCart={addingToCart}
+            isHome={isHome}
           />
         </div>
       </motion.div>
@@ -385,7 +387,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
           <button
             onClick={wish}
-            className="touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 !w-6 !h-6 !min-w-0 !min-h-0 md:!w-9 md:!h-9 border"
+            className={`touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 ${isHome ? '!w-8 !h-8' : '!w-6 !h-6'} !min-w-0 !min-h-0 md:!w-9 md:!h-9 border`}
             style={{
               background: 'var(--card)',
               borderColor: 'var(--border)',
@@ -393,7 +395,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             }}
           >
             <Heart
-              className="w-3 h-3 md:w-[16px] md:h-[16px]"
+              className={`${isHome ? 'w-4 h-4' : 'w-3 h-3'} md:w-[16px] md:h-[16px]`}
               fill={isLiked ? '#ef4444' : 'none'}
               strokeWidth={2.5}
               style={{ color: isLiked ? '#ef4444' : 'var(--heading)' }}
@@ -406,6 +408,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             handleInitialAdd={handleInitialAdd}
             isOutOfStock={isOutOfStock}
             addingToCart={addingToCart}
+            isHome={isHome}
           />
         </div>
 

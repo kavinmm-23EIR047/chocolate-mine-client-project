@@ -26,56 +26,62 @@ const UserLayout = () => {
       <Navbar />
 
       {/* ── RESPONSIVE INFO BANNER ── */}
-      <div className="bg-success/10 border-y border-success/20 text-success py-2 sm:py-2.5 px-4 overflow-hidden">
-        
-        {/* DESKTOP LAYOUT (lg and up) */}
-        <div className="hidden lg:flex items-center justify-between responsive-container">
-          {/* Left: Pure Veg & Eggless */}
+      <div className="bg-success/10 border-y border-success/20 text-success py-2.5 md:py-3 px-4 overflow-hidden">
+
+        {/* DESKTOP/TABLET LAYOUT (md and up) */}
+        <div className="hidden md:flex items-center justify-between responsive-container">
+          {/* Left: Pure Veg & Eggless (Increased Size to 20) */}
           <div className="flex items-center gap-3">
-            <PureVegBadge className="px-2 py-0.5 rounded-full" size={10} />
-            <span className="text-[11px] font-black uppercase tracking-[0.2em]">100% Pure Veg & Eggless cakes across the store</span>
+            <PureVegBadge size={20} className="shadow-none bg-transparent p-0" hideText={true} />
+            <EgglessBadge size={20} className="shadow-none bg-transparent p-0" hideText={true} />
+            <span className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.1em] lg:tracking-[0.15em] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.1em] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
           </div>
-          
+
           {/* Center: Delivery */}
-          <div className="flex items-center gap-1.5 text-primary text-[11px] font-black uppercase tracking-[0.2em]">
-            <Truck size={14} />
+          <div className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-[0.15em] mt-0.5">
+            <Truck size={15} className="shrink-0" />
             <span>Delivery in Coimbatore within 3 Hours</span>
           </div>
 
           {/* Right: Important Routes */}
-          <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em]">
-            <Link to="/contact" className="flex items-center gap-1 hover:text-primary transition-colors">
-              <Phone size={12} /> Contact Us
+          <div className="flex items-center gap-5 text-[10px] font-black uppercase tracking-[0.15em] mt-0.5">
+            <Link to="/contact" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Phone size={12} className="shrink-0" /> Contact Us
             </Link>
-            <Link to="/help" className="flex items-center gap-1 hover:text-primary transition-colors">
-              <HelpCircle size={12} /> Help
+            <Link to="/help" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <HelpCircle size={12} className="shrink-0" /> Help
             </Link>
-            <Link to="/stores" className="flex items-center gap-1 hover:text-primary transition-colors">
-              <MapPin size={12} /> Stores
+            <Link to="/stores" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <MapPin size={12} className="shrink-0" /> Stores
             </Link>
           </div>
         </div>
 
-        {/* MOBILE LAYOUT (below lg) */}
-        <div className="flex lg:hidden items-center justify-between w-full">
-          {/* Left: Pure Veg */}
-          <div className="flex items-center gap-1">
-            <PureVegBadge className="px-1.5 py-0.5 rounded-sm text-[8px]" size={8} />
+        {/* MOBILE LAYOUT (below md) */}
+        <div className="flex md:hidden items-center justify-between w-full">
+          {/* Left: Pure Veg & Eggless (Increased Size to 16 for better visibility in image_6b58ba.png) */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <PureVegBadge size={16} className="shadow-none bg-transparent p-0" hideText={true} />
+            <EgglessBadge size={16} className="shadow-none bg-transparent p-0" hideText={true} />
           </div>
-          
+
           {/* Center: Delivery (Shortened) */}
-          <div className="flex items-center gap-1 text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em]">
-            <Truck size={12} />
+          <div className="flex items-center gap-1 text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] mx-2">
+            <Truck size={13} className="shrink-0" />
             <span>3Hrs Delivery in CBE</span>
           </div>
 
           {/* Right: Icon links */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5 shrink-0">
             <Link to="/contact" className="hover:text-primary transition-colors">
-              <Phone size={12} />
+              <Phone size={13} />
+            </Link>
+            <Link to="/help" className="hover:text-primary transition-colors">
+              <HelpCircle size={13} />
             </Link>
             <Link to="/stores" className="hover:text-primary transition-colors">
-              <MapPin size={12} />
+              <MapPin size={13} />
             </Link>
           </div>
         </div>

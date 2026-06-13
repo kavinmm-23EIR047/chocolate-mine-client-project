@@ -54,7 +54,7 @@ const ScooterLoader = ({ isVisible, text = 'Preparing your order…' }) => {
                 animate={{ x: ['-100%', '280%'] }}
                 transition={{
                   repeat: Infinity,
-                  duration: 1.25,
+                  duration: 2.5,
                   ease: 'linear',
                 }}
               />

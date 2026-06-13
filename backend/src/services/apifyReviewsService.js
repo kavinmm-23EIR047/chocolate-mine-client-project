@@ -79,7 +79,8 @@ class ApifyReviewsService {
       // For time:
       let dateObj;
       try {
-        dateObj = item.reviewDate ? new Date(item.reviewDate) : new Date();
+        // use publishedAtDate if available, since reviewDate is usually text ("a month ago")
+        dateObj = item.publishedAtDate ? new Date(item.publishedAtDate) : new Date();
       } catch (e) {
         dateObj = new Date();
       }
@@ -96,14 +97,36 @@ class ApifyReviewsService {
       // For text:
       const text = item.reviewText || '';
 
+      let pPhoto = item.reviewerPhotoUrl || '';
+      let rImages = [];
+      if (Array.isArray(item.reviewImageUrls) && item.reviewImageUrls.length > 0) {
+          rImages = [...item.reviewImageUrls];
+      } else if (Array.isArray(item.reviewImages) && item.reviewImages.length > 0) {
+          rImages = [...item.reviewImages];
+      }
+
+      if (rImages.length > 0) {
+          if (!pPhoto) {
+              pPhoto = rImages.shift();
+          } else {
+              if (rImages[0] === pPhoto) {
+                  rImages.shift();
+              } else if (rImages[0].includes('/a/') || rImages[0].includes('/a-/') || rImages[0].match(/=s\d+-c/)) {
+                  rImages.shift();
+              }
+          }
+      }
+
       return {
         reviewId: rId,
         authorName: name,
         authorUrl: item.reviewerUrl || '',
-        profilePhotoUrl: item.reviewerPhotoUrl || (item.reviewImages && item.reviewImages[0] ? item.reviewImages[0] : ''),
+        profilePhotoUrl: pPhoto,
+        reviewImageUrls: rImages,
         rating: rating,
         text: text,
         time: dateObj,
+        reviewDateStr: item.reviewDate || '',
         language: item.language || 'en',
         responseFromOwner: item.ownerResponse ? {
           text: item.ownerResponse,

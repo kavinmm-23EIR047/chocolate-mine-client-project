@@ -25,6 +25,9 @@ const googleReviewSchema = new mongoose.Schema(
     profilePhotoUrl: {
       type: String
     },
+    reviewImageUrls: [{
+      type: String
+    }],
     rating: {
       type: Number,
       required: [true, 'Rating is required'],
@@ -40,6 +43,9 @@ const googleReviewSchema = new mongoose.Schema(
     time: {
       type: Date,
       required: true
+    },
+    reviewDateStr: {
+      type: String
     },
     language: {
       type: String

@@ -17,6 +17,7 @@ import adminService from '../../services/adminService';
 import analyticsService from '../../services/analyticsService';
 import { formatCurrency } from '../../utils/helpers';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
+import SocialMediaDashboard from '../../components/admin/SocialMediaDashboard';
 import toast from 'react-hot-toast';
 
 const statCards = [
@@ -238,6 +239,9 @@ const AdminDashboard = () => {
           </div>
         </motion.div>
       )}
+
+      {/* Social Media & Analytics Dashboard */}
+      <SocialMediaDashboard />
     </div>
   );
 };

@@ -11,6 +11,7 @@ import { useDeliveryLocation } from '../context/LocationContext';
 import SearchOverlay from './search/SearchOverlay';
 import ThemeToggle from './ui/ThemeToggle';
 import NotificationDropdown from './ui/NotificationDropdown';
+import MegaMenu from './ui/MegaMenu';
 
 const NAV_LINKS = [
   { label: 'HOME', path: '/' },
@@ -283,12 +284,12 @@ const Navbar = () => {
         </div>
 
         {/* BOTTOM DESKTOP NAVIGATION ROW */}
-        <div className="hidden lg:flex items-center justify-start gap-8 xl:gap-10 tv:gap-14 py-2.5 tv:py-4 border-t border-border/10 bg-navbar responsive-container">
-          <Link to="/shop" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">All</Link>
-          <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Custom Cakes</Link>
-          <Link to="/occasion/anniversary" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Anniversary</Link>
-          <Link to="/shop?bestseller=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Bestseller</Link>
-          <Link to="/shop?featured=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors">Features</Link>
+        <div className="hidden lg:flex items-center justify-start gap-8 xl:gap-10 tv:gap-14 py-2 tv:py-3 border-t border-border/10 bg-navbar responsive-container relative">
+          <MegaMenu />
+          <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Custom Cakes</Link>
+          <Link to="/occasion/anniversary" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Anniversary</Link>
+          <Link to="/shop?bestseller=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Bestseller</Link>
+          <Link to="/shop?featured=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Features</Link>
         </div>
       </nav>
 

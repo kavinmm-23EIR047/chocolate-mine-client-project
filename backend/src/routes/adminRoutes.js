@@ -37,4 +37,9 @@ router.get('/reviews', reviewController.getAllReviews);
 router.patch('/reviews/:id', reviewController.updateReview);
 router.delete('/reviews/:id', reviewController.deleteReview);
 
+// --- Social Media Dashboard ---
+const socialMediaController = require('../controllers/socialMediaController');
+router.get('/social-media/google', socialMediaController.getGoogleAnalytics);
+router.get('/social-media/instagram', socialMediaController.getInstagramStats);
+
 module.exports = router;

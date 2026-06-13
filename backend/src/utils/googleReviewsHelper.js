@@ -23,9 +23,11 @@ exports.calculateStats = (reviews) => {
 
   const averageRating = (totalScore / reviews.length).toFixed(1);
 
+  // OVERRIDE: The scraper only fetches a subset of reviews. 
+  // We hardcode the actual Google Maps stats here as requested.
   return {
-    averageRating: parseFloat(averageRating),
-    totalReviews: reviews.length,
+    averageRating: 4.9,
+    totalReviews: Math.max(475, reviews.length),
     ratingDistribution
   };
 };

@@ -145,7 +145,13 @@ const adminService = {
   ---------------------------------------- */
   getReviews: () => api.get('/admin/reviews'),
   updateReview: (id, data) => api.patch(`/admin/reviews/${id}`, data),
-  deleteReview: (id) => api.delete(`/admin/reviews/${id}`)
+  deleteReview: (id) => api.delete(`/admin/reviews/${id}`),
+
+  /* ----------------------------------------
+     Social Media Dashboard
+  ---------------------------------------- */
+  getGoogleAnalytics: () => api.get('/admin/social-media/google'),
+  getInstagramStats: () => api.get('/admin/social-media/instagram'),
 };
 
 export default adminService;

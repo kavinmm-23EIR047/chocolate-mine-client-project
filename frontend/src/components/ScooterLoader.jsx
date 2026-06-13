@@ -1,12 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import LottieImport from 'lottie-react';
-import brandAnimation from '../assets/brand-loader.json';
-
-// Safely resolve the Lottie component function in both ESM and CJS bundling environments
-const Lottie = LottieImport.default || LottieImport;
 
 const ScooterLoader = ({ isVisible, text = 'Preparing your order…' }) => {
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -20,26 +17,33 @@ const ScooterLoader = ({ isVisible, text = 'Preparing your order…' }) => {
           transition={{ duration: 0.25 }}
           className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-background/85 backdrop-blur-[10px]"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            className="w-full max-w-[420px] rounded-[2.5rem] border border-border/50 bg-card/95 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.16)] px-10 py-10 text-center"
-          >
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              className="w-full max-w-[420px] rounded-[2.5rem] border-2 border-[#121212]/20 bg-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.16)] px-10 py-10 text-center"
+            >
             {/* Premium Lottie Loader */}
-            <div className="relative mx-auto mb-6 w-full max-w-[240px] aspect-square flex items-center justify-center overflow-hidden">
-              <Lottie
-                animationData={brandAnimation}
-                loop={true}
-                className="w-full h-full scale-110"
-              />
+            <div className="relative mx-auto mb-6 w-full max-w-[240px] aspect-[4/3] flex items-center justify-center overflow-hidden">
+              {!iframeLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white rounded-2xl border border-[#121212]/10 animate-pulse">
+                   <div className="w-8 h-8 border-4 border-[#8B4513]/20 border-t-[#8B4513] rounded-full animate-spin"></div>
+                   <p className="mt-3 text-[10px] text-[#8B4513] uppercase font-bold tracking-widest">Loading Animation...</p>
+                </div>
+              )}
+              <iframe
+                src="https://lottie.host/embed/28e9311c-fa3b-4032-a697-e3c220fc0b2d/FEbMbZ114x.lottie"
+                title="Delivery Scooter Animation"
+                onLoad={() => setIframeLoaded(true)}
+                className={`w-full h-full border-none outline-none scale-[1.3] pointer-events-none transition-opacity duration-300 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
+              ></iframe>
             </div>
 
-            <p className="text-[17px] font-semibold text-heading leading-snug tracking-tight">
+            <p className="text-[17px] font-semibold text-[#121212] leading-snug tracking-tight">
               {text}
             </p>
-            <p className="mt-2 text-xs text-muted font-medium">
+            <p className="mt-2 text-xs text-[#121212]/60 font-medium">
               Please wait — secure checkout
             </p>
 

@@ -198,20 +198,54 @@ const orderSchema = new mongoose.Schema(
 );
 
 // Generate SKU for each item before saving
-orderSchema.pre('save', async function(next) {
+orderSchema.pre('save', async function() {
   // Generate TCM formatted order number if not exists
   if (!this.orderNumber) {
     try {
       const year = new Date().getFullYear();
-      const orderCount = await this.constructor.countDocuments({ 
-        createdAt: { 
-          $gte: new Date(`${year}-01-01`), 
-          $lt: new Date(`${year + 1}-01-01`) 
-        } 
-      });
-      const nextNum = (orderCount + 1).toString().padStart(4, '0');
-      const tcmCode = `TCM-${year}-${nextNum}`;
+      let nextNumVal = 1;
+
+      // Find the last order for the current year sorted by orderNumber descending
+      const lastOrder = await this.constructor.findOne({
+        orderNumber: new RegExp(`^TCM-${year}-`)
+      }).sort({ orderNumber: -1 });
+
+      if (lastOrder && lastOrder.orderNumber) {
+        const parts = lastOrder.orderNumber.split('-');
+        if (parts.length === 3) {
+          const lastNum = parseInt(parts[2], 10);
+          if (!isNaN(lastNum)) {
+            nextNumVal = lastNum + 1;
+          }
+        }
+      } else {
+        // Fallback count in case there's no last order
+        const orderCount = await this.constructor.countDocuments({ 
+          createdAt: { 
+            $gte: new Date(`${year}-01-01`), 
+            $lt: new Date(`${year + 1}-01-01`) 
+          } 
+        });
+        nextNumVal = orderCount + 1;
+      }
+
+      let isUnique = false;
+      let tcmCode = '';
+      let attempts = 0;
       
+      while (!isUnique && attempts < 100) {
+        const nextNumStr = nextNumVal.toString().padStart(4, '0');
+        tcmCode = `TCM-${year}-${nextNumStr}`;
+        
+        const existing = await this.constructor.findOne({ orderNumber: tcmCode });
+        if (!existing) {
+          isUnique = true;
+        } else {
+          nextNumVal++;
+          attempts++;
+        }
+      }
+
       this.orderNumber = tcmCode;
       this.trackingCode = tcmCode;
     } catch (err) {
@@ -232,8 +266,6 @@ orderSchema.pre('save', async function(next) {
       );
     }
   });
-  
-  next();
 });
 
 // Method to get SKU for tracking

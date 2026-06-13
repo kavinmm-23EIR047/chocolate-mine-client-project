@@ -322,27 +322,26 @@ const ProductDetails = () => {
       return;
     }
 
-    if (productCategory === 'cakes') {
-      if (!currentVariantFlavor) { toast.error('Please select flavor'); return; }
-      if (!currentVariantWeight) { toast.error('Please select weight'); return; }
+    const currentStockLimit = productCategory === 'cakes' ? selectedStock : productStock;
+    if (cartQty + 1 > currentStockLimit) {
+      toast.error(`Only ${currentStockLimit} units available`);
+      return;
     }
 
-    const directItem = {
-      productId: productId,
-      name: productName,
-      description: product.description,
-      image: displayImage || product.image,
-      price: productPrice,
-      offerPrice: productOfferPrice,
-      variantPrice: isCakeWithVariants ? currentPrice : null,
-      qty: 1,
-      selectedFlavor: currentVariantFlavor,
-      selectedWeight: currentVariantWeight,
-      coupon: product.coupon,
-      stock: productCategory === 'cakes' ? selectedStock : productStock
-    };
+    const options = {};
+    if (productCategory === 'cakes') {
+      if (showCustomFlavorInput && customFlavor) options.flavor = customFlavor;
+      else if (selectedFlavor) options.flavor = selectedFlavor.name;
+      else { toast.error('Please select flavor'); return; }
 
-    navigate('/checkout', { state: { directItem } });
+      if (showCustomWeightInput && customWeight) options.weight = customWeight;
+      else if (selectedWeight) options.weight = selectedWeight;
+      else { toast.error('Please select weight'); return; }
+    }
+
+    dispatch(addToCart({ product, qty: 1, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
+    toast.success(`Item added to cart!`);
+    navigate('/cart');
   };
 
   const getFlavorImages = (flavor) => {

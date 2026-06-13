@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { clearCart, setCoupon } from '../redux/slices/cartSlice';
+import { clearCart, setCoupon, removeFromCart } from '../redux/slices/cartSlice';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
@@ -1369,46 +1369,64 @@ const Checkout = () => {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="divide-y divide-border/20">
+                    <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
                       {cartItems.map((item) => (
-                        <div key={`${item.productId}-${item.options?.color || item.selectedFlavor}-${item.options?.weight || item.selectedWeight}`} className="flex gap-4 p-4 sm:p-5">
-                          <img src={item.image} className="w-16 h-16 rounded-2xl object-cover border border-border/10 shrink-0" alt={item.name} />
+                        <div key={`${item.productId}-${item.options?.color || item.selectedFlavor}-${item.options?.weight || item.selectedWeight}`} className="flex gap-4 p-4 sm:p-5 rounded-2xl border-2 border-border/20 relative group bg-card-soft/50">
+                          <img src={item.image} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl object-cover border border-border/10 shrink-0" alt={item.name} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
+                            <p className="text-sm sm:text-base font-black text-heading uppercase tracking-tight truncate">{item.name}</p>
                             {getItemDescription(item) && (
                               <p className="text-xs text-muted font-medium mt-1 leading-relaxed line-clamp-2">
                                 {getItemDescription(item)}
                               </p>
                             )}
-                            <div className="flex flex-wrap gap-2 mt-1">
+                            <div className="flex flex-wrap gap-2 mt-2">
                               {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
                                 <>
-                                  {(item.options?.color || item.selectedFlavor) && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Color: {item.options?.color || item.selectedFlavor}</span>}
-                                  {(item.options?.flavor || item.selectedFlavor) && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.options?.flavor || item.selectedFlavor}</span>}
-                                  {(item.options?.weight || item.selectedWeight) && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.options?.weight || item.selectedWeight}</span>}
+                                  {(item.options?.color || item.selectedFlavor) && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Color: {item.options?.color || item.selectedFlavor}</span>}
+                                  {(item.options?.flavor || item.selectedFlavor) && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Flavor: {item.options?.flavor || item.selectedFlavor}</span>}
+                                  {(item.options?.weight || item.selectedWeight) && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Weight: {item.options?.weight || item.selectedWeight}</span>}
                                 </>
                               ) : (
                                 <>
-                                  {item.selectedFlavor && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Flavor: {item.selectedFlavor}</span>}
-                                  {item.selectedWeight && <span className="text-[11px] bg-card-soft text-muted font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Weight: {item.selectedWeight}</span>}
+                                  {item.selectedFlavor && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Flavor: {item.selectedFlavor}</span>}
+                                  {item.selectedWeight && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Weight: {item.selectedWeight}</span>}
                                 </>
                               )}
                             </div>
-                            <p className="text-xs text-muted/60 font-black mt-2 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
+                            <p className="text-[11px] sm:text-xs text-primary font-black mt-3 uppercase tracking-widest">QTY {item.qty} × {formatCurrency(getFinalItemPrice(item))}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-black text-heading text-sm">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
+                          <div className="text-right flex flex-col items-end justify-between shrink-0">
+                            <p className="font-black text-heading text-sm sm:text-base">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (directItem) {
+                                  toast.success('Item removed');
+                                  setTimeout(() => navigate('/cart'), 500);
+                                } else {
+                                  dispatch(removeFromCart(item.productId));
+                                  toast.success('Item removed');
+                                }
+                              }}
+                              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm border border-red-500/20 hover:border-red-500"
+                              title="Remove Item"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </div>
                       ))}
-                      <div className="p-4 sm:p-5 space-y-4">
+                      
+                      <div className="space-y-4 pt-2">
                         {shouldShowCustomCakeRequest ? (
-                          <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 space-y-3">
+                          <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 sm:p-5 space-y-3">
                             <div className="flex items-start justify-between gap-3">
-                              <p className="text-xs font-black uppercase tracking-widest text-primary">From custom cake builder</p>
-                              <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-accent hover:underline">Edit</Link>
+                              <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-primary">From custom cake builder</p>
+                              <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-accent hover:underline flex items-center gap-1"><Edit size={12}/> Edit</Link>
                             </div>
-                            <pre className="text-xs text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans">
+                            <pre className="text-[11px] sm:text-xs text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans bg-card-soft p-3 rounded-xl border border-border/30">
                               {getFormattedCustomNotes()}
                             </pre>
                           </div>
@@ -1416,11 +1434,13 @@ const Checkout = () => {
                           <p className="text-xs text-muted font-bold uppercase tracking-widest text-center opacity-40">No custom notes added</p>
                         )}
 
-                        <div className="pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-3 border-t border-border/20 pt-5">
-                          <p className="text-[10px] sm:text-xs text-muted font-bold uppercase tracking-widest">Review items before payment</p>
+                        <div className="pt-4 sm:pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-3 border-t-2 border-border/20 border-dashed">
+                          <p className="text-[10px] sm:text-xs text-muted font-bold uppercase tracking-widest flex items-center gap-2">
+                            <CheckCircle2 size={14} className="text-success" /> Review items before payment
+                          </p>
                           <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                             <Button onClick={() => setActiveStep(2)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
-                            <Button onClick={() => setActiveStep(4)} className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm">Confirm Order</Button>
+                            <Button onClick={() => setActiveStep(4)} disabled={cartItems.length === 0} className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm">Confirm Order</Button>
                           </div>
                         </div>
                       </div>

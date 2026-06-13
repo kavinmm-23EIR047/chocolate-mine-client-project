@@ -317,17 +317,15 @@ export default function CustomCake() {
       // Added weight.label to baseCakeId to fix size variations merging issue
       const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}-${weight.label.replace(/\s+/g, '')}`;
 
-      const directItem = {
-        productId: baseCakeId,
-        name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
-        description: theme.description,
-        image: selectedFlavor.image || theme.image || theme.flavors?.[0]?.image,
-        category: 'Custom Cakes',
-        price: grandTotal,
-        variantPrice: grandTotal,
+      dispatch(addToCart({
+        product: {
+          _id: baseCakeId,
+          name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+          description: theme.description,
+          image: selectedFlavor.image || theme.image || theme.flavors?.[0]?.image,
+          price: grandTotal, stock: 5, category: 'Custom Cakes',
+        },
         qty: 1,
-        selectedFlavor: selectedFlavor.name,
-        selectedWeight: weight.label,
         options: {
           theme: theme.name,
           tier: tierLabel,
@@ -338,7 +336,8 @@ export default function CustomCake() {
           age,
           message: message || 'None'
         },
-      };
+        variantPrice: grandTotal,
+      }));
 
       saveCustomCakeRequest({
         designTheme: theme.name,
@@ -350,8 +349,8 @@ export default function CustomCake() {
         estimatedPrice: grandTotal,
       });
 
-      toast.success('🎂 Dream cake ready for checkout!');
-      setTimeout(() => navigate('/checkout', { state: { directItem } }), 800);
+      toast.success('🎂 Dream cake added to cart!');
+      setTimeout(() => navigate('/cart'), 800);
     } catch { toast.error('Failed to proceed. Please try again.'); }
     finally { setIsAdding(false); }
   };

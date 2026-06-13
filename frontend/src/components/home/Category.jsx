@@ -58,8 +58,6 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
-  const autoPlayTimer = useRef(null);
-  const [isInteracted, setIsInteracted] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -97,38 +95,7 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
     }
   };
 
-  // Manage Auto Slide functionality
-  useEffect(() => {
-    if (categories.length <= 1 || isInteracted) return;
-
-    autoPlayTimer.current = setInterval(() => {
-      const currentIndex = categories.findIndex(cat => cat.name === activeCategory);
-      const nextIndex = (currentIndex + 1) % categories.length;
-      const nextCategory = categories[nextIndex];
-
-      if (nextCategory.isCustom) {
-        // Skip over programmatic navigation route actions during autoplay loop
-        const wrapIndex = (nextIndex + 1) % categories.length;
-        setActiveCategory(categories[wrapIndex].name);
-        centerActiveItem(wrapIndex);
-      } else {
-        setActiveCategory(nextCategory.name);
-        centerActiveItem(nextIndex);
-      }
-    }, 4000); // Transitions to next node every 4 seconds
-
-    return () => {
-      if (autoPlayTimer.current) clearInterval(autoPlayTimer.current);
-    };
-  }, [categories, activeCategory, isInteracted, setActiveCategory]);
-
-  const handleUserInteraction = () => {
-    setIsInteracted(true);
-    if (autoPlayTimer.current) clearInterval(autoPlayTimer.current);
-  };
-
   const scrollHoriz = (direction) => {
-    handleUserInteraction();
     if (!scrollRef.current) return;
     const amount = scrollRef.current.clientWidth * 0.6;
     scrollRef.current.scrollBy({
@@ -163,7 +130,6 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
       {/* UNIFIED SCROLL CONTAINER */}
       <div
         ref={scrollRef}
-        onScroll={handleUserInteraction}
         className="flex overflow-x-auto gap-5 md:gap-8 tv:gap-12 px-4 md:px-16 pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden items-start"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -174,7 +140,6 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
             name={cat.name}
             isActive={activeCategory === cat.name}
             onClick={() => {
-              handleUserInteraction();
               centerActiveItem(index);
               if (cat.isCustom) {
                 navigate('/custom-cake');

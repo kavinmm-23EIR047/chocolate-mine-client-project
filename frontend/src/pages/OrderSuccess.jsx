@@ -2,7 +2,6 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import {
-  Check,
   ArrowRight,
   Package,
   Download,
@@ -30,6 +29,58 @@ const DeliveryIllustration = () => (
   </div>
 );
 
+// ─── Animated SVG Tick (replaces tick.gif) ───────────────────────────────────
+const AnimatedTick = () => (
+  <>
+    <style>{`
+      .tick-bg {
+        fill: #16a34a;
+        r: 0;
+        animation: tickBgPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+      }
+      .tick-ring {
+        fill: none;
+        stroke: #15803d;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        animation: tickCircle 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+      }
+      .tick-check {
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 5.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+        animation: tickCheck 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.85s forwards;
+      }
+      @keyframes tickBgPop  { to { r: 42px; } }
+      @keyframes tickCircle { to { stroke-dashoffset: 0; } }
+      @keyframes tickCheck  { to { stroke-dashoffset: 0; } }
+    `}</style>
+    <svg
+      viewBox="0 0 96 96"
+      width="96"
+      height="96"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Order confirmed"
+    >
+      <circle className="tick-bg" cx="48" cy="48" r="0" />
+      <circle
+        className="tick-ring"
+        cx="48"
+        cy="48"
+        r="44"
+        transform="rotate(-90 48 48)"
+      />
+      <polyline className="tick-check" points="28,50 42,64 68,34" />
+    </svg>
+  </>
+);
+
 const formatOrderRef = (raw) => {
   if (!raw) return null;
   const s = String(raw).replace(/\s+/g, '');
@@ -44,10 +95,7 @@ function fireSuccessCrackerBlast() {
   if (typeof window === 'undefined') return;
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 
-  const shoot = (
-    originX,
-    opts = {}
-  ) => {
+  const shoot = (originX, opts = {}) => {
     confetti({
       particleCount: opts.particleCount ?? 72,
       spread: opts.spread ?? 52,
@@ -181,7 +229,7 @@ const OrderSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 sm:p-8">
+    <div className="py-12 sm:py-20 bg-background flex flex-col items-center justify-center p-4 sm:p-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -189,14 +237,16 @@ const OrderSuccess = () => {
         className="w-full max-w-xl sm:max-w-2xl"
       >
         <div className="rounded-2xl border border-border/50 bg-card shadow-[0_20px_50px_-24px_rgba(0,0,0,0.15)] overflow-hidden">
-          <div className="px-6 pt-8 pb-6 sm:px-8 sm:pt-10 sm:pb-8 text-center">
+          <div className="px-6 py-6 sm:px-8 sm:py-8 text-center">
+
+            {/* ── Animated tick ── */}
             <motion.div
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 28, delay: 0.05 }}
-              className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-success-light text-success border border-success/20"
+              className="mx-auto mb-4 flex h-24 w-24 items-center justify-center"
             >
-              <Check strokeWidth={2.5} className="h-7 w-7" aria-hidden />
+              <AnimatedTick />
             </motion.div>
 
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted mb-2">
@@ -206,17 +256,16 @@ const OrderSuccess = () => {
               Order confirmed
             </h1>
             <p className="mt-3 text-sm text-muted leading-relaxed max-w-lg mx-auto">
-              Payment went through. We’re preparing your order with care — you’ll get updates on the way.
+              Payment went through. We're preparing your order with care — you'll get updates on the way.
             </p>
 
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
-              className="mt-8 mb-2"
+              className="mt-4 mb-2"
             >
-              <DeliveryIllustration />
-              <p className="mt-4 flex items-center justify-center gap-1.5 text-xs font-medium text-muted">
+              <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-muted">
                 <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
                 On its way to you soon
               </p>

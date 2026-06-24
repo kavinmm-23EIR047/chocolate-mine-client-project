@@ -1,19 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
-THE CHOCOLATE MINE — MODERN NEUMORPHISM THEME (NO WHITE SHADOWS)
-─────────────────────────────────────────────────────────────
-Light: Warm Cream     (#feeded)
-Dark:  Deep Brown     (#411b17)
-Accent: Rose Taupe    (#987d7b)
-
-Palette:
-  #411b17  Deep Cocoa Brown   (dark bg / light primary)
-  #feeded  Warm Blush Cream   (light bg / dark foreground)
-  #c2aaa8  Rose Taupe Mid     (borders, muted)
-  #735756  Warm Brown Mid     (body text, secondary)
-  #573a38  Dark Umber         (headings, hover)
-  #987d7b  Dusty Rose         (accent, muted)
-  #e9d2d0  Blush Rose Light   (light card / dark card-soft)
-═══════════════════════════════════════════════════════════════ */
+   THE CHOCOLATE MINE — MODERN NEUMORPHISM THEME (NO WHITE SHADOWS)
+   ─────────────────────────────────────────────────────────────
+   Light: Soft Rose Cream (#EBDEDA)
+   Dark:  Deep Cocoa (#120806)
+   Accent: Caramel Gold (#E6B25A)
+   ═══════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
@@ -21,77 +12,76 @@ Palette:
   box-sizing: border-box;
 }
 
-
 /* ───────────────────────────────────────────
-   LIGHT THEME — Warm Blush Cream
-─────────────────────────────────────────── */
+   LIGHT THEME - Soft Rose Cream (Enhanced Contrast)
+   ─────────────────────────────────────────── */
 :root {
   /* Base Surfaces */
-  --background: #feeded;
-  --background-rgb: 254 237 237;
-  --surface: #feeded;
-  --surface-rgb: 254 237 237;
-  --card: #f5e4e4;
-  --card-rgb: 245 228 228;
-  --card-soft: #e9d2d0;
-  --card-soft-rgb: 233 210 208;
+  --background: #EBDEDA;
+  --background-rgb: 235 222 218;
+  --surface: #EBDEDA;
+  --surface-rgb: 235 222 218;
+  --card: #F1E6E2;
+  --card-rgb: 241 230 226;
+  --card-soft: #E4D4CF;
+  --card-soft-rgb: 228 212 207;
 
   /* Typography */
-  --foreground: #411b17;
-  --foreground-rgb: 65 27 23;
-  --heading: #411b17;
-  --heading-rgb: 65 27 23;
-  --body: #573a38;
-  --body-rgb: 87 58 56;
-  --muted: #987d7b;
-  --muted-rgb: 152 125 123;
+  --foreground: #2D1B17;
+  --foreground-rgb: 45 27 23;
+  --heading: #1F120F;
+  --heading-rgb: 31 18 15;
+  --body: #4A3732;
+  --body-rgb: 74 55 50;
+  --muted: #7C6660;
+  --muted-rgb: 124 102 96;
 
   /* Brand Colors */
-  --primary: #411b17;
-  --primary-rgb: 65 27 23;
-  --primary-hover: #573a38;
-  --primary-hover-rgb: 87 58 56;
-  --primary-active: #735756;
-  --primary-active-rgb: 115 87 86;
-  --secondary: #735756;
-  --secondary-rgb: 115 87 86;
-  --accent: #987d7b;
-  --accent-rgb: 152 125 123;
-  --accent-hover: #c2aaa8;
-  --accent-hover-rgb: 194 170 168;
+  --primary: #4E2820;
+  --primary-rgb: 78 40 32;
+  --primary-hover: #3D1E18;
+  --primary-hover-rgb: 61 30 24;
+  --primary-active: #2C1511;
+  --primary-active-rgb: 44 21 17;
+  --secondary: #936456;
+  --secondary-rgb: 147 100 86;
+  --accent: #C98F45;
+  --accent-rgb: 201 143 69;
+  --accent-hover: #E6B25A;
+  --accent-hover-rgb: 230 178 90;
 
   /* Navigation */
-  --navbar: #feeded;
-  --navbar-rgb: 254 237 237;
-  --navbar-text: #411b17;
-  --navbar-text-rgb: 65 27 23;
+  --navbar: #EBDEDA;
+  --navbar-rgb: 235 222 218;
+  --navbar-text: #1F120F;
+  --navbar-text-rgb: 31 18 15;
 
   /* Footer */
-  --footer: #411b17;
-  --footer-rgb: 65 27 23;
-  --footer-text: #feeded;
-  --footer-text-rgb: 254 237 237;
+  --footer: #1F120F;
+  --footer-rgb: 31 18 15;
+  --footer-text: #F2E2DB;
+  --footer-text-rgb: 242 226 219;
 
   /* Borders */
-  --border: #c2aaa8;
-  --border-rgb: 194 170 168;
-  --border-light: #e9d2d0;
-  --border-light-rgb: 233 210 208;
-  --border-dark: #987d7b;
-  --border-dark-rgb: 152 125 123;
+  --border: #D5C0BA;
+  --border-rgb: 213 192 186;
+  --border-light: #F5ECE9;
+  --border-light-rgb: 245 236 233;
+  --border-dark: #C4AAA3;
+  --border-dark-rgb: 196 170 163;
 
   /* Inputs */
-  --input: #f5e4e4;
-  --input-rgb: 245 228 228;
-  --input-border: #c2aaa8;
-  --input-border-rgb: 194 170 168;
-  --input-focus: #411b17;
-  --ring: rgba(65, 27, 23, 0.15);
+  --input: #F1E6E2;
+  --input-rgb: 241 230 226;
+  --input-border: #D5C0BA;
+  --input-border-rgb: 213 192 186;
+  --input-focus: #4E2820;
+  --ring: rgba(78, 40, 32, 0.15);
 
-  /* Neumorphism Shadows — Light */
-  --shadow-light: rgba(254, 237, 237, 0.85);
-  --shadow-dark: rgba(65, 27, 23, 0.14);
-  --shadow-deep: rgba(65, 27, 23, 0.22);
+  /* Neumorphism Shadows */
+  --shadow-light: rgba(168, 138, 128, 0.15);
+  --shadow-dark: rgba(56, 26, 20, 0.12);
+  --shadow-deep: rgba(56, 26, 20, 0.2);
 
   --nm-extruded: -8px -8px 16px var(--shadow-light), 8px 8px 16px var(--shadow-dark);
   --nm-sunken: inset -4px -4px 8px var(--shadow-light), inset 4px 4px 8px var(--shadow-dark);
@@ -101,51 +91,51 @@ Palette:
   --nm-flat: 0px 2px 4px var(--shadow-dark);
 
   /* Buttons */
-  --button-bg: #411b17;
-  --button-bg-rgb: 65 27 23;
-  --button-text: #feeded;
-  --button-text-rgb: 254 237 237;
-  --button-hover: #573a38;
-  --button-hover-rgb: 87 58 56;
-  --button-alt-bg: #e9d2d0;
-  --button-alt-bg-rgb: 233 210 208;
-  --button-alt-text: #411b17;
-  --button-alt-text-rgb: 65 27 23;
-  --button-alt-hover: #c2aaa8;
-  --button-alt-hover-rgb: 194 170 168;
+  --button-bg: #4E2820;
+  --button-bg-rgb: 78 40 32;
+  --button-text: #F2E2DB;
+  --button-text-rgb: 242 226 219;
+  --button-hover: #3D1E18;
+  --button-hover-rgb: 61 30 24;
+  --button-alt-bg: #F1E6E2;
+  --button-alt-bg-rgb: 241 230 226;
+  --button-alt-text: #4E2820;
+  --button-alt-text-rgb: 78 40 32;
+  --button-alt-hover: #E4D4CF;
+  --button-alt-hover-rgb: 228 212 207;
 
-  /* Badge Colors — Light Theme */
-  --badge-bestseller-bg: #987d7b;
-  --badge-bestseller-text: #feeded;
-  --badge-bestseller-border: #c2aaa8;
+  /* ─── BADGE COLORS - Light Theme ─── */
+  --badge-bestseller-bg: var(--accent);
+  --badge-bestseller-text: var(--heading);
+  --badge-bestseller-border: var(--accent-hover);
 
-  --badge-featured-bg: #573a38;
-  --badge-featured-text: #feeded;
-  --badge-featured-border: #411b17;
+  --badge-featured-bg: var(--secondary);
+  --badge-featured-text: var(--background);
+  --badge-featured-border: var(--primary);
 
-  --badge-discount-bg: #411b17;
-  --badge-discount-text: #feeded;
-  --badge-discount-border: #573a38;
+  --badge-discount-bg: var(--primary);
+  --badge-discount-text: var(--background);
+  --badge-discount-border: var(--primary-hover);
 
   --badge-stock-bg: var(--success-light);
   --badge-stock-text: var(--success-text);
   --badge-stock-border: var(--success);
 
-  --badge-soldout-bg: #e9d2d0;
-  --badge-soldout-text: #411b17;
-  --badge-soldout-border: #c2aaa8;
+  --badge-soldout-bg: var(--card-soft);
+  --badge-soldout-text: var(--heading);
+  --badge-soldout-border: var(--border);
 
-  --badge-coupon-bg: #e9d2d0;
-  --badge-coupon-text: #411b17;
-  --badge-coupon-border: #411b17;
+  --badge-coupon-bg: var(--card-soft);
+  --badge-coupon-text: var(--primary);
+  --badge-coupon-border: var(--primary);
 
-  --badge-new-bg: #987d7b;
-  --badge-new-text: #feeded;
-  --badge-new-border: #c2aaa8;
+  --badge-new-bg: var(--accent);
+  --badge-new-text: var(--heading);
+  --badge-new-border: var(--accent-hover);
 
-  --badge-limited-bg: #735756;
-  --badge-limited-text: #feeded;
-  --badge-limited-border: #411b17;
+  --badge-limited-bg: var(--secondary);
+  --badge-limited-text: var(--background);
+  --badge-limited-border: var(--primary);
 
   /* Semantic Colors */
   --success: #2E7D32;
@@ -187,87 +177,86 @@ Palette:
   --star-rgb: 251 192 45;
 
   /* Overlay */
-  --overlay: rgba(65, 27, 23, 0.4);
-  --backdrop: rgba(254, 237, 237, 0.92);
+  --overlay: rgba(31, 18, 15, 0.4);
+  --backdrop: rgba(235, 222, 218, 0.92);
 
   /* Skeleton */
-  --skeleton: #e9d2d0;
-  --skeleton-rgb: 233 210 208;
-  --skeleton-shine: #f5e4e4;
-  --skeleton-shine-rgb: 245 228 228;
+  --skeleton: #E4D4CF;
+  --skeleton-rgb: 228 212 207;
+  --skeleton-shine: #F1E6E2;
+  --skeleton-shine-rgb: 241 230 226;
 }
 
-
 /* ───────────────────────────────────────────
-   DARK THEME — Deep Cocoa Brown
-─────────────────────────────────────────── */
+   DARK THEME - Deep Cocoa (No White Shadows)
+   ─────────────────────────────────────────── */
 .dark {
   /* Base Surfaces */
-  --background: #411b17;
-  --background-rgb: 65 27 23;
-  --surface: #4e2220;
-  --surface-rgb: 78 34 32;
-  --card: #573a38;
-  --card-rgb: 87 58 56;
-  --card-soft: #5f4240;
-  --card-soft-rgb: 95 66 64;
+  --background: #120806;
+  --background-rgb: 18 8 6;
+  --surface: #1A0E0B;
+  --surface-rgb: 26 14 11;
+  --card: #21120E;
+  --card-rgb: 33 18 14;
+  --card-soft: #2A1813;
+  --card-soft-rgb: 42 24 19;
 
   /* Typography */
-  --foreground: #feeded;
-  --foreground-rgb: 254 237 237;
-  --heading: #feeded;
-  --heading-rgb: 254 237 237;
-  --body: #e9d2d0;
-  --body-rgb: 233 210 208;
-  --muted: #c2aaa8;
-  --muted-rgb: 194 170 168;
+  --foreground: #EBDEDA;
+  --foreground-rgb: 235 222 218;
+  --heading: #EBDEDA;
+  --heading-rgb: 235 222 218;
+  --body: #D4C0BA;
+  --body-rgb: 212 192 186;
+  --muted: #A18881;
+  --muted-rgb: 161 136 129;
 
   /* Brand Colors */
-  --primary: #e9d2d0;
-  --primary-rgb: 233 210 208;
-  --primary-hover: #feeded;
-  --primary-hover-rgb: 254 237 237;
-  --primary-active: #c2aaa8;
-  --primary-active-rgb: 194 170 168;
-  --secondary: #c2aaa8;
-  --secondary-rgb: 194 170 168;
-  --accent: #e9d2d0;
-  --accent-rgb: 233 210 208;
-  --accent-hover: #feeded;
-  --accent-hover-rgb: 254 237 237;
+  --primary: #E8D3CB;
+  --primary-rgb: 232 211 203;
+  --primary-hover: #F4E5DF;
+  --primary-hover-rgb: 244 229 223;
+  --primary-active: #D4C0BA;
+  --primary-active-rgb: 212 192 186;
+  --secondary: #C8A79B;
+  --secondary-rgb: 200 167 155;
+  --accent: #E6B25A;
+  --accent-rgb: 230 178 90;
+  --accent-hover: #F0C46E;
+  --accent-hover-rgb: 240 196 110;
 
   /* Navigation */
-  --navbar: #411b17;
-  --navbar-rgb: 65 27 23;
-  --navbar-text: #feeded;
-  --navbar-text-rgb: 254 237 237;
+  --navbar: #120806;
+  --navbar-rgb: 18 8 6;
+  --navbar-text: #EBDEDA;
+  --navbar-text-rgb: 235 222 218;
 
   /* Footer */
-  --footer: #2e120f;
-  --footer-rgb: 46 18 15;
-  --footer-text: #feeded;
-  --footer-text-rgb: 254 237 237;
+  --footer: #0A0403;
+  --footer-rgb: 10 4 3;
+  --footer-text: #EBDEDA;
+  --footer-text-rgb: 235 222 218;
 
   /* Borders */
-  --border: #735756;
-  --border-rgb: 115 87 86;
-  --border-light: #7d6160;
-  --border-light-rgb: 125 97 96;
-  --border-dark: #4e2220;
-  --border-dark-rgb: 78 34 32;
+  --border: #3A211B;
+  --border-rgb: 58 33 27;
+  --border-light: #4B2B24;
+  --border-light-rgb: 75 43 36;
+  --border-dark: #27130F;
+  --border-dark-rgb: 39 19 15;
 
   /* Inputs */
-  --input: #573a38;
-  --input-rgb: 87 58 56;
-  --input-border: #735756;
-  --input-border-rgb: 115 87 86;
-  --input-focus: #e9d2d0;
-  --ring: rgba(233, 210, 208, 0.18);
+  --input: #21120E;
+  --input-rgb: 33 18 14;
+  --input-border: #3A211B;
+  --input-border-rgb: 58 33 27;
+  --input-focus: #E8D3CB;
+  --ring: rgba(232, 211, 203, 0.15);
 
-  /* Neumorphism Shadows — Dark (no white shadows) */
-  --shadow-light: rgba(115, 87, 86, 0.35);
-  --shadow-dark: rgba(0, 0, 0, 0.55);
-  --shadow-deep: rgba(0, 0, 0, 0.72);
+  /* Neumorphism Shadows - Dark Theme */
+  --shadow-light: rgba(70, 40, 35, 0.3);
+  --shadow-dark: rgba(0, 0, 0, 0.5);
+  --shadow-deep: rgba(0, 0, 0, 0.7);
 
   --nm-extruded: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
   --nm-sunken: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-dark);
@@ -277,51 +266,51 @@ Palette:
   --nm-flat: 0px 2px 4px var(--shadow-dark);
 
   /* Buttons */
-  --button-bg: #e9d2d0;
-  --button-bg-rgb: 233 210 208;
-  --button-text: #411b17;
-  --button-text-rgb: 65 27 23;
-  --button-hover: #feeded;
-  --button-hover-rgb: 254 237 237;
-  --button-alt-bg: #573a38;
-  --button-alt-bg-rgb: 87 58 56;
-  --button-alt-text: #e9d2d0;
-  --button-alt-text-rgb: 233 210 208;
-  --button-alt-hover: #5f4240;
-  --button-alt-hover-rgb: 95 66 64;
+  --button-bg: #E8D3CB;
+  --button-bg-rgb: 232 211 203;
+  --button-text: #120806;
+  --button-text-rgb: 18 8 6;
+  --button-hover: #F4E5DF;
+  --button-hover-rgb: 244 229 223;
+  --button-alt-bg: #21120E;
+  --button-alt-bg-rgb: 33 18 14;
+  --button-alt-text: #E8D3CB;
+  --button-alt-text-rgb: 232 211 203;
+  --button-alt-hover: #2A1813;
+  --button-alt-hover-rgb: 42 24 19;
 
-  /* Badge Colors — Dark Theme */
-  --badge-bestseller-bg: #987d7b;
-  --badge-bestseller-text: #feeded;
-  --badge-bestseller-border: #c2aaa8;
+  /* ─── BADGE COLORS - Dark Theme ─── */
+  --badge-bestseller-bg: var(--accent);
+  --badge-bestseller-text: var(--background);
+  --badge-bestseller-border: var(--accent-hover);
 
-  --badge-featured-bg: #c2aaa8;
-  --badge-featured-text: #411b17;
-  --badge-featured-border: #e9d2d0;
+  --badge-featured-bg: var(--secondary);
+  --badge-featured-text: var(--background);
+  --badge-featured-border: var(--primary);
 
-  --badge-discount-bg: #e9d2d0;
-  --badge-discount-text: #411b17;
-  --badge-discount-border: #feeded;
+  --badge-discount-bg: var(--primary);
+  --badge-discount-text: var(--background);
+  --badge-discount-border: var(--primary-hover);
 
   --badge-stock-bg: var(--success-light);
   --badge-stock-text: var(--success-text);
   --badge-stock-border: var(--success);
 
-  --badge-soldout-bg: #5f4240;
-  --badge-soldout-text: #e9d2d0;
-  --badge-soldout-border: #735756;
+  --badge-soldout-bg: var(--card-soft);
+  --badge-soldout-text: var(--heading);
+  --badge-soldout-border: var(--border);
 
-  --badge-coupon-bg: #5f4240;
-  --badge-coupon-text: #e9d2d0;
-  --badge-coupon-border: #e9d2d0;
+  --badge-coupon-bg: var(--card-soft);
+  --badge-coupon-text: var(--primary);
+  --badge-coupon-border: var(--primary);
 
-  --badge-new-bg: #987d7b;
-  --badge-new-text: #feeded;
-  --badge-new-border: #c2aaa8;
+  --badge-new-bg: var(--accent);
+  --badge-new-text: var(--background);
+  --badge-new-border: var(--accent-hover);
 
-  --badge-limited-bg: #c2aaa8;
-  --badge-limited-text: #411b17;
-  --badge-limited-border: #e9d2d0;
+  --badge-limited-bg: var(--secondary);
+  --badge-limited-text: var(--background);
+  --badge-limited-border: var(--primary);
 
   /* Semantic Colors */
   --success: #66BB6A;
@@ -364,19 +353,18 @@ Palette:
 
   /* Overlay */
   --overlay: rgba(0, 0, 0, 0.6);
-  --backdrop: rgba(65, 27, 23, 0.92);
+  --backdrop: rgba(18, 8, 6, 0.92);
 
   /* Skeleton */
-  --skeleton: #5f4240;
-  --skeleton-rgb: 95 66 64;
-  --skeleton-shine: #573a38;
-  --skeleton-shine-rgb: 87 58 56;
+  --skeleton: #2A1813;
+  --skeleton-rgb: 42 24 19;
+  --skeleton-shine: #21120E;
+  --skeleton-shine-rgb: 33 18 14;
 }
-
 
 /* ───────────────────────────────────────────
    GLOBAL STYLES
-─────────────────────────────────────────── */
+   ─────────────────────────────────────────── */
 html,
 body {
   background-color: var(--background);
@@ -386,10 +374,9 @@ body {
   padding: 0;
 }
 
-
 /* ───────────────────────────────────────────
    BADGE STYLES (Solid Blocks + Shifting Gradient Borders)
-─────────────────────────────────────────── */
+   ─────────────────────────────────────────── */
 
 @keyframes badgeBorderMove {
   0%   { background-position: 0% 50%; }
@@ -397,7 +384,7 @@ body {
   100% { background-position: 0% 50%; }
 }
 
-/* Base Badge */
+/* Base Badge Configuration */
 .neo-badge {
   display: inline-flex;
   align-items: center;
@@ -413,7 +400,7 @@ body {
   z-index: 1;
 }
 
-/* Animated Gradient Border Base */
+/* Base Gradient Animated Border Template */
 .badge-gradient-bestseller,
 .badge-gradient-featured,
 .badge-gradient-discount,
@@ -431,20 +418,23 @@ body {
 .badge-gradient-limited::before {
   content: "";
   position: absolute;
-  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
   border-radius: inherit;
   z-index: -1;
   background-size: 200% auto;
   animation: badgeBorderMove 3s linear infinite;
 }
 
-/* Gradient Variants */
+/* Solid Fill + Animated Gradient Borders */
 .badge-gradient-bestseller {
   background-color: var(--badge-bestseller-bg);
   color: var(--badge-bestseller-text);
 }
 .badge-gradient-bestseller::before {
-  background-image: linear-gradient(135deg, #987d7b, #c2aaa8, #e9d2d0, #987d7b);
+  background-image: linear-gradient(135deg, #F59E0B, #D97706, #FEF3C7, #F59E0B);
 }
 
 .badge-gradient-featured {
@@ -452,7 +442,7 @@ body {
   color: var(--badge-featured-text);
 }
 .badge-gradient-featured::before {
-  background-image: linear-gradient(135deg, #573a38, #735756, #c2aaa8, #573a38);
+  background-image: linear-gradient(135deg, #8B5CF6, #6D28D9, #FCE7F3, #8B5CF6);
 }
 
 .badge-gradient-discount {
@@ -460,7 +450,7 @@ body {
   color: var(--badge-discount-text);
 }
 .badge-gradient-discount::before {
-  background-image: linear-gradient(135deg, #411b17, #573a38, #987d7b, #411b17);
+  background-image: linear-gradient(135deg, #EF4444, #DC2626, #FEE2E2, #EF4444);
 }
 
 .badge-gradient-new {
@@ -468,7 +458,7 @@ body {
   color: var(--badge-new-text);
 }
 .badge-gradient-new::before {
-  background-image: linear-gradient(135deg, #987d7b, #c2aaa8, #feeded, #987d7b);
+  background-image: linear-gradient(135deg, #10B981, #059669, #E6F7EE, #10B981);
 }
 
 .badge-gradient-limited {
@@ -476,17 +466,45 @@ body {
   color: var(--badge-limited-text);
 }
 .badge-gradient-limited::before {
-  background-image: linear-gradient(135deg, #735756, #987d7b, #e9d2d0, #735756);
+  background-image: linear-gradient(135deg, #F59E0B, #EA580C, #FEF3C7, #F59E0B);
 }
 
-/* Standard Badges */
-.badge-bestseller { background: var(--badge-bestseller-bg); color: var(--badge-bestseller-text); border: 1px solid var(--badge-bestseller-border); }
-.badge-featured   { background: var(--badge-featured-bg);   color: var(--badge-featured-text);   border: 1px solid var(--badge-featured-border); }
-.badge-discount   { background: var(--badge-discount-bg);   color: var(--badge-discount-text);   border: 1px solid var(--badge-discount-border); }
-.badge-instock    { background: var(--badge-stock-bg);      color: var(--badge-stock-text);      border: 1px solid var(--badge-stock-border); }
-.badge-soldout    { background: var(--badge-soldout-bg);    color: var(--badge-soldout-text);    border: 1px solid var(--badge-soldout-border); }
-.badge-new        { background: var(--badge-new-bg);        color: var(--badge-new-text);        border: 1px solid var(--badge-new-border); }
-.badge-limited    { background: var(--badge-limited-bg);    color: var(--badge-limited-text);    border: 1px solid var(--badge-limited-border); }
+/* Standard Badges (Opaque Fills) */
+.badge-bestseller {
+  background: var(--badge-bestseller-bg);
+  color: var(--badge-bestseller-text);
+  border: 1px solid var(--badge-bestseller-border);
+}
+.badge-featured {
+  background: var(--badge-featured-bg);
+  color: var(--badge-featured-text);
+  border: 1px solid var(--badge-featured-border);
+}
+.badge-discount {
+  background: var(--badge-discount-bg);
+  color: var(--badge-discount-text);
+  border: 1px solid var(--badge-discount-border);
+}
+.badge-instock {
+  background: var(--badge-stock-bg);
+  color: var(--badge-stock-text);
+  border: 1px solid var(--badge-stock-border);
+}
+.badge-soldout {
+  background: var(--badge-soldout-bg);
+  color: var(--badge-soldout-text);
+  border: 1px solid var(--badge-soldout-border);
+}
+.badge-new {
+  background: var(--badge-new-bg);
+  color: var(--badge-new-text);
+  border: 1px solid var(--badge-new-border);
+}
+.badge-limited {
+  background: var(--badge-limited-bg);
+  color: var(--badge-limited-text);
+  border: 1px solid var(--badge-limited-border);
+}
 
 .badge-coupon {
   background: var(--badge-coupon-bg);
@@ -496,12 +514,11 @@ body {
   letter-spacing: 1px;
 }
 
-
 /* ───────────────────────────────────────────
    NEUMORPHISM UTILITY CLASSES
-─────────────────────────────────────────── */
+   ─────────────────────────────────────────── */
 
-/* Cards */
+/* Card Styles */
 .neo-card,
 .bg-card {
   background: var(--card);
@@ -510,6 +527,7 @@ body {
   border: 1px solid var(--border);
 }
 
+/* Sunken/Inset Card */
 .neo-card-sunken {
   background: var(--card);
   border-radius: 24px;
@@ -517,7 +535,7 @@ body {
   border: 1px solid var(--border-light);
 }
 
-/* Inputs */
+/* Input Styles */
 .neo-input,
 input,
 textarea,
@@ -586,7 +604,7 @@ select:focus {
   box-shadow: var(--nm-button-pressed);
 }
 
-/* Avatar */
+/* Avatar Styles */
 .neo-avatar {
   background: var(--card);
   box-shadow: var(--nm-sunken);
@@ -596,7 +614,7 @@ select:focus {
   justify-content: center;
 }
 
-/* Product Cards */
+/* Product Cards and Variations */
 .product-card,
 .product-card-rounded-sm,
 .product-card-rounded-md,
@@ -612,10 +630,10 @@ select:focus {
 }
 
 .product-card          { border-radius: 20px; }
-.product-card-rounded-sm  { border-radius: 12px; }
-.product-card-rounded-md  { border-radius: 16px; }
-.product-card-rounded-lg  { border-radius: 20px; }
-.product-card-rounded-xl  { border-radius: 24px; }
+.product-card-rounded-sm { border-radius: 12px; }
+.product-card-rounded-md { border-radius: 16px; }
+.product-card-rounded-lg { border-radius: 20px; }
+.product-card-rounded-xl { border-radius: 24px; }
 .product-card-soft     { border-radius: 30px 16px 30px 16px; }
 .product-card-pill     { border-radius: 32px; }
 
@@ -630,12 +648,13 @@ select:focus {
   box-shadow: var(--nm-extruded);
 }
 
+/* Image border radius per card variant */
 .product-card-rounded-sm .product-image { border-radius: 8px; }
 .product-card-rounded-md .product-image { border-radius: 12px; }
 .product-card-rounded-lg .product-image { border-radius: 16px; }
 .product-card-rounded-xl .product-image { border-radius: 20px; }
 
-/* Pagination */
+/* Pagination Bullets */
 .neo-pagination-bullet {
   width: 8px;
   height: 8px;
@@ -660,7 +679,7 @@ select:focus {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar          { width: 8px; height: 8px; }
-::-webkit-scrollbar-track    { background: var(--border-light); border-radius: 4px; }
-::-webkit-scrollbar-thumb    { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar         { width: 8px; height: 8px; }
+::-webkit-scrollbar-track   { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb   { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-dark); }

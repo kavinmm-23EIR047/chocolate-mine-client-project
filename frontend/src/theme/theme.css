@@ -2,7 +2,7 @@
    THE CHOCOLATE MINE — MODERN NEUMORPHISM THEME (NO WHITE SHADOWS)
    ─────────────────────────────────────────────────────────────
    Light: Soft Rose Cream (#EBDEDA)
-   Dark: Deep Cocoa (#120806)
+   Dark:  Deep Cocoa (#120806)
    Accent: Caramel Gold (#E6B25A)
    ═══════════════════════════════════════════════════════════════ */
 
@@ -27,9 +27,9 @@
    --card-soft-rgb: 228 212 207;
 
    /* Typography */
-   --foreground: #351f1a;
+   --foreground: #2D1B17;
    --foreground-rgb: 45 27 23;
-   --heading: #351f1a;
+   --heading: #1F120F;
    --heading-rgb: 31 18 15;
    --body: #4A3732;
    --body-rgb: 74 55 50;
@@ -78,17 +78,17 @@
    --input-focus: #4E2820;
    --ring: rgba(78, 40, 32, 0.15);
 
-   /* Solid UI Shadows */
-   --shadow-light: rgba(0, 0, 0, 0.05);
-   --shadow-dark: rgba(0, 0, 0, 0.1);
-   --shadow-deep: rgba(0, 0, 0, 0.15);
+   /* Neumorphism Shadows */
+   --shadow-light: rgba(168, 138, 128, 0.15);
+   --shadow-dark: rgba(56, 26, 20, 0.12);
+   --shadow-deep: rgba(56, 26, 20, 0.2);
 
-   --nm-extruded: 0 4px 12px rgba(0, 0, 0, 0.08);
-   --nm-sunken: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-   --nm-card: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-   --nm-button: 0 1px 2px rgba(0, 0, 0, 0.05);
-   --nm-button-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-   --nm-flat: none;
+   --nm-extruded: -8px -8px 16px var(--shadow-light), 8px 8px 16px var(--shadow-dark);
+   --nm-sunken: inset -4px -4px 8px var(--shadow-light), inset 4px 4px 8px var(--shadow-dark);
+   --nm-card: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
+   --nm-button: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
+   --nm-button-pressed: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-deep);
+   --nm-flat: 0px 2px 4px var(--shadow-dark);
 
    /* Buttons */
    --button-bg: #4E2820;
@@ -253,17 +253,17 @@
    --input-focus: #E8D3CB;
    --ring: rgba(232, 211, 203, 0.15);
 
-   /* Solid UI Shadows - Dark Theme */
-   --shadow-light: rgba(0, 0, 0, 0.2);
-   --shadow-dark: rgba(0, 0, 0, 0.4);
-   --shadow-deep: rgba(0, 0, 0, 0.6);
+   /* Neumorphism Shadows - Dark Theme */
+   --shadow-light: rgba(70, 40, 35, 0.3);
+   --shadow-dark: rgba(0, 0, 0, 0.5);
+   --shadow-deep: rgba(0, 0, 0, 0.7);
 
-   --nm-extruded: 0 4px 12px rgba(0, 0, 0, 0.3);
-   --nm-sunken: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-   --nm-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
-   --nm-button: 0 1px 2px rgba(0, 0, 0, 0.2);
-   --nm-button-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-   --nm-flat: none;
+   --nm-extruded: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
+   --nm-sunken: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-dark);
+   --nm-card: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
+   --nm-button: -4px -4px 8px var(--shadow-light), 4px 4px 8px var(--shadow-dark);
+   --nm-button-pressed: inset -2px -2px 4px var(--shadow-light), inset 2px 2px 4px var(--shadow-deep);
+   --nm-flat: 0px 2px 4px var(--shadow-dark);
 
    /* Buttons */
    --button-bg: #E8D3CB;
@@ -279,7 +279,7 @@
    --button-alt-hover: #2A1813;
    --button-alt-hover-rgb: 42 24 19;
 
-   /* ─── BADGE COLORS - Dark Theme Solid Block Overrides ─── */
+   /* ─── BADGE COLORS - Dark Theme ─── */
    --badge-bestseller-bg: var(--accent);
    --badge-bestseller-text: var(--background);
    --badge-bestseller-border: var(--accent-hover);
@@ -341,7 +341,7 @@
    --info-text: #81D4FA;
    --info-text-rgb: 129 212 250;
 
-   /* E-commerce */
+   /* E-Commerce */
    --sale: #FF5252;
    --sale-rgb: 255 82 82;
    --coupon: #4ADE80;
@@ -436,7 +436,7 @@ body {
    animation: badgeBorderMove 3s linear infinite;
 }
 
-/* Solid Fill Custom Overrides with Animated Borders */
+/* Solid Fill + Animated Gradient Borders */
 .badge-gradient-bestseller {
    background-color: var(--badge-bestseller-bg);
    color: var(--badge-bestseller-text);
@@ -541,7 +541,7 @@ body {
 .neo-card,
 .bg-card {
    background: var(--card);
-   border-radius: 12px;
+   border-radius: 24px;
    box-shadow: var(--nm-extruded);
    border: 1px solid var(--border);
 }
@@ -549,7 +549,7 @@ body {
 /* Sunken/Inset Card */
 .neo-card-sunken {
    background: var(--card);
-   border-radius: 12px;
+   border-radius: 24px;
    box-shadow: var(--nm-sunken);
    border: 1px solid var(--border-light);
 }
@@ -562,7 +562,7 @@ select {
    background: var(--input);
    box-shadow: var(--nm-sunken);
    border: 1px solid var(--input-border);
-   border-radius: 8px;
+   border-radius: 16px;
    padding: 12px 16px;
    color: var(--foreground);
    font-size: 14px;
@@ -578,13 +578,13 @@ select:focus {
    box-shadow: var(--nm-sunken), 0 0 0 3px var(--ring);
 }
 
-/* Button Styles */
+/* Primary Button */
 .neo-btn {
    background: var(--button-bg);
    color: var(--button-text);
    box-shadow: var(--nm-button);
    border: none;
-   border-radius: 8px;
+   border-radius: 40px;
    padding: 12px 24px;
    font-weight: 700;
    font-size: 14px;
@@ -608,7 +608,7 @@ select:focus {
    color: var(--button-alt-text);
    box-shadow: var(--nm-button);
    border: 1px solid var(--border);
-   border-radius: 8px;
+   border-radius: 40px;
    padding: 12px 24px;
    font-weight: 700;
    cursor: pointer;
@@ -649,31 +649,31 @@ select:focus {
 }
 
 .product-card {
-   border-radius: 12px;
-}
-
-.product-card-rounded-sm {
-   border-radius: 8px;
-}
-
-.product-card-rounded-md {
-   border-radius: 12px;
-}
-
-.product-card-rounded-lg {
-   border-radius: 16px;
-}
-
-.product-card-rounded-xl {
    border-radius: 20px;
 }
 
-.product-card-soft {
+.product-card-rounded-sm {
+   border-radius: 12px;
+}
+
+.product-card-rounded-md {
    border-radius: 16px;
 }
 
+.product-card-rounded-lg {
+   border-radius: 20px;
+}
+
+.product-card-rounded-xl {
+   border-radius: 24px;
+}
+
+.product-card-soft {
+   border-radius: 30px 16px 30px 16px;
+}
+
 .product-card-pill {
-   border-radius: 9999px;
+   border-radius: 32px;
 }
 
 .product-card:hover,

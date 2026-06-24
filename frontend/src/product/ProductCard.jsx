@@ -181,6 +181,10 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const [addingToCart, setAddingToCart] = useState(false);
 
+  const isCake = product?.category?.toLowerCase().includes('cake');
+  const isBento = product?.category?.toLowerCase() === 'bento-cakes' || product?.cakeType?.toLowerCase() === 'bento-cakes';
+  const defaultOptions = isCake ? { flavor: 'Standard', weight: isBento ? '250g' : '500g' } : null;
+
   const hasVariants = product?.hasVariants || (product?.variants && product.variants.length > 0);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const activeVariant = hasVariants && product.variants ? product.variants[selectedVariantIndex] : null;
@@ -189,9 +193,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const currentCartItem = cartItems.find(item => {
     const isIdMatch = item.productId === product?._id;
-    if (isIdMatch && activeVariant) {
-      const activeOptions = { flavor: activeVariant.flavor, weight: activeVariant.weight };
-      return JSON.stringify(item.options) === JSON.stringify(activeOptions);
+    if (isIdMatch) {
+      if (isCake) {
+        return JSON.stringify(item.options) === JSON.stringify(defaultOptions);
+      }
+      if (activeVariant) {
+        const activeOptions = { flavor: activeVariant.flavor, weight: activeVariant.weight };
+        return JSON.stringify(item.options) === JSON.stringify(activeOptions);
+      }
     }
     return isIdMatch;
   });
@@ -251,11 +260,24 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
     try {
       setAddingToCart(true);
+      
+      const options = isCake
+        ? { flavor: 'Standard', weight: isBento ? '250g' : '500g' }
+        : activeVariant
+          ? { flavor: activeVariant.flavor, weight: activeVariant.weight }
+          : null;
+          
+      const variantPrice = isCake
+        ? Number(product.price || 0)
+        : activeVariant
+          ? activeVariant.price
+          : null;
+
       dispatch(addToCart({
         product: product,
         qty: 1,
-        options: activeVariant ? { flavor: activeVariant.flavor, weight: activeVariant.weight } : null,
-        variantPrice: activeVariant ? activeVariant.price : null
+        options,
+        variantPrice
       }));
       toast.success('Added to bag');
     } catch (err) {

@@ -57,7 +57,7 @@ const Features = ({ location }) => {
         >
           {isLoading ? (
             Array(4).fill(0).map((_, i) => (
-              <div key={`feat-skel-${i}`} className="snap-start shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px]">
+              <div key={`feat-skel-${i}`} className="snap-start shrink-0 w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px] tv:w-[360px]">
                 <CardSkeleton />
               </div>
             ))
@@ -70,7 +70,7 @@ const Features = ({ location }) => {
                 whileInView="show"
                 viewport={{ once: true }}
                 custom={i}
-                className="snap-start shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px] h-auto flex flex-col"
+                className="snap-start shrink-0 w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px] tv:w-[360px] h-auto flex flex-col"
               >
                 <ProductCard product={p} />
               </motion.div>

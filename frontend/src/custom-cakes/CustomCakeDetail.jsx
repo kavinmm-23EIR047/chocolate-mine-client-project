@@ -56,6 +56,20 @@ export default function CustomCakeDetail({
   WEIGHTS
 }) {
 
+  const prevColor = () => {
+    if (!theme || !theme.flavors || theme.flavors.length <= 1) return;
+    const currentIndex = theme.flavors.findIndex(f => f.id === selectedFlavor?.id);
+    const prevIndex = (currentIndex - 1 + theme.flavors.length) % theme.flavors.length;
+    setSelectedFlavor(theme.flavors[prevIndex]);
+  };
+
+  const nextColor = () => {
+    if (!theme || !theme.flavors || theme.flavors.length <= 1) return;
+    const currentIndex = theme.flavors.findIndex(f => f.id === selectedFlavor?.id);
+    const nextIndex = (currentIndex + 1) % theme.flavors.length;
+    setSelectedFlavor(theme.flavors[nextIndex]);
+  };
+
   const renderPersonalizeForm = () => (
     <div className="space-y-4">
       <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2">
@@ -255,8 +269,12 @@ export default function CustomCakeDetail({
                 />
               </button>
 
-              <button onClick={prevTheme} className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-[var(--card)] text-[var(--heading)] shadow flex items-center justify-center border border-[var(--border)]"><ChevronLeft size={20} /></button>
-              <button onClick={nextTheme} className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-[var(--card)] text-[var(--heading)] shadow flex items-center justify-center border border-[var(--border)]"><ChevronRight size={20} /></button>
+              {theme.enabled && theme.flavors?.length > 1 && (
+                <>
+                  <button onClick={prevColor} className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-[var(--card)] text-[var(--heading)] shadow flex items-center justify-center border border-[var(--border)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)] transition-colors active:scale-95"><ChevronLeft size={20} /></button>
+                  <button onClick={nextColor} className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-[var(--card)] text-[var(--heading)] shadow flex items-center justify-center border border-[var(--border)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)] transition-colors active:scale-95"><ChevronRight size={20} /></button>
+                </>
+              )}
 
               <div className="w-full h-full">
                 <AnimatePresence mode="wait">

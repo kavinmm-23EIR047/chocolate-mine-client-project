@@ -31,6 +31,24 @@ const sendTelegram = async (message) => {
 };
 
 // =============================================================================
+// Helper: Resolve dynamic display flavor for order items
+const getDisplayFlavor = (item) => {
+  if (!item) return 'Standard';
+  if (item.isCustomCake) return item.selectedFlavor || 'Custom';
+  const flavor = item.selectedFlavor;
+  if (!flavor || flavor.toLowerCase() === 'standard') {
+    const cat = String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
+    if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';
+    if (cat.includes('red-velvet') || cat.includes('red velvet') || name.includes('red-velvet') || name.includes('red velvet')) return 'Red Velvet';
+    if (cat.includes('bento') || name.includes('bento')) return 'Bento';
+    return 'Standard';
+  }
+  return flavor;
+};
+
+// =============================================================================
 // Helper: Format a single order item with custom cake details
 // =============================================================================
 
@@ -62,8 +80,18 @@ const formatOrderItem = (item) => {
     }
     return details.trim();
   }
+  
   // Normal product
-  return `🍰 ${item.name} (x${item.qty})`;
+  let details = `🍰 *${item.name}* (x${item.qty})`;
+  const resolvedFlavor = getDisplayFlavor(item);
+  const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+  const showWeight = item.selectedWeight;
+  if (showFlavor || showWeight) {
+    details += `\n`;
+    if (showFlavor) details += `   Flavor: ${resolvedFlavor}\n`;
+    if (showWeight) details += `   Weight: ${showWeight}\n`;
+  }
+  return details.trim();
 };
 
 // =============================================================================

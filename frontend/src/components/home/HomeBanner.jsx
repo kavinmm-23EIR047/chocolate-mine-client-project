@@ -27,15 +27,16 @@ const HomeBanner = () => {
     if (banners.length <= 1) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % banners.length);
-    }, 5000);
+    }, 3500);
     return () => clearInterval(timer);
-  }, [banners.length]);
+  }, [banners.length, current]);
 
   const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
   const handleBannerClick = (e) => {
-    if (!slide?.link) return;
+    const activeSlide = banners[current];
+    if (!activeSlide?.link) return;
     if (e.target.closest('.interactive-action-node')) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -44,20 +45,20 @@ const HomeBanner = () => {
     if (banners.length > 1 && clickX < rect.width * 0.35) {
       prevSlide();
     } else {
-      window.location.href = slide.link;
+      window.location.href = activeSlide.link;
     }
   };
 
   if (loading) {
     return (
-      <div className="w-full rounded-3xl bg-muted/10 animate-pulse border border-border/20"
+      <div className="w-full rounded-[16px] sm:rounded-[24px] bg-muted/10 animate-pulse border border-border/20"
         style={{ aspectRatio: '16/5' }} />
     );
   }
 
   if (banners.length === 0) {
     return (
-      <div className="w-full rounded-3xl overflow-hidden relative border border-border/20"
+      <div className="w-full rounded-[16px] sm:rounded-[24px] overflow-hidden relative border border-border/20"
         style={{ aspectRatio: '16/5' }}>
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-chocolate to-espresso flex items-center justify-center">
           <img src="/logo.png" alt="Logo" className="w-32 object-contain" />
@@ -70,18 +71,18 @@ const HomeBanner = () => {
 
   return (
     <div
-      className="banner-root relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] shadow-premium select-none"
+      className="banner-root relative w-full overflow-hidden rounded-[16px] sm:rounded-[24px] shadow-premium select-none"
       style={{ aspectRatio: 'var(--banner-ratio, 16/9)' }}
     >
       <style>{`
         @media (max-width: 480px) {
-          .banner-root { aspect-ratio: 16/6.5 !important; }
+          .banner-root { aspect-ratio: 16/6 !important; } 
         }
         @media (min-width: 481px) {
-          .banner-root { aspect-ratio: 16/4.8 !important; }
+          .banner-root { aspect-ratio: 16/4.5 !important; }
         }
         @media (min-width: 1920px) {
-          .banner-root { aspect-ratio: 16/4.2 !important; }
+          .banner-root { aspect-ratio: 16/3.9 !important; }
         }
 
         @property --border-angle {
@@ -91,7 +92,8 @@ const HomeBanner = () => {
         }
 
         .banner-root {
-          border: 3px solid transparent;
+          /* Reduced thickness here from 3px to 1.5px to make it ultra-light */
+          border: 1.5px solid transparent;
           background: 
             linear-gradient(#121212, #121212) padding-box, 
             conic-gradient(from var(--border-angle), #fccc63, #fba650, #f15f53, #e2336b, #b9359a, #62529c, #fccc63) border-box;
@@ -160,7 +162,6 @@ const HomeBanner = () => {
                 </span>
               )}
 
-              {/* Added light opacity (opacity-80) to container elements */}
               <div className="premium-glass flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit pointer-events-auto opacity-80">
                 <Gift size={12} className="text-white shrink-0" />
                 <h2
@@ -184,7 +185,6 @@ const HomeBanner = () => {
           </div>
 
           {/* BOTTOM-RIGHT: Action Button */}
-          {/* Added text-white/80 to give the text and icon a soft opacity */}
           <div className="interactive-action-node absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-20 transition-transform duration-300 hover:scale-[1.02] pointer-events-auto">
             <button
               onClick={(e) => {
@@ -214,6 +214,13 @@ const HomeBanner = () => {
               role="button"
               tabIndex={0}
               onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setCurrent(i);
+                }
+              }}
               aria-label={`Go to slide ${i + 1}`}
               style={{
                 width: current === i ? '16px' : '6px',

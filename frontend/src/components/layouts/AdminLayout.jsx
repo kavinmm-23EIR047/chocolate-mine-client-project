@@ -56,7 +56,7 @@ const AdminLayout = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-5 py-6 border-b border-border">
+      <div className="px-5 py-6 border-b border-border flex items-center justify-between">
         <Link to="/admin/dashboard" className="flex items-center gap-3">
           <Logo className="w-8 h-8" />
           {sidebarOpen && (
@@ -69,6 +69,14 @@ const AdminLayout = () => {
             </motion.span>
           )}
         </Link>
+        {/* Mobile Close Button */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden p-2 rounded-xl text-heading hover:bg-heading/10 transition-all active:scale-95 flex items-center justify-center"
+          aria-label="Close menu"
+        >
+          <X size={22} />
+        </button>
       </div>
 
       {/* Nav Items */}
@@ -160,9 +168,9 @@ const AdminLayout = () => {
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25 }}
               className="fixed left-0 top-0 bottom-0 w-full sm:w-80 bg-card border-r border-border z-50 lg:hidden"
             >

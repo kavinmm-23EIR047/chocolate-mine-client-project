@@ -13,6 +13,21 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 
+const getDisplayFlavor = (item) => {
+  if (item.isCustomCake) return item.selectedFlavor || 'Custom';
+  const flavor = item.selectedFlavor;
+  if (!flavor || flavor.toLowerCase() === 'standard') {
+    const cat = String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
+    if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';
+    if (cat.includes('red-velvet') || cat.includes('red velvet') || name.includes('red-velvet') || name.includes('red velvet')) return 'Red Velvet';
+    if (cat.includes('bento') || name.includes('bento')) return 'Bento';
+    return 'Standard';
+  }
+  return flavor;
+};
+
 // Order Details Modal Component
 const OrderDetailsModal = ({ order, onClose }) => {
   const [expandedItems, setExpandedItems] = useState({});
@@ -76,20 +91,22 @@ const OrderDetailsModal = ({ order, onClose }) => {
                       <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-border/20" />
                     )}
                     <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-bold text-heading">{item.name}</p>
-                          <p className="text-xs text-muted font-mono">SKU: {item.sku || 'N/A'}</p>
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0">
+                          <p className="font-bold text-heading truncate">{item.name}</p>
+                          <p className="text-[10px] sm:text-xs text-muted font-mono break-all">SKU: {item.sku || 'N/A'}</p>
                         </div>
-                        <p className="font-bold text-heading">{formatCurrency(item.price * item.qty)}</p>
+                        <p className="font-bold text-heading shrink-0">{formatCurrency(item.price * item.qty)}</p>
                       </div>
                       <div className="flex justify-between text-sm mt-1">
                         <span className="text-muted">Qty: {item.qty}</span>
                         <span className="text-muted">{formatCurrency(item.price)} each</span>
                       </div>
-                      {(item.selectedFlavor || item.selectedWeight) && (
+                      {(item.selectedFlavor || item.selectedWeight || getDisplayFlavor(item) !== 'Standard') && (
                         <div className="text-xs text-muted mt-1">
-                          {item.selectedFlavor && <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
+                          {(item.selectedFlavor || getDisplayFlavor(item) !== 'Standard') && (
+                            <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {getDisplayFlavor(item)}</span>
+                          )}
                           {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
                         </div>
                       )}

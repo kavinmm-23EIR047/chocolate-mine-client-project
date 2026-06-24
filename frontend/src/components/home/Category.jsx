@@ -6,18 +6,18 @@ import api from '../../utils/api';
 const HighlightCircle = ({ image, name, isActive, onClick, size = "md" }) => {
   const sizeClasses = {
     sm: "w-12 h-12 sm:w-14 sm:h-14",
-    md: "w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32",
+    md: "w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28",
   };
 
   const textSize = {
-    sm: "text-[10px] sm:text-xs",
-    md: "text-[11px] sm:text-xs lg:text-sm",
+    sm: "text-[9px] sm:text-[10px]",
+    md: "text-[10px] sm:text-[11px] lg:text-xs",
   };
 
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-3 group outline-none shrink-0 snap-center transition-transform active:scale-95 min-w-[88px] sm:min-w-[118px] lg:min-w-[136px]"
+      className="flex flex-col items-center gap-2 group outline-none shrink-0 snap-center transition-transform active:scale-95 min-w-[76px] sm:min-w-[108px] lg:min-w-[124px]"
     >
       <div className={`relative ${sizeClasses[size]} transition-all duration-300 ${isActive ? 'scale-105' : 'hover:scale-105'}`}>
 
@@ -77,6 +77,25 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
     fetchCategories();
   }, []);
 
+  // Auto-scroll sliding loop for Category circles
+  useEffect(() => {
+    if (categories.length <= 1 || !scrollRef.current) return;
+
+    const container = scrollRef.current;
+    
+    const interval = setInterval(() => {
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (container.scrollLeft >= maxScroll - 10) {
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        const itemWidth = container.firstElementChild?.clientWidth || 110;
+        container.scrollBy({ left: itemWidth + 16, behavior: 'smooth' });
+      }
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [categories.length]);
+
   // Center active element smoothly inside the viewport
   const centerActiveItem = (index) => {
     if (!scrollRef.current) return;
@@ -107,7 +126,14 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
   if (loading) return null;
 
   return (
-    <section className="py-6 relative w-full mx-auto overflow-hidden">
+    <section className="py-3 relative w-full mx-auto overflow-hidden">
+      {/* Category Section Title */}
+      <div className="px-4 md:px-16 mb-4">
+        <h2 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-heading uppercase">
+          Shop by Category
+        </h2>
+      </div>
+
       <style>{`
         @property --circle-border-angle {
           syntax: '<angle>';
@@ -130,7 +156,7 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
       {/* UNIFIED SCROLL CONTAINER */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-5 md:gap-8 tv:gap-12 px-4 md:px-16 pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden items-start"
+        className="flex overflow-x-auto gap-4 md:gap-6 tv:gap-10 px-4 md:px-16 pb-3 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden items-start"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {categories.map((cat, index) => (
@@ -144,7 +170,8 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
               if (cat.isCustom) {
                 navigate('/custom-cake');
               } else {
-                setActiveCategory(cat.name);
+                const categoryParam = cat.name === 'All' ? 'all' : cat.name;
+                navigate(`/shop?category=${categoryParam}`);
               }
             }}
             size="md"

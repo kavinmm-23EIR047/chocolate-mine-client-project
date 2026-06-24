@@ -57,7 +57,7 @@ const Bestseller = ({ location }) => {
         >
           {isLoading ? (
             Array(4).fill(0).map((_, i) => (
-              <div key={`best-skel-${i}`} className="snap-start shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px]">
+              <div key={`best-skel-${i}`} className="snap-start shrink-0 w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px] tv:w-[360px]">
                 <CardSkeleton />
               </div>
             ))
@@ -70,7 +70,7 @@ const Bestseller = ({ location }) => {
                 whileInView="show"
                 viewport={{ once: true }}
                 custom={i}
-                className="snap-start shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px] h-auto flex flex-col"
+                className="snap-start shrink-0 w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px] tv:w-[360px] h-auto flex flex-col"
               >
                 <ProductCard product={p} />
               </motion.div>

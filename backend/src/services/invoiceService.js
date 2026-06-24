@@ -51,6 +51,23 @@ function hRule(doc, y, color, thickness) {
      .restore();
 }
 
+// ─── Helper: Resolve dynamic display flavor for order items ───────────────────
+function getDisplayFlavor(item) {
+  if (!item) return 'Standard';
+  if (item.isCustomCake) return item.selectedFlavor || 'Custom';
+  var flavor = item.selectedFlavor;
+  if (!flavor || flavor.toLowerCase() === 'standard') {
+    var cat = String(item.category || '').toLowerCase();
+    var name = String(item.name || '').toLowerCase();
+    if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
+    if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';
+    if (cat.includes('red-velvet') || cat.includes('red velvet') || name.includes('red-velvet') || name.includes('red velvet')) return 'Red Velvet';
+    if (cat.includes('bento') || name.includes('bento')) return 'Bento';
+    return 'Standard';
+  }
+  return flavor;
+}
+
 exports.generateInvoiceBuffer = async (orderId) => {
   try {
     const order = await Order.findById(orderId).populate('userId');
@@ -187,9 +204,21 @@ exports.generateInvoiceBuffer = async (orderId) => {
       const price = Number(item.price || 0);
       const total = qty * price;
       const nameText = item.name || '—';
-      
-      const descH = doc.heightOfString(nameText, { font: 'Helvetica', fontSize: 9, width: COL_W.desc });
-      const rowH = Math.max(descH + ROW_PAD * 2, 26);
+
+      // Build subtitle with flavor/weight
+      const resolvedFlavor = getDisplayFlavor(item);
+      const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+      const weight = item.selectedWeight || (item.isCustomCake && item.customDetails && item.customDetails.weight) || '';
+      const flavorDisplay = item.isCustomCake
+        ? (item.customDetails && item.customDetails.flavour ? item.customDetails.flavour : resolvedFlavor)
+        : (showFlavor ? resolvedFlavor : '');
+      const subParts = [flavorDisplay, weight].filter(Boolean);
+      const subtitle = subParts.length > 0 ? subParts.join(' · ') : '';
+
+      // Calculate row height based on name + optional subtitle
+      const nameH = doc.heightOfString(nameText, { font: 'Helvetica', fontSize: 9, width: COL_W.desc });
+      const subH = subtitle ? doc.heightOfString(subtitle, { font: 'Helvetica-Oblique', fontSize: 7.5, width: COL_W.desc }) + 2 : 0;
+      const rowH = Math.max(nameH + subH + ROW_PAD * 2, 26);
 
       // Explicit alternate background tracking row strips
       doc.rect(MARGIN, rowY, CONTENT_W, rowH)
@@ -202,6 +231,11 @@ exports.generateInvoiceBuffer = async (orderId) => {
       doc.font('Helvetica').fontSize(9).fillColor(COLORS.brandText);
       doc.text(qty.toString(),             COL.qty,       cy, { width: COL_W.qty,       align: 'center' });
       doc.text(nameText,                    COL.desc,      cy, { width: COL_W.desc,      align: 'left' });
+      if (subtitle) {
+        doc.font('Helvetica-Oblique').fontSize(7.5).fillColor(COLORS.brandMuted);
+        doc.text(subtitle, COL.desc, cy + nameH + 1, { width: COL_W.desc, align: 'left' });
+      }
+      doc.font('Helvetica').fontSize(9).fillColor(COLORS.brandText);
       doc.text('Rs. ' + price.toFixed(2),   COL.unitPrice, cy, { width: COL_W.unitPrice, align: 'right' });
       doc.text('Rs. ' + total.toFixed(2),   COL.amount,    cy, { width: COL_W.amount,    align: 'right' });
 

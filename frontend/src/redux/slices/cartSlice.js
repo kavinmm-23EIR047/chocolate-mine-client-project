@@ -31,6 +31,8 @@ const cartSlice = createSlice({
           variantPrice: variantPrice,
           qty,
           options,
+          selectedFlavor: options?.flavor || options?.color || null,
+          selectedWeight: options?.weight || null,
           stock: product.stock, // Store initial stock for quick reference
           coupon: product.coupon, // Store coupon details
         });

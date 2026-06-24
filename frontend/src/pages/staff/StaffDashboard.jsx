@@ -81,6 +81,21 @@ const OrderStatusDropdown = ({ order, onUpdate }) => {
   );
 };
 
+const getDisplayFlavor = (item) => {
+  if (item.isCustomCake) return item.selectedFlavor || 'Custom';
+  const flavor = item.selectedFlavor;
+  if (!flavor || flavor.toLowerCase() === 'standard') {
+    const cat = String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
+    if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';
+    if (cat.includes('red-velvet') || cat.includes('red velvet') || name.includes('red-velvet') || name.includes('red velvet')) return 'Red Velvet';
+    if (cat.includes('bento') || name.includes('bento')) return 'Bento';
+    return 'Standard';
+  }
+  return flavor;
+};
+
 // Order Details Modal – theme-aware
 const OrderDetailsModal = ({ order, onClose }) => {
   const [expandedItems, setExpandedItems] = useState({});
@@ -141,20 +156,22 @@ const OrderDetailsModal = ({ order, onClose }) => {
                     <div className="flex gap-3">
                       {item.image && <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-border/20" />}
                       <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-bold text-heading">{item.name}</p>
-                            <p className="text-xs text-muted font-mono">{item.sku}</p>
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="min-w-0">
+                            <p className="font-bold text-heading truncate">{item.name}</p>
+                            <p className="text-[10px] sm:text-xs text-muted font-mono break-all">{item.sku}</p>
                           </div>
-                          <p className="font-bold text-heading">{formatCurrency(total)}</p>
+                          <p className="font-bold text-heading shrink-0">{formatCurrency(total)}</p>
                         </div>
                         <div className="flex justify-between text-sm mt-1">
                           <span className="text-muted">Qty: {item.qty}</span>
                           <span className="text-muted">{formatCurrency(itemPrice)} each</span>
                         </div>
-                        {(item.selectedFlavor || item.selectedWeight) && (
+                        {(item.selectedFlavor || item.selectedWeight || getDisplayFlavor(item) !== 'Standard') && (
                           <div className="text-xs text-muted mt-1">
-                            {item.selectedFlavor && <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {item.selectedFlavor}</span>}
+                            {(item.selectedFlavor || getDisplayFlavor(item) !== 'Standard') && (
+                              <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {getDisplayFlavor(item)}</span>
+                            )}
                             {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
                           </div>
                         )}
@@ -416,7 +433,7 @@ const StaffDashboard = () => {
                       <div key={idx} className="flex justify-between items-center p-2 bg-border/10 rounded-lg text-sm border border-transparent group-hover:border-border/50 transition-all">
                         <div className="flex-1 min-w-0">
                           <p className="font-bold truncate text-sm text-heading">{item.name}</p>
-                          <p className="text-[10px] text-muted">{item.qty}x · {item.selectedFlavor || (item.isCustomCake ? 'Custom' : 'Standard')}{item.selectedWeight && ` · ${item.selectedWeight}`}</p>
+                          <p className="text-[10px] text-muted">{item.qty}x · {getDisplayFlavor(item)}{item.selectedWeight && ` · ${item.selectedWeight}`}</p>
                         </div>
                         <p className="font-black text-xs ml-2 shrink-0 text-heading">{formatCurrency(total)}</p>
                       </div>

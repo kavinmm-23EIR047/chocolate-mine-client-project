@@ -41,6 +41,19 @@ const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+const getWeightMultiplier = (weightStr) => {
+  if (!weightStr) return 1;
+  const w = String(weightStr).toLowerCase().replace(/\s+/g, '');
+  if (w.includes('250g')) return 1;
+  if (w.includes('500g')) return 1;
+  if (w.includes('1.5kg')) return 3;
+  if (w.includes('2.5kg')) return 5;
+  if (w.includes('1kg')) return 2;
+  if (w.includes('2kg')) return 4;
+  if (w.includes('3kg')) return 6;
+  return 1;
+};
+
 const computePricing = ({ cartItems, addressLat, addressLng, discount = 0 }) => {
   const subtotal = cartItems.reduce((sum, item) => {
     const unitPrice = Number(item.finalPrice ?? item.price ?? 0);
@@ -179,6 +192,7 @@ const buildCustomBuilderCartItem = async (item) => {
     selectedFlavor: options.color || options.flavor || item.selectedFlavor,
     selectedWeight: options.weight || item.selectedWeight,
     isCustomCake: true,
+    category: 'Custom Cakes',
     customDetails: buildCustomCakeDetails(options)
   };
 };
@@ -224,8 +238,28 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       if (!product || product.stock < directItem.qty)
         throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
 
+      let isCustomCake = false;
+      let customDetails = null;
+      if (product.category === 'Custom Cakes' || (directItem.options && directItem.options.theme)) {
+        isCustomCake = true;
+        const tierNum = directItem.options.tier ? parseInt(directItem.options.tier.replace(/\D/g, '')) || 1 : 1;
+        customDetails = {
+          shape: 'round', tiers: tierNum, weight: directItem.options.weight || '1 kg',
+          flavour: `${directItem.options.color || ''} (Flavour: ${directItem.options.flavor || ''})`,
+          designTheme: directItem.options.theme || 'Teddy Theme',
+          messageOnCake: `Name: ${directItem.options.name || ''}, Age: ${directItem.options.age || ''}, Message: ${directItem.options.message || ''}`,
+          notes: directItem.options.notes || ''
+        };
+      }
+
       let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
-      if (product.hasVariants && product.variants && directItem.selectedFlavor && directItem.selectedWeight) {
+      const isCake = product.category && product.category.toLowerCase().includes('cake');
+      const isBento = product.category && product.category.toLowerCase() === 'bento-cakes';
+      if (isCake && !isCustomCake) {
+        const selectedWeight = directItem.selectedWeight || (directItem.options && directItem.options.weight) || (isBento ? '250g' : '500g');
+        const multiplier = getWeightMultiplier(selectedWeight);
+        salePrice = product.price * multiplier;
+      } else if (product.hasVariants && product.variants && directItem.selectedFlavor && directItem.selectedWeight) {
         const variant = product.variants.find(v => v.flavor === directItem.selectedFlavor && v.weight === directItem.selectedWeight);
         if (variant) salePrice = variant.price;
         if (variant && variant.stock < directItem.qty)
@@ -248,25 +282,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         }
       }
 
-      let isCustomCake = false;
-      let customDetails = null;
-      if (product.category === 'Custom Cakes' || (directItem.options && directItem.options.theme)) {
-        isCustomCake = true;
-        const tierNum = directItem.options.tier ? parseInt(directItem.options.tier.replace(/\D/g, '')) || 1 : 1;
-        customDetails = {
-          shape: 'round', tiers: tierNum, weight: directItem.options.weight || '1 kg',
-          flavour: `${directItem.options.color || ''} (Flavour: ${directItem.options.flavor || ''})`,
-          designTheme: directItem.options.theme || 'Teddy Theme',
-          messageOnCake: `Name: ${directItem.options.name || ''}, Age: ${directItem.options.age || ''}, Message: ${directItem.options.message || ''}`,
-          notes: directItem.options.notes || ''
-        };
-      }
-
       cart = {
         items: [{
           productId: product._id, name: product.name, qty: directItem.qty, price: product.price, image: product.image,
-          finalPrice, activeCouponCode, selectedFlavor: directItem.selectedFlavor || (directItem.options && directItem.options.flavor),
-          selectedWeight: directItem.selectedWeight || (directItem.options && directItem.options.weight), isCustomCake, customDetails
+          finalPrice, activeCouponCode, selectedFlavor: directItem.selectedFlavor || (directItem.options && (directItem.options.color || directItem.options.flavor)),
+          selectedWeight: directItem.selectedWeight || (directItem.options && directItem.options.weight), isCustomCake, customDetails,
+          category: product.category
         }],
         total: finalPrice * directItem.qty
       };
@@ -292,8 +313,28 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         const product = await Product.findById(dbProductId);
         if (!product || product.stock < item.qty) throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
 
+        let isCustomCake = false;
+        let customDetails = null;
+        if (product.category === 'Custom Cakes' || (item.options && item.options.theme)) {
+          isCustomCake = true;
+          const tierNum = item.options.tier ? parseInt(item.options.tier.replace(/\D/g, '')) || 1 : 1;
+          customDetails = {
+            shape: 'round', tiers: tierNum, weight: item.options.weight || '1 kg',
+            flavour: `${item.options.color || ''} (Flavour: ${item.options.flavor || ''})`,
+            designTheme: item.options.theme || 'Teddy Theme',
+            messageOnCake: `Name: ${item.options.name || ''}, Age: ${item.options.age || ''}, Message: ${item.options.message || ''}`,
+            notes: item.options.notes || ''
+          };
+        }
+
         let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
-        if (product.hasVariants && product.variants && item.options?.flavor && item.options?.weight) {
+        const isCake = product.category && product.category.toLowerCase().includes('cake');
+        const isBento = product.category && product.category.toLowerCase() === 'bento-cakes';
+        if (isCake && !isCustomCake) {
+          const selectedWeight = item.options?.weight || item.selectedWeight || (isBento ? '250g' : '500g');
+          const multiplier = getWeightMultiplier(selectedWeight);
+          salePrice = product.price * multiplier;
+        } else if (product.hasVariants && product.variants && item.options?.flavor && item.options?.weight) {
           const variant = product.variants.find(v => v.flavor === item.options.flavor && v.weight === item.options.weight);
           if (variant) salePrice = variant.price;
         }
@@ -314,24 +355,11 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           }
         }
 
-        let isCustomCake = false;
-        let customDetails = null;
-        if (product.category === 'Custom Cakes' || (item.options && item.options.theme)) {
-          isCustomCake = true;
-          const tierNum = item.options.tier ? parseInt(item.options.tier.replace(/\D/g, '')) || 1 : 1;
-          customDetails = {
-            shape: 'round', tiers: tierNum, weight: item.options.weight || '1 kg',
-            flavour: `${item.options.color || ''} (Flavour: ${item.options.flavor || ''})`,
-            designTheme: item.options.theme || 'Teddy Theme',
-            messageOnCake: `Name: ${item.options.name || ''}, Age: ${item.options.age || ''}, Message: ${item.options.message || ''}`,
-            notes: item.options.notes || ''
-          };
-        }
-
         validatedItems.push({
           productId: product._id, name: product.name, qty: item.qty, price: product.price, image: product.image,
-          finalPrice, activeCouponCode, selectedFlavor: item.options?.color || item.options?.flavor,
-          selectedWeight: item.options?.weight, isCustomCake, customDetails
+          finalPrice, activeCouponCode, selectedFlavor: item.options?.color || item.options?.flavor || item.selectedFlavor,
+          selectedWeight: item.options?.weight || item.selectedWeight, isCustomCake, customDetails,
+          category: product.category
         });
         total += finalPrice * item.qty;
       }
@@ -419,6 +447,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       couponCode: item.activeCouponCode,
       selectedFlavor: item.selectedFlavor,
       selectedWeight: item.selectedWeight,
+      category: item.category,
       discountAmount: ((item.price ?? 0) - (item.finalPrice ?? item.price ?? 0)) * item.qty,
       isCustomCake: item.isCustomCake || false,
       customDetails: item.customDetails || null
@@ -504,13 +533,8 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
     if (product) {
       try {
         const notificationManager = require('../services/notificationManager');
-        if (product.stock === false || product.stock === 0) notificationManager.notifyOutOfStockAlert(product.name).catch(e => console.error(e));
-        else if (typeof product.stock === 'number' && product.stock <= 5) notificationManager.notifyLowStockAlert(product.name, product.stock).catch(e => console.error(e));
+        if (product.stock === false) notificationManager.notifyOutOfStockAlert(product.name).catch(e => console.error(e));
       } catch (err) { console.error('Notification error:', err); }
-      const admins = await User.find({ role: 'admin' });
-      for (const admin of admins) {
-        if (admin.phone) telegramService.sendLowStockAlert(admin.phone, product.name, product.stock).catch(e => console.error(e));
-      }
     }
   }
   try {

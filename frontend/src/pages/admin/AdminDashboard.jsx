@@ -92,7 +92,7 @@ const AdminDashboard = () => {
             }
           }}
           disabled={exporting}
-          className="flex items-center gap-2 bg-primary text-primary-content px-5 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="neo-btn flex items-center justify-center gap-2 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Download size={20} />
           {exporting ? 'Exporting...' : 'Export All Data'}
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-3`}>
               <card.icon size={20} className="text-white" />
             </div>
-            <p className="text-2xl font-black text-heading">
+            <p className="text-xl sm:text-2xl font-black text-heading truncate">
               {card.isCurrency ? formatCurrency(stats?.[card.key] || 0) : (stats?.[card.key] || 0)}
             </p>
             <p className="text-xs text-muted font-medium mt-1">{card.label}</p>
@@ -129,12 +129,12 @@ const AdminDashboard = () => {
           className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
           <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
-            <p className="text-sm text-muted font-medium">Google Average</p>
-            <p className="text-3xl font-black text-heading mt-2">{googleReviewsStats.averageRating} ⭐</p>
+            <p className="text-sm text-muted font-medium truncate">Google Average</p>
+            <p className="text-2xl sm:text-3xl font-black text-heading mt-2 truncate">{googleReviewsStats.averageRating} ⭐</p>
           </div>
           <div className="bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 rounded-2xl p-6">
-            <p className="text-sm text-muted font-medium">Total Google Reviews</p>
-            <p className="text-3xl font-black text-heading mt-2">{googleReviewsStats.totalReviews}</p>
+            <p className="text-sm text-muted font-medium truncate">Total Google Reviews</p>
+            <p className="text-2xl sm:text-3xl font-black text-heading mt-2 truncate">{googleReviewsStats.totalReviews}</p>
           </div>
         </motion.div>
       )}
@@ -205,9 +205,9 @@ const AdminDashboard = () => {
             { label: 'Failed', value: analytics.payments.failed, color: 'text-error' },
             { label: 'Refunded', value: analytics.payments.refunded, color: 'text-purple-500' },
           ].map((p) => (
-            <div key={p.label} className="bg-card border border-border rounded-2xl p-4 text-center">
-              <p className={`text-3xl font-black ${p.color}`}>{p.value}</p>
-              <p className="text-xs text-muted font-medium mt-1">{p.label} Payments</p>
+            <div key={p.label} className="bg-card border border-border rounded-2xl p-4 text-center overflow-hidden">
+              <p className={`text-xl sm:text-3xl font-black ${p.color} truncate`}>{p.value}</p>
+              <p className="text-xs text-muted font-medium mt-1 truncate">{p.label} Payments</p>
             </div>
           ))}
         </motion.div>
@@ -222,16 +222,16 @@ const AdminDashboard = () => {
           className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           <div className="bg-gradient-to-br from-secondary/20 to-secondary/5 border border-secondary/20 rounded-2xl p-6">
-            <p className="text-sm text-muted font-medium">Total Revenue</p>
-            <p className="text-3xl font-black text-heading mt-2">{formatCurrency(analytics.revenue.totalRevenue)}</p>
+            <p className="text-sm text-muted font-medium truncate">Total Revenue</p>
+            <p className="text-2xl sm:text-3xl font-black text-heading mt-2 truncate">{formatCurrency(analytics.revenue.totalRevenue)}</p>
             <div className="flex items-center gap-1 mt-2 text-success text-sm">
               <ArrowUpRight size={16} />
               <span className="font-medium">All time earnings</span>
             </div>
           </div>
           <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
-            <p className="text-sm text-muted font-medium">Monthly Revenue</p>
-            <p className="text-3xl font-black text-heading mt-2">{formatCurrency(analytics.revenue.monthlyRevenue)}</p>
+            <p className="text-sm text-muted font-medium truncate">Monthly Revenue</p>
+            <p className="text-2xl sm:text-3xl font-black text-heading mt-2 truncate">{formatCurrency(analytics.revenue.monthlyRevenue)}</p>
             <div className="flex items-center gap-1 mt-2 text-blue-500 text-sm">
               <ArrowUpRight size={16} />
               <span className="font-medium">This month</span>

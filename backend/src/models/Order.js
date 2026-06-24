@@ -113,6 +113,7 @@ const orderSchema = new mongoose.Schema(
         selectedWeight: { type: String },
         customFlavor: { type: String },
         customWeight: { type: String },
+        category: { type: String },
 
         isCustomCake: { type: Boolean, default: false },
 

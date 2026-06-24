@@ -27,9 +27,9 @@
    --card-soft-rgb: 228 212 207;
 
    /* Typography */
-   --foreground: #2D1B17;
+   --foreground: #351f1a;
    --foreground-rgb: 45 27 23;
-   --heading: #1F120F;
+   --heading: #351f1a;
    --heading-rgb: 31 18 15;
    --body: #4A3732;
    --body-rgb: 74 55 50;
@@ -78,17 +78,17 @@
    --input-focus: #4E2820;
    --ring: rgba(78, 40, 32, 0.15);
 
-   /* Neumorphism Shadows */
-   --shadow-light: rgba(168, 138, 128, 0.15);
-   --shadow-dark: rgba(56, 26, 20, 0.12);
-   --shadow-deep: rgba(56, 26, 20, 0.2);
+   /* Solid UI Shadows */
+   --shadow-light: rgba(0, 0, 0, 0.05);
+   --shadow-dark: rgba(0, 0, 0, 0.1);
+   --shadow-deep: rgba(0, 0, 0, 0.15);
 
-   --nm-extruded: -8px -8px 16px var(--shadow-light), 8px 8px 16px var(--shadow-dark);
-   --nm-sunken: inset -4px -4px 8px var(--shadow-light), inset 4px 4px 8px var(--shadow-dark);
-   --nm-card: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
-   --nm-button: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
-   --nm-button-pressed: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-deep);
-   --nm-flat: 0px 2px 4px var(--shadow-dark);
+   --nm-extruded: 0 4px 12px rgba(0, 0, 0, 0.08);
+   --nm-sunken: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+   --nm-card: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+   --nm-button: 0 1px 2px rgba(0, 0, 0, 0.05);
+   --nm-button-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+   --nm-flat: none;
 
    /* Buttons */
    --button-bg: #4E2820;
@@ -253,17 +253,17 @@
    --input-focus: #E8D3CB;
    --ring: rgba(232, 211, 203, 0.15);
 
-   /* Neumorphism Shadows - Dark Theme */
-   --shadow-light: rgba(70, 40, 35, 0.3);
-   --shadow-dark: rgba(0, 0, 0, 0.5);
-   --shadow-deep: rgba(0, 0, 0, 0.7);
+   /* Solid UI Shadows - Dark Theme */
+   --shadow-light: rgba(0, 0, 0, 0.2);
+   --shadow-dark: rgba(0, 0, 0, 0.4);
+   --shadow-deep: rgba(0, 0, 0, 0.6);
 
-   --nm-extruded: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
-   --nm-sunken: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-dark);
-   --nm-card: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
-   --nm-button: -4px -4px 8px var(--shadow-light), 4px 4px 8px var(--shadow-dark);
-   --nm-button-pressed: inset -2px -2px 4px var(--shadow-light), inset 2px 2px 4px var(--shadow-deep);
-   --nm-flat: 0px 2px 4px var(--shadow-dark);
+   --nm-extruded: 0 4px 12px rgba(0, 0, 0, 0.3);
+   --nm-sunken: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+   --nm-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
+   --nm-button: 0 1px 2px rgba(0, 0, 0, 0.2);
+   --nm-button-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+   --nm-flat: none;
 
    /* Buttons */
    --button-bg: #E8D3CB;
@@ -379,9 +379,17 @@ body {
    ─────────────────────────────────────────── */
 
 @keyframes badgeBorderMove {
-   0% { background-position: 0% 50%; }
-   50% { background-position: 100% 50%; }
-   100% { background-position: 0% 50%; }
+   0% {
+      background-position: 0% 50%;
+   }
+
+   50% {
+      background-position: 100% 50%;
+   }
+
+   100% {
+      background-position: 0% 50%;
+   }
 }
 
 /* Base Badge Configuration */
@@ -418,7 +426,10 @@ body {
 .badge-gradient-limited::before {
    content: "";
    position: absolute;
-   top: -1px; left: -1px; right: -1px; bottom: -1px;
+   top: -1px;
+   left: -1px;
+   right: -1px;
+   bottom: -1px;
    border-radius: inherit;
    z-index: -1;
    background-size: 200% auto;
@@ -430,6 +441,7 @@ body {
    background-color: var(--badge-bestseller-bg);
    color: var(--badge-bestseller-text);
 }
+
 .badge-gradient-bestseller::before {
    background-image: linear-gradient(135deg, #F59E0B, #D97706, #FEF3C7, #F59E0B);
 }
@@ -438,6 +450,7 @@ body {
    background-color: var(--badge-featured-bg);
    color: var(--badge-featured-text);
 }
+
 .badge-gradient-featured::before {
    background-image: linear-gradient(135deg, #8B5CF6, #6D28D9, #FCE7F3, #8B5CF6);
 }
@@ -446,6 +459,7 @@ body {
    background-color: var(--badge-discount-bg);
    color: var(--badge-discount-text);
 }
+
 .badge-gradient-discount::before {
    background-image: linear-gradient(135deg, #EF4444, #DC2626, #FEE2E2, #EF4444);
 }
@@ -454,6 +468,7 @@ body {
    background-color: var(--badge-new-bg);
    color: var(--badge-new-text);
 }
+
 .badge-gradient-new::before {
    background-image: linear-gradient(135deg, #10B981, #059669, #E6F7EE, #10B981);
 }
@@ -462,18 +477,53 @@ body {
    background-color: var(--badge-limited-bg);
    color: var(--badge-limited-text);
 }
+
 .badge-gradient-limited::before {
    background-image: linear-gradient(135deg, #F59E0B, #EA580C, #FEF3C7, #F59E0B);
 }
 
 /* Standard Badges (Opaque Fills) */
-.badge-bestseller { background: var(--badge-bestseller-bg); color: var(--badge-bestseller-text); border: 1px solid var(--badge-bestseller-border); }
-.badge-featured { background: var(--badge-featured-bg); color: var(--badge-featured-text); border: 1px solid var(--badge-featured-border); }
-.badge-discount { background: var(--badge-discount-bg); color: var(--badge-discount-text); border: 1px solid var(--badge-discount-border); }
-.badge-instock { background: var(--badge-stock-bg); color: var(--badge-stock-text); border: 1px solid var(--badge-stock-border); }
-.badge-soldout { background: var(--badge-soldout-bg); color: var(--badge-soldout-text); border: 1px solid var(--badge-soldout-border); }
-.badge-new { background: var(--badge-new-bg); color: var(--badge-new-text); border: 1px solid var(--badge-new-border); }
-.badge-limited { background: var(--badge-limited-bg); color: var(--badge-limited-text); border: 1px solid var(--badge-limited-border); }
+.badge-bestseller {
+   background: var(--badge-bestseller-bg);
+   color: var(--badge-bestseller-text);
+   border: 1px solid var(--badge-bestseller-border);
+}
+
+.badge-featured {
+   background: var(--badge-featured-bg);
+   color: var(--badge-featured-text);
+   border: 1px solid var(--badge-featured-border);
+}
+
+.badge-discount {
+   background: var(--badge-discount-bg);
+   color: var(--badge-discount-text);
+   border: 1px solid var(--badge-discount-border);
+}
+
+.badge-instock {
+   background: var(--badge-stock-bg);
+   color: var(--badge-stock-text);
+   border: 1px solid var(--badge-stock-border);
+}
+
+.badge-soldout {
+   background: var(--badge-soldout-bg);
+   color: var(--badge-soldout-text);
+   border: 1px solid var(--badge-soldout-border);
+}
+
+.badge-new {
+   background: var(--badge-new-bg);
+   color: var(--badge-new-text);
+   border: 1px solid var(--badge-new-border);
+}
+
+.badge-limited {
+   background: var(--badge-limited-bg);
+   color: var(--badge-limited-text);
+   border: 1px solid var(--badge-limited-border);
+}
 
 .badge-coupon {
    background: var(--badge-coupon-bg);
@@ -491,7 +541,7 @@ body {
 .neo-card,
 .bg-card {
    background: var(--card);
-   border-radius: 24px;
+   border-radius: 12px;
    box-shadow: var(--nm-extruded);
    border: 1px solid var(--border);
 }
@@ -499,7 +549,7 @@ body {
 /* Sunken/Inset Card */
 .neo-card-sunken {
    background: var(--card);
-   border-radius: 24px;
+   border-radius: 12px;
    box-shadow: var(--nm-sunken);
    border: 1px solid var(--border-light);
 }
@@ -512,7 +562,7 @@ select {
    background: var(--input);
    box-shadow: var(--nm-sunken);
    border: 1px solid var(--input-border);
-   border-radius: 16px;
+   border-radius: 8px;
    padding: 12px 16px;
    color: var(--foreground);
    font-size: 14px;
@@ -534,7 +584,7 @@ select:focus {
    color: var(--button-text);
    box-shadow: var(--nm-button);
    border: none;
-   border-radius: 40px;
+   border-radius: 8px;
    padding: 12px 24px;
    font-weight: 700;
    font-size: 14px;
@@ -558,7 +608,7 @@ select:focus {
    color: var(--button-alt-text);
    box-shadow: var(--nm-button);
    border: 1px solid var(--border);
-   border-radius: 40px;
+   border-radius: 8px;
    padding: 12px 24px;
    font-weight: 700;
    cursor: pointer;
@@ -598,13 +648,33 @@ select:focus {
    transition: all 0.2s ease;
 }
 
-.product-card { border-radius: 20px; }
-.product-card-rounded-sm { border-radius: 12px; }
-.product-card-rounded-md { border-radius: 16px; }
-.product-card-rounded-lg { border-radius: 20px; }
-.product-card-rounded-xl { border-radius: 24px; }
-.product-card-soft { border-radius: 30px 16px 30px 16px; }
-.product-card-pill { border-radius: 32px; }
+.product-card {
+   border-radius: 12px;
+}
+
+.product-card-rounded-sm {
+   border-radius: 8px;
+}
+
+.product-card-rounded-md {
+   border-radius: 12px;
+}
+
+.product-card-rounded-lg {
+   border-radius: 16px;
+}
+
+.product-card-rounded-xl {
+   border-radius: 20px;
+}
+
+.product-card-soft {
+   border-radius: 16px;
+}
+
+.product-card-pill {
+   border-radius: 9999px;
+}
 
 .product-card:hover,
 .product-card-rounded-sm:hover,
@@ -618,10 +688,21 @@ select:focus {
 }
 
 /* Image border radius variations */
-.product-card-rounded-sm .product-image { border-radius: 8px; }
-.product-card-rounded-md .product-image { border-radius: 12px; }
-.product-card-rounded-lg .product-image { border-radius: 16px; }
-.product-card-rounded-xl .product-image { border-radius: 20px; }
+.product-card-rounded-sm .product-image {
+   border-radius: 8px;
+}
+
+.product-card-rounded-md .product-image {
+   border-radius: 12px;
+}
+
+.product-card-rounded-lg .product-image {
+   border-radius: 16px;
+}
+
+.product-card-rounded-xl .product-image {
+   border-radius: 20px;
+}
 
 /* Pagination Bullets */
 .neo-pagination-bullet {
@@ -648,7 +729,21 @@ select:focus {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--border-light); border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-dark); }
+::-webkit-scrollbar {
+   width: 8px;
+   height: 8px;
+}
+
+::-webkit-scrollbar-track {
+   background: var(--border-light);
+   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+   background: var(--border);
+   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+   background: var(--border-dark);
+}

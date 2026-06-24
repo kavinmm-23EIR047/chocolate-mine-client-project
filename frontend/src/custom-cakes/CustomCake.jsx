@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
-  Star, Heart, ChevronDown, Layers, Filter, Eye, Search, Settings2
+  Star, Heart, ChevronDown, ChevronUp, Layers, Filter, Eye, Search, Settings2, X
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode } from 'swiper/modules';
@@ -25,7 +25,39 @@ import {
 import CustomCakeBrowse from './CustomCakeBrowse';
 import CustomCakeDetail from './CustomCakeDetail';
 
-// ─── COMPONENT ────────────────────────────────────────────────
+// ─── HELPER: Accordion Section Card ────────────────────────────────────
+const SectionCard = ({ title, expanded, onToggle, children }) => (
+  <div className="bg-[var(--card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between p-3.5 bg-[var(--heading)]/5 hover:bg-[var(--heading)]/10 transition-colors border-b border-[var(--border)]"
+    >
+      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80">
+        {title}
+      </h3>
+      {expanded ? (
+        <ChevronUp size={18} className="text-[var(--heading)]/60" />
+      ) : (
+        <ChevronDown size={18} className="text-[var(--heading)]/60" />
+      )}
+    </button>
+    <AnimatePresence>
+      {expanded && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="px-3.5 pb-3.5 pt-3"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+
+// ─── MAIN COMPONENT ──────────────────────────────────────────────────────
 export default function CustomCake() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -39,6 +71,24 @@ export default function CustomCake() {
     } catch {
       return defaultVal;
     }
+  };
+
+  // ── Filter Drawer State ──────────────────────────────────
+  const [isFilterOpen, setIsFilterOpen] = useState(false);       // mobile
+  const [isDesktopFilterOpen, setIsDesktopFilterOpen] = useState(false); // desktop
+
+  // ── Accordion State ──────────────────────────────────────
+  const [expandedSections, setExpandedSections] = useState({
+    tiers: true,
+    search: true,
+    sort: true,
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
   const [selectedTier, setSelectedTier] = useState(null);
@@ -267,7 +317,6 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
-      // Added weight.label to baseCakeId to fix size variations merging issue
       const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}-${weight.label.replace(/\s+/g, '')}`;
 
       dispatch(addToCart({
@@ -314,7 +363,6 @@ export default function CustomCake() {
     try {
       setIsAdding(true);
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
-      // Added weight.label to baseCakeId to fix size variations merging issue
       const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}-${weight.label.replace(/\s+/g, '')}`;
 
       dispatch(addToCart({
@@ -375,7 +423,6 @@ export default function CustomCake() {
       setSelectedDbFlavor(t.dbFlavors[0]);
       sessionStorage.setItem('customCake_insideFlavor', JSON.stringify(t.dbFlavors[0].name));
     }
-    // Persist selection in URL
     const params = new URLSearchParams(window.location.search);
     if (t) params.set('theme', t.id);
     if (selectedTier) params.set('tier', selectedTier);
@@ -384,6 +431,84 @@ export default function CustomCake() {
 
   const isThemeWishlisted = theme ? isInWishlist(theme.id, 'customCake') : false;
 
+  // ── Filter Panel (used in both mobile & desktop drawers) ──
+  const FilterPanel = () => (
+    <div className="space-y-4">
+      {/* Tiers */}
+      <SectionCard
+        title="Tiers"
+        expanded={expandedSections.tiers}
+        onToggle={() => toggleSection('tiers')}
+      >
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3].map((num) => {
+            const tier = getTierById(num);
+            return (
+              <button
+                key={num}
+                onClick={() => setSelectedTier(selectedTier === num ? null : num)}
+                className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all ${selectedTier === num
+                    ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
+                    : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
+                  }`}
+              >
+                {tier?.shortName || `Tier ${num}`}
+              </button>
+            );
+          })}
+        </div>
+      </SectionCard>
+
+      {/* Search */}
+      <SectionCard
+        title="Search Themes"
+        expanded={expandedSections.search}
+        onToggle={() => toggleSection('search')}
+      >
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+          <input
+            type="text"
+            placeholder="Search by theme name..."
+            value={themeSearchFilter}
+            onChange={(e) => setThemeSearchFilter(e.target.value)}
+            className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg py-2 pl-9 pr-3 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
+          />
+        </div>
+      </SectionCard>
+
+      {/* Sort */}
+      <SectionCard
+        title="Sort By"
+        expanded={expandedSections.sort}
+        onToggle={() => toggleSection('sort')}
+      >
+        <select
+          value={priceSortFilter}
+          onChange={(e) => setPriceSortFilter(e.target.value)}
+          className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg p-2.5 text-[12px] font-bold outline-none cursor-pointer"
+        >
+          <option value="">Default</option>
+          <option value="asc">Price: Low → High</option>
+          <option value="desc">Price: High → Low</option>
+        </select>
+      </SectionCard>
+
+      {/* Reset */}
+      <button
+        onClick={() => {
+          setSelectedTier(null);
+          setThemeSearchFilter('');
+          setPriceSortFilter('');
+        }}
+        className="w-full py-3 border border-dashed border-[var(--heading)]/20 rounded-lg text-[12px] font-bold text-[var(--heading)]/80 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all"
+      >
+        Reset All Filters
+      </button>
+    </div>
+  );
+
+  // ── RENDER ─────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans">
 
@@ -405,19 +530,103 @@ export default function CustomCake() {
       {/* ── MAIN ── */}
       <main className="responsive-container py-6 pb-40 lg:pb-8 tv:py-10">
         {themeIdx === null ? (
-          <CustomCakeBrowse 
-            filteredThemes={filteredThemes}
-            loading={loading}
-            selectedTier={selectedTier}
-            setSelectedTier={setSelectedTier}
-            themeSearchFilter={themeSearchFilter}
-            setThemeSearchFilter={setThemeSearchFilter}
-            priceSortFilter={priceSortFilter}
-            setPriceSortFilter={setPriceSortFilter}
-            selectTheme={selectTheme}
-          />
+          <>
+            {/* Browse Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-[var(--heading)]">
+                Choose Your Theme
+                <span className="ml-2 text-sm font-medium text-[var(--muted)] flex-shrink-0">
+                  ({filteredThemes.length} designs)
+                </span>
+              </h2>
+            </div>
+
+            {/* Render browse grid */}
+            <CustomCakeBrowse
+              filteredThemes={filteredThemes}
+              loading={loading}
+              selectedTier={selectedTier}
+              setSelectedTier={setSelectedTier}
+              themeSearchFilter={themeSearchFilter}
+              setThemeSearchFilter={setThemeSearchFilter}
+              priceSortFilter={priceSortFilter}
+              setPriceSortFilter={setPriceSortFilter}
+              selectTheme={selectTheme}
+              hideFilters={true}
+              onToggleFilter={() => setIsFilterOpen(true)}
+              onToggleDesktopFilter={() => setIsDesktopFilterOpen(true)}
+            />
+
+            {/* ── Desktop Filter Drawer ── */}
+            <AnimatePresence>
+              {isDesktopFilterOpen && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setIsDesktopFilterOpen(false)}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+                  />
+                  <motion.aside
+                    initial={{ x: '-100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '-100%' }}
+                    transition={{ type: 'spring', damping: 28 }}
+                    className="fixed left-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-r border-[var(--border)]"
+                  >
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
+                      <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
+                      <button onClick={() => setIsDesktopFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
+                        <X size={18} />
+                      </button>
+                    </div>
+                    <FilterPanel />
+                    <button onClick={() => setIsDesktopFilterOpen(false)}
+                      className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md">
+                      Apply Filters
+                    </button>
+                  </motion.aside>
+                </>
+              )}
+            </AnimatePresence>
+
+            {/* ── Mobile Filter Drawer ── */}
+            <AnimatePresence>
+              {isFilterOpen && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setIsFilterOpen(false)}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+                  />
+                  <motion.div
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ type: 'spring', damping: 28 }}
+                    className="fixed right-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-l border-[var(--border)]"
+                  >
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
+                      <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
+                      <button onClick={() => setIsFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
+                        <X size={18} />
+                      </button>
+                    </div>
+                    <FilterPanel />
+                    <button onClick={() => setIsFilterOpen(false)}
+                      className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md">
+                      Show Results
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </>
         ) : (
-          <CustomCakeDetail 
+          <CustomCakeDetail
             theme={theme}
             currentTier={currentTier}
             selectedTier={selectedTier}

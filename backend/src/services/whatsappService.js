@@ -187,6 +187,25 @@ const sendWhatsApp = async (to, message, role = 'unknown') => {
 };
 
 // =============================================================================
+// Helper: Resolve dynamic display flavor for order items
+// =============================================================================
+const getDisplayFlavor = (item) => {
+  if (!item) return 'Standard';
+  if (item.isCustomCake) return item.selectedFlavor || 'Custom';
+  const flavor = item.selectedFlavor;
+  if (!flavor || flavor.toLowerCase() === 'standard') {
+    const cat = String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
+    if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';
+    if (cat.includes('red-velvet') || cat.includes('red velvet') || name.includes('red-velvet') || name.includes('red velvet')) return 'Red Velvet';
+    if (cat.includes('bento') || name.includes('bento')) return 'Bento';
+    return 'Standard';
+  }
+  return flavor;
+};
+
+// =============================================================================
 // Helper: Format item for ADMIN (full details including custom cake)
 // =============================================================================
 const formatAdminOrderItem = (item) => {
@@ -203,13 +222,32 @@ const formatAdminOrderItem = (item) => {
     }
     return details.trim();
   }
-  return `🍰 ${item.name} (x${item.qty})`;
+  // Standard cake — include resolved flavor and weight
+  let details = `🍰 *${item.name}* (x${item.qty})`;
+  const resolvedFlavor = getDisplayFlavor(item);
+  const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+  const showWeight = item.selectedWeight;
+  if (showFlavor || showWeight) {
+    details += `\n`;
+    if (showFlavor) details += `   Flavor: ${resolvedFlavor}\n`;
+    if (showWeight) details += `   Weight: ${showWeight}\n`;
+  }
+  return details.trim();
 };
 
 // =============================================================================
-// Helper: Format item for CUSTOMER (simple: name + qty only)
+// Helper: Format item for CUSTOMER (includes flavor & weight if available)
 // =============================================================================
 const formatCustomerOrderItem = (item) => {
+  const resolvedFlavor = getDisplayFlavor(item);
+  const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+  const showWeight = item.selectedWeight;
+  if (showFlavor || showWeight) {
+    const parts = [];
+    if (showFlavor) parts.push(resolvedFlavor);
+    if (showWeight) parts.push(showWeight);
+    return `${item.name} (x${item.qty}) [${parts.join(', ')}]`;
+  }
   return `${item.name} (x${item.qty})`;
 };
 

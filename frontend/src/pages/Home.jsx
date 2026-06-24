@@ -122,12 +122,12 @@ const Home = () => {
             <>
               <TrustBar />
 
+              <CategoryCircles activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+
               {/* Home Banner */}
               <section className="mb-3">
                 <HomeBanner />
               </section>
-
-              <CategoryCircles activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
 
               {/* Bestseller Section */}
               <Bestseller location={deliveryCity} />
@@ -169,7 +169,7 @@ const Home = () => {
               {loading && products.length === 0 ? (
                 <div className="flex overflow-x-hidden gap-3 sm:gap-4 lg:gap-6 tv:gap-8 pb-4 lg:pb-6 px-4 sm:px-0">
                   {Array(4).fill(0).map((_, i) => (
-                    <div key={`col-skel-${i}`} className="shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px]">
+                    <div key={`col-skel-${i}`} className="shrink-0 w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px] tv:w-[360px]">
                       <CardSkeleton />
                     </div>
                   ))}
@@ -189,7 +189,7 @@ const Home = () => {
                     }}
                   >
                     {products.map((p, i) => (
-                      <SwiperSlide key={p._id} className="!w-[min(78vw,220px)] md:!w-[260px] lg:!w-[300px] tv:!w-[360px] !h-auto flex flex-col">
+                      <SwiperSlide key={p._id} className="!w-[180px] sm:!w-[220px] md:!w-[260px] lg:!w-[300px] tv:!w-[360px] !h-auto flex flex-col">
                         <motion.div
                           variants={fadeUp}
                           initial="hidden"

@@ -91,11 +91,51 @@ const sendMail = async (options) => {
   }
 };
 
+// =============================================================================
+// Helper: Resolve dynamic display flavor for order items
+// =============================================================================
+const getDisplayFlavor = (item) => {
+  if (!item) return 'Standard';
+  if (item.isCustomCake) return item.selectedFlavor || 'Custom';
+  const flavor = item.selectedFlavor;
+  if (!flavor || flavor.toLowerCase() === 'standard') {
+    const cat = String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
+    if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';
+    if (cat.includes('red-velvet') || cat.includes('red velvet') || name.includes('red-velvet') || name.includes('red velvet')) return 'Red Velvet';
+    if (cat.includes('bento') || name.includes('bento')) return 'Bento';
+    return 'Standard';
+  }
+  return flavor;
+};
+
 const emailService = {
   sendOrderConfirmed: async (email, order) => {
     const quote = "All you need is love. But a little chocolate now and then doesn't hurt.";
     const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
+
+    // Build items table rows
+    const itemsRows = (order.items || []).map(item => {
+      const resolvedFlavor = getDisplayFlavor(item);
+      const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+      const weight = item.selectedWeight || (item.isCustomCake && item.customDetails?.weight) || '';
+      const flavorDisplay = item.isCustomCake
+        ? (item.customDetails?.flavour || resolvedFlavor)
+        : (showFlavor ? resolvedFlavor : '');
+      const subtag = [flavorDisplay, weight].filter(Boolean).join(' · ');
+      const lineTotal = (Number(item.price) || 0) * (Number(item.qty) || 1);
+
+      return `
+        <tr>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #D1C5C3; font-size: 13px;">
+            <b>${item.name}</b>${subtag ? `<br/><span style="font-size: 11px; opacity: 0.75;">${subtag}</span>` : ''}
+          </td>
+          <td style="padding: 10px 8px; border-bottom: 1px solid #D1C5C3; text-align: center; font-size: 13px;">${item.qty}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #D1C5C3; text-align: right; font-size: 13px;">₹${lineTotal.toFixed(2)}</td>
+        </tr>`;
+    }).join('');
 
     return await sendMail({
       to: email,
@@ -119,6 +159,25 @@ const emailService = {
                 <p style="margin: 6px 0 0 0; font-size: 14px;"><b>Tracking Code:</b> ${order.trackingCode || order.orderNumber}</p>
                 <p style="margin: 6px 0 0 0; font-size: 14px;"><b>Estimated Delivery:</b> ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'As scheduled'}</p>
               </div>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 20px 0; border: 1px solid #D1C5C3; border-radius: 8px; overflow: hidden;">
+                <thead>
+                  <tr style="background-color: #381A14;">
+                    <th style="padding: 10px 12px; text-align: left; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>
+                    <th style="padding: 10px 8px; text-align: center; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase;">Qty</th>
+                    <th style="padding: 10px 12px; text-align: right; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsRows}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="2" style="padding: 10px 12px; text-align: right; font-weight: 700; font-size: 13px;">Total</td>
+                    <td style="padding: 10px 12px; text-align: right; font-weight: 800; font-size: 14px;">₹${Number(order.total || 0).toFixed(2)}</td>
+                  </tr>
+                </tfoot>
+              </table>
 
               <div style="text-align: center; margin: 28px 0;">
                 <a href="${trackingLink}" class="action-button" style="display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;">Track My Order</a>

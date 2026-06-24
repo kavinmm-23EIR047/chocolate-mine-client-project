@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  SlidersHorizontal, Search, X, Star, ChevronDown, LayoutGrid, List
+  SlidersHorizontal, Search, X, Star, ChevronDown, ChevronUp, LayoutGrid, List
 } from 'lucide-react';
 import { CardSkeleton } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
@@ -11,17 +11,30 @@ import api from '../utils/api';
 import ProductCard from '../product/ProductCard';
 import { useDeliveryLocation } from '../context/LocationContext';
 
-/* ═══════════════════════════════════════════════════════
-   MAIN SHOP PAGE
-   ═══════════════════════════════════════════════════════ */
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // mobile drawer
+  const [isDesktopFilterOpen, setIsDesktopFilterOpen] = useState(false); // desktop drawer
   const [categories, setCategories] = useState([]);
   const [occasions, setOccasions] = useState([]);
-  // Mobile layout toggle: 'list' (horizontal, 1-col) or 'grid' (vertical, 2-col)
   const [mobileLayout, setMobileLayout] = useState('grid');
-  
+
+  // Accordion state for each filter section
+  const [expandedSections, setExpandedSections] = useState({
+    categories: true,
+    occasions: true,
+    rating: true,
+    price: true,
+    sort: true,
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
   const { location } = useDeliveryLocation();
 
   const activeCategory = searchParams.get('category') || 'all';
@@ -84,11 +97,12 @@ const Shop = () => {
     fetchFilters();
   }, []);
 
-  const { data: productRes, isLoading: loading } = useGetProductsQuery({ page: 1, limit: 1000 });
+  // Increased product limit to 2000
+  const { data: productRes, isLoading: loading } = useGetProductsQuery({ page: 1, limit: 2000 });
 
   const filteredProducts = useMemo(() => {
     let products = productRes?.data ? [...productRes.data] : [];
-    
+
     // Location Filtering
     if (location === 'pan india') {
       products = products.filter(p => p.location === 'pan-india' || p.location === 'pan india');
@@ -130,19 +144,22 @@ const Shop = () => {
     return 'The Shop';
   };
 
-  /* ── Filter Panel ── */
+  /* ── Filter Panel with Accordion ── */
   const FilterPanel = () => (
-    <div className="space-y-7">
-      <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Categories</h3>
+    <div className="space-y-4">
+      {/* Categories */}
+      <SectionCard
+        title="Categories"
+        expanded={expandedSections.categories}
+        onToggle={() => toggleSection('categories')}
+      >
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button key={cat.name} onClick={() => updateSearchParam('category', cat.name)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                activeCategory === cat.name
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${activeCategory === cat.name
                   ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                   : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-              }`}>
+                }`}>
               {cat.label}
             </button>
           ))}
@@ -151,36 +168,42 @@ const Shop = () => {
             Custom Cakes ✨
           </Link>
         </div>
-      </section>
+      </SectionCard>
 
+      {/* Occasions */}
       {occasions.length > 1 && (
-        <section>
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Occasions</h3>
+        <SectionCard
+          title="Occasions"
+          expanded={expandedSections.occasions}
+          onToggle={() => toggleSection('occasions')}
+        >
           <div className="grid grid-cols-2 gap-1.5">
             {occasions.map((occ) => (
               <button key={occ.name} onClick={() => updateSearchParam('occasion', occ.name)}
-                className={`px-2 py-2 rounded-lg text-[11px] font-bold text-left transition-all ${
-                  activeOccasion === occ.name
+                className={`px-2 py-2 rounded-lg text-[11px] font-bold text-left transition-all ${activeOccasion === occ.name
                     ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                     : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-                }`}>
+                  }`}>
                 {occ.label}
               </button>
             ))}
           </div>
-        </section>
+        </SectionCard>
       )}
 
-      <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Min. Rating</h3>
+      {/* Rating */}
+      <SectionCard
+        title="Min. Rating"
+        expanded={expandedSections.rating}
+        onToggle={() => toggleSection('rating')}
+      >
         <div className="space-y-1.5">
           {[4, 3, 2].map((r) => (
             <button key={r} onClick={() => updateSearchParam('rating', activeRating === r ? 0 : r)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                activeRating === r
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${activeRating === r
                   ? 'bg-[var(--secondary)]/15 text-[var(--secondary)] border border-[var(--secondary)]/30'
                   : 'text-[var(--heading)]/70 hover:bg-[var(--heading)]/5 hover:text-[var(--heading)]'
-              }`}>
+                }`}>
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={12} className={i < r ? 'fill-[#FBBF24] text-[#FBBF24]' : 'text-[var(--heading)]/30'} />
@@ -190,12 +213,14 @@ const Shop = () => {
             </button>
           ))}
         </div>
-      </section>
+      </SectionCard>
 
-      <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">
-          Price — ₹{priceRange[0].toLocaleString()} – ₹{priceRange[1].toLocaleString()}
-        </h3>
+      {/* Price Range */}
+      <SectionCard
+        title={`Price — ₹${priceRange[0].toLocaleString()} – ₹${priceRange[1].toLocaleString()}`}
+        expanded={expandedSections.price}
+        onToggle={() => toggleSection('price')}
+      >
         <div className="space-y-3">
           <div>
             <label className="text-[10px] font-bold text-[var(--heading)]/60 mb-1 block">Min ₹{priceRange[0]}</label>
@@ -214,10 +239,14 @@ const Shop = () => {
               className="w-full h-1.5 bg-[var(--border)] rounded-full appearance-none accent-[var(--primary)] cursor-pointer" />
           </div>
         </div>
-      </section>
+      </SectionCard>
 
-      <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Sort By</h3>
+      {/* Sort By */}
+      <SectionCard
+        title="Sort By"
+        expanded={expandedSections.sort}
+        onToggle={() => toggleSection('sort')}
+      >
         <select value={sortBy} onChange={(e) => updateSearchParam('sort', e.target.value)}
           className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg p-2.5 text-[12px] font-bold outline-none cursor-pointer">
           <option value="newest">Newest First</option>
@@ -225,7 +254,7 @@ const Shop = () => {
           <option value="price-high">Price: High → Low</option>
           <option value="rating">Top Rated</option>
         </select>
-      </section>
+      </SectionCard>
 
       <button onClick={clearFilters}
         className="w-full py-3 border border-dashed border-[var(--heading)]/20 rounded-lg text-[12px] font-bold text-[var(--heading)]/80 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all">
@@ -234,7 +263,39 @@ const Shop = () => {
     </div>
   );
 
-  /* ── Mobile Top Bar: search + sort + layout toggle ── */
+  /* ── Helper component for accordion sections ── */
+  const SectionCard = ({ title, expanded, onToggle, children }) => (
+    <div className="bg-[var(--card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between p-3.5 bg-[var(--heading)]/5 hover:bg-[var(--heading)]/10 transition-colors border-b border-[var(--border)]"
+      >
+        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80">
+          {title}
+        </h3>
+        {expanded ? (
+          <ChevronUp size={18} className="text-[var(--heading)]/60" />
+        ) : (
+          <ChevronDown size={18} className="text-[var(--heading)]/60" />
+        )}
+      </button>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="px-3.5 pb-3.5 pt-3"
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  /* ── Mobile Top Bar ── */
   const MobileTopBar = () => (
     <div className="sm:hidden mb-4 flex flex-col gap-3">
       {/* Search */}
@@ -287,11 +348,10 @@ const Shop = () => {
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {categories.map((cat) => (
           <button key={cat.name} onClick={() => updateSearchParam('category', cat.name)}
-            className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-              activeCategory === cat.name
+            className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${activeCategory === cat.name
                 ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                 : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/80 hover:border-[var(--primary)]/40'
-            }`}>
+              }`}>
             {cat.label}
           </button>
         ))}
@@ -321,17 +381,26 @@ const Shop = () => {
               <p className="text-sm text-white/80 font-medium max-w-md">Premium handcrafted confectionery, customized with passion and delivered fresh to your door.</p>
             </div>
             <div className="flex flex-col items-end gap-3">
-              <div className="relative w-full sm:w-72 desktop-large:w-96 group">
-                <input type="text" placeholder="Search products..." value={searchQuery}
-                  onChange={(e) => updateSearchParam('search', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all backdrop-blur-md placeholder:text-white/40"
-                />
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
-                {searchQuery && (
-                  <button onClick={() => updateSearchParam('search', '')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
-                    <X size={16} />
-                  </button>
-                )}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative w-full sm:w-72 desktop-large:w-96 group">
+                  <input type="text" placeholder="Search products..." value={searchQuery}
+                    onChange={(e) => updateSearchParam('search', e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all backdrop-blur-md placeholder:text-white/40"
+                  />
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
+                  {searchQuery && (
+                    <button onClick={() => updateSearchParam('search', '')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                {/* Desktop Filter Toggle Button */}
+                <button
+                  onClick={() => setIsDesktopFilterOpen(true)}
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-sm font-bold hover:bg-white/10 transition-colors"
+                >
+                  <SlidersHorizontal size={16} /> Filters
+                </button>
               </div>
               <span className="text-[11px] font-bold text-white/80 bg-white/5 px-4 py-1.5 rounded-lg border border-white/10">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'Item' : 'Items'}
@@ -356,10 +425,39 @@ const Shop = () => {
 
         {/* ── Layout Body ── */}
         <div className="flex gap-6 lg:gap-8 tv:gap-12">
-          {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-64 tv:w-80 shrink-0">
-            <div className="sticky top-20"><FilterPanel /></div>
-          </aside>
+          {/* Desktop filter drawer (overlay) */}
+          <AnimatePresence>
+            {isDesktopFilterOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsDesktopFilterOpen(false)}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+                />
+                <motion.aside
+                  initial={{ x: '-100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '-100%' }}
+                  transition={{ type: 'spring', damping: 28 }}
+                  className="fixed left-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-r border-[var(--border)]"
+                >
+                  <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
+                    <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
+                    <button onClick={() => setIsDesktopFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
+                      <X size={18} />
+                    </button>
+                  </div>
+                  <FilterPanel />
+                  <button onClick={() => setIsDesktopFilterOpen(false)}
+                    className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md">
+                    Apply Filters
+                  </button>
+                </motion.aside>
+              </>
+            )}
+          </AnimatePresence>
 
           <main className="flex-1 min-w-0">
             {loading ? (
@@ -368,7 +466,7 @@ const Shop = () => {
               </div>
             ) : filteredProducts.length > 0 ? (
               <>
-                {/* ── Mobile: list (1-col horizontal) or grid (2-col vertical) ── */}
+                {/* ── Mobile: list/grid ── */}
                 <div className="sm:hidden">
                   {mobileLayout === 'list' ? (
                     <div className="flex flex-col gap-1.5">

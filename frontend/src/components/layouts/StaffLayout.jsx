@@ -11,6 +11,7 @@ import {
   Moon,
   LogOut,
   ChevronRight,
+  X,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -108,15 +109,24 @@ const StaffLayout = () => {
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
+              exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25 }}
               className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 lg:hidden flex flex-col"
             >
-              <div className="px-5 py-6 border-b border-border flex items-center gap-2">
-                <Logo className="w-7 h-7" />
-                <span className="text-base font-black text-heading">Kitchen Panel</span>
+              <div className="px-5 py-6 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Logo className="w-7 h-7" />
+                  <span className="text-base font-black text-heading">Kitchen Panel</span>
+                </div>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-xl text-heading hover:bg-heading/10 transition-all active:scale-95 flex items-center justify-center"
+                  aria-label="Close menu"
+                >
+                  <X size={22} />
+                </button>
               </div>
               <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                 {menuItems.map((item) => {

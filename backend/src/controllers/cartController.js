@@ -3,12 +3,28 @@ const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
+const getWeightMultiplier = (weightStr) => {
+  if (!weightStr) return 1;
+  const w = String(weightStr).toLowerCase().replace(/\s+/g, '');
+  if (w.includes('250g')) return 1;
+  if (w.includes('500g')) return 1;
+  if (w.includes('1.5kg')) return 3;
+  if (w.includes('2.5kg')) return 5;
+  if (w.includes('1kg')) return 2;
+  if (w.includes('2kg')) return 4;
+  if (w.includes('3kg')) return 6;
+  return 1;
+};
+
 // Helper to calculate fresh prices for an item based on DB state
 const getItemPriceDetails = (product, selectedFlavor = null, selectedWeight = null) => {
   // For cake products with variants
   let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
   let variantPrice = null;
   
+  const isCake = product.category && product.category.toLowerCase().includes('cake');
+  const isBento = product.category && product.category.toLowerCase() === 'bento-cakes';
+
   // If this is a cake with variants and we have selected flavor/weight
   if (product.hasVariants && product.variants && product.variants.length > 0 && selectedFlavor && selectedWeight) {
     const variant = product.variants.find(
@@ -18,6 +34,11 @@ const getItemPriceDetails = (product, selectedFlavor = null, selectedWeight = nu
       variantPrice = variant.price;
       salePrice = variant.price;
     }
+  } else if (isCake) {
+    const weight = selectedWeight || (isBento ? '250g' : '500g');
+    const multiplier = getWeightMultiplier(weight);
+    salePrice = product.price * multiplier;
+    variantPrice = salePrice;
   }
   
   let finalPrice = salePrice;

@@ -58,7 +58,7 @@ const ProductGrid = ({ query, activeCategory, deliveryCity }) => {
             className="flex overflow-x-hidden gap-3 sm:gap-4 lg:gap-6 tv:gap-8 pb-4 lg:pb-6"
           >
             {Array(4).fill(0).map((_, i) => (
-              <div key={`col-skel-${i}`} className="shrink-0 w-[min(78vw,220px)] md:w-[260px] lg:w-[300px] tv:w-[360px]">
+              <div key={`col-skel-${i}`} className="shrink-0 w-[180px] sm:w-[220px] md:w-[260px] lg:w-[300px] tv:w-[360px]">
                 <CardSkeleton />
               </div>
             ))}
@@ -80,7 +80,7 @@ const ProductGrid = ({ query, activeCategory, deliveryCity }) => {
               }}
             >
               {products.map((p, i) => (
-                <SwiperSlide key={p._id} className="!w-[min(78vw,220px)] md:!w-[260px] lg:!w-[300px] tv:!w-[360px] !h-auto flex flex-col">
+                <SwiperSlide key={p._id} className="!w-[180px] sm:!w-[220px] md:!w-[260px] lg:!w-[300px] tv:!w-[360px] !h-auto flex flex-col">
                   <motion.div
                     variants={fadeUp}
                     initial="hidden"

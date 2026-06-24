@@ -30,6 +30,19 @@ import ProductReviews from './components/ProductReviews';
 import ProductRelated from './components/ProductRelated';
 import ProductSimilar from './components/ProductSimilar';
 
+const getWeightMultiplier = (weightStr) => {
+  if (!weightStr) return 1;
+  const w = String(weightStr).toLowerCase().replace(/\s+/g, '');
+  if (w.includes('250g')) return 1;
+  if (w.includes('500g')) return 1;
+  if (w.includes('1.5kg')) return 3;
+  if (w.includes('2.5kg')) return 5;
+  if (w.includes('1kg')) return 2;
+  if (w.includes('2kg')) return 4;
+  if (w.includes('3kg')) return 6;
+  return 1;
+};
+
 const ProductDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -37,6 +50,7 @@ const ProductDetails = () => {
 
   const { data: productRes, isLoading: loading } = useGetProductBySlugQuery(slug);
   const product = productRes?.data;
+  const isCake = product?.category?.toLowerCase().includes('cake');
 
   const productId = product?._id?.$oid || product?._id;
   const { data: reviewRes } = useGetProductReviewsQuery(productId, { skip: !productId });
@@ -82,23 +96,25 @@ const ProductDetails = () => {
   // ─── INITIALIZE SELECTIONS ─────────────────────────────
   useEffect(() => {
     if (product) {
-      if (product.category === 'cakes' && product.hasVariants && product.variants && product.variants.length > 0) {
-        const initialVariant = product.variants.find(v => v.stock > 0) || product.variants[0];
+      if (isCake) {
+        const isBento = product?.category?.toLowerCase() === 'bento-cakes' || product?.cakeType?.toLowerCase() === 'bento-cakes';
+        const defaultWeight = isBento ? '250g' : '500g';
+        setSelectedWeight(defaultWeight);
+        
+        const basePriceVal = Number(product.price || 0);
+        setSelectedPrice(basePriceVal);
+        setSelectedStock(product.stock !== undefined ? product.stock : true);
 
-        if (initialVariant) {
-          const initialFlavor = product.flavors?.find(f => f.name === initialVariant.flavor) || { name: initialVariant.flavor };
+        if (product.flavors && product.flavors.length > 0) {
+          const initialFlavor = product.flavors[0];
           setSelectedFlavor(initialFlavor);
-          setSelectedWeight(initialVariant.weight);
-          const priceFromWeights = getPriceForWeight(product, initialVariant.weight);
-          setSelectedPrice(priceFromWeights !== null ? priceFromWeights : initialVariant.price);
-          setSelectedStock(initialVariant.stock);
-
           if (initialFlavor.images && initialFlavor.images.length > 0) {
             setDisplayImage(initialFlavor.images[0]);
           } else {
             setDisplayImage(product.image || null);
           }
         } else {
+          setSelectedFlavor({ name: 'Standard' });
           setDisplayImage(product.image || null);
         }
       } else {
@@ -124,21 +140,6 @@ const ProductDetails = () => {
     setShowCustomFlavorInput(false);
     setCustomFlavor('');
 
-    let variant = product.variants?.find(v => v.flavor === flavor.name && v.weight === selectedWeight);
-    if (!variant && product.variants) {
-      variant = product.variants.find(v => v.flavor === flavor.name);
-    }
-
-    if (variant) {
-      setSelectedWeight(variant.weight);
-      const priceFromWeights = getPriceForWeight(product, variant.weight);
-      setSelectedPrice(priceFromWeights !== null ? priceFromWeights : variant.price);
-      setSelectedStock(variant.stock);
-    } else {
-      const priceFromWeights = getPriceForWeight(product, selectedWeight);
-      if (priceFromWeights !== null) setSelectedPrice(priceFromWeights);
-    }
-
     if (flavor.images && flavor.images.length > 0) {
       setDisplayImage(flavor.images[0]);
     }
@@ -149,25 +150,16 @@ const ProductDetails = () => {
     setShowCustomWeightInput(false);
     setCustomWeight('');
 
-    const variant = product.variants?.find(v => v.flavor === selectedFlavor?.name && v.weight === weight);
-    if (variant) {
-      const priceFromWeights = getPriceForWeight(product, weight);
-      setSelectedPrice(priceFromWeights !== null ? priceFromWeights : variant.price);
-      setSelectedStock(variant.stock);
-    } else {
-      const priceFromWeights = getPriceForWeight(product, weight);
-      if (priceFromWeights !== null) {
-        setSelectedPrice(priceFromWeights);
-        setSelectedStock(product.stock || 0);
-      }
-    }
+    const multiplier = getWeightMultiplier(weight);
+    const basePriceVal = Number(product.price || 0);
+    setSelectedPrice(basePriceVal * multiplier);
+    setSelectedStock(product.stock !== undefined ? product.stock : true);
   };
 
   const handleCustomFlavorSubmit = () => {
     if (customFlavor.trim()) {
       setSelectedFlavor({ name: customFlavor.trim(), images: [] });
       setShowCustomFlavorInput(false);
-      setSelectedPrice(product.variants?.[0]?.price || product.price);
     }
   };
 
@@ -182,32 +174,32 @@ const ProductDetails = () => {
   const productName = product?.name;
   const productPrice = Number(product?.price || 0);
   const productOfferPrice = Number(product?.offerPrice || 0);
-  const productStock = Number(product?.stock ?? 0);
+  const productAvailable = product?.stock !== false;
   const productCategory = product?.category;
 
-  const currentVariantFlavor = productCategory === 'cakes'
+  const currentVariantFlavor = isCake
     ? (showCustomFlavorInput ? customFlavor : selectedFlavor?.name)
     : null;
-  const currentVariantWeight = productCategory === 'cakes'
+  const currentVariantWeight = isCake
     ? (showCustomWeightInput ? customWeight : selectedWeight)
     : null;
 
   const cartItem = cartItems?.find(i =>
     idsMatch(i.productId, productId) &&
-    (productCategory !== 'cakes' || (i.selectedFlavor === currentVariantFlavor && i.selectedWeight === currentVariantWeight))
+    (!isCake || (i.options?.flavor === currentVariantFlavor && i.options?.weight === currentVariantWeight))
   );
   const cartQty = cartItem?.qty || 0;
   const isWishlisted = product ? isInWishlist(productId) : false;
 
   // ─── PRICE LOGIC ───────────────────────────────────────
   const getCurrentPrice = () => {
-    return productCategory === 'cakes' && selectedPrice
+    return isCake && selectedPrice
       ? selectedPrice
       : productPrice;
   };
 
   const currentPrice = getCurrentPrice();
-  const isCakeWithVariants = productCategory === 'cakes' && product?.hasVariants;
+  const isCakeWithVariants = isCake;
   const hasOffer = !isCakeWithVariants && productOfferPrice > 0 && productOfferPrice < currentPrice;
   const basePrice = hasOffer ? productOfferPrice : currentPrice;
   const offerDiscount = currentPrice - basePrice;
@@ -236,7 +228,7 @@ const ProductDetails = () => {
   const finalPrice = totalFinalPrice;
   const couponSavings = couponSavingsPerUnit * quantity;
 
-  const isInStock = productCategory === 'cakes' ? (selectedStock > 0) : (productStock > 0);
+  const isInStock = isCake ? (selectedStock === true || selectedStock > 0) : productAvailable;
 
   // ─── ACTIONS ───────────────────────────────────────────
   const handleApplyCoupon = async () => {
@@ -249,14 +241,14 @@ const ProductDetails = () => {
     try {
       const isInCart = cartItems?.some(item =>
         idsMatch(item.productId, product._id) &&
-        (product.category !== 'cakes' ||
+        (!isCake ||
           (item.selectedFlavor === currentVariantFlavor &&
             item.selectedWeight === currentVariantWeight))
       );
 
       if (!isInCart && quantity > 0) {
         const options = {};
-        if (product?.category === 'cakes') {
+        if (isCake) {
           if (showCustomFlavorInput && customFlavor) options.flavor = customFlavor;
           else if (selectedFlavor) options.flavor = selectedFlavor.name;
           
@@ -289,19 +281,13 @@ const ProductDetails = () => {
 
   const handleAddToCart = async () => {
     if (!isInStock) {
-      toast.error('Out of stock');
-      return;
-    }
-
-    const currentStockLimit = productCategory === 'cakes' ? selectedStock : productStock;
-    if (cartQty + 1 > currentStockLimit) {
-      toast.error(`Only ${currentStockLimit} units available`);
+      toast.error('Not available');
       return;
     }
 
     setAddingToCart(true);
     const options = {};
-    if (productCategory === 'cakes') {
+    if (isCake) {
       if (showCustomFlavorInput && customFlavor) options.flavor = customFlavor;
       else if (selectedFlavor) options.flavor = selectedFlavor.name;
       else { toast.error('Please select flavor'); setAddingToCart(false); return; }
@@ -318,18 +304,12 @@ const ProductDetails = () => {
 
   const handleBuyNow = async () => {
     if (!isInStock) {
-      toast.error('Out of stock');
-      return;
-    }
-
-    const currentStockLimit = productCategory === 'cakes' ? selectedStock : productStock;
-    if (cartQty + 1 > currentStockLimit) {
-      toast.error(`Only ${currentStockLimit} units available`);
+      toast.error('Not available');
       return;
     }
 
     const options = {};
-    if (productCategory === 'cakes') {
+    if (isCake) {
       if (showCustomFlavorInput && customFlavor) options.flavor = customFlavor;
       else if (selectedFlavor) options.flavor = selectedFlavor.name;
       else { toast.error('Please select flavor'); return; }

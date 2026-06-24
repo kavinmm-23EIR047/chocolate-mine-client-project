@@ -19,8 +19,12 @@ export default function CustomCakeBrowse({
   setThemeSearchFilter,
   priceSortFilter,
   setPriceSortFilter,
-  selectTheme
+  selectTheme,
+  hideFilters = false,
+  onToggleFilter,
+  onToggleDesktopFilter
 }) {
+  // ── Filter Panel (desktop sidebar) ──
   const FilterPanel = () => (
     <div className="space-y-7">
       <section>
@@ -65,6 +69,7 @@ export default function CustomCakeBrowse({
     </div>
   );
 
+  // ── Mobile Top Bar (only shown if not hiding filters) ──
   const MobileTopBar = () => (
     <div className="sm:hidden mb-4 flex flex-col gap-3">
       <div className="relative">
@@ -114,13 +119,28 @@ export default function CustomCakeBrowse({
             <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">Custom Cakes</h1>
             <p className="text-sm text-white/80 font-medium max-w-md">Choose your tier and theme to start configuring your dream cake.</p>
           </div>
-          <div className="flex flex-col items-end gap-3">
-            <div className="relative w-full sm:w-72 group">
-              <input type="text" placeholder="Search themes..." value={themeSearchFilter}
-                onChange={(e) => setThemeSearchFilter(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all backdrop-blur-md placeholder:text-white/40"
-              />
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
+          <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:w-72 group">
+                <input type="text" placeholder="Search themes..." value={themeSearchFilter}
+                  onChange={(e) => setThemeSearchFilter(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 text-white rounded-xl py-3 pl-12 pr-10 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all backdrop-blur-md placeholder:text-white/40"
+                />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
+                {themeSearchFilter && (
+                  <button onClick={() => setThemeSearchFilter('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              {hideFilters && (
+                <button
+                  onClick={onToggleDesktopFilter}
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-sm font-bold hover:bg-white/10 transition-colors"
+                >
+                  <Filter size={16} /> Filters
+                </button>
+              )}
             </div>
             <span className="text-[11px] font-bold text-white/80 bg-white/5 px-4 py-1.5 rounded-lg border border-white/10">
               {filteredThemes.length} {filteredThemes.length === 1 ? 'Theme' : 'Themes'}
@@ -140,18 +160,44 @@ export default function CustomCakeBrowse({
         </span>
       </div>
 
-      <MobileTopBar />
+      {/* Mobile view controls when hiding standard filters */}
+      {hideFilters && (
+        <div className="sm:hidden mb-4 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+            <input type="text" placeholder="Search themes..." value={themeSearchFilter}
+              onChange={(e) => setThemeSearchFilter(e.target.value)}
+              className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg py-2.5 pl-10 pr-9 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
+            />
+            {themeSearchFilter && (
+              <button onClick={() => setThemeSearchFilter('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--heading)]">
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={onToggleFilter}
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm font-bold text-[var(--heading)] hover:border-[var(--primary)] transition-colors"
+          >
+            <Filter size={16} /> Filters
+          </button>
+        </div>
+      )}
+
+      {/* ── Mobile Top Bar – hidden when filters are hidden ── */}
+      {!hideFilters && <MobileTopBar />}
 
       <div className="flex gap-6 lg:gap-8">
-        {/* Desktop Sidebar Panel */}
-        <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-20"><FilterPanel /></div>
-        </aside>
+        {/* ── Desktop Sidebar Panel – hidden when filters are hidden ── */}
+        {!hideFilters && (
+          <aside className="hidden lg:block w-64 shrink-0">
+            <div className="sticky top-20"><FilterPanel /></div>
+          </aside>
+        )}
 
         {/* ── Main Catalog Display Window ── */}
         <main className="flex-1 min-w-0">
           {loading ? (
-            /* Strict 2x2 Grid Skeleton Loaders */
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--card)] animate-pulse">
@@ -168,7 +214,6 @@ export default function CustomCakeBrowse({
               No themes match your filters.
             </div>
           ) : (
-            /* CRITICAL FIX: Fixed to grid-cols-2 for perfect 2x2 symmetry layout layout on mobile screens */
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               <AnimatePresence mode="popLayout">
                 {filteredThemes.map((t, i) => (
@@ -183,7 +228,6 @@ export default function CustomCakeBrowse({
                     style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
                   >
                     <div>
-                      {/* Image Frame Holder Layout Block */}
                       <div className="relative aspect-square overflow-visible shrink-0 w-full mb-8" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
                         <div className="w-full h-full overflow-hidden rounded-xl">
                           {t.image || t.flavors?.[0]?.image
@@ -192,9 +236,7 @@ export default function CustomCakeBrowse({
                           }
                         </div>
 
-                        {/* CRITICAL FIX: Swiggy Layout action replace blocky layout text */}
                         <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] overflow-hidden shadow-md">
-                          {/* Moving Gradient Radial Border Effect Layer */}
                           <motion.div
                             className="absolute inset-0 w-[200%] h-[200%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,var(--accent)_0%,var(--secondary)_50%,transparent_100%)]"
                             animate={{ rotate: 360 }}
@@ -213,7 +255,6 @@ export default function CustomCakeBrowse({
                         </div>
                       </div>
 
-                      {/* Text Information Description Blocks */}
                       <div className="flex flex-col text-left mt-1">
                         <div className="flex items-center gap-1.5 flex-wrap mb-2">
                           <VegIcon />
@@ -247,7 +288,6 @@ export default function CustomCakeBrowse({
                       </div>
                     </div>
 
-                    {/* Base Pricing Info Row Block */}
                     <div className="flex flex-col text-left mt-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-[11px] font-bold" style={{ color: 'var(--muted)' }}>From</span>

@@ -26,7 +26,7 @@ const UserLayout = () => {
       <Navbar />
 
       {/* ── RESPONSIVE INFO BANNER ── */}
-      <div className="bg-success/10 border-y border-success/20 text-success py-2.5 md:py-3 px-4 overflow-hidden">
+      <div className="bg-success/10 border-y border-success/20 text-success py-4 md:py-5 px-4 overflow-hidden">
 
         {/* DESKTOP/TABLET LAYOUT (md and up) */}
         <div className="hidden md:flex items-center justify-between responsive-container">

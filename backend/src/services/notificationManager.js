@@ -568,11 +568,9 @@ exports.notifyNewProduct = async (product) => {
     // Save in DB for all active users & send FCM broadcast
     await saveBroadcastWebNotification(title, msg, 'new_product', metadata);
 
-    // Also check stock immediately in case of low stock
-    if (product.stock === false || product.stock === 0) {
+    // Check if product is not available
+    if (product.stock === false) {
       await exports.notifyOutOfStockAlert(product.name);
-    } else if (typeof product.stock === 'number' && product.stock <= 5) {
-      await exports.notifyLowStockAlert(product.name, product.stock);
     }
   } catch (err) {
     logger.error('New Product Notification Error:', err.message);
@@ -629,9 +627,8 @@ exports.notifyProductUpdated = async (product, previousData = {}) => {
     });
 
     // Determine what changed:
-    const isBackInStock = previousData.stock === false && (product.stock === true || (typeof product.stock === 'number' && product.stock > 0));
-    const isOutOfStock = (previousData.stock === true || (typeof previousData.stock === 'number' && previousData.stock > 0)) && 
-                         (product.stock === false || product.stock === 0);
+    const isBackInStock = previousData.stock === false && product.stock === true;
+    const isOutOfStock = previousData.stock === true && product.stock === false;
     const isNewOffer = product.offerPrice && product.offerPrice < product.price &&
                        (!previousData.offerPrice || previousData.offerPrice >= previousData.price);
 
@@ -661,10 +658,8 @@ exports.notifyProductUpdated = async (product, previousData = {}) => {
     }
 
     // Admin stock alerts (internal)
-    if (product.stock === false || product.stock === 0) {
+    if (product.stock === false) {
       await exports.notifyOutOfStockAlert(product.name);
-    } else if (typeof product.stock === 'number' && product.stock <= 5) {
-      await exports.notifyLowStockAlert(product.name, product.stock);
     }
   } catch (err) {
     logger.error('Product Update Notification Error:', err.message);

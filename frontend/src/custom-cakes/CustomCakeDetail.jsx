@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode } from 'swiper/modules';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
-  Star, Heart, ChevronDown, Settings2, Search
+  Star, Heart, ChevronDown, Settings2, Search, X
 } from 'lucide-react';
 import PureVegIcon from '../assets/pure veg.webp';
 import 'swiper/css';
@@ -55,6 +55,18 @@ export default function CustomCakeDetail({
   toggleWishlist,
   WEIGHTS
 }) {
+  const [hasCustomized, setHasCustomized] = useState(false);
+
+  useEffect(() => {
+    if (window.innerWidth < 768 && (showMobileConfig || flavorDropdownOpen)) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showMobileConfig, flavorDropdownOpen]);
 
   const prevColor = () => {
     if (!theme || !theme.flavors || theme.flavors.length <= 1) return;
@@ -102,15 +114,35 @@ export default function CustomCakeDetail({
         <AnimatePresence>
           {flavorDropdownOpen && (
             <>
-              <div className="fixed inset-0 z-40 bg-black/0" onClick={() => setFlavorDropdownOpen(false)} />
+              {/* Mobile Overlay covering the modal */}
+              <div className="md:hidden fixed inset-0 z-[200] bg-[var(--background)]" />
+
+              {/* Desktop Overlay */}
+              <div className="hidden md:block fixed inset-0 z-40 bg-black/0" onClick={() => setFlavorDropdownOpen(false)} />
+
               <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
-                className="absolute left-0 right-0 mt-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[320px] flex flex-col"
+                className="
+                  fixed inset-0 z-[201] flex flex-col bg-[var(--background)] rounded-t-3xl
+                  md:absolute md:inset-auto md:left-0 md:right-0 md:mt-2 md:max-h-[320px] md:bg-[var(--card)] md:border md:border-[var(--border)] md:rounded-2xl md:shadow-2xl md:z-50
+                "
               >
-                <div className="p-3 border-b border-[var(--border)] bg-[var(--background)] flex-shrink-0 relative z-50">
+                {/* Mobile Header */}
+                <div className="md:hidden flex flex-col p-4 pt-3 border-b border-[var(--border)] shrink-0 bg-[var(--card)] rounded-t-3xl">
+                  {/* Drag Handle Pill */}
+                  <div className="w-12 h-1.5 bg-[var(--border)] rounded-full mx-auto mb-4" />
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-black text-[var(--heading)] text-lg">Select Flavour</h3>
+                    <button onClick={(e) => { e.stopPropagation(); setFlavorDropdownOpen(false); }} className="w-8 h-8 flex items-center justify-center bg-[var(--background)] border border-[var(--border)] rounded-full text-[var(--muted)] hover:text-[var(--heading)]">
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-3 border-b border-[var(--border)] bg-[var(--background)] shrink-0 relative z-10">
                   <div className="relative">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
                     <input
@@ -118,13 +150,13 @@ export default function CustomCakeDetail({
                       placeholder="Search flavours..."
                       value={flavorSearch}
                       onChange={(e) => setFlavorSearch(e.target.value)}
-                      className="w-full bg-[var(--input)] border border-[var(--input-border)] pl-9 pr-3 py-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[var(--primary)] font-bold text-[var(--foreground)] transition-all"
+                      className="w-full bg-[var(--input)] border border-[var(--input-border)] pl-9 pr-3 py-3 md:py-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[var(--primary)] font-bold text-[var(--foreground)] transition-all"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
                 </div>
 
-                <div className="overflow-y-auto flex-1 relative z-50 pb-2">
+                <div className="flex-1 overflow-y-auto relative z-10 pb-safe">
                   {theme && Array.from(new Set(theme.dbFlavors.map(f => f.category))).map(category => {
                     const categoryFlavors = theme.dbFlavors.filter(
                       f => f.category === category && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
@@ -228,6 +260,52 @@ export default function CustomCakeDetail({
           <span className="absolute right-3 top-2.5 text-[10px] text-[var(--muted)] font-bold">{message.length}/60</span>
         </div>
       </div>
+    </div>
+  );
+
+  const renderConfigContent = () => (
+    <div className="space-y-6">
+      {/* Weight Selection */}
+      {theme.enabled && (
+        <div>
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="font-black text-sm text-[var(--heading)]">Select Cake Weight</p>
+            <span className="text-xs text-[var(--muted)] font-bold">Serves {weight.serves} people</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            {WEIGHTS.map((w, i) => {
+              const isSel = i === weightIdx;
+              return (
+                <button
+                  key={w.label} onClick={() => setWeightIdx(i)}
+                  className={`py-2.5 rounded-xl border-2 text-center text-xs font-black transition-all ${isSel ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--background)] shadow-sm' : 'border-[var(--border)] bg-[var(--card)] text-[var(--heading)]'}`}
+                >
+                  <div>{w.label}</div>
+                  <div className={`text-[9px] font-bold ${isSel ? 'text-[var(--background)] opacity-90' : 'text-[var(--muted)]'}`}>₹{getFlavorWeightPrice(w)}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Personalization Inputs */}
+      {theme.enabled && (
+        <div className="bg-[var(--card-soft)] border border-[var(--border)] p-4 lg:p-5 rounded-2xl space-y-4">
+          <p className="font-black text-sm text-[var(--heading)] border-b border-[var(--border)] pb-2">Custom Configuration Specifications</p>
+          {renderPersonalizeForm()}
+        </div>
+      )}
+
+      {/* Summary Box */}
+      {theme.enabled && (
+        <div className="bg-[var(--card-soft)] rounded-2xl border border-[var(--border)] p-4 space-y-2 text-xs">
+          <div className="flex justify-between"><span>Base Cake & Flavour Weight Price</span><span className="font-bold">₹{basePrice}</span></div>
+          <div className="flex justify-between"><span>Tier & Structural Frame Pricing</span><span className="font-bold">+₹{tierPrice}</span></div>
+          <div className="flex justify-between"><span>Theme Color Modification Addon</span><span className="font-bold">+₹{themePrice}</span></div>
+          <div className="border-t border-[var(--border)] pt-2 flex justify-between text-sm font-black text-[var(--primary)]"><span>Grand Valuation Total:</span><span>₹{grandTotal}</span></div>
+        </div>
+      )}
     </div>
   );
 
@@ -353,56 +431,38 @@ export default function CustomCakeDetail({
             </div>
           </div>
 
-          {/* ─── MOBILE COLLAPSIBLE & DESKTOP CONFIG ─── */}
-          <div ref={configRef} className="w-full">
-            <div className={`${showMobileConfig ? 'block' : 'hidden'} md:block space-y-6`}>
-              {/* Weight Selection */}
-              {theme.enabled && (
-                <div>
-                  <div className="flex items-center justify-between mb-2.5">
-                    <p className="font-black text-sm text-[var(--heading)]">Select Cake Weight</p>
-                    <span className="text-xs text-[var(--muted)] font-bold">Serves {weight.serves} people</span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                    {WEIGHTS.map((w, i) => {
-                      const isSel = i === weightIdx;
-                      return (
-                        <button
-                          key={w.label} onClick={() => setWeightIdx(i)}
-                          className={`py-2.5 rounded-xl border-2 text-center text-xs font-black transition-all ${isSel ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--background)] shadow-sm' : 'border-[var(--border)] bg-[var(--card)] text-[var(--heading)]'}`}
-                        >
-                          <div>{w.label}</div>
-                          <div className={`text-[9px] font-bold ${isSel ? 'text-[var(--background)] opacity-90' : 'text-[var(--muted)]'}`}>₹{getFlavorWeightPrice(w)}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+          {/* ─── DESKTOP CONFIG ─── */}
+          <div className="hidden md:block w-full">
+            {renderConfigContent()}
+          </div>
 
-              {/* Personalization Inputs */}
-              {theme.enabled && (
-                <div className="bg-[var(--card-soft)] border border-[var(--border)] p-4 lg:p-5 rounded-2xl space-y-4">
-                  <p className="font-black text-sm text-[var(--heading)] border-b border-[var(--border)] pb-2">Custom Configuration Specifications</p>
-                  {renderPersonalizeForm()}
-                </div>
-              )}
-
-              {/* Summary Box */}
-              {theme.enabled && (
-                <div className="bg-[var(--card-soft)] rounded-2xl border border-[var(--border)] p-4 space-y-2 text-xs">
-                  <div className="flex justify-between"><span>Base Cake & Flavour Weight Price</span><span className="font-bold">₹{basePrice}</span></div>
-                  <div className="flex justify-between"><span>Tier & Structural Frame Pricing</span><span className="font-bold">+₹{tierPrice}</span></div>
-                  <div className="flex justify-between"><span>Theme Color Modification Addon</span><span className="font-bold">+₹{themePrice}</span></div>
-                  <div className="border-t border-[var(--border)] pt-2 flex justify-between text-sm font-black text-[var(--primary)]"><span>Grand Valuation Total:</span><span>₹{grandTotal}</span></div>
-                </div>
-              )}
+          {/* ─── ACTION BUTTONS (INLINE FLOW) ─── */}
+          {/* Mobile Configuration Summary (Visible after DONE) */}
+          {hasCustomized && (
+            <div className="md:hidden mt-6 bg-[var(--card-soft)] border border-[var(--border)] rounded-2xl p-4 space-y-2 text-xs">
+              <p className="font-black text-sm text-[var(--heading)] border-b border-[var(--border)] pb-2 mb-2">Your Configuration</p>
+              <div className="flex justify-between"><span>Outer Color</span><span className="font-bold">{selectedFlavor?.name || 'Standard'}</span></div>
+              {selectedDbFlavor && <div className="flex justify-between"><span>Inside Flavor</span><span className="font-bold">{selectedDbFlavor.name}</span></div>}
+              <div className="flex justify-between"><span>Weight</span><span className="font-bold">{weight?.label}</span></div>
+              {customerName && <div className="flex justify-between"><span>Name</span><span className="font-bold">{customerName}</span></div>}
+              {message && <div className="flex justify-between"><span>Message</span><span className="font-bold">{message}</span></div>}
+              <div className="border-t border-[var(--border)] pt-2 mt-2 flex justify-between text-sm font-black text-[var(--primary)]"><span>Total Price</span><span>₹{grandTotal}</span></div>
             </div>
+          )}
+
+          {/* Mobile Buttons */}
+          <div className="grid grid-cols-2 gap-3 mt-4 w-full md:hidden">
+            <button onClick={handleAddToCart} disabled={isAdding} className="h-14 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 bg-[var(--card)]">
+              <ShoppingCart size={18} /> CART
+            </button>
+            <button onClick={() => setShowMobileConfig(true)} className={`h-14 font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all ${hasCustomized ? 'bg-[var(--card)] border-2 border-[var(--primary)]/30 text-[var(--heading)]' : 'bg-[var(--secondary)] text-[var(--button-text)]'}`}>
+              {hasCustomized ? <><Check size={16} className="text-[var(--primary)]" /> EDITED</> : <><Settings2 size={16} /> CUSTOMIZE</>}
+            </button>
           </div>
 
           {/* Desktop/Laptop Action Buttons */}
           <div className="hidden md:grid grid-cols-2 gap-3 mt-2 w-full">
-            <button onClick={handleAddToCart} disabled={isAdding} className="h-14 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--primary)]/5 transition-colors">
+            <button onClick={handleAddToCart} disabled={isAdding} className="h-14 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--primary)]/5 transition-colors bg-[var(--card)]">
               <ShoppingCart size={18} /> ADD TO CART
             </button>
             <button onClick={handleBuyNow} disabled={isAdding} className="h-14 bg-[var(--secondary)] text-[var(--button-text)] font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg hover:brightness-110 transition-all">
@@ -449,32 +509,51 @@ export default function CustomCakeDetail({
         </div>
       )}
 
-      {/* ── FIXED FLOATING MOBILE ACTIONS ── */}
-      {theme && theme.enabled && (
-        <div className="md:hidden fixed bottom-24 left-4 right-4 z-40 bg-[var(--card)]/95 backdrop-blur-md border border-[var(--border)] p-3 rounded-2xl shadow-2xl flex gap-3">
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdding}
-            className="flex-1 h-12 border-2 border-[var(--primary)] text-[var(--primary)] font-black text-xs rounded-xl flex items-center justify-center gap-2 bg-[var(--card)]"
-          >
-            <ShoppingCart size={16} /> CART
-          </button>
-          <button
-            onClick={() => {
-              if (showMobileConfig) {
-                handleBuyNow();
-              } else {
-                setShowMobileConfig(true);
-                setTimeout(() => configRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-              }
-            }}
-            disabled={isAdding}
-            className={`flex-1 h-12 font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all ${showMobileConfig ? 'bg-[var(--primary)] text-[var(--background)]' : 'bg-[var(--secondary)] text-[var(--button-text)]'} shadow-xl`}
-          >
-            {showMobileConfig ? <><Check size={16} /> {isAdding ? 'SAVING...' : 'DONE'}</> : <><Settings2 size={16} /> CUSTOMIZE</>}
-          </button>
-        </div>
-      )}
+      {/* ── MOBILE POP CARD MODAL FOR CUSTOMIZATION ── */}
+      <AnimatePresence>
+        {showMobileConfig && (
+          <div className="md:hidden fixed inset-0 z-[9999] flex items-end justify-center">
+            <motion.div 
+               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+               onClick={() => setShowMobileConfig(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full bg-[var(--background)] max-h-[85vh] rounded-t-3xl shadow-2xl p-5 pt-3 pb-safe z-10 flex flex-col"
+            >
+              {/* Drag Handle Pill */}
+              <div className="w-12 h-1.5 bg-[var(--border)] rounded-full mx-auto mb-4" />
+
+              <div className="sticky top-0 bg-[var(--background)] z-20 pb-4 mb-2 border-b border-[var(--border)] flex justify-between items-center">
+                <h2 className="font-black text-lg text-[var(--heading)]">Customize Details</h2>
+                <button onClick={() => setShowMobileConfig(false)} className="w-8 h-8 flex items-center justify-center bg-[var(--card)] border border-[var(--border)] rounded-full text-[var(--muted)] hover:text-[var(--heading)]">
+                  <X size={16} />
+                </button>
+              </div>
+              
+              <div className={`flex-1 ${flavorDropdownOpen ? 'overflow-hidden' : 'overflow-y-auto'} pt-2 pb-6`}>
+                {renderConfigContent()}
+              </div>
+
+              <div className="sticky bottom-0 bg-[var(--background)] pt-4 border-t border-[var(--border)]">
+                <button 
+                   onClick={() => {
+                     setShowMobileConfig(false);
+                     setHasCustomized(true);
+                   }}
+                   className="w-full h-14 bg-[var(--primary)] text-[var(--background)] font-black text-sm rounded-xl shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Check size={18} /> DONE
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

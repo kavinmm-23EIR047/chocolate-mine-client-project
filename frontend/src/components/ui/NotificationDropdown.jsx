@@ -6,7 +6,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { getSocket } from '../../sockets/socketManager';
 
-const NotificationDropdown = ({ iconClass }) => {
+const NotificationDropdown = ({ iconClass, buttonClass, showLabel }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -128,14 +128,17 @@ const NotificationDropdown = ({ iconClass }) => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center"
+        className={buttonClass || "relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center"}
       >
-        <Bell size={24} className={iconClass || "text-heading"} />
-        {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-card flex items-center justify-center text-[8px] font-black text-white px-0.5 leading-none">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
+        <div className="relative flex items-center justify-center">
+          <Bell size={24} className={iconClass || "text-heading"} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-accent rounded-full flex items-center justify-center text-[10px] font-black text-[#120806] leading-none z-10">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
+        {showLabel && <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>}
       </button>
 
       <AnimatePresence>

@@ -61,14 +61,28 @@ const TrustBar = () => {
         </div>
       </div>
 
-      {/* Desktop Trust Bar */}
-      <div className="hidden lg:block bg-card/50 backdrop-blur-sm border border-border/30 rounded-2xl overflow-hidden mb-8">
-        <div className="px-6 py-3">
-          <div className="flex items-center justify-between gap-4">
-            {TRUST.map((t, i) => {
+      {/* Desktop Trust Marquee */}
+      <div className="hidden lg:block bg-card border-y border-border overflow-hidden relative w-full">
+        <style>{`
+          @keyframes scroll-marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-scroll-marquee {
+            display: flex;
+            width: max-content;
+            animation: scroll-marquee 40s linear infinite;
+          }
+          .animate-scroll-marquee:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
+        <div className="py-3">
+          <div className="animate-scroll-marquee">
+            {[...TRUST, ...TRUST, ...TRUST, ...TRUST].map((t, i) => {
               const isVeg = t.label.includes('Pure Veg');
               return (
-                <div key={i} className="flex items-center gap-2 whitespace-nowrap shrink-0 group">
+                <div key={i} className="flex items-center gap-2 whitespace-nowrap shrink-0 group px-8">
                   <div className={`transition-transform duration-300 ${isVeg ? 'text-emerald-600 dark:text-emerald-400' : 'text-primary'} group-hover:scale-110`}>
                     {t.icon}
                   </div>

@@ -352,6 +352,7 @@ export default function CustomCake() {
       });
 
       toast.success('🎂 Dream cake added to bag!');
+      setTimeout(() => navigate('/cart'), 400);
     } catch { toast.error('Failed to add. Please try again.'); }
     finally { setIsAdding(false); }
   };
@@ -531,16 +532,6 @@ export default function CustomCake() {
       <main className="responsive-container py-6 pb-40 lg:pb-8 tv:py-10">
         {themeIdx === null ? (
           <>
-            {/* Browse Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-[var(--heading)]">
-                Choose Your Theme
-                <span className="ml-2 text-sm font-medium text-[var(--muted)] flex-shrink-0">
-                  ({filteredThemes.length} designs)
-                </span>
-              </h2>
-            </div>
-
             {/* Render browse grid */}
             <CustomCakeBrowse
               filteredThemes={filteredThemes}

@@ -122,7 +122,7 @@ const MobileBottomNav = () => {
 
           <div
             className="neo-bottom-nav-container max-w-md mx-auto pointer-events-auto"
-            style={{ boxShadow: 'var(--nm-extruded)' }}
+            style={{ boxShadow: '0 -4px 12px rgba(var(--shadow-color), 0.08)' }}
           >
             <nav className="neo-bottom-nav transition-colors duration-300">
               {navItems.map((item) => (
@@ -137,7 +137,7 @@ const MobileBottomNav = () => {
                       className={`flex flex-col items-center justify-center py-2 nav-item-element relative transition-all duration-300
                         ${isActive ? 'nav-item-active font-bold' : 'nav-item-inactive hover:bg-white/5 dark:hover:bg-black/5 hover:opacity-90'}`}
                       style={{
-                        boxShadow: isActive ? 'var(--nm-button-pressed)' : 'none',
+                        boxShadow: isActive ? 'inset 0 2px 4px rgba(var(--shadow-color), 0.1)' : 'none',
                       }}
                     >
                       {/* Icon Base Frame */}

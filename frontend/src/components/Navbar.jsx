@@ -130,58 +130,67 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Search Bar */}
-            <div className="flex flex-1 max-w-md xl:max-w-xl tv:max-w-3xl mx-auto cursor-pointer px-2" onClick={() => setIsSearchOverlayOpen(true)}>
+            <div className="flex flex-1 max-w-md xl:max-w-xl tv:max-w-3xl mx-auto cursor-pointer px-4" onClick={() => setIsSearchOverlayOpen(true)}>
               <div className="relative w-full">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-heading/70" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-heading/70" />
                 <input
                   type="text" readOnly placeholder="Search for cakes, desserts and more..."
-                  className="w-full bg-surface border border-border/60 text-foreground pl-10 pr-10 py-2.5 rounded-full outline-none text-xs cursor-pointer"
+                  className="w-full bg-surface border border-border/60 text-foreground pl-12 pr-12 py-3.5 rounded-full outline-none text-sm cursor-pointer"
                 />
-                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-heading/60">
-                  <SlidersHorizontal size={14} />
+                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-heading/60 hover:text-heading transition-colors">
+                  <SlidersHorizontal size={16} />
                 </button>
               </div>
             </div>
 
             {/* Desktop Navigation Panels */}
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               {user ? (
-                <div className="flex flex-col items-center gap-0.5 px-2 py-1 min-w-[64px]">
-                  <NotificationDropdown />
-                  <span className="text-[11px] font-bold text-muted uppercase tracking-wide whitespace-nowrap mt-0.5">Alerts</span>
-                </div>
+                <NotificationDropdown 
+                  buttonClass="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px] relative cursor-pointer"
+                  iconClass="text-heading group-hover:text-primary transition-colors"
+                  showLabel={true}
+                />
               ) : (
-                <button onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))} className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]">
+                <button onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))} className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px]">
                   <Bell size={24} className="text-heading group-hover:text-primary transition-colors" />
                   <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
                 </button>
               )}
 
               {[user ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' } : { icon: LogIn, label: 'Sign In', to: '/login' }].map(({ icon: Icon, label, to }) => (
-                <Link key={label} to={to} className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[64px]">
+                <Link key={label} to={to} className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px]">
                   <Icon size={24} className="text-heading group-hover:text-primary transition-colors" />
                   <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">{label}</span>
                 </Link>
               ))}
 
-              <Link to="/cart" className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl hover:bg-primary/8 group transition-colors relative min-w-[64px]">
+              <Link to="/cart" className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors relative min-w-[72px]">
                 <ShoppingCart size={24} className="text-heading group-hover:text-primary transition-colors" />
-                {cartCount > 0 && <span className="absolute -top-2 -right-2.5 bg-accent text-[#120807] text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full leading-none px-1">{cartCount}</span>}
+                {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-accent text-[#120807] text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full leading-none px-1">{cartCount}</span>}
                 <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
               </Link>
-              <ThemeToggle />
+              <ThemeToggle 
+                buttonClass="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px] relative cursor-pointer"
+                iconClass="text-heading group-hover:text-primary transition-colors"
+                showLabel={true}
+              />
             </div>
           </div>
 
           {/* MOBILE VIEW LAYOUT */}
-          <div className="lg:hidden flex flex-col gap-4 pt-3">
+          <div className="lg:hidden flex flex-col gap-5 pt-5 pb-2">
 
             {/* Top Row: Menu + Logo + Actions */}
             <div className="flex items-center justify-between w-full px-1">
               {/* Left Side: Menu + Logo */}
               <div className="flex items-center gap-2">
                 <button onClick={() => setIsMenuOpen(true)} className="p-1 rounded-lg transition-colors flex-shrink-0">
-                  <Menu size={28} className="text-heading" />
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-heading">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                  </svg>
                 </button>
                 <Link to="/" className="block select-none group flex-shrink-0">
                   <LogoMark containerClass="w-[95px] sm:w-[115px]" />
@@ -198,7 +207,7 @@ const Navbar = () => {
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full" />
                   </button>
                 )}
-                <ThemeToggle buttonClass="w-10 h-10 rounded-full flex items-center justify-center border border-border bg-card-soft text-foreground hover:bg-background transition-all active:scale-95 shadow-sm" />
+                <ThemeToggle buttonClass="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center relative" iconClass="text-heading" />
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import api from '../../utils/api';
 
 const HighlightCircle = ({ image, name, isActive, onClick, size = "md" }) => {
@@ -127,11 +127,15 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
 
   return (
     <section className="py-3 relative w-full mx-auto overflow-hidden">
-      {/* Category Section Title */}
-      <div className="px-4 md:px-16 mb-4">
-        <h2 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-heading uppercase">
-          Shop by Category
-        </h2>
+      <div className="flex items-center justify-between px-4 md:px-16 mb-6 lg:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+          </div>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase text-heading">
+            Shop by Category
+          </h2>
+        </div>
       </div>
 
       <style>{`

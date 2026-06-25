@@ -18,10 +18,9 @@ const Bestseller = ({ location }) => {
   const { data: productRes, isLoading } = useGetProductsQuery({
     bestseller: 'true',
     location,
-    limit: 10, // Fetch a bit more in case backend pagination includes non-bestsellers
+    limit: 10,
   });
 
-  // STRICT FRONTEND FILTER: Only keep items where bestseller is true
   const products = (productRes?.data || []).filter(p => p.bestseller === true);
 
   if (!isLoading && products.length === 0) {
@@ -31,12 +30,13 @@ const Bestseller = ({ location }) => {
   return (
     <section className="responsive-section !py-6 lg:!py-10 border-b border-border/20 overflow-hidden">
       <div className="flex flex-col gap-5 lg:gap-8">
-        <div className="flex flex-row items-end justify-between gap-3 w-full">
-          <div className="space-y-1 lg:space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 lg:px-4 lg:py-1.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] lg:text-xs font-black uppercase tracking-wider">
-              <Star size={10} fill="currentColor" className="lg:w-3 lg:h-3" /> Bestselling
+        <div className="flex flex-row items-center justify-between gap-4 w-full px-4 sm:px-0 mb-6 lg:mb-8">
+          
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-heading uppercase">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase text-heading">
               Our Bestsellers
             </h2>
           </div>
@@ -46,7 +46,7 @@ const Bestseller = ({ location }) => {
               to="/shop?bestseller=true"
               className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs lg:text-sm font-black text-primary hover:text-primary-hover uppercase tracking-widest border-b-2 border-primary/20 pb-0.5 transition-all hover:gap-2 whitespace-nowrap mb-1"
             >
-              View All <ArrowRight size={14} className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+              View All <ArrowRight size={14} className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 inline ml-1" />
             </Link>
           )}
         </div>

@@ -33,12 +33,13 @@ const ProductGrid = ({ query, activeCategory, deliveryCity }) => {
     <section className="responsive-section !py-6 lg:!py-10 border-b border-border/20 overflow-hidden" id="main-catalog">
       <div className="flex flex-col gap-5 lg:gap-8">
         
-        <div className="flex flex-col mobile-lg:flex-row mobile-lg:items-end justify-between gap-3 w-full">
-          <div className="space-y-1 lg:space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 lg:px-4 lg:py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-[9px] lg:text-xs font-black uppercase tracking-wider">
-              <Grid size={10} className="lg:w-3 lg:h-3" /> Our Collections
+        <div className="flex flex-row items-center justify-between gap-4 w-full px-4 sm:px-0 mb-6 lg:mb-8">
+          
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <Grid className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-heading uppercase">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase text-heading">
               Main Catalog
             </h2>
           </div>

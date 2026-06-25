@@ -6,6 +6,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { useGoogleReviews } from '../../hooks/useGoogleReviews';
+import bakeryImage from '../../assets/bakery.png';
 
 const timeAgo = (date) => {
   if (!date) return '';
@@ -71,9 +72,9 @@ const DEFAULT_REVIEWS = [
   }
 ];
 
-const NEUMORPHIC_INNER = "shadow-[inset_6px_6px_12px_rgba(56,26,20,0.08),inset_-6px_-6px_12px_rgba(232,220,216,0.8)] dark:shadow-[inset_6px_6px_12px_rgba(0,0,0,0.4),inset_-6px_-6px_12px_rgba(56,26,20,0.2)]";
-const NEUMORPHIC_CARD = "shadow-[8px_8px_16px_rgba(56,26,20,0.1),-8px_-8px_16px_rgba(232,220,216,0.85)] dark:shadow-[8px_8px_16px_rgba(0,0,0,0.45),-8px_-8px_16px_rgba(56,26,20,0.2)]";
-const NEUMORPHIC_BUTTON = "shadow-[6px_6px_12px_rgba(56,26,20,0.1),-6px_-6px_12px_rgba(232,220,216,0.85)] hover:shadow-[inset_4px_4px_8px_rgba(56,26,20,0.08),inset_-4px_-4px_8px_rgba(232,220,216,0.7)] dark:shadow-[6px_6px_12px_rgba(0,0,0,0.4),-6px_-6px_12px_rgba(56,26,20,0.2)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4),inset_-4px_-4px_8px_rgba(56,26,20,0.2)]";
+const NEUMORPHIC_INNER = "shadow-sm border border-border/50";
+const NEUMORPHIC_CARD = "shadow-card border border-border";
+const NEUMORPHIC_BUTTON = "shadow-sm hover:shadow-md border border-border";
 
 const GoogleLogo = ({ size = 20 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg" className="shrink-0">
@@ -134,11 +135,19 @@ const ReviewsHome = () => {
   };
 
   return (
-    <section className="py-10 md:py-20 bg-background overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-6 md:py-8 overflow-hidden w-full">
+      <div className="w-full bg-[#F5EDEA] dark:bg-[#1A0E0B] border-y border-[#D5C0BA] dark:border-[#3A211B] py-6 sm:py-8 md:py-10 px-4 sm:px-6 lg:px-12 relative overflow-hidden shadow-sm">
 
-        {/* Brand Information Header Section */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between mb-10 md:mb-16 gap-6 lg:gap-10">
+        {/* Themed Mid-Right Illustration (Repositioned to avoid buttons) */}
+        <img
+          src={bakeryImage}
+          alt="Baker Illustration"
+          className="absolute top-1/2 -translate-y-1/2 -right-10 md:-right-16 w-56 md:w-80 lg:w-[450px] opacity-[0.15] md:opacity-20 pointer-events-none z-30 drop-shadow-sm"
+        />
+
+        <div className="max-w-[1440px] mx-auto relative z-10">
+          {/* Brand Information Header Section */}
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between mb-8 md:mb-12 gap-6 lg:gap-10">
           <div className="text-center lg:text-left max-w-2xl">
             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card mb-3 md:mb-5 ${NEUMORPHIC_INNER}`}>
               <GoogleLogo size={18} />
@@ -214,11 +223,11 @@ const ReviewsHome = () => {
 
         {/* Reviews Swiper Carousel Framework */}
         {error ? (
-          <div className={`text-center py-12 rounded-3xl bg-card ${NEUMORPHIC_CARD}`}>
+          <div className={`relative z-10 text-center py-12 rounded-3xl bg-card ${NEUMORPHIC_CARD}`}>
             <p className="text-error font-semibold mb-2 text-base">Failed to load testimonials.</p>
           </div>
         ) : (
-          <div className="relative group mb-6 md:mb-12 px-1">
+          <div className="relative z-10 group mb-6 md:mb-12 px-1">
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
               autoplay={{ delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }}
@@ -314,29 +323,30 @@ const ReviewsHome = () => {
         )}
 
         {/* Global Action Navigation Cluster */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 md:gap-4 mt-6 md:mt-10">
+        <div className="relative z-10 flex flex-row justify-center items-stretch gap-2 md:gap-4 mt-6 md:mt-10 w-full">
           <a
             href={GOOGLE_MAPS_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-card text-heading font-black text-[11px] md:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON}`}
+            className={`flex-1 sm:w-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-6 py-3.5 rounded-full bg-card text-heading font-black text-[8px] sm:text-[11px] md:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} text-center`}
           >
-            <ExternalLink size={14} className="text-muted" />
-            View All My Googles
+            <ExternalLink size={14} className="text-muted shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="leading-tight whitespace-nowrap">View All My Googles</span>
           </a>
 
           <a
             href={GOOGLE_SHARE_EXPERIENCE_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-black text-[11px] md:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON}`}
+            className={`flex-1 sm:w-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-6 py-3.5 rounded-full font-black text-[8px] sm:text-[11px] md:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} text-center`}
             style={{ backgroundColor: 'var(--button-bg)', color: 'var(--button-text)' }}
           >
-            <MessageSquare size={14} />
-            Share Your Experience
+            <MessageSquare size={14} className="shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="leading-tight whitespace-nowrap">Share Your Experience</span>
           </a>
         </div>
 
+        </div>
       </div>
 
       <style>{`

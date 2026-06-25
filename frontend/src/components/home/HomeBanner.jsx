@@ -71,39 +71,18 @@ const HomeBanner = () => {
 
   return (
     <div
-      className="banner-root relative w-full overflow-hidden rounded-[16px] sm:rounded-[24px] shadow-premium select-none"
+      className="banner-root relative w-full overflow-hidden rounded-[16px] sm:rounded-[24px] shadow-premium select-none border border-border/20"
       style={{ aspectRatio: 'var(--banner-ratio, 16/9)' }}
     >
       <style>{`
         @media (max-width: 480px) {
-          .banner-root { aspect-ratio: 16/6 !important; } 
+          .banner-root { aspect-ratio: 16/7.5 !important; } 
         }
         @media (min-width: 481px) {
           .banner-root { aspect-ratio: 16/4.5 !important; }
         }
         @media (min-width: 1920px) {
           .banner-root { aspect-ratio: 16/3.9 !important; }
-        }
-
-        @property --border-angle {
-          syntax: '<angle>';
-          initial-value: 0deg;
-          inherits: false;
-        }
-
-        .banner-root {
-          /* Reduced thickness here from 3px to 1.5px to make it ultra-light */
-          border: 1.5px solid transparent;
-          background: 
-            linear-gradient(#121212, #121212) padding-box, 
-            conic-gradient(from var(--border-angle), #fccc63, #fba650, #f15f53, #e2336b, #b9359a, #62529c, #fccc63) border-box;
-          animation: spinInstagramBorder 3s linear infinite;
-        }
-
-        @keyframes spinInstagramBorder {
-          to {
-            --border-angle: 360deg;
-          }
         }
 
         .premium-glass {
@@ -115,11 +94,11 @@ const HomeBanner = () => {
         }
       `}</style>
 
-      {/* Solid dark base layer behind transitions */}
-      <div className="absolute inset-0 bg-[#121212] -z-10" />
+      {/* Solid base layer behind transitions */}
+      <div className="absolute inset-0 bg-background transition-colors duration-300 -z-10" />
 
       {/* Slide transition zone */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.div
           key={slide._id}
           initial={{ opacity: 0 }}

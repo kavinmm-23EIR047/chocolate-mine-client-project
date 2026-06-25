@@ -370,7 +370,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             style={{
               background: 'var(--card)',
               borderColor: 'var(--border)',
-              boxShadow: 'var(--nm-flat)'
+              boxShadow: '0 2px 8px rgba(var(--shadow-color), 0.08)'
             }}
           >
             <Heart
@@ -413,7 +413,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             style={{
               background: 'var(--card)',
               borderColor: 'var(--border)',
-              boxShadow: 'var(--nm-flat)'
+              boxShadow: '0 2px 8px rgba(var(--shadow-color), 0.08)'
             }}
           >
             <Heart

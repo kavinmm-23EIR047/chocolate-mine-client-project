@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    THE CHOCOLATE MINE — MODERN NEUMORPHISM THEME (NO WHITE SHADOWS)
    ─────────────────────────────────────────────────────────────
-   Light: Soft Rose Cream (#EBDEDA)
+   Light: Soft Rose Cream (#ecded9)
    Dark:  Deep Cocoa (#120806)
    Accent: Caramel Gold (#E6B25A)
    ═══════════════════════════════════════════════════════════════ */
@@ -17,10 +17,10 @@
    ─────────────────────────────────────────── */
 :root {
    /* Base Surfaces */
-   --background: #EBDEDA;
-   --background-rgb: 235 222 218;
-   --surface: #EBDEDA;
-   --surface-rgb: 235 222 218;
+   --background: #ecded9;
+   --background-rgb: 236 222 217;
+   --surface: #ecded9;
+   --surface-rgb: 236 222 217;
    --card: #F1E6E2;
    --card-rgb: 241 230 226;
    --card-soft: #E4D4CF;
@@ -29,8 +29,8 @@
    /* Typography */
    --foreground: #2D1B17;
    --foreground-rgb: 45 27 23;
-   --heading: #1F120F;
-   --heading-rgb: 31 18 15;
+   --heading: #332623;
+   --heading-rgb: 51 38 35;
    --body: #4A3732;
    --body-rgb: 74 55 50;
    --muted: #7C6660;
@@ -51,14 +51,14 @@
    --accent-hover-rgb: 230 178 90;
 
    /* Navigation */
-   --navbar: #EBDEDA;
-   --navbar-rgb: 235 222 218;
-   --navbar-text: #1F120F;
-   --navbar-text-rgb: 31 18 15;
+   --navbar: #ecded9;
+   --navbar-rgb: 236 222 217;
+   --navbar-text: #332623;
+   --navbar-text-rgb: 51 38 35;
 
    /* Footer */
-   --footer: #1F120F;
-   --footer-rgb: 31 18 15;
+   --footer: #332623;
+   --footer-rgb: 51 38 35;
    --footer-text: #F2E2DB;
    --footer-text-rgb: 242 226 219;
 
@@ -78,17 +78,8 @@
    --input-focus: #4E2820;
    --ring: rgba(78, 40, 32, 0.15);
 
-   /* Neumorphism Shadows */
-   --shadow-light: rgba(168, 138, 128, 0.15);
-   --shadow-dark: rgba(56, 26, 20, 0.12);
-   --shadow-deep: rgba(56, 26, 20, 0.2);
-
-   --nm-extruded: -8px -8px 16px var(--shadow-light), 8px 8px 16px var(--shadow-dark);
-   --nm-sunken: inset -4px -4px 8px var(--shadow-light), inset 4px 4px 8px var(--shadow-dark);
-   --nm-card: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
-   --nm-button: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
-   --nm-button-pressed: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-deep);
-   --nm-flat: 0px 2px 4px var(--shadow-dark);
+   /* Solid UI Shadows */
+   --shadow-color: 51, 38, 35;
 
    /* Buttons */
    --button-bg: #4E2820;
@@ -177,8 +168,8 @@
    --star-rgb: 251 192 45;
 
    /* Overlay */
-   --overlay: rgba(31, 18, 15, 0.4);
-   --backdrop: rgba(235, 222, 218, 0.92);
+   --overlay: rgba(51, 38, 35, 0.4);
+   --backdrop: rgba(236, 222, 217, 0.92);
 
    /* Skeleton */
    --skeleton: #E4D4CF;
@@ -202,10 +193,10 @@
    --card-soft-rgb: 42 24 19;
 
    /* Typography */
-   --foreground: #EBDEDA;
-   --foreground-rgb: 235 222 218;
-   --heading: #EBDEDA;
-   --heading-rgb: 235 222 218;
+   --foreground: #ecded9;
+   --foreground-rgb: 236 222 217;
+   --heading: #ecded9;
+   --heading-rgb: 236 222 217;
    --body: #D4C0BA;
    --body-rgb: 212 192 186;
    --muted: #A18881;
@@ -228,14 +219,14 @@
    /* Navigation */
    --navbar: #120806;
    --navbar-rgb: 18 8 6;
-   --navbar-text: #EBDEDA;
-   --navbar-text-rgb: 235 222 218;
+   --navbar-text: #ecded9;
+   --navbar-text-rgb: 236 222 217;
 
    /* Footer */
    --footer: #0A0403;
    --footer-rgb: 10 4 3;
-   --footer-text: #EBDEDA;
-   --footer-text-rgb: 235 222 218;
+   --footer-text: #ecded9;
+   --footer-text-rgb: 236 222 217;
 
    /* Borders */
    --border: #3A211B;
@@ -253,17 +244,8 @@
    --input-focus: #E8D3CB;
    --ring: rgba(232, 211, 203, 0.15);
 
-   /* Neumorphism Shadows - Dark Theme */
-   --shadow-light: rgba(70, 40, 35, 0.3);
-   --shadow-dark: rgba(0, 0, 0, 0.5);
-   --shadow-deep: rgba(0, 0, 0, 0.7);
-
-   --nm-extruded: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
-   --nm-sunken: inset -3px -3px 6px var(--shadow-light), inset 3px 3px 6px var(--shadow-dark);
-   --nm-card: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
-   --nm-button: -4px -4px 8px var(--shadow-light), 4px 4px 8px var(--shadow-dark);
-   --nm-button-pressed: inset -2px -2px 4px var(--shadow-light), inset 2px 2px 4px var(--shadow-deep);
-   --nm-flat: 0px 2px 4px var(--shadow-dark);
+   /* Solid UI Shadows - Dark Theme */
+   --shadow-color: 0, 0, 0;
 
    /* Buttons */
    --button-bg: #E8D3CB;
@@ -542,7 +524,7 @@ body {
 .bg-card {
    background: var(--card);
    border-radius: 24px;
-   box-shadow: var(--nm-extruded);
+   box-shadow: 0 4px 12px rgba(var(--shadow-color), 0.05);
    border: 1px solid var(--border);
 }
 
@@ -550,7 +532,7 @@ body {
 .neo-card-sunken {
    background: var(--card);
    border-radius: 24px;
-   box-shadow: var(--nm-sunken);
+   box-shadow: inset 0 2px 4px rgba(var(--shadow-color), 0.05);
    border: 1px solid var(--border-light);
 }
 
@@ -560,7 +542,7 @@ input,
 textarea,
 select {
    background: var(--input);
-   box-shadow: var(--nm-sunken);
+   box-shadow: 0 1px 2px rgba(var(--shadow-color), 0.05);
    border: 1px solid var(--input-border);
    border-radius: 16px;
    padding: 12px 16px;
@@ -575,14 +557,14 @@ textarea:focus,
 select:focus {
    outline: none;
    border-color: var(--input-focus);
-   box-shadow: var(--nm-sunken), 0 0 0 3px var(--ring);
+   box-shadow: 0 0 0 3px var(--ring);
 }
 
 /* Primary Button */
 .neo-btn {
    background: var(--button-bg);
    color: var(--button-text);
-   box-shadow: var(--nm-button);
+   box-shadow: 0 2px 4px rgba(var(--shadow-color), 0.1);
    border: none;
    border-radius: 40px;
    padding: 12px 24px;
@@ -595,18 +577,19 @@ select:focus {
 .neo-btn:hover {
    background: var(--button-hover);
    transform: translateY(-1px);
+   box-shadow: 0 4px 6px rgba(var(--shadow-color), 0.15);
 }
 
 .neo-btn:active {
-   box-shadow: var(--nm-button-pressed);
    transform: translateY(0);
+   box-shadow: 0 1px 2px rgba(var(--shadow-color), 0.1);
 }
 
 /* Secondary Button */
 .neo-btn-secondary {
    background: var(--button-alt-bg);
    color: var(--button-alt-text);
-   box-shadow: var(--nm-button);
+   box-shadow: 0 2px 4px rgba(var(--shadow-color), 0.05);
    border: 1px solid var(--border);
    border-radius: 40px;
    padding: 12px 24px;
@@ -617,16 +600,18 @@ select:focus {
 
 .neo-btn-secondary:hover {
    background: var(--button-alt-hover);
+   box-shadow: 0 4px 6px rgba(var(--shadow-color), 0.1);
 }
 
 .neo-btn-secondary:active {
-   box-shadow: var(--nm-button-pressed);
+   box-shadow: 0 1px 2px rgba(var(--shadow-color), 0.05);
 }
 
 /* Avatar Styles */
 .neo-avatar {
    background: var(--card);
-   box-shadow: var(--nm-sunken);
+   box-shadow: 0 2px 8px rgba(var(--shadow-color), 0.08);
+   border: 1px solid var(--border);
    border-radius: 50%;
    display: flex;
    align-items: center;
@@ -642,7 +627,7 @@ select:focus {
 .product-card-soft,
 .product-card-pill {
    background: var(--card);
-   box-shadow: var(--nm-card);
+   box-shadow: 0 2px 8px rgba(var(--shadow-color), 0.05);
    border: 1px solid var(--border);
    overflow: hidden;
    transition: all 0.2s ease;
@@ -684,7 +669,7 @@ select:focus {
 .product-card-soft:hover,
 .product-card-pill:hover {
    transform: translateY(-2px);
-   box-shadow: var(--nm-extruded);
+   box-shadow: 0 12px 24px -4px rgba(var(--shadow-color), 0.12);
 }
 
 /* Image border radius variations */
@@ -710,7 +695,7 @@ select:focus {
    height: 8px;
    border-radius: 50%;
    background: var(--border);
-   box-shadow: var(--nm-sunken);
+   box-shadow: 0 1px 2px rgba(var(--shadow-color), 0.1);
    cursor: pointer;
    transition: all 0.2s ease;
 }

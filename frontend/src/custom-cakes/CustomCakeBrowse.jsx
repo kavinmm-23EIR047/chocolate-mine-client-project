@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useWishlist } from '../context/WishlistContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Eye, Check, Layers, Search, ChevronDown, Star, ChevronRight, Settings2 } from 'lucide-react';
+import { Filter, Eye, Check, Layers, Search, ChevronDown, Star, ChevronRight, Settings2, Heart, List, LayoutGrid, SlidersHorizontal, X } from 'lucide-react';
 import { TIERS } from './customCakeData';
 
 // Premium Bolded Veg Icon 
@@ -24,6 +25,9 @@ export default function CustomCakeBrowse({
   onToggleFilter,
   onToggleDesktopFilter
 }) {
+  const [mobileLayout, setMobileLayout] = useState('grid');
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
   // ── Filter Panel (desktop sidebar) ──
   const FilterPanel = () => (
     <div className="space-y-7">
@@ -72,13 +76,52 @@ export default function CustomCakeBrowse({
   // ── Mobile Top Bar (only shown if not hiding filters) ──
   const MobileTopBar = () => (
     <div className="sm:hidden mb-4 flex flex-col gap-3">
+      {/* Search */}
       <div className="relative">
         <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
         <input type="text" placeholder="Search themes..." value={themeSearchFilter}
           onChange={(e) => setThemeSearchFilter(e.target.value)}
           className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg py-2.5 pl-10 pr-9 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
         />
+        {themeSearchFilter && (
+          <button onClick={() => setThemeSearchFilter('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--heading)]">
+            <X size={16} />
+          </button>
+        )}
       </div>
+
+      {/* Controls row */}
+      <div className="flex items-center gap-2">
+        <button onClick={onToggleFilter}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-[12px] font-bold text-[var(--heading)] hover:border-[var(--primary)] transition-colors">
+          <SlidersHorizontal size={14} /> Filter
+        </button>
+
+        {/* Sort dropdown */}
+        <div className="relative flex-1">
+          <select value={priceSortFilter} onChange={(e) => setPriceSortFilter(e.target.value)}
+            className="w-full appearance-none bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg pl-3 pr-7 py-2.5 text-[12px] font-bold outline-none cursor-pointer">
+            <option value="">Default Sort</option>
+            <option value="asc">Price ↑</option>
+            <option value="desc">Price ↓</option>
+          </select>
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
+        </div>
+
+        {/* Layout toggle */}
+        <div className="flex items-center bg-[var(--card)] border border-[var(--border)] rounded-lg overflow-hidden shrink-0 h-[42px]">
+          <button onClick={() => setMobileLayout('list')}
+            className={`h-full px-3 transition-colors ${mobileLayout === 'list' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'text-[var(--muted)] hover:text-[var(--heading)]'}`}>
+            <List size={16} />
+          </button>
+          <button onClick={() => setMobileLayout('grid')}
+            className={`h-full px-3 transition-colors ${mobileLayout === 'grid' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'text-[var(--muted)] hover:text-[var(--heading)]'}`}>
+            <LayoutGrid size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Category pills — horizontal scroll */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
         <button onClick={() => setSelectedTier(null)}
           className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${selectedTier === null
@@ -96,15 +139,6 @@ export default function CustomCakeBrowse({
             {tier.shortName}
           </button>
         ))}
-      </div>
-      <div className="relative">
-        <select value={priceSortFilter} onChange={(e) => setPriceSortFilter(e.target.value)}
-          className="w-full appearance-none bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg pl-3 pr-7 py-2.5 text-[12px] font-bold outline-none cursor-pointer">
-          <option value="">Sort: Default</option>
-          <option value="asc">Price ↑</option>
-          <option value="desc">Price ↓</option>
-        </select>
-        <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
       </div>
     </div>
   );
@@ -160,32 +194,7 @@ export default function CustomCakeBrowse({
         </span>
       </div>
 
-      {/* Mobile view controls when hiding standard filters */}
-      {hideFilters && (
-        <div className="sm:hidden mb-4 flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-            <input type="text" placeholder="Search themes..." value={themeSearchFilter}
-              onChange={(e) => setThemeSearchFilter(e.target.value)}
-              className="w-full bg-[var(--card)] border border-[var(--border)] text-[var(--heading)] rounded-lg py-2.5 pl-10 pr-9 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
-            />
-            {themeSearchFilter && (
-              <button onClick={() => setThemeSearchFilter('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--heading)]">
-                <X size={16} />
-              </button>
-            )}
-          </div>
-          <button
-            onClick={onToggleFilter}
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-sm font-bold text-[var(--heading)] hover:border-[var(--primary)] transition-colors"
-          >
-            <Filter size={16} /> Filters
-          </button>
-        </div>
-      )}
-
-      {/* ── Mobile Top Bar – hidden when filters are hidden ── */}
-      {!hideFilters && <MobileTopBar />}
+      <MobileTopBar />
 
       <div className="flex gap-6 lg:gap-8">
         {/* ── Desktop Sidebar Panel – hidden when filters are hidden ── */}
@@ -198,7 +207,7 @@ export default function CustomCakeBrowse({
         {/* ── Main Catalog Display Window ── */}
         <main className="flex-1 min-w-0">
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            <div className={`grid ${mobileLayout === 'list' ? 'grid-cols-1' : 'grid-cols-2'} sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6`}>
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--card)] animate-pulse">
                   <div className="aspect-square bg-[var(--border)]/40" />
@@ -214,7 +223,7 @@ export default function CustomCakeBrowse({
               No themes match your filters.
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            <div className={`grid ${mobileLayout === 'list' ? 'grid-cols-1' : 'grid-cols-2'} sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6`}>
               <AnimatePresence mode="popLayout">
                 {filteredThemes.map((t, i) => (
                   <motion.div
@@ -224,10 +233,101 @@ export default function CustomCakeBrowse({
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2, delay: i * 0.03 }}
                     onClick={() => selectTheme(i)}
-                    className="group w-full h-full min-w-0 flex flex-col justify-between cursor-pointer transition-all duration-200 p-3 sm:p-4 pb-8 rounded-xl"
-                    style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+                    className={mobileLayout === 'list' 
+                      ? "flex flex-row p-3 sm:p-4 pb-8 gap-3 sm:gap-4 items-stretch cursor-pointer w-full border-b transition-colors min-w-0"
+                      : "group w-full h-full min-w-0 flex flex-col justify-between cursor-pointer transition-all duration-200 p-3 sm:p-4 pb-8 rounded-xl"
+                    }
+                    style={{ background: 'var(--card)', border: mobileLayout === 'list' ? 'none' : '1px solid var(--border)', borderBottom: mobileLayout === 'list' ? '1px solid var(--border)' : '' }}
                   >
-                    <div>
+                    {mobileLayout === 'list' ? (
+                      <>
+                        <div className="flex flex-col flex-1 min-w-0 justify-between overflow-hidden">
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                              <VegIcon />
+                              {t.enabled && (
+                                <div
+                                  className="text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm"
+                                  style={{ background: 'var(--badge-discount-bg)', color: 'var(--badge-discount-text)', borderColor: 'var(--badge-discount-border)' }}
+                                >
+                                  Available
+                                </div>
+                              )}
+                            </div>
+
+                            <h3 className="text-[14px] sm:text-[15px] font-bold leading-tight break-words capitalize" style={{ color: 'var(--heading)' }}>
+                              {t.name}
+                            </h3>
+
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              <span className="text-[14px] font-extrabold" style={{ color: 'var(--heading)' }}>₹{t.basePrice}</span>
+                            </div>
+
+                            <div className="flex items-center gap-0.5 mt-1 text-[11px] font-bold text-green-500">
+                              <Star size={12} fill={(t.rating || 0) > 0 ? "currentColor" : "none"} strokeWidth={2.5} />
+                              <span>{(t.rating || 0) > 0 ? (t.rating || 0).toFixed(1) : '0'}</span>
+                              <span className="font-medium text-[10px] ml-1" style={{ color: 'var(--muted)' }}>
+                                ({t.numReviews === 1 ? '1 review' : `${t.numReviews || 0} reviews`})
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1.5 mt-2 pr-2">
+                            {t.description && (
+                              <div className="flex items-start gap-1 mt-1 text-[10px]" style={{ color: 'var(--muted)' }}>
+                                <span className="capitalize leading-snug line-clamp-2">{t.description}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="relative shrink-0 w-[104px] sm:w-28 md:w-36 aspect-square rounded-xl self-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                          <div className="w-full h-full overflow-hidden rounded-xl">
+                            {t.image || t.flavors?.[0]?.image
+                              ? <img src={t.image || t.flavors[0].image} alt={t.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                              : <span className="flex items-center justify-center h-full text-6xl">{t.emoji}</span>
+                            }
+                          </div>
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); if(t._id || t.id) toggleWishlist(t._id || t.id, 'customCake'); }}
+                            className={`touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 w-6 h-6 md:w-9 md:h-9 border`}
+                            style={{
+                              background: 'var(--card)',
+                              borderColor: 'var(--border)',
+                              boxShadow: '0 2px 8px rgba(var(--shadow-color), 0.08)'
+                            }}
+                          >
+                            <Heart
+                              className={`w-3 h-3 md:w-[16px] md:h-[16px]`}
+                              fill={isInWishlist(t._id || t.id, 'customCake') ? '#ef4444' : 'none'}
+                              strokeWidth={2.5}
+                              style={{ color: isInWishlist(t._id || t.id, 'customCake') ? '#ef4444' : 'var(--heading)' }}
+                            />
+                          </button>
+
+                          <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] overflow-hidden shadow-md">
+                            <motion.div
+                              className="absolute inset-0 w-[200%] h-[200%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,var(--accent)_0%,var(--secondary)_50%,transparent_100%)]"
+                              animate={{ rotate: 360 }}
+                              transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+                              style={{ transformOrigin: 'center' }}
+                            />
+                            <button
+                              onClick={(e) => { e.stopPropagation(); selectTheme(i); }}
+                              className="touch-compact relative z-10 flex items-center justify-center rounded-[5px] h-6 w-6 md:h-9 md:w-[104px] text-[12px] md:text-[14px] font-extrabold tracking-wider cursor-pointer transition-transform active:scale-95"
+                              style={{ background: 'var(--button-bg)', color: 'var(--button-text)' }}
+                              title="Customize Cake"
+                            >
+                              <Settings2 size={12} strokeWidth={3.5} className="md:w-[15px] md:h-[15px]" />
+                              <span className="hidden md:inline ml-1">CUSTOMIZE</span>
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
                       <div className="relative aspect-square overflow-visible shrink-0 w-full mb-8" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
                         <div className="w-full h-full overflow-hidden rounded-xl">
                           {t.image || t.flavors?.[0]?.image
@@ -235,6 +335,23 @@ export default function CustomCakeBrowse({
                             : <span className="flex items-center justify-center h-full text-6xl">{t.emoji}</span>
                           }
                         </div>
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); if(t._id || t.id) toggleWishlist(t._id || t.id, 'customCake'); }}
+                            className={`touch-compact absolute top-1.5 right-1.5 flex items-center justify-center rounded-full shadow-md z-10 w-6 h-6 md:w-9 md:h-9 border`}
+                            style={{
+                              background: 'var(--card)',
+                              borderColor: 'var(--border)',
+                              boxShadow: '0 2px 8px rgba(var(--shadow-color), 0.08)'
+                            }}
+                          >
+                            <Heart
+                              className={`w-3 h-3 md:w-[16px] md:h-[16px]`}
+                              fill={isInWishlist(t._id || t.id, 'customCake') ? '#ef4444' : 'none'}
+                              strokeWidth={2.5}
+                              style={{ color: isInWishlist(t._id || t.id, 'customCake') ? '#ef4444' : 'var(--heading)' }}
+                            />
+                          </button>
 
                         <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] overflow-hidden shadow-md">
                           <motion.div
@@ -268,34 +385,37 @@ export default function CustomCakeBrowse({
                           )}
                         </div>
 
-                        <h3 className="text-[14px] md:text-[15px] font-bold leading-tight mb-1 truncate capitalize" style={{ color: 'var(--heading)' }}>
+                        <h3 className="text-[14px] md:text-[15px] font-bold leading-tight mb-1 break-words capitalize" style={{ color: 'var(--heading)' }}>
                           {t.name}
                         </h3>
 
-                        <div className="flex items-center gap-1 text-[11px] md:text-[12px] font-medium mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
+                        <div className="flex items-center gap-1 text-[12px] font-medium mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
                           <div className="flex items-center gap-0.5 font-bold text-green-500">
-                            <Star size={12} fill="currentColor" strokeWidth={2.5} />
-                            <span>5.0</span>
-                            <span className="font-normal text-[10px] ml-0.5" style={{ color: 'var(--muted)' }}>
-                              (12)
+                            <Star size={13} fill={(t.rating || 0) > 0 ? "currentColor" : "none"} strokeWidth={2.5} />
+                            <span>{(t.rating || 0) > 0 ? (t.rating || 0).toFixed(1) : '0'}</span>
+                            <span className="font-normal text-[11px] ml-0.5" style={{ color: 'var(--muted)' }}>
+                              ({t.numReviews === 1 ? '1 review' : `${t.numReviews || 0} reviews`})
                             </span>
                           </div>
-                          <span>•</span>
-                          <div className="flex items-center gap-0.5 truncate text-[10px] max-w-[70px] md:max-w-none">
-                            {t.description || "Freshly Baked"}
-                          </div>
+                          {t.description && (
+                            <>
+                              <span>•</span>
+                              <div className="flex items-center gap-0.5">
+                                <span className="capitalize text-[11px] line-clamp-2 leading-snug">{t.description}</span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex flex-col text-left mt-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[11px] font-bold" style={{ color: 'var(--muted)' }}>From</span>
-                        <span className="text-[15px] md:text-[17px] font-black" style={{ color: 'var(--heading)' }}>
-                          ₹{t.basePrice}
-                        </span>
+                        <span className="text-[15px] md:text-[17px] font-black" style={{ color: 'var(--heading)' }}>₹{t.basePrice}</span>
                       </div>
                     </div>
+                      </>
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>

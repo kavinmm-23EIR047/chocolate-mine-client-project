@@ -26,33 +26,33 @@ const UserLayout = () => {
       <Navbar />
 
       {/* ── RESPONSIVE INFO BANNER ── */}
-      <div className="bg-success/10 border-y border-success/20 text-success py-4 md:py-5 px-4 overflow-hidden">
+      <div className="bg-[#4E2820] dark:bg-[#E8D3CB] py-2.5 px-4 overflow-hidden border-b border-border/10 transition-colors duration-300">
 
         {/* DESKTOP/TABLET LAYOUT (md and up) */}
         <div className="hidden md:flex items-center justify-between responsive-container">
-          {/* Left: Pure Veg & Eggless (Increased Size to 20) */}
-          <div className="flex items-center gap-3">
-            <PureVegBadge size={20} className="shadow-none bg-transparent p-0" hideText={true} />
-            <EgglessBadge size={20} className="shadow-none bg-transparent p-0" hideText={true} />
-            <span className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.1em] lg:tracking-[0.15em] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
-            <span className="text-[10px] font-black uppercase tracking-[0.1em] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
+          {/* Left: Pure Veg & Eggless */}
+          <div className="flex items-center gap-2.5">
+            <PureVegBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
+            <EgglessBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
+            <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
+            <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.1em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
           </div>
 
           {/* Center: Delivery */}
-          <div className="flex items-center gap-2 text-primary text-[11px] font-black uppercase tracking-[0.15em] mt-0.5">
-            <Truck size={15} className="shrink-0" />
+          <div className="flex items-center gap-2 text-[#F2E2DB] dark:text-[#120806] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] mt-0.5">
+            <Truck size={14} className="shrink-0" />
             <span>Delivery in Coimbatore within 3 Hours</span>
           </div>
 
           {/* Right: Important Routes */}
-          <div className="flex items-center gap-5 text-[10px] font-black uppercase tracking-[0.15em] mt-0.5">
-            <Link to="/contact" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+          <div className="flex items-center gap-5 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] mt-0.5 text-[#4ade80] dark:text-[#4E2820]">
+            <Link to="/contact" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
               <Phone size={12} className="shrink-0" /> Contact Us
             </Link>
-            <Link to="/help" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+            <Link to="/help" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
               <HelpCircle size={12} className="shrink-0" /> Help
             </Link>
-            <Link to="/stores" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+            <Link to="/stores" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
               <MapPin size={12} className="shrink-0" /> Stores
             </Link>
           </div>
@@ -60,28 +60,28 @@ const UserLayout = () => {
 
         {/* MOBILE LAYOUT (below md) */}
         <div className="flex md:hidden items-center justify-between w-full">
-          {/* Left: Pure Veg & Eggless (Increased Size to 16 for better visibility in image_6b58ba.png) */}
+          {/* Left: Pure Veg & Eggless */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <PureVegBadge size={16} className="shadow-none bg-transparent p-0" hideText={true} />
-            <EgglessBadge size={16} className="shadow-none bg-transparent p-0" hideText={true} />
+            <PureVegBadge size={14} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
+            <EgglessBadge size={14} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
           </div>
 
-          {/* Center: Delivery (Shortened) */}
-          <div className="flex items-center gap-1 text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] mx-2">
-            <Truck size={13} className="shrink-0" />
+          {/* Center: Delivery */}
+          <div className="flex items-center gap-1 text-[#F2E2DB] dark:text-[#120806] text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] mx-2 mt-0.5">
+            <Truck size={11} className="shrink-0 text-[#F2E2DB] dark:text-[#120806]" />
             <span>3Hrs Delivery in CBE</span>
           </div>
 
           {/* Right: Icon links */}
-          <div className="flex items-center gap-3.5 shrink-0">
-            <Link to="/contact" className="hover:text-primary transition-colors">
-              <Phone size={13} />
+          <div className="flex items-center gap-3.5 shrink-0 text-[#4ade80] dark:text-[#4E2820]">
+            <Link to="/contact" className="hover:text-white dark:hover:text-[#120806] transition-colors">
+              <Phone size={12} />
             </Link>
-            <Link to="/help" className="hover:text-primary transition-colors">
-              <HelpCircle size={13} />
+            <Link to="/help" className="hover:text-white dark:hover:text-[#120806] transition-colors">
+              <HelpCircle size={12} />
             </Link>
-            <Link to="/stores" className="hover:text-primary transition-colors">
-              <MapPin size={13} />
+            <Link to="/stores" className="hover:text-white dark:hover:text-[#120806] transition-colors">
+              <MapPin size={12} />
             </Link>
           </div>
         </div>

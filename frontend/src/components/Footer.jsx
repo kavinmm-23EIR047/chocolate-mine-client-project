@@ -117,7 +117,7 @@ const Footer = () => {
                 <a
                   key={i}
                   href="#"
-                  className="w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-300 bg-card border border-border shadow-[var(--nm-button)] hover:shadow-[var(--nm-button-pressed)] hover:scale-105"
+                  className="w-11 h-11 flex items-center justify-center rounded-2xl transition-all duration-300 bg-card border border-border shadow-card hover:shadow-sm hover:scale-105"
                 >
                   <Icon size={18} className="text-foreground" />
                 </a>
@@ -235,7 +235,7 @@ const Footer = () => {
             <h4 className="text-[11px] font-black uppercase tracking-[0.35em] mb-6 text-accent">Experience Us</h4>
             <ul className="space-y-5">
               <li className="flex items-start gap-3.5">
-                <div className="w-9 h-9 bg-card rounded-lg flex items-center justify-center shrink-0 border border-border shadow-[var(--nm-sunken)]">
+                <div className="w-9 h-9 bg-card rounded-lg flex items-center justify-center shrink-0 border border-border shadow-sm">
                   <MapPin size={15} className="text-primary" />
                 </div>
                 <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-muted hover:text-primary leading-normal pt-0.5 transition-colors">
@@ -244,7 +244,7 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex items-start gap-3.5">
-                <div className="w-9 h-9 bg-card rounded-lg flex items-center justify-center shrink-0 border border-border shadow-[var(--nm-sunken)]">
+                <div className="w-9 h-9 bg-card rounded-lg flex items-center justify-center shrink-0 border border-border shadow-sm">
                   <Phone size={15} className="text-primary" />
                 </div>
                 <div className="text-xs font-semibold text-muted leading-normal pt-0.5">

@@ -34,7 +34,7 @@ const MegaMenu = () => {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <button className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-heading group-hover:text-primary transition-colors py-4">
+      <button className="flex items-center gap-1 text-sm font-black uppercase tracking-widest text-heading group-hover:text-primary transition-colors py-4">
         SHOP BY CATEGORY <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
       </button>
 
@@ -48,14 +48,14 @@ const MegaMenu = () => {
           
           {/* Categories Column */}
           <div className="flex-1 pr-6 border-r border-border/10">
-            <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4 border-b border-border/10 pb-2">Categories</h3>
+            <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-4 border-b border-border/10 pb-2">Categories</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {categories.map((cat) => (
                 <Link 
                   key={cat._id} 
                   to={`/shop?category=${cat.name.toLowerCase()}`}
                   onClick={() => setIsOpen(false)}
-                  className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-wide transition-colors truncate block"
+                  className="text-sm font-bold text-heading/80 hover:text-primary uppercase tracking-wide transition-colors truncate block"
                 >
                   {cat.name}
                 </Link>
@@ -65,14 +65,14 @@ const MegaMenu = () => {
 
           {/* Occasions Column */}
           <div className="flex-1 pl-6">
-            <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4 border-b border-border/10 pb-2">Occasions</h3>
+            <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-4 border-b border-border/10 pb-2">Occasions</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {occasions.map((occ) => (
                 <Link 
                   key={occ._id} 
                   to={`/occasion/${occ.name.toLowerCase()}`}
                   onClick={() => setIsOpen(false)}
-                  className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-wide transition-colors truncate block"
+                  className="text-sm font-bold text-heading/80 hover:text-primary uppercase tracking-wide transition-colors truncate block"
                 >
                   {occ.name}
                 </Link>
@@ -84,13 +84,13 @@ const MegaMenu = () => {
         
         {/* Bottom Quick Links Bar */}
         <div className="bg-primary/5 p-4 flex items-center justify-between border-t border-border/10">
-          <Link to="/custom-cake" onClick={() => setIsOpen(false)} className="text-xs font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
+          <Link to="/custom-cake" onClick={() => setIsOpen(false)} className="text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
             ✨ Custom Cakes Builder
           </Link>
-          <Link to="/shop?bestseller=true" onClick={() => setIsOpen(false)} className="text-xs font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
+          <Link to="/shop?bestseller=true" onClick={() => setIsOpen(false)} className="text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
             🔥 View Bestsellers
           </Link>
-          <Link to="/shop?featured=true" onClick={() => setIsOpen(false)} className="text-xs font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
+          <Link to="/shop?featured=true" onClick={() => setIsOpen(false)} className="text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
             ⭐ Featured Products
           </Link>
         </div>

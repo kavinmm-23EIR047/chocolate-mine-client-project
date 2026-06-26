@@ -34,18 +34,18 @@ const UserLayout = () => {
           <div className="flex items-center gap-2.5">
             <PureVegBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
             <EgglessBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
-            <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
-            <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.1em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
+            <span className="text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
           </div>
 
           {/* Center: Delivery */}
-          <div className="flex items-center gap-2 text-[#F2E2DB] dark:text-[#120806] text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] mt-0.5">
+          <div className="flex items-center gap-2 text-[#F2E2DB] dark:text-[#120806] text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] mt-0.5">
             <Truck size={14} className="shrink-0" />
             <span>Delivery in Coimbatore within 3 Hours</span>
           </div>
 
           {/* Right: Important Routes */}
-          <div className="flex items-center gap-5 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] mt-0.5 text-[#4ade80] dark:text-[#4E2820]">
+          <div className="flex items-center gap-5 text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] mt-0.5 text-[#4ade80] dark:text-[#4E2820]">
             <Link to="/contact" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
               <Phone size={12} className="shrink-0" /> Contact Us
             </Link>

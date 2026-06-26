@@ -102,8 +102,8 @@ const Navbar = () => {
                 >
                   <MapPin size={14} className="text-primary shrink-0" />
                   <div className="flex flex-col items-start">
-                    <span className="text-[9px] font-bold text-muted uppercase tracking-widest leading-none">Deliver to</span>
-                    <span className="text-[11px] font-black text-heading uppercase tracking-wide flex items-center gap-1 leading-tight mt-0.5">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-widest leading-none">Deliver to</span>
+                    <span className="text-[12px] font-black text-heading uppercase tracking-wide flex items-center gap-1 leading-tight mt-0.5">
                       {deliveryCity === 'pan india' ? 'PAN INDIA' : (deliveryCity?.toUpperCase() || 'SELECT CITY')}
                       <ChevronDown size={11} className={`transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`} />
                     </span>
@@ -154,21 +154,21 @@ const Navbar = () => {
               ) : (
                 <button onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))} className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px]">
                   <Bell size={24} className="text-heading group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
+                  <span className="text-[12px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
                 </button>
               )}
 
               {[user ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' } : { icon: LogIn, label: 'Sign In', to: '/login' }].map(({ icon: Icon, label, to }) => (
                 <Link key={label} to={to} className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px]">
                   <Icon size={24} className="text-heading group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">{label}</span>
+                  <span className="text-[12px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">{label}</span>
                 </Link>
               ))}
 
               <Link to="/cart" className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors relative min-w-[72px]">
                 <ShoppingCart size={24} className="text-heading group-hover:text-primary transition-colors" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-accent text-[#120807] text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full leading-none px-1">{cartCount}</span>}
-                <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
+                <span className="text-[12px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
               </Link>
               <ThemeToggle 
                 buttonClass="flex flex-col items-center gap-1 px-4 py-2 rounded-xl hover:bg-primary/8 group transition-colors min-w-[72px] relative cursor-pointer"
@@ -263,10 +263,10 @@ const Navbar = () => {
         {/* BOTTOM DESKTOP NAVIGATION LINKS */}
         <div className="hidden lg:flex items-center justify-start gap-8 xl:gap-10 tv:gap-14 py-2 tv:py-3 border-t border-border/10 bg-navbar responsive-container relative">
           <MegaMenu />
-          <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Custom Cakes</Link>
-          <Link to="/occasion/anniversary" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Anniversary</Link>
-          <Link to="/shop?bestseller=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Bestseller</Link>
-          <Link to="/shop?featured=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Features</Link>
+          <Link to="/custom-cake" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Custom Cakes</Link>
+          <Link to="/occasion/anniversary" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Anniversary</Link>
+          <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Bestseller</Link>
+          <Link to="/shop?featured=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Features</Link>
         </div>
       </nav>
 

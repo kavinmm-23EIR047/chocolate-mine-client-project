@@ -1,54 +1,88 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../utils/api';
+import fallbackCakeImg from '../../assets/cake.png';
 
-const HighlightCircle = ({ image, name, isActive, onClick, size = "md" }) => {
-  const sizeClasses = {
-    sm: "w-12 h-12 sm:w-14 sm:h-14",
-    md: "w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28",
+const FALLBACK_IMAGE = fallbackCakeImg;
+const IMAGE_BASE_URL = "http://localhost:5000";
+
+const HighlightCircle = ({ image, name, isActive, onClick, index }) => {
+  // Premium designer backdrops matching the reference UI perfectly
+  const renderPremiumBackdrop = (idx) => {
+    const type = idx % 4;
+    if (type === 0) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center scale-110">
+          <div className="absolute w-full h-full bg-[#FF007F]/20 animate-[spin_40s_linear_infinite]" style={{ clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+          <div className="absolute w-[75%] h-[75%] bg-[#FF007F]/10 rounded-full blur-sm" />
+        </div>
+      );
+    } else if (type === 1) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-full h-full bg-[#2AD1B5]/20 rounded-full" />
+          <div className="absolute w-full h-[40%] bg-[#2AD1B5]/20 rounded-full rotate-45" />
+          <div className="absolute w-full h-[40%] bg-[#2AD1B5]/20 rounded-full -rotate-45" />
+          <div className="absolute w-[40%] h-full bg-[#2AD1B5]/20 rounded-full rotate-45" />
+          <div className="absolute w-[40%] h-full bg-[#2AD1B5]/20 rounded-full -rotate-45" />
+        </div>
+      );
+    } else if (type === 2) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-[115%] h-[65%] bg-[#EAB308]/20 rounded-[30px_50px_30px_50px] transform -rotate-3" />
+          <div className="absolute w-[95%] h-[50%] bg-[#EAB308]/10 rounded-[50px_30px_50px_30px] transform rotate-6" />
+        </div>
+      );
+    } else {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute w-[105%] h-[105%] bg-[#D946EF]/20 rounded-[40%_60%_60%_40%/_60%_50%_50%_40%]" />
+          <div className="absolute w-[85%] h-[85%] bg-[#D946EF]/10 rounded-[50%_40%_45%_55%/_40%_45%_55%_60%] rotate-12" />
+        </div>
+      );
+    }
   };
 
-  const textSize = {
-    sm: "text-[9px] sm:text-[10px]",
-    md: "text-[10px] sm:text-[11px] lg:text-xs",
+  const getImageUrl = (src) => {
+    if (!src) return FALLBACK_IMAGE;
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
+      return src;
+    }
+    const cleanSrc = src.startsWith('/') ? src : `/${src}`;
+    return `${IMAGE_BASE_URL}${cleanSrc}`;
   };
 
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-2 group outline-none shrink-0 snap-center transition-transform active:scale-95 min-w-[76px] sm:min-w-[108px] lg:min-w-[124px]"
+      className="flex flex-col items-center group outline-none shrink-0 transition-transform active:scale-95 min-w-[120px] sm:min-w-[140px] pt-10 pb-2 relative z-20"
     >
-      <div className={`relative ${sizeClasses[size]} transition-all duration-300 ${isActive ? 'scale-105' : 'hover:scale-105'}`}>
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+        <div className="absolute inset-0 w-full h-full z-0 transition-transform duration-500 group-hover:scale-115 group-hover:rotate-12">
+          {renderPremiumBackdrop(index)}
+        </div>
 
-        {/* Animated Active Border Border Box */}
-        {isActive ? (
-          <div className="absolute inset-0 rounded-full active-gradient-border p-[3px]">
-            <div className="w-full h-full rounded-full bg-[#121212]" />
-          </div>
-        ) : (
-          <div className="absolute inset-0 border-2 border-border/40 rounded-full group-hover:border-primary/60 transition-all duration-300" />
-        )}
-
-        {/* Core Image Content Wrapper */}
-        <div className="absolute inset-[3px] rounded-full overflow-hidden bg-muted/10 shadow-inner flex items-center justify-center">
+        <div className="absolute z-10 w-24 h-24 sm:w-28 sm:h-28 -top-6 -right-2 flex items-center justify-center filter drop-shadow-[0_14px_20px_rgba(0,0,0,0.35)] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-3">
           <img
-            src={image}
+            src={getImageUrl(image)}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-contain"
             onError={(e) => {
-              e.target.onerror = null; // Prevent infinite loops if fallback fails
-              e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&q=80';
+              e.target.onerror = null;
+              e.target.src = FALLBACK_IMAGE;
             }}
           />
         </div>
       </div>
 
-      {/* Label Tag */}
-      <span className={`${textSize[size]} font-bold uppercase tracking-wider text-center px-1 transition-all duration-300 ${isActive ? 'text-primary' : 'text-muted/80 group-hover:text-primary'
-        }`}>
-        {name}
-      </span>
+      <div className="flex flex-col items-center gap-1 mt-3 sm:mt-4">
+        <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.15em] text-center px-1 text-heading group-hover:text-primary transition-colors duration-300">
+          {name}
+        </span>
+        <div className={`h-[2px] rounded-full bg-primary transition-all duration-300 ${isActive ? 'w-10' : 'w-0 group-hover:w-10'}`} />
+      </div>
     </button>
   );
 };
@@ -65,11 +99,11 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
         setLoading(true);
         const response = await api.get('/categories');
         const backend = response.data?.data || [];
-        const all = { name: 'All', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&q=80' };
-        const custom = { name: 'Custom Cakes', image: 'https://images.unsplash.com/photo-1557308536-ee471ef2c390?w=200&q=80', isCustom: true };
+        const all = { name: 'All', image: FALLBACK_IMAGE };
+        const custom = { name: 'Custom Cakes', image: FALLBACK_IMAGE, isCustom: true };
         setCategories([all, ...backend, custom]);
       } catch (error) {
-        setCategories([{ name: 'All', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&q=80' }]);
+        setCategories([{ name: 'All', image: FALLBACK_IMAGE }]);
       } finally {
         setLoading(false);
       }
@@ -77,100 +111,72 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
     fetchCategories();
   }, []);
 
-  // Auto-scroll sliding loop for Category circles
   useEffect(() => {
     if (categories.length <= 1 || !scrollRef.current) return;
-
     const container = scrollRef.current;
-    
+
+    let isHovered = false;
+    const handlePause = () => isHovered = true;
+    const handleResume = () => isHovered = false;
+
+    container.addEventListener('mouseenter', handlePause);
+    container.addEventListener('mouseleave', handleResume);
+    container.addEventListener('touchstart', handlePause, { passive: true });
+    container.addEventListener('touchend', handleResume, { passive: true });
+
     const interval = setInterval(() => {
-      const maxScroll = container.scrollWidth - container.clientWidth;
-      if (container.scrollLeft >= maxScroll - 10) {
+      if (isHovered) return;
+      const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+      
+      // If we are at the end (or very close to it), scroll back to start
+      if (container.scrollLeft >= maxScroll - 20) {
         container.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
-        const itemWidth = container.firstElementChild?.clientWidth || 110;
-        container.scrollBy({ left: itemWidth + 16, behavior: 'smooth' });
+        // Scroll exactly one card width + gap
+        const itemWidth = container.firstElementChild?.offsetWidth || 140;
+        const gap = 32; // gap-8
+        container.scrollBy({ left: itemWidth + gap, behavior: 'smooth' });
       }
-    }, 3500);
+    }, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      container.removeEventListener('mouseenter', handlePause);
+      container.removeEventListener('mouseleave', handleResume);
+      container.removeEventListener('touchstart', handlePause);
+      container.removeEventListener('touchend', handleResume);
+    };
   }, [categories.length]);
-
-  // Center active element smoothly inside the viewport
-  const centerActiveItem = (index) => {
-    if (!scrollRef.current) return;
-    const container = scrollRef.current;
-    const children = container.children;
-    if (children && children[index]) {
-      const element = children[index];
-      const containerWidth = container.clientWidth;
-      const elementOffset = element.offsetLeft;
-      const elementWidth = element.clientWidth;
-
-      container.scrollTo({
-        left: elementOffset - containerWidth / 2 + elementWidth / 2,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  const scrollHoriz = (direction) => {
-    if (!scrollRef.current) return;
-    const amount = scrollRef.current.clientWidth * 0.6;
-    scrollRef.current.scrollBy({
-      left: direction === 'left' ? -amount : amount,
-      behavior: 'smooth'
-    });
-  };
 
   if (loading) return null;
 
   return (
-    <section className="py-3 relative w-full mx-auto overflow-hidden">
-      <div className="flex items-center justify-between px-4 md:px-16 mb-6 lg:mb-8">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-            <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
-          </div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase text-heading">
+    /* The main section container has no background now, matches page background */
+    <section className="pt-2 pb-12 md:pb-20 lg:pb-24 relative w-full mx-auto overflow-hidden transition-colors duration-300">
+
+      <div className="flex flex-col items-center justify-center px-4 mb-4 mt-2 relative z-20">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="w-6 sm:w-12 h-[2px] bg-primary/40 rounded-full" />
+          <h2 className="text-base sm:text-lg lg:text-xl font-black tracking-[0.15em] uppercase text-heading text-center font-serif transition-colors duration-300">
             Shop by Category
           </h2>
+          <div className="w-8 sm:w-16 h-[2px] bg-primary/40 rounded-full" />
         </div>
       </div>
 
-      <style>{`
-        @property --circle-border-angle {
-          syntax: '<angle>';
-          initial-value: 0deg;
-          inherits: false;
-        }
-
-        .active-gradient-border {
-          background: conic-gradient(from var(--circle-border-angle), #fccc63, #fba650, #f15f53, #e2336b, #b9359a, #62529c, #fccc63) border-box;
-          animation: spinCircleBorder 3s linear infinite;
-        }
-
-        @keyframes spinCircleBorder {
-          to {
-            --circle-border-angle: 360deg;
-          }
-        }
-      `}</style>
-
-      {/* UNIFIED SCROLL CONTAINER */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-4 md:gap-6 tv:gap-10 px-4 md:px-16 pb-3 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden items-start"
+        className="flex overflow-x-auto gap-6 sm:gap-8 lg:gap-10 px-6 md:px-16 pb-2 pt-0 scroll-smooth [&::-webkit-scrollbar]:hidden items-start relative z-20"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {categories.map((cat, index) => (
           <HighlightCircle
             key={cat.name}
+            index={index}
             image={cat.image}
             name={cat.name}
             isActive={activeCategory === cat.name}
             onClick={() => {
-              centerActiveItem(index);
               if (cat.isCustom) {
                 navigate('/custom-cake');
               } else {
@@ -178,37 +184,36 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
                 navigate(`/shop?category=${categoryParam}`);
               }
             }}
-            size="md"
           />
         ))}
       </div>
 
-      {/* UNIFIED MINIMALIST NAVIGATION ROW (< SWIPE >) */}
-      <div className="flex justify-center items-center gap-4 mt-2 mb-2">
+      {/* Swipe Indicator & Controls */}
+      <div className="flex items-center justify-center gap-3 relative z-20 pb-4 text-muted opacity-80">
         <button
-          onClick={() => scrollHoriz('left')}
-          className="p-2 text-muted-foreground/60 hover:text-primary transition-colors hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label="Scroll left"
+          onClick={() => scrollRef.current?.scrollBy({ left: -250, behavior: 'smooth' })}
+          className="p-1 hover:text-primary transition-colors cursor-pointer outline-none"
         >
-          <ChevronLeft size={18} strokeWidth={2.5} />
+          <ChevronLeft size={16} className="animate-pulse" />
         </button>
-
-        <span className="text-[10px] md:text-[11px] font-black text-muted-foreground/50 tracking-[0.25em] uppercase select-none">
-          SWIPE
-        </span>
-
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] cursor-default">Swipe</span>
         <button
-          onClick={() => scrollHoriz('right')}
-          className="p-2 text-muted-foreground/60 hover:text-primary transition-colors hover:scale-110 active:scale-95 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          aria-label="Scroll right"
+          onClick={() => scrollRef.current?.scrollBy({ left: 250, behavior: 'smooth' })}
+          className="p-1 hover:text-primary transition-colors cursor-pointer outline-none"
         >
-          <ChevronRight size={18} strokeWidth={2.5} />
+          <ChevronRight size={16} className="animate-pulse" />
         </button>
       </div>
 
-      {/* Side Fade Masks for Clear Reading Continuity */}
-      <div className="hidden md:block absolute top-0 bottom-12 left-0 w-16 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
-      <div className="hidden md:block absolute top-0 bottom-12 right-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+      {/* 🍫 BOTTOM: Realistic Chocolate Melting Drip SVG Frame */}
+      <div 
+        className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none"
+        style={{ filter: 'drop-shadow(0px 8px 4px rgba(25, 10, 5, 0.4))' }}
+      >
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-[140%] md:w-full h-16 md:h-24 text-[#351810] dark:text-[#E8D3CB] fill-current">
+          <path d="M1200,0H0V28.05c31.13,0,51.84,54.49,85.64,54.49,38.8,0,49.27-37.49,84.71-37.49,37,0,52.33,78.36,92.51,78.36,36.56,0,52.34-45.72,86.6-45.72,31.7,0,49.09,19.34,79.52,19.34,35,0,52.48-51.52,87.89-51.52,38.65,0,50.15,92.4,89.5,92.4,36.93,0,52-65.73,88.16-65.73,34.13,0,50,33.56,83.18,33.56,38.16,0,50.93-70.36,89-70.36,36.08,0,51.5,41,86.35,41,32.22,0,50.05-18.79,81.42-18.79,37,0,50.7,60.67,88.75,60.67,36.19,0,51-51.49,85.62-51.49,32.41,0,49.33,26.78,81.15,26.78Z"></path>
+        </svg>
+      </div>
     </section>
   );
 };

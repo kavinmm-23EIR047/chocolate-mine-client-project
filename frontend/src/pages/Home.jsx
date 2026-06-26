@@ -29,7 +29,8 @@ import { Grid, Heart, Package, Star, TrendingUp, Filter, Sparkles, Cake } from '
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   show: (i = 0) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { delay: i * 0.07, duration: 0.4, ease: 'easeOut' },
   }),
 };
@@ -82,7 +83,6 @@ const Home = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-
   useEffect(() => {
     const fetchFeaturedProduct = async () => {
       try {
@@ -116,23 +116,29 @@ const Home = () => {
 
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore | Pan India Delivery | Pure Veg & Eggless Cakes</h1>
 
+      {/* 1. TrustBar (Top-most element) */}
       {!query && (
         <div className="w-full overflow-hidden">
           <TrustBar />
         </div>
       )}
 
+      {/* 2. Home Banner */}
+      {!query && (
+        <div className="responsive-container pt-4 pb-6">
+          <HomeBanner />
+        </div>
+      )}
+
+      {/* 3. CategoryCircles */}
+      {!query && (
+        <CategoryCircles activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+      )}
+
       <main className="responsive-container py-6 pb-32">
         <div className="mx-auto space-y-10 sm:space-y-12 tv:space-y-16">
           {!query ? (
             <>
-              <CategoryCircles activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
-
-              {/* Home Banner */}
-              <section className="mb-3">
-                <HomeBanner />
-              </section>
-
               {/* Bestseller Section */}
               <Bestseller location={deliveryCity} />
 
@@ -151,7 +157,7 @@ const Home = () => {
             <div className="flex flex-col gap-5 lg:gap-8">
 
               <div className="flex flex-row items-center justify-between gap-4 w-full px-4 sm:px-0 mb-6 lg:mb-8">
-                
+
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <Cake className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />

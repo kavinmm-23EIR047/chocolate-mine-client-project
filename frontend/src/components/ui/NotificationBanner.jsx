@@ -137,7 +137,7 @@ const NotificationBanner = () => {
               href="https://support.google.com/chrome/answer/3220216"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white text-[#381A14] hover:bg-white/95 text-[10px] font-black uppercase tracking-widest px-4.5 py-2 rounded-xl transition-all duration-300 active:scale-95 shadow-premium"
+              className="bg-white text-[#381A14] hover:bg-white/95 text-[10px] font-black uppercase tracking-widest px-5 py-2 rounded-xl transition-all duration-300 active:scale-95 shadow-premium"
             >
               How to Enable
             </a>
@@ -145,7 +145,7 @@ const NotificationBanner = () => {
             <button
               onClick={handleEnable}
               disabled={isLoading}
-              className="bg-white text-[#381A14] hover:bg-white/95 text-[10px] font-black uppercase tracking-widest px-4.5 py-2 rounded-xl transition-all duration-300 active:scale-95 disabled:opacity-50 shrink-0 shadow-premium"
+              className="bg-white text-[#381A14] hover:bg-white/95 text-[10px] font-black uppercase tracking-widest px-5 py-2 rounded-xl transition-all duration-300 active:scale-95 disabled:opacity-50 shrink-0 shadow-premium"
             >
               {isLoading ? 'Enabling...' : 'Enable Notifications'}
             </button>

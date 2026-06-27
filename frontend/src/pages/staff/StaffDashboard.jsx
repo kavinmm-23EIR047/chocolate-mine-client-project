@@ -450,8 +450,15 @@ const StaffDashboard = () => {
                 <div className="flex items-center gap-2">
                   <button onClick={() => handleViewOrderDetails(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="View Details"><Eye size={18} /></button>
                   <OrderStatusDropdown order={order} onUpdate={handleDeliveryStatusUpdate} />
-                  <button onClick={() => handlePrintKOT(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="Print KOT"><ChefHat size={18} /></button>
-                  <button onClick={() => handlePrintInvoice(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="Print Invoice"><Printer size={18} /></button>
+                  <a 
+                    href={`${import.meta.env.VITE_API_URL}/staff/orders/${order._id}/kot/print`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0 flex items-center justify-center" 
+                    title="Print KOT"
+                  >
+                    <ChefHat size={18} />
+                  </a>
                 </div>
               </motion.div>
             ))}

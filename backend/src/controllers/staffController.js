@@ -352,7 +352,7 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
       </head>
       <body>
         <div class="no-print" style="margin-bottom: 15px; text-align: center;">
-          <button onclick="window.print()" style="padding: 8px 16px; font-size: 14px; font-family: sans-serif; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px;">Print Ticket</button>
+          <button onclick="window.focus(); window.print();" style="padding: 8px 16px; font-size: 14px; font-family: sans-serif; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px;">Print Ticket</button>
         </div>
 
         <div class="text-center">
@@ -446,11 +446,16 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
         </div>
 
         <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
+          window.addEventListener('DOMContentLoaded', () => {
+            window.focus();
+            setTimeout(() => {
+              try {
+                window.print();
+              } catch (e) {
+                console.error("Print blocked by browser:", e);
+              }
             }, 500);
-          };
+          });
         </script>
       </body>
     </html>

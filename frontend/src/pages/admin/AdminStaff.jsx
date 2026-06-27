@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { UserPlus, Shield, Mail, Trash2, Edit2, ShieldCheck, Key } from 'lucide-react';
+import { UserPlus, Shield, Mail, Trash2, Edit2, ShieldCheck, Key, ChevronDown } from 'lucide-react';
 import adminService from '../../services/adminService';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -119,9 +119,11 @@ const AdminStaff = () => {
           action={<Button icon={UserPlus} onClick={handleOpenCreate}>Add Staff</Button>}
         />
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-soft">
+        <>
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-soft">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[800px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-border bg-border/20 text-left">
                   <th className="px-6 py-4 text-xs font-black text-muted uppercase tracking-widest">Name</th>
@@ -187,6 +189,69 @@ const AdminStaff = () => {
             </table>
           </div>
         </div>
+
+        {/* Mobile Accordion */}
+        <div className="md:hidden flex flex-col gap-3">
+          {staff.map((member) => (
+            <details key={`mobile-${member._id}`} className="bg-card border border-border rounded-2xl overflow-hidden group">
+              <summary className="p-4 flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center font-black text-secondary uppercase shrink-0">
+                    {member.name.charAt(0)}
+                  </div>
+                  <div>
+                    <span className="font-bold text-heading text-sm block">{member.name}</span>
+                    <Badge variant={member.role === 'admin' ? 'danger' : 'outline'} className="uppercase text-[9px] mt-1">
+                      {member.role}
+                    </Badge>
+                  </div>
+                </div>
+                <ChevronDown size={20} className="text-muted group-open:rotate-180 transition-transform shrink-0" />
+              </summary>
+              
+              <div className="px-4 pb-4 pt-1 space-y-3">
+                <div className="h-px w-full bg-border/50 mb-3" />
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Email</span>
+                  <span className="text-sm font-bold text-heading">{member.email}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Phone</span>
+                  <span className="text-xs text-muted font-medium">{member.phone || 'No phone'}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Status</span>
+                  <button 
+                    onClick={() => handleToggleStatus(member)}
+                    className={`flex items-center gap-1.5 text-xs font-black uppercase tracking-widest transition-all ${member.active ? 'text-success' : 'text-error'}`}
+                  >
+                    {member.active ? <ShieldCheck size={14} /> : <Shield size={14} />}
+                    {member.active ? 'Active' : 'Disabled'}
+                  </button>
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-end gap-2">
+                  <button 
+                    onClick={() => handleOpenEdit(member)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-border/50 hover:bg-border rounded-lg text-xs font-bold transition-colors text-heading"
+                  >
+                    <Edit2 size={14} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(member._id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-error/10 hover:bg-error/20 text-error rounded-lg text-xs font-bold transition-colors"
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+        </>
       )}
 
       {/* Staff Modal */}

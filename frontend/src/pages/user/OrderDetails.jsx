@@ -367,7 +367,7 @@ const OrderDetails = () => {
                     <div className="flex-1">
                       <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0">
-                          <p className="font-bold truncate">{item.name}</p>
+                          <p className="font-bold break-words">{item.name}</p>
                           <p className="text-[10px] sm:text-xs text-muted break-all">SKU: {item.sku || 'N/A'}</p>
                         </div>
                         <p className="font-bold shrink-0">{formatCurrency(item.price * item.qty)}</p>

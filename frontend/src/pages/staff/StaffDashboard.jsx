@@ -158,7 +158,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                       <div className="flex-1">
                         <div className="flex justify-between items-start gap-2">
                           <div className="min-w-0">
-                            <p className="font-bold text-heading truncate">{item.name}</p>
+                            <p className="font-bold text-heading break-words">{item.name}</p>
                             <p className="text-[10px] sm:text-xs text-muted font-mono break-all">{item.sku}</p>
                           </div>
                           <p className="font-bold text-heading shrink-0">{formatCurrency(total)}</p>

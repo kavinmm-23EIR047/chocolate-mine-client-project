@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Edit3, Trash2, Star, Award, EyeOff, Cake } from 'lucide-react';
+import { Plus, Edit3, Trash2, Star, Award, EyeOff, Cake, ChevronDown } from 'lucide-react';
 import productService from '../../services/productService';
 import { formatCurrency } from '../../utils/helpers';
 import { CATEGORIES } from '../../utils/constants';
@@ -99,9 +99,11 @@ const AdminProducts = () => {
       {loading ? <TableSkeleton rows={6} cols={7} /> : products.length === 0 ? (
         <EmptyState title="No products found" message="Start by adding your first product." action={<Link to="/admin/products/create"><Button icon={Plus}>Add Product</Button></Link>} />
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <>
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[1000px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-border bg-border/20">
                   <th className="text-left px-4 py-3 text-xs font-bold text-muted uppercase">Product</th>
@@ -174,6 +176,84 @@ const AdminProducts = () => {
             </table>
           </div>
         </div>
+
+        {/* Mobile Accordion */}
+        <div className="md:hidden flex flex-col gap-3">
+          {products.map((p) => {
+            const flavourSummary = getFlavourSummary(p);
+            return (
+              <details key={`mobile-${p._id}`} className="bg-card border border-border rounded-2xl overflow-hidden group">
+                <summary className="p-4 flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <div className="flex items-center gap-3">
+                    <img src={p.image} alt={p.name} className="w-12 h-12 rounded-xl object-cover bg-border" onError={(e) => { e.target.src = 'https://placehold.co/100x100/3B1A0F/FAF0EC?text=🍫'; }} />
+                    <div>
+                      <p className="font-bold text-heading text-sm">{p.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="font-bold text-heading text-xs">{formatCurrency(p.price)}</span>
+                        <span className={`font-bold text-[10px] px-2 py-0.5 rounded-full ${p.stock ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{p.stock ? 'In Stock' : 'Out'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronDown size={20} className="text-muted group-open:rotate-180 transition-transform shrink-0" />
+                </summary>
+                
+                <div className="px-4 pb-4 pt-1 space-y-3">
+                  <div className="h-px w-full bg-border/50 mb-3" />
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-muted uppercase tracking-widest">Category</span>
+                    <Badge>{p.category}</Badge>
+                  </div>
+
+                  {p.category === 'cakes' && flavourSummary && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] font-black text-muted uppercase tracking-widest mt-1">Flavours</span>
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-center gap-1 text-xs font-bold text-primary">
+                          <Cake size={12} /><span>{flavourSummary.flavourNames}</span>
+                        </div>
+                        <span className="text-[10px] text-muted">{flavourSummary.totalWeights} weight options</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-muted uppercase tracking-widest">Occasion</span>
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {p.occasion && p.occasion.length > 0 ? p.occasion.map(o => <Badge key={o} variant="info">{o}</Badge>) : <Badge variant="info">none</Badge>}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-muted uppercase tracking-widest">Location</span>
+                    <Badge variant="secondary">{p.location}</Badge>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-muted uppercase tracking-widest">Status</span>
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      {p.featured && <span className="text-xs font-bold text-yellow-500 flex items-center gap-1"><Star size={12} fill="currentColor" />Featured</span>}
+                      {p.bestseller && <span className="text-xs font-bold text-orange-500 flex items-center gap-1"><Award size={12} />Best</span>}
+                      {!p.isActive && <span className="text-xs font-bold text-error flex items-center gap-1"><EyeOff size={12} />Hidden</span>}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-end gap-2">
+                    <Link to={`/admin/products/edit/${p._id}`}>
+                      <button className="flex items-center gap-1.5 px-3 py-1.5 bg-border/50 hover:bg-border rounded-lg text-xs font-bold transition-colors">
+                        <Edit3 size={14} /> Edit
+                      </button>
+                    </Link>
+                    <button onClick={() => setDeleteId(p._id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-error/10 hover:bg-error/20 text-error rounded-lg text-xs font-bold transition-colors">
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                </div>
+              </details>
+            );
+          })}
+        </div>
+        </>
       )}
       <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       <ConfirmModal isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete Product" message="Are you sure? This cannot be undone." isLoading={deleting} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   BarChart3, TrendingUp, PieChart as PieChartIcon, Calendar, 
-  ArrowUpRight, ArrowDownRight, IndianRupee, Users, ShoppingBag, Activity
+  ArrowUpRight, ArrowDownRight, IndianRupee, Users, ShoppingBag, Activity, ChevronDown
 } from 'lucide-react';
 import analyticsService from '../../services/analyticsService';
 import { formatCurrency } from '../../utils/helpers';
@@ -134,8 +134,10 @@ const AdminAnalytics = () => {
                <h3 className="font-black text-heading uppercase tracking-widest text-sm">Top Selling Products</h3>
                <BarChart3 size={18} className="text-muted" />
             </div>
-            <div className="p-0 flex-1 overflow-x-auto">
-               <table className="w-full min-w-[500px]">
+            <div className="p-0 flex-1 overflow-x-auto overflow-y-hidden">
+               <>
+               {/* Desktop Table */}
+               <table className="hidden md:table w-full min-w-[500px]">
                   <thead className="bg-border/20">
                      <tr>
                         <th className="text-left px-6 py-4 text-[10px] font-black text-muted uppercase tracking-widest">Product</th>
@@ -149,8 +151,8 @@ const AdminAnalytics = () => {
                        <tr key={i} className="hover:bg-border/10 transition-colors">
                           <td className="px-6 py-4">
                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs">🍰</div>
-                                <span className="font-bold text-heading text-sm line-clamp-1">{p.name}</span>
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs shrink-0">🍰</div>
+                                <span className="font-bold text-heading text-sm break-words">{p.name}</span>
                              </div>
                           </td>
                           <td className="px-6 py-4 text-xs font-bold text-muted uppercase">{p.category}</td>
@@ -167,6 +169,42 @@ const AdminAnalytics = () => {
                      )}
                   </tbody>
                </table>
+
+               {/* Mobile Accordion */}
+               <div className="md:hidden flex flex-col gap-2 p-4">
+                 {(data?.topProducts || []).map((p, i) => (
+                   <details key={`mobile-top-${i}`} className="bg-card border border-border rounded-xl overflow-hidden group">
+                     <summary className="p-4 flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden bg-border/5">
+                       <div className="flex items-center gap-3 w-full pr-4">
+                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs shrink-0">🍰</div>
+                         <div className="min-w-0">
+                           <p className="font-bold text-heading text-sm break-words">{p.name}</p>
+                           <p className="text-[10px] font-bold text-muted uppercase mt-0.5 break-words">{p.category}</p>
+                         </div>
+                       </div>
+                       <ChevronDown size={20} className="text-muted group-open:rotate-180 transition-transform shrink-0" />
+                     </summary>
+                     
+                     <div className="px-4 pb-4 pt-1 space-y-3 bg-border/5">
+                       <div className="h-px w-full bg-border/50 mb-3" />
+                       <div className="flex justify-between items-center">
+                         <span className="text-[10px] font-black text-muted uppercase tracking-widest">Sales</span>
+                         <span className="font-black text-sm">{p.salesCount}</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <span className="text-[10px] font-black text-muted uppercase tracking-widest">Revenue</span>
+                         <span className="font-black text-primary">{formatCurrency(p.revenue)}</span>
+                       </div>
+                     </div>
+                   </details>
+                 ))}
+                 {(!data?.topProducts || data?.topProducts.length === 0) && (
+                   <div className="text-center py-8 text-muted font-bold text-sm">
+                     No sales data available
+                   </div>
+                 )}
+               </div>
+               </>
             </div>
          </div>
 

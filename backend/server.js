@@ -45,6 +45,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'https://chocolate-mine-client-project.vercel.app',
+  'https://thechocolatemine.in',
   process.env.FRONTEND_URL
 ]
   .filter(Boolean)
@@ -204,7 +205,7 @@ console.log('✅ Socket.io initialized and passed to controllers');
 ================================== */
 io.on('connection', (socket) => {
   console.log(`🟢 New client connected: ${socket.id}`);
-  
+
   socket.on('disconnect', () => {
     console.log(`🔴 Client disconnected: ${socket.id}`);
   });
@@ -220,7 +221,7 @@ server.listen(PORT, () => {
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`Allowed origins: ${allowedOrigins.join(', ')}`);
   logger.info(`WebSocket ready for real-time updates`);
-  
+
   // Initialize scheduled jobs for Google Reviews
   require('./src/jobs/googleReviewsSyncJob').initScheduledJobs();
 });

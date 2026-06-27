@@ -34,7 +34,7 @@ const staffService = {
   getKOTData: (id) => api.get(`/staff/orders/${id}/kot`),
   printKOT: (id) => {
     const url = `${import.meta.env.VITE_API_URL}/staff/orders/${id}/kot/print`;
-    window.open(url, '_blank', 'width=400,height=600');
+    window.open(url, '_blank');
   },
   markKOTPrinted: (id) => api.patch(`/staff/orders/${id}/print-kot`),
 };

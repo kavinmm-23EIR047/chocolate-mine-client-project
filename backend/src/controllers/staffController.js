@@ -299,20 +299,165 @@ exports.getKOTData = asyncHandler(async (req, res, next) => {
 // @desc    Print KOT
 // @route   GET /api/v1/staff/orders/:id/kot/print
 exports.printKOT = asyncHandler(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate('userId', 'name phone');
   
   if (!order) {
     return next(new AppError('Order not found', 404));
   }
 
+  if (order.kotPrinted) {
+    order.kotReprintCount = (order.kotReprintCount || 0) + 1;
+  }
   order.kotPrinted = true;
   order.kotPrintedAt = new Date();
   await order.save();
 
-  res.status(200).json({
-    status: 'success',
-    data: order
-  });
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>KOT - ${order.kotNumber || order.orderNumber || order._id}</title>
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            color: #000;
+            margin: 10px;
+            padding: 0;
+            width: 72mm;
+          }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .bold { font-weight: bold; }
+          .title { font-size: 16px; font-weight: bold; margin-bottom: 2px; text-transform: uppercase; }
+          .subtitle { font-size: 10px; margin-bottom: 10px; }
+          .divider { border-top: 1px dashed #000; margin: 8px 0; }
+          .info-table, .items-table { width: 100%; border-collapse: collapse; }
+          .info-table td { padding: 2px 0; vertical-align: top; font-size: 11px; }
+          .items-table th, .items-table td { padding: 4px 0; vertical-align: top; }
+          .items-table th { border-bottom: 1px dashed #000; font-size: 11px; text-align: left; }
+          .item-name { font-weight: bold; font-size: 13px; }
+          .item-meta { font-size: 10px; padding-left: 10px; margin-top: 2px; }
+          .item-custom { font-size: 10px; padding-left: 10px; font-style: italic; color: #333; margin-top: 2px; }
+          .footer { margin-top: 20px; font-size: 9px; text-align: center; }
+          @media print {
+            body { margin: 0; padding: 10px; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print" style="margin-bottom: 15px; text-align: center;">
+          <button onclick="window.print()" style="padding: 8px 16px; font-size: 14px; font-family: sans-serif; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px;">Print Ticket</button>
+        </div>
+
+        <div class="text-center">
+          <div class="title">THE CHOCOLATE MINE</div>
+          <div class="subtitle">KITCHEN ORDER TICKET (KOT)</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <table class="info-table">
+          <tr>
+            <td class="bold">KOT No:</td>
+            <td>${order.kotNumber || 'N/A'}</td>
+            <td class="bold">Date:</td>
+            <td class="text-right">${new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td class="bold">Order No:</td>
+            <td>${order.orderNumber || 'N/A'}</td>
+            <td class="bold">Reprint:</td>
+            <td class="text-right">${order.kotReprintCount || 0}</td>
+          </tr>
+          <tr>
+            <td class="bold">Delivery:</td>
+            <td colspan="3">${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN') : 'N/A'} (${order.deliverySlot || 'N/A'})</td>
+          </tr>
+          <tr>
+            <td class="bold">Customer:</td>
+            <td colspan="3">${order.userId?.name || 'N/A'} (${order.userId?.phone || 'N/A'})</td>
+          </tr>
+        </table>
+
+        <div class="divider"></div>
+
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th width="80%">ITEM</th>
+              <th width="20%" class="text-center">QTY</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map(item => `
+              <tr>
+                <td>
+                  <div class="item-name">${item.name}</div>
+                  
+                  ${(item.selectedFlavor || item.customFlavor) ? `
+                    <div class="item-meta">Flavour: ${item.selectedFlavor || item.customFlavor}</div>
+                  ` : ''}
+                  
+                  ${(item.selectedWeight || item.customWeight) ? `
+                    <div class="item-meta">Weight: ${item.selectedWeight || item.customWeight}</div>
+                  ` : ''}
+
+                  ${item.isCustomCake && item.customDetails ? `
+                    <div class="item-custom">
+                      -- CUSTOM CAKE DETAILS --<br/>
+                      ${item.customDetails.shape ? `Shape: ${item.customDetails.shape}<br/>` : ''}
+                      ${item.customDetails.tiers ? `Tiers: ${item.customDetails.tiers}<br/>` : ''}
+                      ${item.customDetails.spongeType ? `Sponge: ${item.customDetails.spongeType}<br/>` : ''}
+                      ${item.customDetails.creamColor ? `Cream Color: ${item.customDetails.creamColor}<br/>` : ''}
+                      ${item.customDetails.frostingColor ? `Frosting Color: ${item.customDetails.frostingColor}<br/>` : ''}
+                      ${item.customDetails.designTheme ? `Theme: ${item.customDetails.designTheme}<br/>` : ''}
+                      ${item.customDetails.eggless ? `Eggless: Yes<br/>` : ''}
+                      ${item.customDetails.lessSugar ? `Less Sugar: Yes<br/>` : ''}
+                      ${item.customDetails.toppings && item.customDetails.toppings.length > 0 ? `Toppings: ${item.customDetails.toppings.join(', ')}<br/>` : ''}
+                      ${item.customDetails.notes ? `Custom Notes: ${item.customDetails.notes}<br/>` : ''}
+                    </div>
+                  ` : ''}
+                </td>
+                <td class="text-center bold" style="font-size: 14px;">${item.qty}</td>
+              </tr>
+              <tr><td colspan="2"><div style="border-top: 1px dotted #ccc; margin: 4px 0;"></div></td></tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        ${(order.cakeMessage || order.notes) ? `
+          <div class="divider"></div>
+          <div class="bold" style="font-size: 11px; margin-bottom: 4px;">INSTRUCTIONS:</div>
+          ${order.cakeMessage ? `<div style="font-size: 11px; margin-bottom: 2px;"><strong>Msg on Cake:</strong> ${order.cakeMessage}</div>` : ''}
+          ${order.notes ? `<div style="font-size: 11px;"><strong>Notes:</strong> ${order.notes}</div>` : ''}
+        ` : ''}
+
+        <div class="divider"></div>
+
+        <div class="footer">
+          Generated at: ${new Date(order.kotPrintedAt).toLocaleString('en-IN')}<br/>
+          Thank you!
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        </script>
+      </body>
+    </html>
+  `;
+
+  res.setHeader('Content-Type', 'text/html');
+  res.status(200).send(html);
 });
 
 // @desc    Mark KOT as Printed

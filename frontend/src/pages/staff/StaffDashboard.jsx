@@ -347,16 +347,16 @@ const StaffDashboard = () => {
     ];
     return (
       <div className="space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {summaryItems.map((item) => (
             <Link key={item.id} to={item.path} className="group">
-              <motion.div whileHover={{ y: -5 }} className="bg-card border border-border p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300">
-                <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <item.icon size={28} />
+              <motion.div whileHover={{ y: -5 }} className="bg-card border border-border p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${item.bg} ${item.color} rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
+                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h3 className="text-sm font-black text-muted uppercase tracking-widest">{item.label}</h3>
-                <p className="text-4xl font-black text-heading mt-2">{item.count || 0}</p>
-                <div className="flex items-center gap-2 text-[10px] font-black text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <h3 className="text-[10px] sm:text-xs font-black text-muted uppercase tracking-widest truncate">{item.label}</h3>
+                <p className="text-2xl sm:text-3xl font-black text-heading mt-1">{item.count || 0}</p>
+                <div className="hidden sm:flex items-center gap-2 text-[10px] font-black text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   VIEW ALL ORDERS →
                 </div>
               </motion.div>

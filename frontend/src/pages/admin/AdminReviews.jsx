@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Trash2, Check, X, MessageSquare, User, Calendar, Edit3, ShieldAlert } from 'lucide-react';
+import { Star, Trash2, Check, X, MessageSquare, User, Calendar, Edit3, ShieldAlert, ChevronDown } from 'lucide-react';
 import adminService from '../../services/adminService';
 import Button from '../../components/ui/Button';
 import SearchInput from '../../components/ui/SearchInput';
@@ -174,9 +174,11 @@ const AdminReviews = () => {
       {loading ? <TableSkeleton rows={6} cols={6} /> : filteredReviews.length === 0 ? (
         <EmptyState title="No reviews found" message="There are no user reviews matching these filters." icon={MessageSquare} />
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-premium-sm">
+        <>
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-premium-sm">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[1000px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-border bg-border/20">
                   <th className="text-left px-5 py-4 text-xs font-bold text-muted uppercase tracking-wider">User</th>
@@ -236,7 +238,7 @@ const AdminReviews = () => {
                         <span className="text-[10px] text-muted font-bold">{r.rating} / 5</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-4 whitespace-normal min-w-[300px]">
                       <div className="space-y-1">
                         <p className="text-xs text-heading leading-relaxed break-words font-medium">{r.comment || <em className="text-muted">No comment text</em>}</p>
                         <div className="flex items-center gap-1.5 text-[9px] text-muted">
@@ -281,6 +283,91 @@ const AdminReviews = () => {
             </table>
           </div>
         </div>
+
+        {/* Mobile Accordion */}
+        <div className="md:hidden flex flex-col gap-3">
+          {filteredReviews.map((r) => (
+            <details key={`mobile-${r._id}`} className="bg-card border border-border rounded-2xl overflow-hidden group">
+              <summary className="p-4 flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden bg-border/5">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
+                    {r.userImage ? (
+                      <img src={r.userImage} alt={r.userName} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <User size={16} />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-bold text-heading text-sm truncate">{r.userName || 'Customer'}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {renderStars(r.rating)}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={r.isApproved ? 'success' : 'warning'} className="text-[10px]">
+                    {r.isApproved ? 'Approved' : 'Pending'}
+                  </Badge>
+                  <ChevronDown size={20} className="text-muted group-open:rotate-180 transition-transform shrink-0" />
+                </div>
+              </summary>
+              
+              <div className="px-4 pb-4 pt-1 space-y-3 bg-border/5">
+                <div className="h-px w-full bg-border/50 mb-3" />
+                
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Review</span>
+                  <p className="text-xs text-heading leading-relaxed break-words font-medium">{r.comment || <em className="text-muted">No comment text</em>}</p>
+                  <div className="flex items-center gap-1.5 text-[9px] text-muted mt-1">
+                    <Calendar size={10} />
+                    <span>{new Date(r.createdAt || Date.now()).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-border/20">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Product</span>
+                  {r.productId ? (
+                    <div className="flex items-center gap-2 text-right">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-heading text-[10px] truncate">{r.productId.name}</p>
+                      </div>
+                      <img 
+                        src={r.productId.image} 
+                        alt={r.productId.name} 
+                        className="w-6 h-6 rounded object-cover bg-border shrink-0" 
+                        onError={(e) => { e.target.src = 'https://placehold.co/100x100/3B1A0F/FAF0EC?text=🍫'; }} 
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-muted flex items-center gap-1"><ShieldAlert size={10} /> Deleted</span>
+                  )}
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-end gap-2">
+                  <button 
+                    onClick={() => handleToggleApproval(r)} 
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${r.isApproved ? 'bg-warning/10 hover:bg-warning/20 text-warning' : 'bg-success/10 hover:bg-success/20 text-success'}`}
+                  >
+                    {r.isApproved ? <><X size={14} /> Hide</> : <><Check size={14} /> Approve</>}
+                  </button>
+                  <button 
+                    onClick={() => handleOpenEdit(r)} 
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-border/50 hover:bg-border rounded-lg text-xs font-bold text-heading transition-colors"
+                  >
+                    <Edit3 size={14} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => setDeleteId(r._id)} 
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-error/10 hover:bg-error/20 text-error rounded-lg text-xs font-bold transition-colors"
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+        </>
       )}
 
       {/* Edit Review Modal */}

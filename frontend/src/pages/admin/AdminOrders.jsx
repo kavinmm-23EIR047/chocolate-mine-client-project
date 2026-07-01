@@ -93,7 +93,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
                     <div className="flex-1">
                       <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0">
-                          <p className="font-bold text-heading truncate">{item.name}</p>
+                          <p className="font-bold text-heading break-words">{item.name}</p>
                           <p className="text-[10px] sm:text-xs text-muted font-mono break-all">SKU: {item.sku || 'N/A'}</p>
                         </div>
                         <p className="font-bold text-heading shrink-0">{formatCurrency(item.price * item.qty)}</p>
@@ -316,9 +316,11 @@ const AdminOrders = () => {
           message="When customers place orders, they'll appear here." 
         />
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-soft">
+        <>
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-card border border-border rounded-2xl overflow-hidden shadow-soft">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[1000px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-border bg-border/20">
                   <th className="text-left px-4 py-4 text-xs font-black text-muted uppercase tracking-widest">Order ID</th>
@@ -450,6 +452,103 @@ const AdminOrders = () => {
             </table>
           </div>
         </div>
+
+        {/* Mobile Accordion */}
+        <div className="md:hidden flex flex-col gap-3">
+          {orders.map((order) => (
+            <details key={`mobile-${order._id}`} className="bg-card border border-border rounded-2xl overflow-hidden group">
+              <summary className="p-4 flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden bg-border/5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <ShoppingBag size={20} />
+                  </div>
+                  <div>
+                    <span className="font-black text-heading text-sm uppercase block">
+                      #{getOrderDisplayId(order)}
+                    </span>
+                    <p className="text-[10px] text-muted font-bold mt-0.5">
+                      {order.address?.fullName || order.user?.name || 'Guest'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-black text-primary text-sm">{formatCurrency(order.total || 0)}</span>
+                  <ChevronDown size={20} className="text-muted group-open:rotate-180 transition-transform shrink-0" />
+                </div>
+              </summary>
+              
+              <div className="px-4 pb-4 pt-1 space-y-3 bg-border/5">
+                <div className="h-px w-full bg-border/50 mb-3" />
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Date & Time</span>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-heading">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    <p className="text-[10px] text-muted">{new Date(order.createdAt).toLocaleTimeString()}</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Delivery</span>
+                  <div className="text-right">
+                    {order.deliveryDate && <p className="text-[10px] text-primary font-bold">Deliver: {new Date(order.deliveryDate).toLocaleDateString()}</p>}
+                    {order.deliverySlot && <p className="text-[9px] text-muted">Slot: {order.deliverySlot}</p>}
+                    {order.trackingCode && order.orderNumber !== order.trackingCode && <p className="text-[9px] text-muted font-mono mt-1">T: {order.trackingCode}</p>}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Items</span>
+                  <div className="text-right flex items-center gap-1">
+                    <Package size={12} className="text-muted" />
+                    <span className="text-xs font-bold text-heading">{order.items?.length || 0} items</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Payment</span>
+                  <Badge variant={order.paymentStatus === 'paid' ? 'success' : 'warning'}>
+                    {order.paymentStatus?.toUpperCase()}
+                  </Badge>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black text-muted uppercase tracking-widest">Status</span>
+                  <OrderStatusBadge status={order.orderStatus} />
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-end gap-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleViewOrderDetails(order._id); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-lg text-xs font-bold transition-colors"
+                  >
+                    <Eye size={14} /> View Details
+                  </button>
+                  {order.orderStatus === 'delivered' && (
+                    <button 
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const res = await adminService.downloadInvoice(order._id);
+                          const url = window.URL.createObjectURL(new Blob([res.data]));
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', `Invoice-${getOrderDisplayId(order)}.pdf`);
+                          document.body.appendChild(link);
+                          link.click();
+                        } catch (err) { toast.error('Failed to download invoice'); }
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-border/50 hover:bg-border text-heading rounded-lg text-xs font-bold transition-colors"
+                    >
+                      <Download size={14} /> Invoice
+                    </button>
+                  )}
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+        </>
       )}
       <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
     </div>

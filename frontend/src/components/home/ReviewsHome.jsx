@@ -138,11 +138,11 @@ const ReviewsHome = () => {
     <section className="py-6 md:py-8 overflow-hidden w-full">
       <div className="w-full bg-[#F5EDEA] dark:bg-[#1A0E0B] border-y border-[#D5C0BA] dark:border-[#3A211B] py-6 sm:py-8 md:py-10 px-4 sm:px-6 lg:px-12 relative overflow-hidden shadow-sm">
 
-        {/* Themed Mid-Right Illustration (Repositioned to avoid buttons) */}
+        {/* Themed Mid-Right Illustration */}
         <img
           src={bakeryImage}
           alt="Baker Illustration"
-          className="absolute top-1/2 -translate-y-1/2 -right-10 md:-right-16 w-56 md:w-80 lg:w-[450px] opacity-[0.15] md:opacity-20 pointer-events-none z-30 drop-shadow-sm"
+          className="absolute top-1/2 -translate-y-1/2 right-0 w-56 md:w-80 lg:w-[450px] opacity-[0.15] md:opacity-30 pointer-events-none z-30 drop-shadow-sm object-contain"
         />
 
         <div className="max-w-[1440px] mx-auto relative z-10">
@@ -323,26 +323,26 @@ const ReviewsHome = () => {
         )}
 
         {/* Global Action Navigation Cluster */}
-        <div className="relative z-10 flex flex-row justify-center items-stretch gap-2 md:gap-4 mt-6 md:mt-10 w-full">
+        <div className="relative z-10 flex flex-row flex-wrap justify-center items-center gap-3 md:gap-5 mt-6 md:mt-10 w-full">
           <a
             href={GOOGLE_MAPS_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex-1 sm:w-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-6 py-3.5 rounded-full bg-card text-heading font-black text-[8px] sm:text-[11px] md:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} text-center`}
+            className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-4 rounded-full bg-card text-heading font-black text-[10px] sm:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} text-center whitespace-nowrap min-w-max`}
           >
-            <ExternalLink size={14} className="text-muted shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            <span className="leading-tight whitespace-nowrap">View All My Googles</span>
+            <ExternalLink size={16} className="text-muted shrink-0" />
+            <span>View All My Googles</span>
           </a>
 
           <a
             href={GOOGLE_SHARE_EXPERIENCE_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex-1 sm:w-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-1 sm:px-6 py-3.5 rounded-full font-black text-[8px] sm:text-[11px] md:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} text-center`}
+            className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-4 rounded-full font-black text-[10px] sm:text-xs uppercase tracking-wider transition-all duration-300 ${NEUMORPHIC_BUTTON} text-center whitespace-nowrap min-w-max`}
             style={{ backgroundColor: 'var(--button-bg)', color: 'var(--button-text)' }}
           >
-            <MessageSquare size={14} className="shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            <span className="leading-tight whitespace-nowrap">Share Your Experience</span>
+            <MessageSquare size={16} className="shrink-0" />
+            <span>Share Your Experience</span>
           </a>
         </div>
 

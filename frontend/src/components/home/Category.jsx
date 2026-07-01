@@ -166,7 +166,7 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
 
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-6 sm:gap-8 lg:gap-10 px-6 md:px-16 pb-2 pt-0 scroll-smooth [&::-webkit-scrollbar]:hidden items-start relative z-20"
+        className="flex overflow-x-auto justify-start 2xl:justify-between gap-6 sm:gap-8 lg:gap-12 2xl:gap-0 px-6 md:px-16 pb-2 pt-0 scroll-smooth [&::-webkit-scrollbar]:hidden items-start relative z-20 w-full max-w-[1800px] mx-auto"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {categories.map((cat, index) => (

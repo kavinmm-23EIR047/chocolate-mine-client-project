@@ -349,7 +349,7 @@ const OrderTracking = () => {
               <div className="divide-y divide-border text-sm">
                 {order.items?.map((item, idx) => (
                   <div key={idx} className="py-2.5 flex justify-between gap-4">
-                    <span className="text-muted-foreground truncate">{item.name} <strong className="text-foreground font-normal">x{item.qty}</strong></span>
+                    <span className="text-muted-foreground break-words">{item.name} <strong className="text-foreground font-normal">x{item.qty}</strong></span>
                     <span className="font-medium flex-shrink-0">{formatCurrency(item.price * item.qty)}</span>
                   </div>
                 ))}

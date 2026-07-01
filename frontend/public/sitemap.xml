@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://chocolatemine.com/</loc>
-    <lastmod>2026-05-14</lastmod>
+    <loc>https://thechocolatemine.in/</loc>
+    <lastmod>2026-06-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://chocolatemine.com/shop</loc>
-    <lastmod>2026-05-14</lastmod>
+    <loc>https://thechocolatemine.in/shop</loc>
+    <lastmod>2026-06-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://thechocolatemine.in/custom-cakes</loc>
+    <lastmod>2026-06-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://chocolatemine.com/custom-cake</loc>
-    <lastmod>2026-05-14</lastmod>
+    <loc>https://thechocolatemine.in/about</loc>
+    <lastmod>2026-06-27</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://chocolatemine.com/track</loc>
-    <lastmod>2026-05-14</lastmod>
+    <loc>https://thechocolatemine.in/contact</loc>
+    <lastmod>2026-06-27</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.6</priority>
   </url>
 </urlset>

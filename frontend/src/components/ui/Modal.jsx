@@ -30,10 +30,10 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
             className={`
               relative w-full ${sizeClasses[size]}
               bg-card border border-border rounded-2xl shadow-2xl
-              max-h-[90vh] overflow-y-auto
+              max-h-[90vh] flex flex-col overflow-hidden
             `}
           >
-            <div className="sticky top-0 z-10 bg-card border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl">
+            <div className="bg-card border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl shrink-0">
               <h3 className="text-lg font-bold text-heading">{title}</h3>
               <button
                 onClick={onClose}
@@ -42,7 +42,7 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
                 <X size={18} />
               </button>
             </div>
-            <div className="p-6">{children}</div>
+            <div className="p-6 overflow-y-auto flex-1">{children}</div>
           </motion.div>
         </div>
       )}

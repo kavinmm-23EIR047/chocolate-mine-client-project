@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Check, X, RotateCcw, Search, Sparkles, Cake } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, X, RotateCcw, Search, Sparkles, Cake, ChevronDown } from 'lucide-react';
 import adminService from '../../../services/adminService';
 import toast from 'react-hot-toast';
 
@@ -336,8 +336,8 @@ const FlavourManager = () => {
                     </span>
                   </div>
                   
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full min-w-[800px] whitespace-nowrap">
                       <thead>
                         <tr className="border-b border-border text-left">
                           <th className="px-6 py-3.5 text-xs font-black text-muted uppercase tracking-widest">Name</th>
@@ -405,6 +405,62 @@ const FlavourManager = () => {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* Mobile Accordion */}
+                  <div className="lg:hidden flex flex-col gap-2 p-4">
+                    {categoryFlavours.map((flavour, i) => (
+                      <details key={`mobile-${flavour._id}`} className="bg-card border border-border rounded-xl overflow-hidden group">
+                        <summary className="p-4 flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden bg-border/5">
+                          <div className="flex-1 pr-4">
+                            <p className="font-bold text-heading text-sm break-words">{flavour.name}</p>
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider mt-1 inline-block ${flavour.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                              {flavour.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <ChevronDown size={20} className="text-muted group-open:rotate-180 transition-transform shrink-0" />
+                        </summary>
+                        
+                        <div className="px-4 pb-4 pt-1 space-y-3 bg-border/5">
+                          <div className="h-px w-full bg-border/50 mb-3" />
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-widest">1 Kg</span>
+                              <span className="font-extrabold text-primary text-sm">₹{flavour.weights?.find(w => w.kg === 1)?.price || '-'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-widest">1.5 Kg</span>
+                              <span className="font-bold text-heading text-sm">₹{flavour.weights?.find(w => w.kg === 1.5)?.price || '-'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-widest">2 Kg</span>
+                              <span className="font-bold text-heading text-sm">₹{flavour.weights?.find(w => w.kg === 2)?.price || '-'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-widest">2.5 Kg</span>
+                              <span className="font-bold text-heading text-sm">₹{flavour.weights?.find(w => w.kg === 2.5)?.price || '-'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[9px] font-black text-muted uppercase tracking-widest">3 Kg</span>
+                              <span className="font-bold text-heading text-sm">₹{flavour.weights?.find(w => w.kg === 3)?.price || '-'}</span>
+                            </div>
+                          </div>
+
+                          <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-end gap-2">
+                            <button onClick={() => handleToggleActive(flavour)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${flavour.isActive ? 'bg-border/50 hover:bg-border text-heading' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800'}`}>
+                              <Check size={14} /> Toggle
+                            </button>
+                            <button onClick={() => handleEdit(flavour)} className="flex items-center gap-1.5 px-3 py-1.5 bg-border/50 hover:bg-border rounded-lg text-xs font-bold text-heading transition-colors">
+                              <Edit2 size={14} /> Edit
+                            </button>
+                            <button onClick={() => handleDelete(flavour._id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-error/10 hover:bg-error/20 text-error rounded-lg text-xs font-bold transition-colors">
+                              <Trash2 size={14} /> Delete
+                            </button>
+                          </div>
+                        </div>
+                      </details>
+                    ))}
                   </div>
                 </div>
               );

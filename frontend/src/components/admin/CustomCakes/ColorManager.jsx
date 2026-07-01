@@ -151,8 +151,9 @@ const ColorManager = () => {
         <Search size={16} className="absolute left-3 top-3.5 text-muted" />
       </div>
 
-      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-        <table className="w-full">
+      {/* Desktop Table */}
+      <div className="hidden md:block bg-card border border-border rounded-2xl shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[500px] whitespace-nowrap">
           <thead>
             <tr className="border-b border-border text-left bg-border/20">
               <th className="px-6 py-3.5 text-xs font-black text-muted uppercase">Color</th>
@@ -171,7 +172,7 @@ const ColorManager = () => {
                 </td>
                 <td className="px-6 py-4 font-bold text-sm">{color.name}</td>
                 <td className="px-6 py-4">
-                  <span className={`text-xs font-black px-2 py-1 rounded-full uppercase ${color.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                  <span className={`text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider ${color.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
                     {color.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </td>
@@ -186,6 +187,36 @@ const ColorManager = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden flex flex-col gap-3">
+        {filteredColors.length === 0 && !loading ? (
+          <div className="text-center py-6 text-muted font-bold">No colors found.</div>
+        ) : (
+          filteredColors.map(color => (
+            <div key={`mobile-${color._id}`} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-full shadow-inner border border-border shrink-0 flex items-center justify-center" 
+                  style={{ backgroundColor: color.hexCode || 'transparent' }}
+                >
+                  {!color.hexCode && <span className="text-xs text-muted">?</span>}
+                </div>
+                <div>
+                  <p className="font-bold text-heading text-sm">{color.name}</p>
+                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider mt-1 inline-block ${color.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                    {color.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => handleEdit(color)} className="p-2 text-muted hover:text-heading bg-border/20 rounded-lg"><Edit2 size={16} /></button>
+                <button onClick={() => handleDelete(color._id)} className="p-2 text-muted hover:text-red-600 bg-red-500/10 rounded-lg"><Trash2 size={16} /></button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -4,7 +4,6 @@ import { Truck, Phone, HelpCircle, MapPin } from 'lucide-react';
 import Navbar from '../Navbar';
 import Footer from '../Footer';
 import MobileBottomNav from '../layout/MobileBottomNav';
-import EgglessBadge from '../ui/EgglessBadge';
 import PureVegBadge from '../ui/PureVegBadge';
 import NotificationPrompt from '../ui/NotificationPrompt';
 import NotificationBanner from '../ui/NotificationBanner';
@@ -33,7 +32,6 @@ const UserLayout = () => {
           {/* Left: Pure Veg & Eggless */}
           <div className="flex items-center gap-2.5">
             <PureVegBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
-            <EgglessBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
             <span className="text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
             <span className="text-[9px] font-black uppercase tracking-[0.1em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
           </div>
@@ -63,7 +61,6 @@ const UserLayout = () => {
           {/* Left: Pure Veg & Eggless */}
           <div className="flex items-center gap-1.5 shrink-0">
             <PureVegBadge size={14} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
-            <EgglessBadge size={14} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
           </div>
 
           {/* Center: Delivery */}

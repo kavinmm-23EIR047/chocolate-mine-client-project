@@ -18,7 +18,6 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { formatCurrency, getCouponUnitDiscount, idsMatch } from '../utils/helpers';
 import ProductCard from './ProductCard';
-import EgglessBadge from '../components/ui/EgglessBadge';
 import PureVegBadge from '../components/ui/PureVegBadge';
 
 import ProductGallery from './components/ProductGallery';
@@ -228,7 +227,7 @@ const ProductDetails = () => {
   const finalPrice = totalFinalPrice;
   const couponSavings = couponSavingsPerUnit * quantity;
 
-  const isInStock = isCake ? (selectedStock === true || selectedStock > 0) : productAvailable;
+  const isInStock = isCake ? (selectedStock !== false) : productAvailable;
 
   // ─── ACTIONS ───────────────────────────────────────────
   const handleApplyCoupon = async () => {
@@ -405,7 +404,6 @@ const ProductDetails = () => {
               {String(productCategory || '').toLowerCase().includes('cake') && (
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                   <PureVegBadge className="px-3 py-2 rounded-full" />
-                  <EgglessBadge className="px-3 py-2 rounded-full" />
                 </div>
               )}
 

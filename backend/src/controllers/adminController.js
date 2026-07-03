@@ -7,10 +7,13 @@ const cloudinaryService = require('../services/cloudinaryService');
 const DEFAULT_CAKE_IMAGE_URL = 'https://via.placeholder.com/800x600.png?text=Chocolate+Mine+Cake+Background';
 
 const normalizeStockValue = (value) => {
-  if (value === true || value === 'true') return 1;
-  if (value === false || value === 'false') return 0;
+  if (value === true || value === 'true') return true;
+  if (value === false || value === 'false') return false;
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  if (Number.isFinite(parsed)) {
+    return parsed > 0;
+  }
+  return false;
 };
 
 // @desc    Create Staff Member

@@ -189,13 +189,13 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
       return next(new AppError('Selected flavor and weight combination not available', 400));
     }
     
-    if (variant.stock !== undefined && variant.stock < qty) {
-      return next(new AppError(`Only ${variant.stock} items available for this combination`, 400));
+    if (variant.stock === false) {
+      return next(new AppError('Selected flavor and weight combination is out of stock', 400));
     }
   } else {
     // Regular product stock check
-    if (product.stock < qty) {
-      return next(new AppError(`Only ${product.stock} items available`, 400));
+    if (product.stock === false) {
+      return next(new AppError('This product is out of stock', 400));
     }
   }
 

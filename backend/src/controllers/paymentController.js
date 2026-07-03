@@ -235,8 +235,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         dbProductId = parts[parts.length - 1];
       }
       const product = await Product.findById(dbProductId);
-      if (!product || product.stock < directItem.qty)
-        throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
+      if (!product || product.stock === false)
+        throw new AppError(`Stock error: ${product?.name || 'Item'} is out of stock`, 400);
 
       let isCustomCake = false;
       let customDetails = null;
@@ -262,8 +262,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       } else if (product.hasVariants && product.variants && directItem.selectedFlavor && directItem.selectedWeight) {
         const variant = product.variants.find(v => v.flavor === directItem.selectedFlavor && v.weight === directItem.selectedWeight);
         if (variant) salePrice = variant.price;
-        if (variant && variant.stock < directItem.qty)
-          throw new AppError(`Stock error: Selected combination unavailable`, 400);
+        if (variant && variant.stock === false)
+          throw new AppError(`Stock error: Selected combination is out of stock`, 400);
       }
 
       let finalPrice = salePrice;
@@ -311,7 +311,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           dbProductId = parts[parts.length - 1];
         }
         const product = await Product.findById(dbProductId);
-        if (!product || product.stock < item.qty) throw new AppError(`Stock error: ${product?.name || 'Item'} unavailable`, 400);
+        if (!product || product.stock === false) throw new AppError(`Stock error: ${product?.name || 'Item'} is out of stock`, 400);
 
         let isCustomCake = false;
         let customDetails = null;
@@ -432,7 +432,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('Razorpay order creation error:', error);
-    throw new AppError('Failed to create Razorpay order', 500);
+    const errMsg = error.message || error.description || JSON.stringify(error);
+    throw new AppError(`Failed to create Razorpay order: ${errMsg}`, 500);
   }
 
   const order = await Order.create({

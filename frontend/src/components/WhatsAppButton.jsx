@@ -104,14 +104,14 @@ const WhatsAppButton = () => {
 
       {/* Floating Button with Rotating Gradient Border */}
       {!isOpen && (
-        <div className="relative p-[3px] rounded-full overflow-hidden cursor-pointer">
+        <div className="relative p-[2.5px] md:p-[3px] rounded-full overflow-hidden cursor-pointer">
           <div className="absolute inset-0 bg-[conic-gradient(from_0deg,#25D366_0deg,#ffffff_180deg,#25D366_360deg)] animate-spin-border"></div>
           <button
             onClick={() => setIsOpen(true)}
-            className="relative bg-[#25D366] text-white p-4 rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-all duration-300"
+            className="relative bg-[#25D366] text-white p-2.5 md:p-4 rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-all duration-300"
             aria-label="Chat with us"
           >
-            <Whatsapp size={28} />
+            <Whatsapp className="w-[20px] h-[20px] md:w-[28px] md:h-[28px]" />
           </button>
         </div>
       )}

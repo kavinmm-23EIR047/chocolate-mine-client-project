@@ -13,7 +13,6 @@ import {
   FaWhatsapp as Whatsapp
 } from 'react-icons/fa';
 import Button from './ui/Button';
-import EgglessBadge from './ui/EgglessBadge';
 import PureVegBadge from './ui/PureVegBadge';
 
 const Footer = () => {
@@ -104,7 +103,6 @@ const Footer = () => {
             <div className="flex flex-wrap items-center justify-start gap-3 max-w-md text-left">
               <div className="flex gap-3">
                 <PureVegBadge size={28} className="bg-transparent shadow-none p-0" hideText={true} />
-                <EgglessBadge size={28} className="bg-transparent shadow-none p-0" hideText={true} />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 block w-full mt-1.5 leading-relaxed">
                 100% Pure Veg & Eggless artisanal desserts, masterfully crafted for every celebration.

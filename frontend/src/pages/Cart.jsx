@@ -143,10 +143,6 @@ const Cart = () => {
       dispatch(removeFromCart(productId));
       toast.success("Item removed");
     } else {
-      if (newQty > item.stock) {
-        toast.error(`Only ${item.stock} units available`);
-        return;
-      }
       dispatch(updateCartQty({ productId, qty: newQty }));
     }
   };

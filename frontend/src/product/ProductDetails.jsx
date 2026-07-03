@@ -97,7 +97,7 @@ const ProductDetails = () => {
   useEffect(() => {
     if (product) {
       if (isCake) {
-        const isBento = product?.category?.toLowerCase() === 'bento-cakes' || product?.cakeType?.toLowerCase() === 'bento-cakes';
+        const isBento = product?.category?.toLowerCase().includes('bento') || product?.cakeType?.toLowerCase().includes('bento');
         const defaultWeight = isBento ? '250g' : '500g';
         setSelectedWeight(defaultWeight);
         

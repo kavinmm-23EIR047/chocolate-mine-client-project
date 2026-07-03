@@ -22,7 +22,7 @@ const ProductVariants = ({
   const isCake = product?.category?.toLowerCase().includes('cake');
   if (!isCake) return null;
 
-  const isBento = product?.category?.toLowerCase() === 'bento-cakes' || product?.cakeType?.toLowerCase() === 'bento-cakes';
+  const isBento = product?.category?.toLowerCase().includes('bento') || product?.cakeType?.toLowerCase().includes('bento');
   const weights = isBento
     ? [{ value: '250g' }]
     : [

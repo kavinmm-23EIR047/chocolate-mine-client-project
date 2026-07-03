@@ -54,6 +54,7 @@ exports.getProducts = asyncHandler(async (req, res) => {
     featured, 
     bestseller, 
     category, 
+    subCategory,
     cakeType,
     location, 
     occasion,
@@ -68,6 +69,7 @@ exports.getProducts = asyncHandler(async (req, res) => {
   if (featured) query.featured = featured === 'true';
   if (bestseller) query.bestseller = bestseller === 'true';
   if (category) query.category = category;
+  if (subCategory) query.subCategory = subCategory.toLowerCase();
   if (cakeType) query.cakeType = cakeType;
   if (location) query.location = location.toLowerCase();
   
@@ -290,6 +292,9 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   if (body.category) {
     body.category = body.category.trim().toLowerCase();
   }
+  if (body.subCategory) {
+    body.subCategory = body.subCategory.trim().toLowerCase();
+  }
   
   Object.keys(body).forEach(key => {
     if (typeof body[key] === 'string') {
@@ -298,7 +303,7 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
         body[key] = true;
       } else if (trimmed === 'false') {
         body[key] = false;
-      } else if (trimmed !== '' && !isNaN(trimmed) && !['name', 'slug', 'description', 'shortDescription', 'image', 'occasion', 'flavors', 'weights', 'variants', 'category'].includes(key)) {
+      } else if (trimmed !== '' && !isNaN(trimmed) && !['name', 'slug', 'description', 'shortDescription', 'image', 'occasion', 'flavors', 'weights', 'variants', 'category', 'subCategory'].includes(key)) {
         body[key] = Number(trimmed);
       } else {
         body[key] = trimmed;
@@ -401,7 +406,14 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     }
   }
 
-  body.slug = slugify(body.name, { lower: true });
+  let baseSlug = slugify(body.name, { lower: true });
+  let slugStr = baseSlug;
+  let slugCounter = 1;
+  while (await Product.findOne({ slug: slugStr })) {
+    slugStr = `${baseSlug}-${slugCounter}`;
+    slugCounter++;
+  }
+  body.slug = slugStr;
   body.createdBy = req.user._id;
   
   const product = await Product.create(body);
@@ -439,6 +451,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   if (body.category) {
     body.category = body.category.trim().toLowerCase();
   }
+  if (body.subCategory) {
+    body.subCategory = body.subCategory.trim().toLowerCase();
+  }
   
   Object.keys(body).forEach(key => {
     if (typeof body[key] === 'string') {
@@ -447,7 +462,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         body[key] = true;
       } else if (trimmed === 'false') {
         body[key] = false;
-      } else if (trimmed !== '' && !isNaN(trimmed) && !['name', 'slug', 'description', 'shortDescription', 'image', 'occasion', 'flavors', 'weights', 'variants', 'category'].includes(key)) {
+      } else if (trimmed !== '' && !isNaN(trimmed) && !['name', 'slug', 'description', 'shortDescription', 'image', 'occasion', 'flavors', 'weights', 'variants', 'category', 'subCategory'].includes(key)) {
         body[key] = Number(trimmed);
       } else {
         body[key] = trimmed;
@@ -541,7 +556,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   }
 
   // Handle other fields (including dynamic category)
-  const fieldsToUpdate = ['name', 'description', 'shortDescription', 'price', 'offerPrice', 'category', 'location', 'stock', 'featured', 'bestseller', 'isActive'];
+  const fieldsToUpdate = ['name', 'description', 'shortDescription', 'price', 'offerPrice', 'category', 'subCategory', 'location', 'stock', 'featured', 'bestseller', 'isActive'];
   fieldsToUpdate.forEach(field => {
     if (body[field] !== undefined) {
       product[field] = body[field];
@@ -567,7 +582,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     }
   }
 
-  if (body.name) product.slug = slugify(body.name, { lower: true });
+  if (body.name && body.name !== product.name) {
+    let baseSlug = slugify(body.name, { lower: true });
+    let slugStr = baseSlug;
+    let slugCounter = 1;
+    while (await Product.findOne({ slug: slugStr, _id: { $ne: product._id } })) {
+      slugStr = `${baseSlug}-${slugCounter}`;
+      slugCounter++;
+    }
+    product.slug = slugStr;
+  }
 
   await product.save();
 

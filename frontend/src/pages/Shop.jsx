@@ -38,6 +38,7 @@ const Shop = () => {
   const { location } = useDeliveryLocation();
 
   const activeCategory = searchParams.get('category') || 'all';
+  const activeSubCategory = searchParams.get('subCategory') || '';
   const activeOccasion = searchParams.get('occasion') || 'all';
   const activeRating = Number(searchParams.get('rating')) || 0;
   const sortBy = searchParams.get('sort') || 'newest';
@@ -73,7 +74,7 @@ const Shop = () => {
         const dbCats = categoriesRes.data?.data || categoriesRes.data || [];
         setCategories([
           { name: 'all', label: 'All' },
-          ...dbCats.filter(c => c.isActive !== false).map(c => ({ name: c.name, label: c.label || c.name.replace(/-/g, ' ') })),
+          ...dbCats.filter(c => c.isActive !== false).map(c => ({ name: c.name, label: c.label || c.name.replace(/-/g, ' '), subCategories: c.subCategories || [] })),
         ]);
 
         const occasionsRes = await api.get('/occasions');
@@ -109,6 +110,7 @@ const Shop = () => {
     }
 
     if (activeCategory !== 'all') products = products.filter(p => p.category === activeCategory);
+    if (activeSubCategory) products = products.filter(p => p.subCategory === activeSubCategory || p.cakeType === activeSubCategory);
     if (activeOccasion !== 'all') products = products.filter(p => p.occasion?.some(o => o.toLowerCase() === activeOccasion.toLowerCase()));
     if (activeRating > 0) products = products.filter(p => p.ratingsAverage >= activeRating);
     products = products.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
@@ -129,7 +131,7 @@ const Shop = () => {
       return db - da;
     });
     return sorted;
-  }, [productRes?.data, activeCategory, activeOccasion, activeRating, priceRange, searchQuery, isBestseller, isFeatured, sortBy, location]);
+  }, [productRes?.data, activeCategory, activeSubCategory, activeOccasion, activeRating, priceRange, searchQuery, isBestseller, isFeatured, sortBy, location]);
 
   const clearFilters = () => { setSearchParams(new URLSearchParams(), { replace: true }); setPriceRange([10, 10000]); };
 
@@ -155,7 +157,7 @@ const Shop = () => {
       >
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
-            <button key={cat.name} onClick={() => updateSearchParam('category', cat.name)}
+            <button key={cat.name} onClick={() => { updateSearchParam('category', cat.name); updateSearchParam('subCategory', ''); }}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${activeCategory === cat.name
                   ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                   : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
@@ -347,7 +349,7 @@ const Shop = () => {
       {/* Category pills — horizontal scroll */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {categories.map((cat) => (
-          <button key={cat.name} onClick={() => updateSearchParam('category', cat.name)}
+          <button key={cat.name} onClick={() => { updateSearchParam('category', cat.name); updateSearchParam('subCategory', ''); }}
             className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${activeCategory === cat.name
                 ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                 : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/80 hover:border-[var(--primary)]/40'
@@ -422,6 +424,33 @@ const Shop = () => {
 
         {/* ── Mobile Top Bar ── */}
         <MobileTopBar />
+
+        {/* ── Desktop & Mobile Subcategory Bar ── */}
+        {activeCategory !== 'all' && categories.find(c => c.name === activeCategory)?.subCategories?.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-2 scrollbar-hide pt-2 sm:pt-0">
+            <button
+              onClick={() => updateSearchParam('subCategory', '')}
+              className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${!activeSubCategory
+                  ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
+                  : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/80 hover:border-[var(--primary)]/40'
+                }`}
+            >
+              All {categories.find(c => c.name === activeCategory)?.label}
+            </button>
+            {categories.find(c => c.name === activeCategory).subCategories.map(sub => (
+              <button
+                key={sub}
+                onClick={() => updateSearchParam('subCategory', sub)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all capitalize ${activeSubCategory === sub
+                    ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
+                    : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/80 hover:border-[var(--primary)]/40'
+                  }`}
+              >
+                {sub.replace(/-/g, ' ')}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* ── Layout Body ── */}
         <div className="flex gap-6 lg:gap-8 tv:gap-12">

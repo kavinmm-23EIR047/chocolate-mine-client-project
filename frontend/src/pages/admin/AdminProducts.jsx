@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus, Edit3, Trash2, Star, Award, EyeOff, Cake, ChevronDown } from 'lucide-react';
 import productService from '../../services/productService';
+import adminService from '../../services/adminService';
 import { formatCurrency } from '../../utils/helpers';
-import { CATEGORIES } from '../../utils/constants';
 import Button from '../../components/ui/Button';
 import SearchInput from '../../components/ui/SearchInput';
 import Badge from '../../components/ui/Badge';
@@ -17,10 +17,11 @@ import toast from 'react-hot-toast';
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-  const [sort, setSort] = useState('-createdAt');
-  const [page, setPage] = useState(1);
+  const [dbCategories, setDbCategories] = useState([]);
+  const [search, setSearch] = useState(() => sessionStorage.getItem('adminProductsSearch') || '');
+  const [category, setCategory] = useState(() => sessionStorage.getItem('adminProductsCategory') || '');
+  const [sort, setSort] = useState(() => sessionStorage.getItem('adminProductsSort') || '-createdAt');
+  const [page, setPage] = useState(() => parseInt(sessionStorage.getItem('adminProductsPage')) || 1);
   const [totalPages, setTotalPages] = useState(1);
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -46,6 +47,23 @@ const AdminProducts = () => {
   }, [page, sort, category, search]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await adminService.getCategories();
+        setDbCategories(res.data?.data || []);
+      } catch (err) {
+        // ignore
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => { sessionStorage.setItem('adminProductsPage', page); }, [page]);
+  useEffect(() => { sessionStorage.setItem('adminProductsCategory', category); }, [category]);
+  useEffect(() => { sessionStorage.setItem('adminProductsSort', sort); }, [sort]);
+  useEffect(() => { sessionStorage.setItem('adminProductsSearch', search); }, [search]);
 
   const handleDelete = async () => {
     try {
@@ -85,9 +103,9 @@ const AdminProducts = () => {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <SearchInput onSearch={handleSearch} placeholder="Search products..." className="flex-1 max-w-sm" />
-        <select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none">
+        <select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none capitalize">
           <option value="">All Categories</option>
-          {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>)}
+          {dbCategories.map((c) => <option key={c._id} value={(c.name || '').toLowerCase()}>{c.label || c.name.replace(/-/g, ' ')}</option>)}
         </select>
         <select value={sort} onChange={(e) => setSort(e.target.value)} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none">
           <option value="-createdAt">Newest</option>

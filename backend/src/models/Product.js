@@ -31,6 +31,12 @@ const productSchema = new mongoose.Schema({
     lowercase: true
   },
 
+  subCategory: {
+    type: String,
+    trim: true,
+    lowercase: true
+  },
+
   location: {
     type: String,
     trim: true,

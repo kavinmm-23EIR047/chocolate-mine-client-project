@@ -31,6 +31,7 @@ const ProductForm = () => {
     price: '',
     offerPrice: '',
     category: '',
+    subCategory: '',
     cakeType: '',
     location: 'coimbatore',
     occasion: [],
@@ -98,6 +99,7 @@ const ProductForm = () => {
             price: p.price || '',
             offerPrice: p.offerPrice || '',
             category: p.category ? p.category.toLowerCase() : '',
+            subCategory: p.subCategory ? p.subCategory.toLowerCase() : '',
             cakeType: p.cakeType || '',
             location: p.location || 'coimbatore',
             occasion: Array.isArray(p.occasion) ? p.occasion : (p.occasion ? [p.occasion] : []),
@@ -313,10 +315,9 @@ const ProductForm = () => {
   // Compute weight prices based on cakeType and basePrice
   const computeWeightPrices = (type, base) => {
     const b = Number(base) || 0;
-    if ((type || '').toLowerCase() === 'bento-cakes') {
+    if ((type || '').toLowerCase().includes('bento')) {
       return [
-        { weight: '0.25', price: Math.round(b) },
-        { weight: '0.5', price: Math.round(b * 2) }
+        { weight: '0.25', price: Math.round(b) }
       ];
     }
     return [
@@ -459,7 +460,7 @@ const ProductForm = () => {
                     onChange={(e) => {
                       const raw = e.target.value || '';
                       const normalized = typeof raw === 'string' ? raw.trim().toLowerCase() : raw;
-                      setFormData(prev => ({ ...prev, category: normalized }));
+                      setFormData(prev => ({ ...prev, category: normalized, subCategory: '' }));
                       if (normalized !== 'cakes') {
                         setFlavors([]);
                         setWeights([]);
@@ -477,6 +478,23 @@ const ProductForm = () => {
                   </select>
                 </div>
               </div>
+
+              {categories.find(c => (c.name || '').toLowerCase() === formData.category)?.subCategories?.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-muted uppercase tracking-widest">Subcategory</label>
+                  <select 
+                    name="subCategory" 
+                    value={formData.subCategory} 
+                    onChange={handleChange} 
+                    className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold capitalize"
+                  >
+                    <option value="">Select Subcategory</option>
+                    {categories.find(c => (c.name || '').toLowerCase() === formData.category).subCategories.map(sub => (
+                      <option key={sub} value={sub}>{sub.replace(/-/g, ' ')}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label className="text-xs font-black text-muted uppercase tracking-widest">Short Description</label>
@@ -630,10 +648,10 @@ const ProductForm = () => {
                       type="number"
                       value={basePrice}
                       onChange={(e) => setBasePrice(e.target.value)}
-                      placeholder={formData.cakeType === 'bento-cakes' ? 'Quarter KG Price (₹)' : 'Half KG Price (₹)'}
+                      placeholder={(formData.cakeType || '').toLowerCase().includes('bento') ? 'Quarter KG Price (₹)' : 'Half KG Price (₹)'}
                       className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
                     />
-                    <p className="text-[10px] text-muted">Enter base price for {formData.cakeType === 'bento-cakes' ? '0.25 kg' : '0.5 kg'}. Other weights will be calculated automatically.</p>
+                    <p className="text-[10px] text-muted">Enter base price for {(formData.cakeType || '').toLowerCase().includes('bento') ? '0.25 kg' : '0.5 kg'}. Other weights will be calculated automatically.</p>
                   </div>
                 </div>
                 

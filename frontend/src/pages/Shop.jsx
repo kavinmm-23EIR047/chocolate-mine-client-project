@@ -16,7 +16,6 @@ import FilterDrawer from '../components/filter/FilterDrawer';
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isDesktopFilterOpen, setIsDesktopFilterOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [occasions, setOccasions] = useState([]);
   const [mobileLayout, setMobileLayout] = useState('grid');
@@ -47,7 +46,9 @@ const Shop = () => {
   const { location } = useDeliveryLocation();
 
   // Get filter values from URL with proper defaults
-  const activeCategory = searchParams.get('category') || 'all';
+  const activeCategories = searchParams.get('category') && searchParams.get('category') !== 'all' 
+    ? searchParams.get('category').split(',').map(c => c.trim()).filter(Boolean) 
+    : [];
   const activeSubCategory = searchParams.get('subCategory') || '';
   const activeOccasion = searchParams.get('occasion') || 'all';
   const activeRating = Number(searchParams.get('rating')) || 0;
@@ -70,7 +71,7 @@ const Shop = () => {
   // Sync filters with URL params
   useEffect(() => {
     const filters = {};
-    if (activeCategory !== 'all') filters.categories = [activeCategory];
+    if (activeCategories.length > 0) filters.categories = activeCategories;
     if (activeOccasion !== 'all') filters.occasions = [activeOccasion];
     if (activeRating > 0) filters.ratings = [activeRating];
     if (priceRange[0] > 10 || priceRange[1] < 10000) {
@@ -78,27 +79,33 @@ const Shop = () => {
     }
     if (sortBy !== 'newest') filters.sort = [sortBy];
     setActiveFilters(filters);
-  }, [activeCategory, activeOccasion, activeRating, priceRange, sortBy]);
+  }, [JSON.stringify(activeCategories), activeOccasion, activeRating, priceRange, sortBy]);
 
   // CRITICAL FIX: Update search param with proper state management
   const updateSearchParam = useCallback((key, value) => {
-    // Clear any pending timeout
-    if (filterTimeoutRef.current) {
-      clearTimeout(filterTimeoutRef.current);
-    }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (!value || value === 'all' || value === 0 || value === false || value === '') {
+        next.delete(key);
+      } else {
+        next.set(key, String(value));
+      }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
-    // Use a small delay to prevent rapid re-renders
-    filterTimeoutRef.current = setTimeout(() => {
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
+  const updateMultipleSearchParams = useCallback((updates) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([key, value]) => {
         if (!value || value === 'all' || value === 0 || value === false || value === '') {
           next.delete(key);
         } else {
           next.set(key, String(value));
         }
-        return next;
-      }, { replace: true });
-    }, 50);
+      });
+      return next;
+    }, { replace: true });
   }, [setSearchParams]);
 
   // Handle search with debounce
@@ -138,43 +145,46 @@ const Shop = () => {
   const handleApplyFilters = useCallback((filters) => {
     setActiveFilters(filters);
     
+    const updates = {};
+    
     // Update URL params based on filters
     if (filters.categories?.length) {
-      updateSearchParam('category', filters.categories[0]);
+      updates.category = filters.categories.join(',');
     } else {
-      updateSearchParam('category', 'all');
+      updates.category = 'all';
     }
     
     if (filters.occasions?.length) {
-      updateSearchParam('occasion', filters.occasions[0]);
+      updates.occasion = filters.occasions[0];
     } else {
-      updateSearchParam('occasion', 'all');
+      updates.occasion = 'all';
     }
     
     if (filters.ratings?.length) {
-      updateSearchParam('rating', filters.ratings[0]);
+      updates.rating = filters.ratings[0];
     } else {
-      updateSearchParam('rating', 0);
+      updates.rating = 0;
     }
     
     if (filters.priceRange) {
-      updateSearchParam('minPrice', filters.priceRange.min);
-      updateSearchParam('maxPrice', filters.priceRange.max);
+      updates.minPrice = filters.priceRange.min;
+      updates.maxPrice = filters.priceRange.max;
     } else {
-      updateSearchParam('minPrice', 10);
-      updateSearchParam('maxPrice', 10000);
+      updates.minPrice = 10;
+      updates.maxPrice = 10000;
     }
     
     if (filters.sort?.length) {
-      updateSearchParam('sort', filters.sort[0]);
+      updates.sort = filters.sort[0];
     } else {
-      updateSearchParam('sort', 'newest');
+      updates.sort = 'newest';
     }
     
-    // Close drawers
+    updateMultipleSearchParams(updates);
+    
+    // Close drawer
     setIsFilterOpen(false);
-    setIsDesktopFilterOpen(false);
-  }, [updateSearchParam]);
+  }, [updateMultipleSearchParams]);
 
   // Handle reset filters
   const handleResetFilters = useCallback(() => {
@@ -190,7 +200,6 @@ const Shop = () => {
       clearTimeout(filterTimeoutRef.current);
     }
     setIsFilterOpen(false);
-    setIsDesktopFilterOpen(false);
   }, [setSearchParams]);
 
   // CRITICAL FIX: Handle category click with prevention of default behavior
@@ -204,11 +213,10 @@ const Shop = () => {
     
     // Close mobile filter if open
     if (isFilterOpen) setIsFilterOpen(false);
-    if (isDesktopFilterOpen) setIsDesktopFilterOpen(false);
     
     // Reset applying state after delay
     setTimeout(() => setIsApplyingFilter(false), 200);
-  }, [updateSearchParam, isFilterOpen, isDesktopFilterOpen]);
+  }, [updateSearchParam, isFilterOpen]);
 
   // CRITICAL FIX: Handle occasion click
   const handleOccasionClick = useCallback((e, occasionName) => {
@@ -297,7 +305,7 @@ const Shop = () => {
   const { data: productRes, isLoading: loading } = useGetProductsQuery({ 
     page: 1, 
     limit: 2000,
-    category: activeCategory !== 'all' ? activeCategory : undefined,
+    category: activeCategories.length > 0 ? activeCategories.join(',') : undefined,
     subCategory: activeSubCategory || undefined,
     occasion: activeOccasion !== 'all' ? activeOccasion : undefined,
     rating: activeRating > 0 ? activeRating : undefined,
@@ -320,10 +328,15 @@ const Shop = () => {
     }
 
     // Category Filter
-    if (activeCategory !== 'all') {
-      products = products.filter(p => 
-        p.category?.toLowerCase() === activeCategory.toLowerCase()
-      );
+    if (activeCategories.length > 0) {
+      products = products.filter(p => {
+        const prodCats = Array.isArray(p.category) ? p.category : [p.category || ''];
+        return activeCategories.some(ac => 
+          prodCats.some(pc => 
+            typeof pc === 'string' && pc.toLowerCase().replace(/-/g, ' ') === ac.toLowerCase().replace(/-/g, ' ')
+          )
+        );
+      });
     }
     
     // SubCategory Filter
@@ -361,7 +374,7 @@ const Shop = () => {
       products = products.filter(p => {
         const name = p.name?.toLowerCase() || '';
         const desc = p.description?.toLowerCase() || '';
-        const category = p.category?.toLowerCase() || '';
+        const category = Array.isArray(p.category) ? p.category.join(' ').toLowerCase() : (p.category || '').toLowerCase();
         const tags = p.tags?.map(t => t.toLowerCase()).join(' ') || '';
         const searchableText = `${name} ${desc} ${category} ${tags}`;
         return queryWords.some(word => searchableText.includes(word));
@@ -430,7 +443,7 @@ const Shop = () => {
     return products;
   }, [
     productRes?.data, 
-    activeCategory, 
+    JSON.stringify(activeCategories), 
     activeSubCategory, 
     activeOccasion, 
     activeRating, 
@@ -456,14 +469,12 @@ const Shop = () => {
       clearTimeout(filterTimeoutRef.current);
     }
     setIsFilterOpen(false);
-    setIsDesktopFilterOpen(false);
     setTimeout(() => setIsApplyingFilter(false), 200);
   }, [setSearchParams]);
 
-  // Get active filter count for badge
   const getActiveFilterCount = useCallback(() => {
     let count = 0;
-    if (activeCategory !== 'all') count += 1;
+    if (activeCategories.length > 0) count += activeCategories.length;
     if (activeSubCategory) count += 1;
     if (activeOccasion !== 'all') count += 1;
     if (activeRating > 0) count += 1;
@@ -472,300 +483,22 @@ const Shop = () => {
     if (isBestseller) count += 1;
     if (isFeatured) count += 1;
     return count;
-  }, [activeCategory, activeSubCategory, activeOccasion, activeRating, priceRange, sortBy, isBestseller, isFeatured]);
+  }, [JSON.stringify(activeCategories), activeSubCategory, activeOccasion, activeRating, priceRange, sortBy, isBestseller, isFeatured]);
 
   const getPageTitle = () => {
     if (isBestseller) return 'Best Sellers';
     if (isFeatured) return 'Featured Delights';
     if (searchQuery) return `"${searchQuery}"`;
-    if (activeCategory !== 'all') {
-      const sel = categories.find(c => c.name === activeCategory);
-      return sel ? sel.label : activeCategory;
+    if (activeCategories.length === 1) {
+      const sel = categories.find(c => c.name === activeCategories[0]);
+      return sel ? sel.label : activeCategories[0];
+    } else if (activeCategories.length > 1) {
+      return 'Multiple Categories';
     }
     return 'The Shop';
   };
 
-  // Filter Panel Component with proper event handlers
-  const FilterPanel = () => (
-    <div className="space-y-4">
-      {/* Search Section */}
-      <SectionCard
-        title="Search Products"
-        expanded={expandedSections.search !== false}
-        onToggle={() => toggleSection('search')}
-      >
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-          <input 
-            type="text" 
-            placeholder="Search for products..." 
-            value={localSearchTerm}
-            onChange={handleSearchChange}
-            className="w-full bg-[var(--background)] border border-[var(--border)] rounded-lg py-2.5 pl-9 pr-9 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
-          />
-          {localSearchTerm && (
-            <button 
-              onClick={handleSearchClear} 
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--heading)]"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-        {localSearchTerm && (
-          <p className="mt-2 text-xs text-[var(--muted)]">
-            Showing results for: <span className="font-bold text-[var(--heading)]">"{localSearchTerm}"</span>
-          </p>
-        )}
-      </SectionCard>
 
-      {/* Categories */}
-      <SectionCard
-        title="Categories"
-        expanded={expandedSections.categories}
-        onToggle={() => toggleSection('categories')}
-      >
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button 
-              key={cat.name} 
-              onClick={(e) => handleCategoryClick(e, cat.name)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                activeCategory === cat.name
-                  ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
-                  : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-          <Link to="/custom-cake"
-            className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-gradient-to-r from-amber-400 to-pink-500 text-white shadow-md hover:scale-105 flex items-center gap-1 transition-all"
-          >
-            Custom Cakes ✨
-          </Link>
-        </div>
-      </SectionCard>
-
-      {/* Occasions */}
-      {occasions.length > 1 && (
-        <SectionCard
-          title="Occasions"
-          expanded={expandedSections.occasions}
-          onToggle={() => toggleSection('occasions')}
-        >
-          <div className="grid grid-cols-2 gap-1.5">
-            {occasions.map((occ) => (
-              <button 
-                key={occ.name} 
-                onClick={(e) => handleOccasionClick(e, occ.name)}
-                className={`px-2 py-2 rounded-lg text-[11px] font-bold text-left transition-all ${
-                  activeOccasion === occ.name
-                    ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
-                    : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-                }`}
-              >
-                {occ.label}
-              </button>
-            ))}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Rating */}
-      <SectionCard
-        title="Min. Rating"
-        expanded={expandedSections.rating}
-        onToggle={() => toggleSection('rating')}
-      >
-        <div className="space-y-1.5">
-          {[4, 3, 2].map((r) => (
-            <button 
-              key={r} 
-              onClick={(e) => handleRatingClick(e, r)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                activeRating === r
-                  ? 'bg-[var(--secondary)]/15 text-[var(--secondary)] border border-[var(--secondary)]/30'
-                  : 'text-[var(--heading)]/70 hover:bg-[var(--heading)]/5 hover:text-[var(--heading)]'
-              }`}
-            >
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    size={12} 
-                    className={i < r ? 'fill-[#FBBF24] text-[#FBBF24]' : 'text-[var(--heading)]/30'} 
-                  />
-                ))}
-              </div>
-              <span className="text-[11px] font-bold">&amp; up</span>
-            </button>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* Price Range */}
-      <SectionCard
-        title={`Price — ₹${priceRange[0].toLocaleString()} – ₹${priceRange[1].toLocaleString()}`}
-        expanded={expandedSections.price}
-        onToggle={() => toggleSection('price')}
-      >
-        <div className="space-y-4">
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="text-[10px] font-bold text-[var(--heading)]/60 mb-1 block">Min</label>
-              <input 
-                type="number" 
-                value={priceRange[0]} 
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  if (val >= 0 && val <= priceRange[1]) {
-                    setPriceRange([val, priceRange[1]]);
-                  }
-                }}
-                onBlur={() => {
-                  updateSearchParam('minPrice', priceRange[0]);
-                  updateSearchParam('maxPrice', priceRange[1]);
-                }}
-                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none"
-                min="0"
-                max={priceRange[1]}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-[10px] font-bold text-[var(--heading)]/60 mb-1 block">Max</label>
-              <input 
-                type="number" 
-                value={priceRange[1]} 
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  if (val >= priceRange[0] && val <= 10000) {
-                    setPriceRange([priceRange[0], val]);
-                  }
-                }}
-                onBlur={() => {
-                  updateSearchParam('minPrice', priceRange[0]);
-                  updateSearchParam('maxPrice', priceRange[1]);
-                }}
-                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none"
-                min={priceRange[0]}
-                max="10000"
-              />
-            </div>
-          </div>
-          <div>
-            <input 
-              type="range" 
-              min={10} 
-              max={10000} 
-              step={50} 
-              value={priceRange[0]}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val <= priceRange[1]) {
-                  setPriceRange([val, priceRange[1]]);
-                }
-              }}
-              onMouseUp={() => {
-                updateSearchParam('minPrice', priceRange[0]);
-                updateSearchParam('maxPrice', priceRange[1]);
-              }}
-              onTouchEnd={() => {
-                updateSearchParam('minPrice', priceRange[0]);
-                updateSearchParam('maxPrice', priceRange[1]);
-              }}
-              className="w-full h-1.5 bg-[var(--border)] rounded-full appearance-none accent-[var(--primary)] cursor-pointer" 
-            />
-          </div>
-          <div>
-            <input 
-              type="range" 
-              min={10} 
-              max={10000} 
-              step={50} 
-              value={priceRange[1]}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                if (val >= priceRange[0]) {
-                  setPriceRange([priceRange[0], val]);
-                }
-              }}
-              onMouseUp={() => {
-                updateSearchParam('minPrice', priceRange[0]);
-                updateSearchParam('maxPrice', priceRange[1]);
-              }}
-              onTouchEnd={() => {
-                updateSearchParam('minPrice', priceRange[0]);
-                updateSearchParam('maxPrice', priceRange[1]);
-              }}
-              className="w-full h-1.5 bg-[var(--border)] rounded-full appearance-none accent-[var(--primary)] cursor-pointer" 
-            />
-          </div>
-          <div className="flex justify-between text-[10px] font-bold text-[var(--muted)]">
-            <span>₹10</span>
-            <span>₹10,000+</span>
-          </div>
-        </div>
-      </SectionCard>
-
-      {/* Sort By */}
-      <SectionCard
-        title="Sort By"
-        expanded={expandedSections.sort}
-        onToggle={() => toggleSection('sort')}
-      >
-        <select 
-          value={sortBy} 
-          onChange={handleSortChange}
-          className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg p-2.5 text-[12px] font-bold outline-none cursor-pointer"
-        >
-          <option value="newest">Newest First</option>
-          <option value="price-low">Price: Low → High</option>
-          <option value="price-high">Price: High → Low</option>
-          <option value="rating">Top Rated</option>
-        </select>
-      </SectionCard>
-
-      <button 
-        onClick={clearFilters}
-        className="w-full py-3 border border-dashed border-[var(--heading)]/20 rounded-lg text-[12px] font-bold text-[var(--heading)]/80 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all"
-      >
-        Reset All Filters
-      </button>
-    </div>
-  );
-
-  // SectionCard component
-  const SectionCard = ({ title, expanded, onToggle, children }) => (
-    <div className="bg-[var(--card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-3.5 bg-[var(--heading)]/5 hover:bg-[var(--heading)]/10 transition-colors border-b border-[var(--border)]"
-      >
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80">
-          {title}
-        </h3>
-        {expanded ? (
-          <ChevronUp size={18} className="text-[var(--heading)]/60" />
-        ) : (
-          <ChevronDown size={18} className="text-[var(--heading)]/60" />
-        )}
-      </button>
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="px-3.5 pb-3.5 pt-3"
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
 
   // Mobile Top Bar
   const MobileTopBar = () => (
@@ -832,9 +565,18 @@ const Shop = () => {
         {categories.map((cat) => (
           <button 
             key={cat.name} 
-            onClick={(e) => handleCategoryClick(e, cat.name)}
+            onClick={(e) => {
+              e.preventDefault();
+              let newCats;
+              if (activeCategories.includes(cat.name)) {
+                newCats = activeCategories.filter(c => c !== cat.name);
+              } else {
+                newCats = [...activeCategories, cat.name];
+              }
+              updateSearchParam('category', newCats.length > 0 ? newCats.join(',') : 'all');
+            }}
             className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-              activeCategory === cat.name
+              activeCategories.includes(cat.name)
                 ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
                 : 'bg-[var(--card)] border border-[var(--border)] text-[var(--heading)]/80 hover:border-[var(--primary)]/40'
             }`}
@@ -887,17 +629,6 @@ const Shop = () => {
                     </button>
                   )}
                 </div>
-                <button
-                  onClick={() => setIsDesktopFilterOpen(true)}
-                  className="shrink-0 flex items-center gap-1.5 px-4 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-sm font-bold hover:bg-white/10 transition-colors"
-                >
-                  <SlidersHorizontal size={16} /> Filters
-                  {getActiveFilterCount() > 0 && (
-                    <span className="ml-1 px-2 py-0.5 bg-white/20 text-xs rounded-full">
-                      {getActiveFilterCount()}
-                    </span>
-                  )}
-                </button>
               </div>
               <span className="text-[11px] font-bold text-white/80 bg-white/5 px-4 py-1.5 rounded-lg border border-white/10">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'Item' : 'Items'}
@@ -936,17 +667,21 @@ const Shop = () => {
           <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
             <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Active Filters:</span>
             
-            {activeCategory !== 'all' && (
-              <span className="px-3 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded-full text-[10px] font-bold flex items-center gap-1">
-                Category: {categories.find(c => c.name === activeCategory)?.label || activeCategory}
+            {activeCategories.map(ac => (
+              <span key={ac} className="px-3 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded-full text-[10px] font-bold flex items-center gap-1">
+                Category: {categories.find(c => c.name === ac)?.label || ac}
                 <button 
-                  onClick={(e) => handleCategoryClick(e, 'all')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const newCats = activeCategories.filter(c => c !== ac);
+                    updateSearchParam('category', newCats.length > 0 ? newCats.join(',') : 'all');
+                  }}
                   className="hover:text-[var(--primary)]/70"
                 >
                   ×
                 </button>
               </span>
-            )}
+            ))}
             
             {activeSubCategory && (
               <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-[10px] font-bold flex items-center gap-1">
@@ -1098,42 +833,9 @@ const Shop = () => {
         onSearch={handleFilterSearch}
         searchTerm={searchTerm}
         products={products}
+        categories={categories.map(c => c.label)}
       />
 
-      {/* Desktop Filter Drawer */}
-      <AnimatePresence>
-        {isDesktopFilterOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsDesktopFilterOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
-            />
-            <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 28 }}
-              className="fixed left-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-r border-[var(--border)]"
-            >
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
-                <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
-                <button onClick={() => setIsDesktopFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
-                  <X size={18} />
-                </button>
-              </div>
-              <FilterPanel />
-              <button onClick={() => setIsDesktopFilterOpen(false)}
-                className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md"
-              >
-                Apply Filters
-              </button>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

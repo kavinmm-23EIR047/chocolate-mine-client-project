@@ -30,7 +30,7 @@ const ProductForm = () => {
     shortDescription: '',
     price: '',
     offerPrice: '',
-    category: '',
+    category: [],
     subCategory: '',
     cakeType: '',
     location: 'coimbatore',
@@ -98,7 +98,7 @@ const ProductForm = () => {
             shortDescription: p.shortDescription || '',
             price: p.price || '',
             offerPrice: p.offerPrice || '',
-            category: p.category ? p.category.toLowerCase() : '',
+            category: Array.isArray(p.category) ? p.category.map(c => typeof c === 'string' ? c.toLowerCase() : c) : (p.category ? [p.category.toLowerCase()] : []),
             subCategory: p.subCategory ? p.subCategory.toLowerCase() : '',
             cakeType: p.cakeType || '',
             location: p.location || 'coimbatore',
@@ -118,7 +118,7 @@ const ProductForm = () => {
             }
           });
           setPreview(p.image);
-          if ((p.category || '').toLowerCase() === 'cakes') {
+          if (Array.isArray(p.category) ? p.category.some(c => typeof c === 'string' && c.toLowerCase() === 'cakes') : (p.category || '').toLowerCase() === 'cakes') {
             setFlavors(p.flavors || []);
             setWeights(p.weights || []);
             setVariants(p.variants || []);
@@ -170,6 +170,28 @@ const ProductForm = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCategoryToggle = (value) => {
+    setFormData(prev => {
+      const current = prev.category || [];
+      const updated = current.includes(value)
+        ? current.filter(c => c !== value)
+        : [...current, value];
+      
+      let subCategory = prev.subCategory;
+      if (updated.length === 0) {
+        subCategory = '';
+      }
+      
+      if (!updated.includes('cakes')) {
+        setFlavors([]);
+        setWeights([]);
+        setVariants([]);
+      }
+      
+      return { ...prev, category: updated, subCategory };
+    });
   };
 
   const handleOccasionToggle = (value) => {
@@ -360,8 +382,8 @@ const ProductForm = () => {
           Object.keys(formData.coupon).forEach(subKey => {
             data.append(`coupon.${subKey}`, formData.coupon[subKey]);
           });
-        } else if (key === 'occasion') {
-          data.append('occasion', JSON.stringify(formData.occasion));
+        } else if (key === 'category' || key === 'occasion') {
+          data.append(key, JSON.stringify(formData[key]));
         } else if (key === 'stock') {
           // Send stock as boolean
           data.append('stock', formData.stock ? 'true' : 'false');
@@ -374,7 +396,7 @@ const ProductForm = () => {
       });
       
       // Add variant data for cake category
-      if ((formData.category || '').toLowerCase() === 'cakes') {
+      if (formData.category.includes('cakes')) {
         // Prepare flavors with images array
         const flavorsForSubmit = flavors.map(flavor => ({
           name: flavor.name,
@@ -452,34 +474,34 @@ const ProductForm = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-muted uppercase tracking-widest">Category</label>
-                  <select 
-                    name="category" 
-                    value={formData.category} 
-                    onChange={(e) => {
-                      const raw = e.target.value || '';
-                      const normalized = typeof raw === 'string' ? raw.trim().toLowerCase() : raw;
-                      setFormData(prev => ({ ...prev, category: normalized, subCategory: '' }));
-                      if (normalized !== 'cakes') {
-                        setFlavors([]);
-                        setWeights([]);
-                        setVariants([]);
-                      }
-                    }} 
-                    required 
-                    className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
-                  >
-                    <option value="">Select Category</option>
+                <div className="space-y-3">
+                  <label className="text-xs font-black text-muted uppercase tracking-widest">Categories (Multiple)</label>
+                  <div className="flex flex-wrap gap-2">
                     {categories.length > 0
-                      ? categories.map(c => <option key={c._id} value={(c.name || '').toLowerCase()}>{c.label || c.name}</option>)
-                      : <option disabled>Loading categories...</option>
+                      ? categories.map(c => {
+                          const normalized = (c.name || '').toLowerCase();
+                          return (
+                            <button
+                              key={c._id}
+                              type="button"
+                              onClick={() => handleCategoryToggle(normalized)}
+                              className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all border-2 ${
+                                formData.category.includes(normalized)
+                                  ? 'bg-primary border-primary text-button-text shadow-lift'
+                                  : 'bg-input border-input-border text-muted hover:border-primary/50'
+                              }`}
+                            >
+                              {c.label || c.name}
+                            </button>
+                          );
+                        })
+                      : <p className="text-xs text-muted italic">Loading categories...</p>
                     }
-                  </select>
+                  </div>
                 </div>
               </div>
 
-              {categories.find(c => (c.name || '').toLowerCase() === formData.category)?.subCategories?.length > 0 && (
+              {categories.find(c => formData.category.includes((c.name || '').toLowerCase()))?.subCategories?.length > 0 && (
                 <div className="space-y-2">
                   <label className="text-xs font-black text-muted uppercase tracking-widest">Subcategory</label>
                   <select 
@@ -489,7 +511,7 @@ const ProductForm = () => {
                     className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold capitalize"
                   >
                     <option value="">Select Subcategory</option>
-                    {categories.find(c => (c.name || '').toLowerCase() === formData.category).subCategories.map(sub => (
+                    {categories.find(c => formData.category.includes((c.name || '').toLowerCase())).subCategories.map(sub => (
                       <option key={sub} value={sub}>{sub.replace(/-/g, ' ')}</option>
                     ))}
                   </select>
@@ -522,7 +544,7 @@ const ProductForm = () => {
               </div>
 
               {/* Regular price fields (for non-cake or simple products) */}
-              {(formData.category || '').toLowerCase() !== 'cakes' && (
+              {!formData.category.includes('cakes') && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-black text-muted uppercase tracking-widest">Original Price (₹)</label>
@@ -589,7 +611,7 @@ const ProductForm = () => {
             </div>
 
             {/* Cake-specific Variant Section with Multiple Images */}
-            {(formData.category || '').toLowerCase() === 'cakes' && (
+            {formData.category.includes('cakes') && (
               <div className="card-premium p-6 space-y-6">
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <h3 className="font-black text-heading uppercase tracking-widest text-sm">

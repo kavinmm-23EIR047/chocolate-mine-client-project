@@ -174,14 +174,19 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
             key={cat.name}
             index={index}
             image={cat.image}
-            name={cat.name}
+            name={cat.label || (cat.name ? cat.name.replace(/-/g, ' ') : '')}
             isActive={activeCategory === cat.name}
             onClick={() => {
               if (cat.isCustom) {
                 navigate('/custom-cake');
               } else {
-                const categoryParam = cat.name === 'All' ? 'all' : cat.name;
-                navigate(`/shop?category=${categoryParam}`);
+                setActiveCategory(cat.name);
+                // Also scroll to the collections section
+                const el = document.getElementById('main-catalog');
+                if (el) {
+                  const offset = el.getBoundingClientRect().top + window.pageYOffset - 100;
+                  window.scrollTo({ top: offset, behavior: 'smooth' });
+                }
               }
             }}
           />

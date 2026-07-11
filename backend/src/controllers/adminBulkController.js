@@ -43,7 +43,15 @@ exports.bulkCreateProducts = asyncHandler(async (req, res, next) => {
       body.allowCustomWeight = body.allowCustomWeight === 'true' || body.allowCustomWeight === true;
 
       // Normalize category
-      if (body.category) body.category = String(body.category).trim().toLowerCase();
+      if (body.category) {
+        if (Array.isArray(body.category)) {
+          body.category = body.category.map(c => String(c).trim().toLowerCase());
+        } else {
+          body.category = String(body.category).split(',').map(c => c.trim().toLowerCase()).filter(Boolean);
+        }
+      } else {
+        body.category = [];
+      }
 
       // Normalize basic strings -> numbers where appropriate
       Object.keys(body).forEach(key => {
@@ -74,7 +82,8 @@ exports.bulkCreateProducts = asyncHandler(async (req, res, next) => {
       }
 
       // Cake-specific handling
-      if (body.category === 'cakes') {
+      const isCakes = Array.isArray(body.category) ? body.category.includes('cakes') : false;
+      if (isCakes) {
         // Parse flavors/weights/variants
         if (body.flavors && typeof body.flavors === 'string') {
           try {
@@ -134,8 +143,8 @@ exports.bulkCreateProducts = asyncHandler(async (req, res, next) => {
       }
 
       // If cakeType is provided but category wasn't, infer cakes category
-      if (!body.category && body.cakeType) {
-        body.category = 'cakes';
+      if ((!body.category || body.category.length === 0) && body.cakeType) {
+        body.category = ['cakes'];
       }
 
       // Ensure description and shortDescription exist for validation
@@ -148,12 +157,14 @@ exports.bulkCreateProducts = asyncHandler(async (req, res, next) => {
 
       // Image handling
       let imageInput = body.image;
-      if (!imageInput && body.category === 'cakes') {
+      const finalIsCakes = Array.isArray(body.category) ? body.category.includes('cakes') : false;
+      if (!imageInput && finalIsCakes) {
         imageInput = DEFAULT_CAKE_IMAGE_URL;
       }
 
       if (imageInput) {
-        const uploadResult = await cloudinaryService.uploadImage(imageInput, body.category || 'general');
+        const uploadCategory = Array.isArray(body.category) && body.category.length > 0 ? body.category[0] : 'general';
+        const uploadResult = await cloudinaryService.uploadImage(imageInput, uploadCategory);
         if (uploadResult) {
           body.image = uploadResult.secure_url;
           body.imagePublicId = uploadResult.public_id;

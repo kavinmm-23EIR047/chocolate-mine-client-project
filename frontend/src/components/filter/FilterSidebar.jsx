@@ -8,7 +8,8 @@ const FilterSidebar = ({
   onSearch,
   searchTerm = '',
   products = [],
-  categories: propCategories = []
+  categories: propCategories = [],
+  isMobileDrawer = false
 }) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
@@ -18,7 +19,8 @@ const FilterSidebar = ({
   // Extract unique categories from products if not provided
   useEffect(() => {
     if (propCategories.length === 0 && products.length > 0) {
-      const uniqueCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
+      const allCategories = products.flatMap(p => Array.isArray(p.category) ? p.category : [p.category]).filter(Boolean);
+      const uniqueCategories = [...new Set(allCategories)];
       setCategories(uniqueCategories);
     } else {
       setCategories(propCategories);

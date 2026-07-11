@@ -34,7 +34,7 @@ const Button = forwardRef(({
   active = false,
   onClick,
   type = 'button',
-  preventDefault = true,
+  preventDefault = type !== 'submit',
   ...props
 }, ref) => {
   // Handle click with optional prevent default

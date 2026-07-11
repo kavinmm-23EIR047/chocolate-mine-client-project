@@ -51,6 +51,8 @@ router.route('/themes/:id/colors/:colorId/images')
     { name: 'tier3Image', maxCount: 1 }
   ]), customCakeController.updateThemeColorImages);
 
+router.post('/themes/:id/colors/:colorId/apply-to-all', customCakeController.applyThemeColorToAll);
+
 // Colors
 router.post('/colors', customCakeController.createColor);
 router.route('/colors/:id')

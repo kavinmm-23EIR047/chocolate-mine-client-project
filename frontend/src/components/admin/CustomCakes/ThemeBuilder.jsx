@@ -217,7 +217,7 @@ const ThemeBuilder = ({ themeId, onBack }) => {
   const isMappingReadyToSave = mapping => {
     if (!mapping) return false;
     const fileCount = Object.values(mapping.files || {}).filter(Boolean).length;
-    return fileCount > 0 && (mapping.price || 0) > 0;
+    return fileCount > 0 && (mapping.price || 0) >= 0;
   };
 
   const handlePriceInputChange = (colorName, price) => {
@@ -241,14 +241,13 @@ const ThemeBuilder = ({ themeId, onBack }) => {
     const numericPrice = parseFloat(price) || 0;
 
     if (!themeId || !color?._id) {
-      if (numericPrice <= 0) {
+      if (numericPrice < 0) {
         throw new Error('Please enter a valid price before saving.');
       }
       handleSetPendingMapping(colorName, files, numericPrice);
       return null;
     }
-
-    if (numericPrice <= 0) {
+    if (numericPrice < 0) {
       throw new Error('Please enter a valid price before saving.');
     }
 
@@ -276,6 +275,21 @@ const ThemeBuilder = ({ themeId, onBack }) => {
       delete newState[colorName];
       return newState;
     });
+  };
+
+  const handleApplyToAll = async (colorId) => {
+    if (!window.confirm('Apply these images and price to all other colors in this theme? This will overwrite existing mappings.')) return;
+    try {
+      const response = await adminService.applyCustomCakeThemeColorToAll(theme._id, colorId);
+      toast.success('Applied to all colors successfully');
+      setTheme(prev => ({
+        ...prev,
+        colors: response.data.data
+      }));
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to apply to all colors');
+    }
   };
   
   const handleDeleteThemeColor = async (tcId) => {
@@ -436,6 +450,14 @@ const ThemeBuilder = ({ themeId, onBack }) => {
                       <span className="text-xs font-black text-muted uppercase">Base Price</span>
                       <span className="font-black text-primary">₹{pending?.price ?? color.price ?? 0}</span>
                     </div>
+                    {color._id && hasImages && !pending && (
+                      <button 
+                        onClick={() => handleApplyToAll(color._id)}
+                        className="w-full mt-1 py-1.5 bg-secondary text-white rounded font-bold text-xs hover:bg-secondary/90 transition-colors"
+                      >
+                        Apply to All Colors
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="pl-2 flex flex-col gap-2">

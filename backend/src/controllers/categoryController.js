@@ -32,7 +32,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
   console.log('Body:', req.body);
   console.log('File:', req.file);
   
-  const { name, label } = req.body;
+  const { name, label, subCategories } = req.body;
   
   if (!name) {
     return next(new AppError('Category name is required', 400));
@@ -84,6 +84,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
   const category = await Category.create({
     name: name.trim().toLowerCase(),
     label: label || name.trim(),
+    subCategories: subCategories ? (Array.isArray(subCategories) ? subCategories : JSON.parse(subCategories)).map(s => s.trim().toLowerCase()) : [],
     image: imageUrl,
     imagePublicId: imagePublicId
   });
@@ -101,7 +102,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     return next(new AppError('Category not found', 404));
   }
 
-  const { name, label, active } = req.body;
+  const { name, label, active, subCategories } = req.body;
   
   if (name) {
     const existingCategory = await Category.findOne({ 
@@ -116,6 +117,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
   
   if (label !== undefined) category.label = label;
   if (active !== undefined) category.active = active === 'true' || active === true;
+  if (subCategories !== undefined) category.subCategories = (Array.isArray(subCategories) ? subCategories : JSON.parse(subCategories)).map(s => s.trim().toLowerCase());
 
   if (req.file) {
     try {

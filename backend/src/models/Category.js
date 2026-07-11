@@ -12,6 +12,11 @@ const categorySchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  subCategories: [{
+    type: String,
+    trim: true,
+    lowercase: true
+  }],
   image: {
     type: String,
     required: [true, 'Category image is required']

@@ -182,7 +182,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
   const [addingToCart, setAddingToCart] = useState(false);
 
   const isCake = product?.category?.toLowerCase().includes('cake');
-  const isBento = product?.category?.toLowerCase() === 'bento-cakes' || product?.cakeType?.toLowerCase() === 'bento-cakes';
+  const isBento = product?.category?.toLowerCase().includes('bento') || product?.cakeType?.toLowerCase().includes('bento');
   const defaultOptions = isCake ? { flavor: 'Standard', weight: isBento ? '250g' : '500g' } : null;
 
   const hasVariants = product?.hasVariants || (product?.variants && product.variants.length > 0);

@@ -55,7 +55,7 @@ const AdminGoogleReviews = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Google Reviews Management</h1>
+        <h1 className="text-2xl font-bold text-[var(--heading)]">Google Reviews Management</h1>
         <div className="flex gap-4">
           <button 
             onClick={handleSync} 
@@ -77,29 +77,29 @@ const AdminGoogleReviews = () => {
 
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="text-gray-500 text-sm">Total Reviews</h3>
-            <p className="text-2xl font-bold">{stats.totalReviews}</p>
+          <div className="bg-[var(--card)] p-4 rounded shadow border border-[var(--border)]">
+            <h3 className="text-[var(--muted)] text-sm">Total Reviews</h3>
+            <p className="text-2xl font-bold text-[var(--heading)]">{stats.totalReviews}</p>
           </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="text-gray-500 text-sm">Average Rating</h3>
-            <p className="text-2xl font-bold">{stats.averageRating} ⭐</p>
+          <div className="bg-[var(--card)] p-4 rounded shadow border border-[var(--border)]">
+            <h3 className="text-[var(--muted)] text-sm">Average Rating</h3>
+            <p className="text-2xl font-bold text-[var(--heading)]">{stats.averageRating} ⭐</p>
           </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="text-gray-500 text-sm">Last Sync</h3>
-            <p className="text-sm mt-1">{stats.lastSyncTime ? new Date(stats.lastSyncTime).toLocaleString() : 'Never'}</p>
+          <div className="bg-[var(--card)] p-4 rounded shadow border border-[var(--border)]">
+            <h3 className="text-[var(--muted)] text-sm">Last Sync</h3>
+            <p className="text-sm mt-1 text-[var(--heading)]">{stats.lastSyncTime ? new Date(stats.lastSyncTime).toLocaleString() : 'Never'}</p>
           </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="text-gray-500 text-sm">Integration Status</h3>
+          <div className="bg-[var(--card)] p-4 rounded shadow border border-[var(--border)]">
+            <h3 className="text-[var(--muted)] text-sm">Integration Status</h3>
             <p className="text-green-600 font-bold mt-1">{stats.isEnabled ? 'Active' : 'Disabled'}</p>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded shadow overflow-hidden">
-        <table className="w-full text-left border-collapse">
+      <div className="bg-[var(--card)] rounded shadow overflow-hidden border border-[var(--border)]">
+        <table className="w-full text-left border-collapse text-[var(--heading)]">
           <thead>
-            <tr className="bg-gray-100 border-b">
+            <tr className="bg-[var(--card-soft)] border-b border-[var(--border)]">
               <th className="p-4">Customer</th>
               <th className="p-4">Rating</th>
               <th className="p-4">Review</th>
@@ -110,16 +110,16 @@ const AdminGoogleReviews = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="6" className="p-4 text-center">Loading...</td></tr>
+              <tr><td colSpan="6" className="p-4 text-center text-[var(--muted)]">Loading...</td></tr>
             ) : reviews.length === 0 ? (
-              <tr><td colSpan="6" className="p-4 text-center">No reviews found</td></tr>
+              <tr><td colSpan="6" className="p-4 text-center text-[var(--muted)]">No reviews found</td></tr>
             ) : (
               reviews.map(review => (
-                <tr key={review._id} className="border-b hover:bg-gray-50">
+                <tr key={review._id} className="border-b border-[var(--border)] hover:bg-[var(--card-soft)]">
                   <td className="p-4">{review.authorName}</td>
                   <td className="p-4">{'⭐'.repeat(review.rating)}</td>
                   <td className="p-4 text-sm max-w-xs truncate" title={review.text}>{review.text || '-'}</td>
-                  <td className="p-4">{new Date(review.time).toLocaleDateString()}</td>
+                  <td className="p-4 text-[var(--muted)]">{new Date(review.time).toLocaleDateString()}</td>
                   <td className="p-4">
                     <button 
                       onClick={() => handleToggleVisibility(review._id)}

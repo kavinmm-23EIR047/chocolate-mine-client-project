@@ -182,9 +182,9 @@ const AdminProducts = () => {
                         </div>
                        </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link to={`/admin/products/edit/${p._id}`}><button className="p-2 hover:bg-border rounded-xl text-muted hover:text-heading"><Edit3 size={16} /></button></Link>
-                          <button onClick={() => setDeleteId(p._id)} className="p-2 hover:bg-error/10 rounded-xl text-muted hover:text-error"><Trash2 size={16} /></button>
+                        <div className="flex items-center justify-end gap-2 shrink-0">
+                          <Link to={`/admin/products/edit/${p._id}`} className="p-2 hover:bg-border rounded-xl text-muted hover:text-heading block"><Edit3 size={16} /></Link>
+                          <button onClick={() => setDeleteId(p._id)} className="p-2 hover:bg-error/10 rounded-xl text-muted hover:text-error shrink-0"><Trash2 size={16} /></button>
                         </div>
                        </td>
                     </motion.tr>

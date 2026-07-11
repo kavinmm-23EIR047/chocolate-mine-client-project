@@ -28,6 +28,12 @@ import Cart from './pages/Cart';
 import ForgotPassword from './pages/ForgotPassword';
 import OAuthCallback from './pages/OAuthCallback';
 import ReviewPage from './pages/ReviewPage';
+import Contact from './pages/Contact';
+import Help from './pages/Help';
+import Stores from './pages/Stores';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import RefundPolicy from './pages/RefundPolicy';
 
 // Premium User Dashboard Layout
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -88,6 +94,7 @@ const SocketInitializer = ({ children }) => {
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminGoogleReviews from './pages/admin/AdminGoogleReviews';
 import AdminProducts from './pages/admin/AdminProducts';
 import ProductForm from './pages/admin/ProductForm';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -132,13 +139,17 @@ const GlobalNotificationHandler = () => {
   useEffect(() => {
     // 1. Firebase Foreground Push Notifications
     const unsubscribe = onMessageListener((payload) => {
-      if (payload?.notification) {
+      // Support both standard notification payloads AND data-only payloads
+      const title = payload.data?.title || payload.notification?.title;
+      const body = payload.data?.message || payload.notification?.body;
+      
+      if (title || body) {
         toast.success(
           <div className="flex flex-col gap-1">
-            <span className="font-bold">{payload.notification.title}</span>
-            <span className="text-xs">{payload.notification.body}</span>
+            <span className="font-bold">{title || 'The Chocolate Mine'}</span>
+            <span className="text-xs">{body || 'You have a new update'}</span>
           </div>,
-          { duration: 6000, icon: '🔔' }
+          { duration: 6000, icon: '🍫' }
         );
       }
     });
@@ -205,6 +216,12 @@ function App() {
                   <Route path="/track/:orderId?" element={<OrderTracking />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
                   <Route path="/oauth-callback" element={<OAuthCallback />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/help" element={<Help />} />
+                  <Route path="/stores" element={<Stores />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsConditions />} />
+                  <Route path="/refund" element={<RefundPolicy />} />
 
                   {/* Guest only */}
                   <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
@@ -249,6 +266,7 @@ function App() {
                   <Route path="banners" element={<AdminBanner />} />
                   <Route path="custom-cakes" element={<AdminCustomCakes />} />
                   <Route path="reviews" element={<AdminReviews />} />
+                  <Route path="google-reviews" element={<AdminGoogleReviews />} />
                   <Route path="settings" element={<AdminDashboard />} />
                 </Route>
 
@@ -270,7 +288,5 @@ function App() {
     </AuthProvider>
   );
 }
-
-
 
 export default App;

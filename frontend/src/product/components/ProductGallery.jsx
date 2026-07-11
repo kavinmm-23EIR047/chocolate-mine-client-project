@@ -26,7 +26,7 @@ const ProductGallery = ({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Dynamic image resolution fallback array
-  const flavorImages = product?.category === 'cakes' && selectedFlavor ? getFlavorImages(selectedFlavor) : [];
+  const flavorImages = (Array.isArray(product?.category) ? product.category.includes('cakes') : product?.category === 'cakes') && selectedFlavor ? getFlavorImages(selectedFlavor) : [];
   const fallbackImages = (product?.images || [product?.image]).filter(Boolean);
   const currentGallerySet = flavorImages.length > 0 ? flavorImages : fallbackImages;
 
@@ -146,7 +146,7 @@ const ProductGallery = ({
             {/* Top Bar Info & Dismiss Button */}
             <div className="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between text-white bg-gradient-to-b from-black/70 to-transparent z-10">
               <div className="pl-2 sm:pl-4">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-black mb-0.5">{product?.category || "Artisan Bakery"}</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-black mb-0.5">{Array.isArray(product?.category) ? product.category.join(', ') : (product?.category || "Artisan Bakery")}</p>
                 <h3 className="text-sm sm:text-base font-black capitalize tracking-tight text-white">{product?.name}</h3>
               </div>
               

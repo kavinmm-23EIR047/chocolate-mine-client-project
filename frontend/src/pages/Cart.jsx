@@ -221,12 +221,12 @@ const Cart = () => {
                       <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0">
                           <p className="text-[9px] sm:text-[10px] text-muted uppercase font-black tracking-widest mb-1">
-                            {item.category}
+                            {Array.isArray(item.category) ? item.category.join(', ') : item.category}
                           </p>
                           <h3 className="font-black text-heading text-sm sm:text-lg capitalize mb-1.5 sm:mb-2 leading-tight pr-2">
                             {item.name}
                           </h3>
-                          {item.category === 'Custom Cakes' ? (
+                          {(Array.isArray(item?.category) ? item.category.includes('Custom Cakes') : item?.category === 'Custom Cakes') ? (
                             <>
                               {item.options?.color && (
                                 <p className="text-xs text-muted font-medium">Color: {item.options.color}</p>

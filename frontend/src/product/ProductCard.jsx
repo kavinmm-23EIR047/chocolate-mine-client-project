@@ -181,8 +181,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const [addingToCart, setAddingToCart] = useState(false);
 
-  const isCake = product?.category?.toLowerCase().includes('cake');
-  const isBento = product?.category?.toLowerCase().includes('bento') || product?.cakeType?.toLowerCase().includes('bento');
+  const isCake = Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('cake')) : (product?.category || '').toLowerCase().includes('cake');
+  const isBento = (Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('bento')) : (product?.category || '').toLowerCase().includes('bento')) || product?.cakeType?.toLowerCase().includes('bento');
   const defaultOptions = isCake ? { flavor: 'Standard', weight: isBento ? '250g' : '500g' } : null;
 
   const hasVariants = product?.hasVariants || (product?.variants && product.variants.length > 0);
@@ -232,7 +232,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const rating = Number(product?.ratingsAverage) || 0;
   const reviewCount = Number(product?.ratingsCount) || 0;
-  const isCakeCategory = String(product?.category || '').toLowerCase().includes('cake') || !!product?.cakeType;
+  const isCakeCategory = (Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('cake')) : String(product?.category || '').toLowerCase().includes('cake')) || !!product?.cakeType;
   const hasValidImage = typeof product?.image === 'string' && product.image.trim() !== '' && product.image !== 'none';
 
   const locationDisplay = (product?.location === 'pan-india' || product?.location === 'pan india' || product?.location === 'both')

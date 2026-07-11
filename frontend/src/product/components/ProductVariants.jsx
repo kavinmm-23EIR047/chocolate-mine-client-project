@@ -19,10 +19,10 @@ const ProductVariants = ({
   handleCustomWeightSubmit,
   isInStock
 }) => {
-  const isCake = product?.category?.toLowerCase().includes('cake');
-  if (!isCake) return null;
+  const isCake = Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('cake')) : (product?.category || '').toLowerCase().includes('cake');
+  const hasVariants = product?.hasVariants || false;
 
-  const isBento = product?.category?.toLowerCase().includes('bento') || product?.cakeType?.toLowerCase().includes('bento');
+  const isBento = (Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('bento')) : (product?.category || '').toLowerCase().includes('bento')) || product?.cakeType?.toLowerCase().includes('bento');
   const weights = isBento
     ? [{ value: '250g' }]
     : [

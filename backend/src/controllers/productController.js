@@ -69,7 +69,13 @@ exports.getProducts = asyncHandler(async (req, res) => {
 
   if (featured) query.featured = featured === 'true';
   if (bestseller) query.bestseller = bestseller === 'true';
-  if (category) query.category = category;
+  if (category) {
+    if (category.includes(',')) {
+      query.category = { $in: category.split(',').map(c => c.trim().toLowerCase()) };
+    } else {
+      query.category = category.toLowerCase();
+    }
+  }
   if (subCategory) query.subCategory = subCategory.toLowerCase();
   if (cakeType) query.cakeType = cakeType;
   if (location) query.location = location.toLowerCase();
@@ -291,7 +297,18 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   
   // FIX: Normalize category to lowercase and trim (for dynamic category support)
   if (body.category) {
-    body.category = body.category.trim().toLowerCase();
+    if (Array.isArray(body.category)) {
+      body.category = body.category.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c);
+    } else if (typeof body.category === 'string') {
+      try {
+        const parsed = JSON.parse(body.category);
+        body.category = Array.isArray(parsed) ? parsed.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c) : [parsed.trim().toLowerCase()];
+      } catch (e) {
+        body.category = body.category.split(',').map(c => c.trim().toLowerCase()).filter(Boolean);
+      }
+    }
+  } else {
+    body.category = [];
   }
   if (body.subCategory) {
     body.subCategory = body.subCategory.trim().toLowerCase();
@@ -329,7 +346,8 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   }
 
   // Handle variant data for cakes (with multiple images per flavor)
-  if (body.category === 'cakes') {
+  const isCakes = Array.isArray(body.category) ? body.category.includes('cakes') : false;
+  if (isCakes) {
     if (body.flavors && typeof body.flavors === 'string') {
       try {
         const parsedFlavors = JSON.parse(body.flavors);
@@ -393,12 +411,13 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     imageInput = `data:${req.file.mimetype};base64,${b64}`;
   }
 
-  if (!imageInput && body.category === 'cakes') {
+  if (!imageInput && isCakes) {
     imageInput = DEFAULT_CAKE_IMAGE_URL;
   }
 
   if (imageInput) {
-    const uploadResult = await cloudinaryService.uploadImage(imageInput, body.category || 'general');
+    const uploadCategory = Array.isArray(body.category) && body.category.length > 0 ? body.category[0] : 'general';
+    const uploadResult = await cloudinaryService.uploadImage(imageInput, uploadCategory);
     if (uploadResult) {
       body.image = uploadResult.secure_url;
       body.imagePublicId = uploadResult.public_id;
@@ -449,8 +468,17 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   const allowCustomWeight = normalizeBoolean(body.allowCustomWeight);
   
   // FIX: Normalize category to lowercase and trim (for dynamic category support)
-  if (body.category) {
-    body.category = body.category.trim().toLowerCase();
+  if (body.category !== undefined) {
+    if (Array.isArray(body.category)) {
+      body.category = body.category.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c);
+    } else if (typeof body.category === 'string') {
+      try {
+        const parsed = JSON.parse(body.category);
+        body.category = Array.isArray(parsed) ? parsed.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c) : [parsed.trim().toLowerCase()];
+      } catch (e) {
+        body.category = body.category.split(',').map(c => c.trim().toLowerCase()).filter(Boolean);
+      }
+    }
   }
   if (body.subCategory) {
     body.subCategory = body.subCategory.trim().toLowerCase();
@@ -486,8 +514,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   }
 
   // Handle variant data for cakes (with multiple images per flavor)
-  const finalCategory = body.category || product.category;
-  if (finalCategory === 'cakes') {
+  const finalCategory = body.category || product.category || [];
+  const isCakes = Array.isArray(finalCategory) ? finalCategory.includes('cakes') : false;
+  if (isCakes) {
     if (body.flavors !== undefined) {
       if (typeof body.flavors === 'string') {
         try {
@@ -576,7 +605,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       await cloudinaryService.deleteImage(product.imagePublicId);
     }
     
-    const uploadResult = await cloudinaryService.uploadImage(imageInput, body.category || product.category);
+    const uploadCategory = Array.isArray(finalCategory) && finalCategory.length > 0 ? finalCategory[0] : 'general';
+    const uploadResult = await cloudinaryService.uploadImage(imageInput, uploadCategory);
     if (uploadResult) {
       product.image = uploadResult.secure_url;
       product.imagePublicId = uploadResult.public_id;

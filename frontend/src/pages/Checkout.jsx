@@ -516,7 +516,7 @@ const Checkout = () => {
   };
 
   const isCustomCakeItem = (item) => (
-    item?.productId?.startsWith?.('custom-') || item?.category === 'Custom Cakes'
+    item?.productId?.startsWith?.('custom-') || (Array.isArray(item?.category) ? item.category.includes('Custom Cakes') : item?.category === 'Custom Cakes')
   );
 
   const doesCustomCakeRequestMatchItem = (request, item) => {
@@ -1381,7 +1381,7 @@ const Checkout = () => {
                               </p>
                             )}
                             <div className="flex flex-wrap gap-2 mt-2">
-                              {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
+                              {(Array.isArray(item?.category) ? item.category.includes('Custom Cakes') : item?.category === 'Custom Cakes') || item.productId?.startsWith?.('custom-') ? (
                                 <>
                                   {(item.options?.color || item.selectedFlavor) && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Color: {item.options?.color || item.selectedFlavor}</span>}
                                   {(item.options?.flavor || item.selectedFlavor) && <span className="text-[10px] sm:text-[11px] bg-card text-muted font-bold px-2 py-1 rounded-md uppercase tracking-tighter shadow-sm border border-border/30">Flavor: {item.options?.flavor || item.selectedFlavor}</span>}
@@ -1583,7 +1583,7 @@ const Checkout = () => {
                             {getItemDescription(item)}
                           </p>
                         )}
-                        {item.category === 'Custom Cakes' || item.productId?.startsWith?.('custom-') ? (
+                        {(Array.isArray(item?.category) ? item.category.includes('Custom Cakes') : item?.category === 'Custom Cakes') || item.productId?.startsWith?.('custom-') ? (
                           <>
                             {(item.options?.color || item.selectedFlavor) && <p className="text-[11px] text-muted font-bold mt-0.5">Color: {item.options?.color || item.selectedFlavor}</p>}
                             {(item.options?.flavor || item.selectedFlavor) && <p className="text-[11px] text-muted font-bold">Flavor: {item.options?.flavor || item.selectedFlavor}</p>}

@@ -1,87 +1,57 @@
-// In your parent component
-const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-const [filters, setFilters] = useState({});
-const [searchTerm, setSearchTerm] = useState('');
-const [filteredProducts, setFilteredProducts] = useState([]);
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
-const handleApplyFilters = (newFilters) => {
-  setFilters(newFilters);
-  applyAllFilters(newFilters, searchTerm);
+const FilterDrawer = ({
+  isOpen,
+  onClose,
+  filters,
+  onApply,
+  onReset,
+  onSearch,
+  searchTerm,
+  products
+}) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] sm:hidden"
+          />
+          <motion.aside
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 28 }}
+            className="fixed left-0 top-0 bottom-0 w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-r border-[var(--border)] sm:hidden"
+          >
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
+              <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
+              <button onClick={onClose} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="py-8 text-center text-[var(--muted)]">
+              <p className="text-sm font-medium">Mobile filters</p>
+              <p className="text-xs mt-2">Please use the desktop filter sidebar or category pills for now.</p>
+            </div>
+
+            <button onClick={onClose}
+              className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md"
+            >
+              Close
+            </button>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
+  );
 };
 
-const handleSearch = (term) => {
-  setSearchTerm(term);
-  applyAllFilters(filters, term);
-};
-
-const handleResetFilters = () => {
-  setFilters({});
-  setSearchTerm('');
-  applyAllFilters({}, '');
-};
-
-const applyAllFilters = (activeFilters, search) => {
-  let results = [...products];
-  
-  // Apply search with relevance scoring
-  if (search) {
-    const searchLower = search.toLowerCase();
-    results = results.filter(product => 
-      product.name.toLowerCase().includes(searchLower) ||
-      product.description?.toLowerCase().includes(searchLower)
-    );
-    
-    // Sort by relevance: starts with > contains > ends with
-    results.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      
-      const aStartsWith = aName.startsWith(searchLower) ? 0 : 1;
-      const bStartsWith = bName.startsWith(searchLower) ? 0 : 1;
-      if (aStartsWith !== bStartsWith) return aStartsWith - bStartsWith;
-      
-      const aContains = aName.includes(searchLower) ? 0 : 1;
-      const bContains = bName.includes(searchLower) ? 0 : 1;
-      return aContains - bContains;
-    });
-  }
-  
-  // Apply category filters
-  if (activeFilters.categories?.length) {
-    results = results.filter(p => activeFilters.categories.includes(p.category));
-  }
-  
-  // Apply price range
-  if (activeFilters.priceRange) {
-    results = results.filter(p => 
-      p.price >= activeFilters.priceRange.min && 
-      p.price <= activeFilters.priceRange.max
-    );
-  }
-  
-  // Apply dietary filters
-  if (activeFilters.dietary?.length) {
-    results = results.filter(p => activeFilters.dietary.includes(p.dietary));
-  }
-  
-  // Apply rating filters
-  if (activeFilters.ratings?.length) {
-    results = results.filter(p => 
-      activeFilters.ratings.some(r => p.rating >= r)
-    );
-  }
-  
-  setFilteredProducts(results);
-};
-
-// In your JSX
-<FilterDrawer
-  isOpen={isDrawerOpen}
-  onClose={() => setIsDrawerOpen(false)}
-  filters={filters}
-  onApply={handleApplyFilters}
-  onReset={handleResetFilters}
-  onSearch={handleSearch}
-  searchTerm={searchTerm}
-  products={products}
-/>
+export default FilterDrawer;

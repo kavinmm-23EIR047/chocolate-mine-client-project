@@ -18,12 +18,10 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, unique: true, required: true, lowercase: true },
 
-  // NO enum restriction - accepts any category from the Category collection
+  // Accepts multiple categories
   category: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true
+    type: [String],
+    default: []
   },
 
   subCategory: {

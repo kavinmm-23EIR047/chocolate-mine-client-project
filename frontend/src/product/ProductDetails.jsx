@@ -49,7 +49,7 @@ const ProductDetails = () => {
 
   const { data: productRes, isLoading: loading } = useGetProductBySlugQuery(slug);
   const product = productRes?.data;
-  const isCake = product?.category?.toLowerCase().includes('cake');
+  const isCake = Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('cake')) : (product?.category || '').toLowerCase().includes('cake');
 
   const productId = product?._id?.$oid || product?._id;
   const { data: reviewRes } = useGetProductReviewsQuery(productId, { skip: !productId });
@@ -63,10 +63,15 @@ const ProductDetails = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   // Fetch similar products in the same category
+  const { data: similarRes } = useGetProductsQuery({
+    category: Array.isArray(product?.category) && product.category.length > 0 ? product.category[0] : product?.category,
+    limit: 5
+  }, { skip: !(Array.isArray(product?.category) ? product.category.length > 0 : product?.category) });
+
   const { data: relatedRes } = useGetProductsQuery({
-    category: product?.category,
+    category: Array.isArray(product?.category) && product.category.length > 0 ? product.category[0] : product?.category,
     limit: 10
-  }, { skip: !product?.category });
+  }, { skip: !(Array.isArray(product?.category) ? product.category.length > 0 : product?.category) });
 
   useEffect(() => {
     if (relatedRes?.data && product) {
@@ -96,7 +101,7 @@ const ProductDetails = () => {
   useEffect(() => {
     if (product) {
       if (isCake) {
-        const isBento = product?.category?.toLowerCase().includes('bento') || product?.cakeType?.toLowerCase().includes('bento');
+        const isBento = (Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('bento')) : (product?.category || '').toLowerCase().includes('bento')) || product?.cakeType?.toLowerCase().includes('bento');
         const defaultWeight = isBento ? '250g' : '500g';
         setSelectedWeight(defaultWeight);
         
@@ -174,7 +179,7 @@ const ProductDetails = () => {
   const productPrice = Number(product?.price || 0);
   const productOfferPrice = Number(product?.offerPrice || 0);
   const productAvailable = product?.stock !== false;
-  const productCategory = product?.category;
+  const productCategory = Array.isArray(product?.category) ? product.category.join(' ') : product?.category;
 
   const currentVariantFlavor = isCake
     ? (showCustomFlavorInput ? customFlavor : selectedFlavor?.name)
@@ -370,7 +375,14 @@ const ProductDetails = () => {
           <div className="flex items-center flex-wrap gap-1.5 lg:gap-2 text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] lg:tracking-[0.2em] text-muted">
             <button onClick={() => navigate('/')} className="hover:text-primary transition">Home</button>
             <ChevronRight size={12} />
-            <button onClick={() => navigate(`/shop?category=${product?.category}`)} className="hover:text-primary transition capitalize">{product?.category}</button>
+            {Array.isArray(product?.category) ? product.category.map((cat, i) => (
+              <React.Fragment key={cat}>
+                <button onClick={() => navigate(`/shop?category=${cat}`)} className="hover:text-primary transition capitalize">{cat}</button>
+                {i < product.category.length - 1 && ', '}
+              </React.Fragment>
+            )) : (
+              <button onClick={() => navigate(`/shop?category=${product?.category}`)} className="hover:text-primary transition capitalize">{product?.category}</button>
+            )}
             <ChevronRight size={12} />
             <span className="text-heading truncate max-w-[200px]">{product?.name}</span>
           </div>

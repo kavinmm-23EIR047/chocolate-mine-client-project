@@ -39,7 +39,7 @@ const getDisplayFlavor = (item) => {
   if (item.isCustomCake) return item.selectedFlavor || 'Custom';
   const flavor = item.selectedFlavor;
   if (!flavor || flavor.toLowerCase() === 'standard') {
-    const cat = String(item.category || '').toLowerCase();
+    const cat = Array.isArray(item.category) ? item.category.join(' ').toLowerCase() : String(item.category || '').toLowerCase();
     const name = String(item.name || '').toLowerCase();
     if (cat.includes('chocolate') || name.includes('chocolate') || name.includes('forest') || name.includes('fudge') || name.includes('truffle') || name.includes('oreo') || name.includes('caramel')) return 'Chocolate';
     if (cat.includes('vanilla') || name.includes('vanilla') || name.includes('pineapple') || name.includes('butterscotch') || name.includes('strawberry') || name.includes('blueberry') || name.includes('biscoff') || name.includes('jamun') || name.includes('gulkand') || name.includes('rasmalai') || name.includes('honey') || name.includes('almond') || name.includes('lychee') || name.includes('rose')) return 'Vanilla';

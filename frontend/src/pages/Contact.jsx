@@ -16,6 +16,7 @@ const Contact = () => {
           <p className="text-sm text-muted">+91 98765 43210</p>
         </div>
         
+        
         <div className="p-6 rounded-2xl flex flex-col items-center gap-3 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
           <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary">
             <Mail size={24} />

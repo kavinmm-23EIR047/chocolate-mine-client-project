@@ -212,22 +212,27 @@ const FilterSidebar = ({
                 <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={(e) => handleCategoryToggle('All', e)}
+                      onClick={(e) => handleCategoryToggle('all', e)}
                       className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                        !(localFilters.categories?.length) || localFilters.categories.includes('All')
+                        !(localFilters.categories?.length) || localFilters.categories.includes('all')
                           ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
                           : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
                       }`}
                     >
                       All
                     </button>
-                    {categories.filter(c => c !== 'All' && c.toLowerCase() !== 'all').map((category) => {
-                      const isActive = (localFilters.categories || []).includes(category);
-                      const isCustom = category.toLowerCase().includes('custom cakes');
+                    {categories.filter(c => {
+                      const catName = typeof c === 'object' ? c.name : c;
+                      return catName && catName !== 'all' && catName.toLowerCase() !== 'all';
+                    }).map((category) => {
+                      const catName = typeof category === 'object' ? category.name : category;
+                      const catLabel = typeof category === 'object' ? category.label : category.replace(/-/g, ' ');
+                      const isActive = (localFilters.categories || []).includes(catName);
+                      const isCustom = catName.toLowerCase().includes('custom');
                       return (
                         <button
-                          key={category}
-                          onClick={(e) => handleCategoryToggle(category, e)}
+                          key={catName}
+                          onClick={(e) => handleCategoryToggle(catName, e)}
                           className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
                             isCustom 
                               ? 'bg-gradient-to-r from-amber-400 to-pink-500 text-white border-transparent shadow-lg shadow-pink-500/20'
@@ -236,7 +241,7 @@ const FilterSidebar = ({
                                 : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
                           }`}
                         >
-                          {category} {isCustom && '✨'}
+                          {catLabel} {isCustom && '✨'}
                         </button>
                       );
                     })}

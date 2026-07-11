@@ -766,7 +766,7 @@ const Shop = () => {
             onSearch={handleFilterSearch}
             searchTerm={searchTerm}
             products={products}
-            categories={categories.map(c => c.label)}
+            categories={categories}
           />
 
           <main className="flex-1 min-w-0">
@@ -833,7 +833,7 @@ const Shop = () => {
         onSearch={handleFilterSearch}
         searchTerm={searchTerm}
         products={products}
-        categories={categories.map(c => c.label)}
+        categories={categories}
       />
 
     </div>

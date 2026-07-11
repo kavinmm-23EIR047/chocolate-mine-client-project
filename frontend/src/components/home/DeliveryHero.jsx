@@ -142,9 +142,10 @@ const DeliveryHero = () => {
               className="text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black leading-[1.2] tracking-[-0.02em] mb-4"
               style={{ color: 'var(--heading)' }}
             >
-              Exclusive<br />
-              <span style={{ color: 'var(--accent)' }}>Local</span> Delivery<br />
-              Made for You
+              The Best of <br />
+              <span style={{ color: 'var(--accent)' }}>Coimbatore</span>
+              <br />
+              At Your Doorstep in 3 Hours
             </motion.h2>
 
             <motion.p
@@ -155,7 +156,7 @@ const DeliveryHero = () => {
               className="text-sm sm:text-base font-medium leading-relaxed mb-6 max-w-md mx-auto lg:mx-0"
               style={{ color: 'var(--muted)' }}
             >
-              From our kitchen to your doorstep — fast, fresh and handled with care.
+              Premium cakes, handcrafted with love and delivered fresh across the city.
             </motion.p>
 
             <motion.div

@@ -34,13 +34,16 @@ const Button = forwardRef(({
   active = false,
   onClick,
   type = 'button',
-  preventDefault = type !== 'submit',
+  preventDefault = false,
+  stopPropagation = false,
   ...props
 }, ref) => {
-  // Handle click with optional prevent default
+  // Handle click with optional prevent default and stop propagation
   const handleClick = (e) => {
     if (preventDefault) {
       e.preventDefault();
+    }
+    if (stopPropagation) {
       e.stopPropagation();
     }
     if (onClick && !disabled && !isLoading && !loading) {

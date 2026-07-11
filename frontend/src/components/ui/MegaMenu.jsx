@@ -50,12 +50,19 @@ const MegaMenu = () => {
           <div className="flex-1 pr-6 border-r border-border/10">
             <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-4 border-b border-border/10 pb-2">Categories</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Link 
+                to="/shop"
+                onClick={() => setIsOpen(false)}
+                className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
+              >
+                ALL
+              </Link>
               {categories.map((cat) => (
                 <Link 
                   key={cat._id} 
                   to={`/shop?category=${cat.name.toLowerCase()}`}
                   onClick={() => setIsOpen(false)}
-                  className="text-sm font-bold text-heading/80 hover:text-primary uppercase tracking-wide transition-colors truncate block"
+                  className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
                 >
                   {cat.name}
                 </Link>
@@ -67,12 +74,19 @@ const MegaMenu = () => {
           <div className="flex-1 pl-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-4 border-b border-border/10 pb-2">Occasions</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Link 
+                to="/shop"
+                onClick={() => setIsOpen(false)}
+                className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
+              >
+                ALL
+              </Link>
               {occasions.map((occ) => (
                 <Link 
                   key={occ._id} 
                   to={`/occasion/${occ.name.toLowerCase()}`}
                   onClick={() => setIsOpen(false)}
-                  className="text-sm font-bold text-heading/80 hover:text-primary uppercase tracking-wide transition-colors truncate block"
+                  className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
                 >
                   {occ.name}
                 </Link>

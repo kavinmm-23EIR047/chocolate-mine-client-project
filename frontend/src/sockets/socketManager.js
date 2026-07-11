@@ -7,7 +7,7 @@ let socket;
 export const initSocket = (dispatch) => {
   const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
   socket = io(socketUrl, {
-    transports: ['websocket'],
+    transports: ['polling', 'websocket'],
     reconnection: true,
   });
 

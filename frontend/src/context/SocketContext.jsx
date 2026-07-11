@@ -34,7 +34,7 @@ export const SocketProvider = ({ children }) => {
     
     // Initialize socket connection
     const socket = io(baseUrl, {
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,

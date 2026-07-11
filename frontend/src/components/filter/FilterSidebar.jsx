@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Star, Check, RotateCcw, Search, X } from 'lucide-react';
+import { Star, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FilterSidebar = ({ 
   activeFilters = {}, 
@@ -12,9 +13,22 @@ const FilterSidebar = ({
   isMobileDrawer = false
 }) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [priceRange, setPriceRange] = useState({ min: 10, max: 10000 });
   const [categories, setCategories] = useState(propCategories);
   const [localFilters, setLocalFilters] = useState(activeFilters);
+
+  const [expanded, setExpanded] = useState({
+    search: true,
+    categories: true,
+    occasions: true,
+    rating: true,
+    price: true,
+    sort: true
+  });
+
+  const toggleSection = (section) => {
+    setExpanded(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   // Extract unique categories from products if not provided
   useEffect(() => {
@@ -44,43 +58,12 @@ const FilterSidebar = ({
     }
   }, [activeFilters.priceRange]);
 
-  const sections = [
-    {
-      id: 'sort',
-      label: 'Sort By',
-      options: [
-        { value: 'popular', label: 'Popularity' },
-        { value: 'price_low', label: 'Price: Low to High' },
-        { value: 'price_high', label: 'Price: High to Low' },
-        { value: 'rating', label: 'Rating' },
-      ]
-    },
-    {
-      id: 'dietary',
-      label: 'Dietary',
-      options: [
-        { value: 'veg', label: 'Pure Veg' },
-        { value: 'eggless', label: 'Eggless' },
-      ]
-    }
+  const occasions = [
+    { id: 'anniversary-gift', label: 'Anniversary gift' },
+    { id: 'birthday-gifts', label: 'Birthday gifts' },
+    { id: 'gift-for-her', label: 'Gift for Her' },
+    { id: 'gift-for-him', label: 'Gift for Him' },
   ];
-
-  // Handle toggle with prevent default
-  const handleToggle = useCallback((sectionId, value, e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    const current = localFilters[sectionId] || [];
-    const updated = current.includes(value) 
-      ? current.filter(v => v !== value) 
-      : [...current, value];
-    
-    const newFilters = { ...localFilters, [sectionId]: updated };
-    setLocalFilters(newFilters);
-    onApply(newFilters);
-  }, [localFilters, onApply]);
 
   // Handle search with debounce
   const handleSearchChange = useCallback((e) => {
@@ -95,15 +78,6 @@ const FilterSidebar = ({
     }, 300);
   }, [onSearch]);
 
-  const handleSearchClear = useCallback(() => {
-    setLocalSearchTerm('');
-    if (onSearch) {
-      onSearch('');
-    }
-    clearTimeout(window.searchTimeout);
-  }, [onSearch]);
-
-  // Handle category toggle with prevent default
   const handleCategoryToggle = useCallback((category, e) => {
     if (e) {
       e.preventDefault();
@@ -120,7 +94,21 @@ const FilterSidebar = ({
     onApply(newFilters);
   }, [localFilters, onApply]);
 
-  // Handle price range change
+  const handleOccasionToggle = useCallback((occasionId, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const current = localFilters.occasions || [];
+    const updated = current.includes(occasionId)
+      ? current.filter(o => o !== occasionId)
+      : [occasionId]; 
+      
+    const newFilters = { ...localFilters, occasions: updated };
+    setLocalFilters(newFilters);
+    onApply(newFilters);
+  }, [localFilters, onApply]);
+
   const handlePriceRangeChange = useCallback((type, value, e) => {
     if (e) {
       e.preventDefault();
@@ -129,12 +117,14 @@ const FilterSidebar = ({
     
     const newRange = { ...priceRange, [type]: parseInt(value) || 0 };
     setPriceRange(newRange);
-    const newFilters = { ...localFilters, priceRange: newRange };
+  }, [priceRange]);
+  
+  const handlePriceApply = useCallback(() => {
+    const newFilters = { ...localFilters, priceRange };
     setLocalFilters(newFilters);
     onApply(newFilters);
   }, [priceRange, localFilters, onApply]);
 
-  // Handle rating toggle with prevent default
   const handleRatingToggle = useCallback((rating, e) => {
     if (e) {
       e.preventDefault();
@@ -144,9 +134,16 @@ const FilterSidebar = ({
     const current = localFilters.ratings || [];
     const updated = current.includes(rating) 
       ? current.filter(r => r !== rating) 
-      : [...current, rating];
+      : [rating]; 
     
     const newFilters = { ...localFilters, ratings: updated };
+    setLocalFilters(newFilters);
+    onApply(newFilters);
+  }, [localFilters, onApply]);
+
+  const handleSortChange = useCallback((e) => {
+    const value = e.target.value;
+    const newFilters = { ...localFilters, sort: [value] };
     setLocalFilters(newFilters);
     onApply(newFilters);
   }, [localFilters, onApply]);
@@ -155,181 +152,271 @@ const FilterSidebar = ({
     return (localFilters.ratings || []).includes(rating);
   }, [localFilters.ratings]);
 
-  // Handle reset with prevent default
-  const handleReset = useCallback((e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    setLocalFilters({});
-    setPriceRange({ min: 0, max: 5000 });
-    setLocalSearchTerm('');
-    if (onSearch) onSearch('');
-    onReset();
-  }, [onSearch, onReset]);
+  const containerClasses = isMobileDrawer
+    ? "w-full bg-[#1A0F0D] text-white h-full overflow-y-auto custom-scrollbar p-5"
+    : "hidden lg:block w-[320px] bg-[#1A0F0D] text-white rounded-xl shadow-xl border border-white/5 h-fit sticky top-[100px] max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar p-6";
+
+  const renderAccordionHeader = (id, label) => (
+    <button 
+      onClick={() => toggleSection(id)}
+      className="flex items-center justify-between w-full py-4 px-4 text-left group"
+    >
+      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90 group-hover:text-primary transition-colors">{label}</h3>
+      {expanded[id] ? (
+        <ChevronUp size={16} className="text-white/50 group-hover:text-primary transition-colors" />
+      ) : (
+        <ChevronDown size={16} className="text-white/50 group-hover:text-primary transition-colors" />
+      )}
+    </button>
+  );
 
   return (
-    <aside className="hidden lg:block w-72 bg-white dark:bg-card rounded-sm shadow-sm border border-border/10 h-fit sticky top-[100px] max-h-[calc(100vh-120px)] overflow-y-auto">
-      <div className="p-4 border-b border-border/30 flex items-center justify-between">
-        <h2 className="text-base font-black text-heading uppercase tracking-tighter">Filters</h2>
-        <button 
-          onClick={handleReset}
-          className="text-[10px] font-black text-primary hover:text-secondary uppercase tracking-widest flex items-center gap-1"
-        >
-          <RotateCcw size={12} /> Clear All
-        </button>
-      </div>
-
-      {/* Search Section */}
-      <div className="p-4 border-b border-border/30">
-        <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-3">Search Products</h3>
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            value={localSearchTerm}
-            onChange={handleSearchChange}
-            placeholder="Search for products..."
-            className="w-full pl-9 pr-9 py-2 text-sm border border-border/50 rounded-md focus:outline-none focus:border-primary bg-white dark:bg-card"
-          />
-          {localSearchTerm && (
-            <button
-              onClick={handleSearchClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading"
-            >
-              <X size={16} />
-            </button>
-          )}
+    <aside className={containerClasses}>
+      {!isMobileDrawer && (
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+          <h2 className="text-xl font-black text-white tracking-tight">Filters</h2>
+          <button onClick={() => onReset()} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+            <X size={14} className="text-white/60 hover:text-white" />
+          </button>
         </div>
-        {localSearchTerm && (
-          <p className="mt-2 text-xs text-muted">
-            Showing results for: <span className="font-bold text-heading">"{localSearchTerm}"</span>
-          </p>
-        )}
-      </div>
+      )}
 
-      <div className="divide-y divide-border/30">
-        {/* Categories Section - Dynamic */}
-        {categories.length > 0 && (
-          <div className="p-4 py-6">
-            <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">Categories</h3>
-            <div className="space-y-3">
-              {categories.map((category) => {
-                const isActive = (localFilters.categories || []).includes(category);
-                return (
-                  <label key={category} className="flex items-center gap-3 cursor-pointer group">
-                    <div 
-                      onClick={(e) => handleCategoryToggle(category, e)}
-                      className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all cursor-pointer ${
-                        isActive ? 'bg-primary border-primary' : 'border-border group-hover:border-primary/50'
-                      }`}
-                    >
-                      {isActive && <Check size={12} className="text-white" strokeWidth={4} />}
-                    </div>
-                    <span className={`text-xs font-bold uppercase tracking-tight transition-colors ${
-                      isActive ? 'text-primary' : 'text-heading/70 group-hover:text-heading'
-                    }`}>
-                      {category}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Price Range Section */}
-        <div className="p-4 py-6">
-          <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">Price Range</h3>
-          <div className="space-y-4">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Min</label>
-                <input
-                  type="number"
-                  value={priceRange.min}
-                  onChange={(e) => handlePriceRangeChange('min', e.target.value, e)}
-                  className="w-full mt-1 px-2 py-1 text-sm border border-border/50 rounded-md focus:outline-none focus:border-primary"
-                  min="0"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="text-[10px] font-bold text-muted uppercase tracking-wider">Max</label>
-                <input
-                  type="number"
-                  value={priceRange.max}
-                  onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
-                  className="w-full mt-1 px-2 py-1 text-sm border border-border/50 rounded-md focus:outline-none focus:border-primary"
-                  min="0"
-                />
-              </div>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="5000"
-              value={priceRange.max}
-              onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-muted">
-              <span>₹0</span>
-              <span>₹5000+</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter Sections */}
-        {sections.map((section) => (
-          <div key={section.id} className="p-4 py-6">
-            <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">{section.label}</h3>
-            <div className="space-y-3">
-              {section.options.map((opt) => {
-                const isActive = localFilters[section.id]?.includes(opt.value);
-                return (
-                  <label key={opt.value} className="flex items-center gap-3 cursor-pointer group">
-                    <div 
-                      onClick={(e) => handleToggle(section.id, opt.value, e)}
-                      className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all cursor-pointer ${
-                        isActive ? 'bg-primary border-primary' : 'border-border group-hover:border-primary/50'
-                      }`}
-                    >
-                      {isActive && <Check size={12} className="text-white" strokeWidth={4} />}
-                    </div>
-                    <span className={`text-xs font-bold uppercase tracking-tight transition-colors ${
-                      isActive ? 'text-primary' : 'text-heading/70 group-hover:text-heading'
-                    }`}>
-                      {opt.label}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        {/* Rating Filter Special */}
-        <div className="p-4 py-6">
-          <h3 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">Customer Ratings</h3>
-          <div className="space-y-3">
-            {[4, 3, 2].map((rating) => (
-              <label key={rating} className="flex items-center gap-3 cursor-pointer group">
-                <div 
-                  onClick={(e) => handleRatingToggle(rating, e)}
-                  className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-all cursor-pointer ${
-                    isRatingActive(rating) ? 'bg-primary border-primary' : 'border-border group-hover:border-primary/50'
-                  }`}
-                >
-                  {isRatingActive(rating) && <Check size={12} className="text-white" strokeWidth={4} />}
+      <div className="space-y-2">
+        {/* Search Section */}
+        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          {renderAccordionHeader('search', 'Search Products')}
+          <AnimatePresence>
+            {expanded.search && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                  <input
+                    type="text"
+                    value={localSearchTerm}
+                    onChange={handleSearchChange}
+                    placeholder="Search for products..."
+                    className="w-full pl-10 pr-4 py-3 text-sm bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-primary text-white placeholder:text-white/30"
+                  />
                 </div>
-                <span className={`text-xs font-bold transition-colors ${
-                  isRatingActive(rating) ? 'text-primary' : 'text-heading/70 group-hover:text-heading'
-                }`}>
-                  {rating}★ & above
-                </span>
-              </label>
-            ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Categories Section */}
+        {categories.length > 0 && (
+          <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+            {renderAccordionHeader('categories', 'Categories')}
+            <AnimatePresence>
+              {expanded.categories && (
+                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={(e) => handleCategoryToggle('All', e)}
+                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                        !(localFilters.categories?.length) || localFilters.categories.includes('All')
+                          ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                          : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {categories.filter(c => c !== 'All' && c.toLowerCase() !== 'all').map((category) => {
+                      const isActive = (localFilters.categories || []).includes(category);
+                      const isCustom = category.toLowerCase().includes('custom cakes');
+                      return (
+                        <button
+                          key={category}
+                          onClick={(e) => handleCategoryToggle(category, e)}
+                          className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                            isCustom 
+                              ? 'bg-gradient-to-r from-amber-400 to-pink-500 text-white border-transparent shadow-lg shadow-pink-500/20'
+                              : isActive 
+                                ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
+                                : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
+                          }`}
+                        >
+                          {category} {isCustom && '✨'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+        )}
+
+        {/* Occasions Section */}
+        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          {renderAccordionHeader('occasions', 'Occasions')}
+          <AnimatePresence>
+            {expanded.occasions && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={(e) => handleOccasionToggle('All', e)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                      !(localFilters.occasions?.length) || localFilters.occasions.includes('All')
+                        ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent w-[48%]'
+                        : 'bg-transparent border-white/20 text-white/80 hover:border-white/50 w-[48%]'
+                    }`}
+                  >
+                    <div className="text-left w-full">All</div>
+                  </button>
+                  {occasions.map((occ) => {
+                    const isActive = (localFilters.occasions || []).includes(occ.id);
+                    return (
+                      <button
+                        key={occ.id}
+                        onClick={(e) => handleOccasionToggle(occ.id, e)}
+                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                          isActive 
+                            ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent w-[48%]' 
+                            : 'bg-transparent border-white/20 text-white/80 hover:border-white/50 w-[48%]'
+                        }`}
+                      >
+                        <div className="text-left w-full">{occ.label}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Min Rating Section */}
+        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          {renderAccordionHeader('rating', 'Min. Rating')}
+          <AnimatePresence>
+            {expanded.rating && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+                <div className="space-y-3">
+                  {[4, 3, 2].map((rating) => {
+                    const isActive = isRatingActive(rating);
+                    return (
+                      <div 
+                        key={rating}
+                        onClick={(e) => handleRatingToggle(rating, e)}
+                        className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-all ${
+                          isActive ? 'bg-white/10' : 'hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              size={14} 
+                              className={i < rating ? "fill-amber-400 text-amber-400" : "text-white/20"} 
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs font-bold text-white/70">& up</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Price Section */}
+        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          <button 
+            onClick={() => toggleSection('price')}
+            className="flex items-center justify-between w-full py-4 px-4 text-left group"
+          >
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90 group-hover:text-primary transition-colors">
+              Price — ₹{priceRange.min} - ₹{priceRange.max === 10000 ? '10,000+' : priceRange.max}
+            </h3>
+            {expanded.price ? <ChevronUp size={16} className="text-white/50" /> : <ChevronDown size={16} className="text-white/50" />}
+          </button>
+          
+          <AnimatePresence>
+            {expanded.price && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+                <div className="flex gap-3 mb-6">
+                  <div className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3">
+                    <label className="text-[10px] font-bold text-white/50 mb-1 block">Min</label>
+                    <input
+                      type="number"
+                      value={priceRange.min}
+                      onChange={(e) => handlePriceRangeChange('min', e.target.value, e)}
+                      onBlur={handlePriceApply}
+                      className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3">
+                    <label className="text-[10px] font-bold text-white/50 mb-1 block">Max</label>
+                    <input
+                      type="number"
+                      value={priceRange.max}
+                      onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
+                      onBlur={handlePriceApply}
+                      className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="relative h-10 bg-black/40 rounded-full border border-white/10 flex items-center px-4">
+                    <input 
+                      type="range" 
+                      min="0" max="5000" 
+                      value={priceRange.min} 
+                      onChange={(e) => handlePriceRangeChange('min', e.target.value, e)}
+                      onMouseUp={handlePriceApply}
+                      onTouchEnd={handlePriceApply}
+                      className="w-full accent-[#EBD1C6]" 
+                    />
+                  </div>
+                  <div className="relative h-10 bg-black/40 rounded-full border border-white/10 flex items-center px-4">
+                    <input 
+                      type="range" 
+                      min="0" max="10000" 
+                      value={priceRange.max} 
+                      onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
+                      onMouseUp={handlePriceApply}
+                      onTouchEnd={handlePriceApply}
+                      className="w-full accent-[#EBD1C6]" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-between text-[10px] font-bold text-white/40 mt-4 px-1">
+                  <span>₹10</span>
+                  <span>₹10,000+</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Sort By Section */}
+        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          {renderAccordionHeader('sort', 'Sort By')}
+          <AnimatePresence>
+            {expanded.sort && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+                <div className="relative">
+                  <select 
+                    className="w-full appearance-none bg-black/40 border border-white/10 text-white font-bold text-sm py-3 px-4 rounded-xl focus:outline-none focus:border-primary"
+                    value={localFilters.sort?.[0] || 'newest'}
+                    onChange={handleSortChange}
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="popular">Popularity</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Rating</option>
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </aside>

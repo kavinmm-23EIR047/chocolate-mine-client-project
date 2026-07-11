@@ -366,7 +366,7 @@ export default function CustomCake() {
       const tierLabel = currentTier ? currentTier.shortName : 'Tier 1';
       const baseCakeId = `custom-${theme.id}-${selectedFlavor.id}-${selectedTier || 1}-${selectedDbFlavor?._id || 'noflav'}-${weight.label.replace(/\s+/g, '')}`;
 
-      dispatch(addToCart({
+      const directItem = {
         product: {
           _id: baseCakeId,
           name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
@@ -374,7 +374,11 @@ export default function CustomCake() {
           image: selectedFlavor.image || theme.image || theme.flavors?.[0]?.image,
           price: grandTotal, stock: 5, category: 'Custom Cakes',
         },
+        productId: baseCakeId,
+        name: `${selectedDbFlavor?.name || 'Custom'} Cake — ${theme.name} (${tierLabel})`,
+        image: selectedFlavor.image || theme.image || theme.flavors?.[0]?.image,
         qty: 1,
+        price: grandTotal,
         options: {
           theme: theme.name,
           tier: tierLabel,
@@ -385,8 +389,7 @@ export default function CustomCake() {
           age,
           message: message || 'None'
         },
-        variantPrice: grandTotal,
-      }));
+      };
 
       saveCustomCakeRequest({
         designTheme: theme.name,
@@ -398,8 +401,8 @@ export default function CustomCake() {
         estimatedPrice: grandTotal,
       });
 
-      toast.success('🎂 Dream cake added to cart!');
-      setTimeout(() => navigate('/cart'), 800);
+      toast.success('🎂 Directed to checkout!');
+      setTimeout(() => navigate('/checkout', { state: { directItem } }), 400);
     } catch { toast.error('Failed to proceed. Please try again.'); }
     finally { setIsAdding(false); }
   };

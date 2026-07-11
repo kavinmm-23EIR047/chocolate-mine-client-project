@@ -33,9 +33,9 @@ const AdminProducts = () => {
       if (category) params.category = category;
       let res;
       if (search) {
-        res = await productService.search({ q: search });
+        res = await productService.search({ q: search, admin: true });
       } else {
-        res = await productService.getAll(params);
+        res = await productService.getAll({ ...params, admin: true });
       }
       setProducts(res.data.data || []);
       setTotalPages(Math.ceil((res.data.total || 0) / 12));

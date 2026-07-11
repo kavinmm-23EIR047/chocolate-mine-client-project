@@ -318,9 +318,18 @@ const ProductDetails = () => {
       else { toast.error('Please select weight'); return; }
     }
 
-    dispatch(addToCart({ product, qty: 1, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
-    toast.success(`Item added to cart!`);
-    navigate('/cart');
+    const directItem = {
+      product: product,
+      productId: product._id?.$oid || product._id,
+      name: product.name,
+      image: product.image,
+      qty: quantity,
+      price: isCakeWithVariants ? currentPrice : product.price,
+      options: options,
+      coupon: product.coupon?.enabled ? product.coupon : null
+    };
+
+    navigate('/checkout', { state: { directItem } });
   };
 
   const getFlavorImages = (flavor) => {

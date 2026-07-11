@@ -61,10 +61,11 @@ exports.getProducts = asyncHandler(async (req, res) => {
     rating,
     minPrice,
     maxPrice,
-    q
+    q,
+    admin
   } = req.query;
 
-  let query = { isActive: true };
+  let query = admin === 'true' ? {} : { isActive: true };
 
   if (featured) query.featured = featured === 'true';
   if (bestseller) query.bestseller = bestseller === 'true';
@@ -99,11 +100,11 @@ exports.getProducts = asyncHandler(async (req, res) => {
     ];
   }
 
-  let sortQuery = '-createdAt';
-  if (sort === 'price-low') sortQuery = 'price';
-  if (sort === 'price-high') sortQuery = '-price';
-  if (sort === 'rating') sortQuery = '-ratingsAverage';
-  if (sort === 'newest') sortQuery = '-createdAt';
+  let sortQuery = '-createdAt _id';
+  if (sort === 'price-low') sortQuery = 'price _id';
+  if (sort === 'price-high') sortQuery = '-price _id';
+  if (sort === 'rating') sortQuery = '-ratingsAverage _id';
+  if (sort === 'newest') sortQuery = '-createdAt _id';
 
   const rawProducts = await Product.find(query)
     .sort(sortQuery)
@@ -630,13 +631,35 @@ exports.getProductsByCategory = asyncHandler(async (req, res) => {
 });
 
 exports.searchProducts = asyncHandler(async (req, res) => {
-  const { q } = req.query;
-  const rawProducts = await Product.find({
-    $text: { $search: q },
-    isActive: true
-  }).sort({ score: { $meta: 'textScore' } });
+  const { q, admin, limit } = req.query;
+  
+  let query = {};
+  if (admin !== 'true') {
+    query.isActive = true;
+  }
+  
+  let queryWords = [];
+  let lowerQ = '';
+  
+  if (q) {
+    lowerQ = q.toLowerCase().trim();
+    queryWords = lowerQ.split(/\s+/).filter(Boolean);
+    
+    if (queryWords.length > 0) {
+      const regexConditions = queryWords.map(word => ({
+        $or: [
+          { name: { $regex: word, $options: 'i' } },
+          { description: { $regex: word, $options: 'i' } },
+          { shortDescription: { $regex: word, $options: 'i' } }
+        ]
+      }));
+      query.$or = regexConditions;
+    }
+  }
+  
+  const rawProducts = await Product.find(query);
 
-  const products = rawProducts.map(p => {
+  let products = rawProducts.map(p => {
     const couponData = applyCoupon(p);
     let sellingPrice;
     if (p.hasVariants && p.variants && p.variants.length > 0) {
@@ -650,6 +673,32 @@ exports.searchProducts = asyncHandler(async (req, res) => {
       finalPrice: sellingPrice
     };
   });
+
+  if (lowerQ) {
+    products.sort((a, b) => {
+      const aName = (a.name || '').toLowerCase();
+      const bName = (b.name || '').toLowerCase();
+      
+      const getScore = (nameStr) => {
+        if (nameStr === lowerQ) return 0;
+        if (nameStr.startsWith(lowerQ)) return 1;
+        if (nameStr.includes(lowerQ) && !nameStr.endsWith(lowerQ)) return 2;
+        if (nameStr.endsWith(lowerQ)) return 3;
+        
+        for (const word of queryWords) {
+           if (nameStr.startsWith(word)) return 4;
+        }
+        return 5;
+      };
+      
+      return getScore(aName) - getScore(bName);
+    });
+  }
+  
+  const limitNum = parseInt(limit);
+  if (limitNum && !isNaN(limitNum)) {
+    products = products.slice(0, limitNum);
+  }
 
   res.status(200).json({ status: 'success', total: products.length, data: products });
 });

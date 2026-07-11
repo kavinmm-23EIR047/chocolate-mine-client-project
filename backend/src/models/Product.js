@@ -1,10 +1,5 @@
 const mongoose = require('mongoose');
 
-// Flavor schema for cake variants with multiple images
-const flavorSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  images: [{ type: String }]
-});
 
 // Weight schema for cake variants
 const weightSchema = new mongoose.Schema({
@@ -60,7 +55,6 @@ const productSchema = new mongoose.Schema({
   cakeType: { type: String, trim: true, lowercase: true },
   weightPrices: [{ weight: { type: String }, price: { type: Number, min: 0 } }],
   hasVariants: { type: Boolean, default: false },
-  flavors: [flavorSchema],
   weights: [weightSchema],
   variants: [variantSchema],
   allowCustomFlavor: { type: Boolean, default: false },

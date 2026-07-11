@@ -259,8 +259,33 @@ exports.updateThemeColorImages = asyncHandler(async (req, res, next) => {
     return next(new AppError('Failed to upload images: ' + error.message, 500));
   }
 
+  theme.markModified('colors');
   await theme.save();
   res.status(200).json({ status: 'success', data: color });
+});
+
+exports.applyThemeColorToAll = asyncHandler(async (req, res, next) => {
+  const theme = await CustomCakeTheme.findById(req.params.id);
+  if (!theme) return next(new AppError('Theme not found', 404));
+
+  const sourceColor = theme.colors.id(req.params.colorId);
+  if (!sourceColor) return next(new AppError('Source color not found in this theme', 404));
+
+  // Copy images and price to all other active colors in the theme
+  theme.colors.forEach(color => {
+    if (color._id.toString() !== sourceColor._id.toString()) {
+      color.images = {
+        tier1: sourceColor.images.tier1,
+        tier2: sourceColor.images.tier2,
+        tier3: sourceColor.images.tier3
+      };
+      color.price = sourceColor.price;
+    }
+  });
+
+  theme.markModified('colors');
+  await theme.save();
+  res.status(200).json({ status: 'success', data: theme.colors });
 });
 
 // --- MASTER COLORS ---

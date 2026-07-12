@@ -239,6 +239,15 @@ const Home = () => {
 
           {/* Bottom Banner */}
           {!query && <BottomBanner />}
+          
+          {/* Temporary Google OAuth Verification Text */}
+          <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--muted, #666)', padding: '20px', marginTop: '40px', borderTop: '1px solid var(--border, #eee)' }}>
+            <p style={{ marginBottom: '8px' }}><strong>(For Google Verification Purposes Only)</strong></p>
+            <p style={{ margin: '4px 0' }}>Our application sells premium chocolates online.</p>
+            <p style={{ margin: '4px 0' }}>Google sign-in is used solely for account creation, order tracking, and saving favorites.</p>
+            <p style={{ margin: '4px 0' }}>User email is used only for order confirmations and account management.</p>
+            <p style={{ margin: '0' }}>Data is never shared with third parties.</p>
+          </div>
         </div>
       </main>
 

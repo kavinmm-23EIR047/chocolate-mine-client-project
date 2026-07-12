@@ -114,6 +114,13 @@ const Home = () => {
     <div className="min-h-screen bg-background text-body">
       <HomeLoader show={showHomeLoader} onFinish={handleLoaderFinish} />
 
+      {/* Temporary Google OAuth Verification Banner - Prominently placed at the top */}
+      <div style={{ backgroundColor: 'var(--card, #fff)', borderBottom: '1px solid var(--border, #eee)', padding: '12px 20px', textAlign: 'center', fontSize: '14px', color: 'var(--foreground, #333)', zIndex: 50, position: 'relative' }}>
+        <strong>App Purpose:</strong> This application is an online e-commerce platform for selling premium chocolates and cakes. <br />
+        <strong>Data Usage:</strong> Google Sign-in is used strictly for account creation, seamless login, order tracking, and wishlist management. User email is used solely for order confirmations. Data is <strong>never</strong> shared with third parties. <br />
+        <span style={{ fontSize: '12px', color: 'var(--muted, #888)', display: 'block', marginTop: '4px' }}>(Note: This text is for Google Verification Purposes Only)</span>
+      </div>
+
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore | Pan India Delivery | Pure Veg & Eggless Cakes</h1>
 
       {/* 1. TrustBar (Top-most element) */}
@@ -239,15 +246,6 @@ const Home = () => {
 
           {/* Bottom Banner */}
           {!query && <BottomBanner />}
-          
-          {/* Temporary Google OAuth Verification Text */}
-          <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--muted, #666)', padding: '20px', marginTop: '40px', borderTop: '1px solid var(--border, #eee)' }}>
-            <p style={{ marginBottom: '8px' }}><strong>(For Google Verification Purposes Only)</strong></p>
-            <p style={{ margin: '4px 0' }}>Our application sells premium chocolates online.</p>
-            <p style={{ margin: '4px 0' }}>Google sign-in is used solely for account creation, order tracking, and saving favorites.</p>
-            <p style={{ margin: '4px 0' }}>User email is used only for order confirmations and account management.</p>
-            <p style={{ margin: '0' }}>Data is never shared with third parties.</p>
-          </div>
         </div>
       </main>
 

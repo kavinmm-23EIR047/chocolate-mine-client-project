@@ -249,6 +249,17 @@ const Home = () => {
         </div>
       </main>
 
+      {/* Required Footer for Google Verification */}
+      <footer className="w-full bg-card border-t border-border/20 py-8 pb-20">
+        <div className="responsive-container flex flex-col md:flex-row justify-center items-center gap-4 text-xs font-medium text-muted">
+          <p>© {new Date().getFullYear()} The Chocolate Mine. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link to="/privacy" className="hover:text-primary transition-colors hover:underline">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-primary transition-colors hover:underline">Terms of Service</Link>
+          </div>
+        </div>
+      </footer>
+
       <WhatsAppButton />
     </div>
   );

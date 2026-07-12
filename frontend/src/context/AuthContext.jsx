@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
-import { requestFirebaseNotificationPermission } from '../firebase';
+import { requestFirebaseNotificationPermission, auth, onAuthStateChanged, logoutGoogle } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Initialize auth state - auto-login via HttpOnly cookie
+  // Initialize auth state - auto-login via Firebase & HttpOnly cookie
   useEffect(() => {
     const initializeAuth = async () => {
       // First, check sessionStorage for fast restore
@@ -116,15 +116,61 @@ export const AuthProvider = ({ children }) => {
         console.log('🔐 Auto-login: no valid session', status);
         
         // Clear stale session data
-        setUser(null);
-        sessionStorage.removeItem('user');
-        sessionStorage.removeItem('token');
+        if (!auth?.currentUser) {
+          setUser(null);
+          sessionStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     initializeAuth();
+
+    // Firebase onAuthStateChanged listener
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          console.log("🔥 Firebase User logged in:", firebaseUser.email);
+          
+          try {
+            // Get a standard backend session via Firebase Login route
+            const response = await api.post('/auth/firebase-login', {
+              email: firebaseUser.email,
+              name: firebaseUser.displayName,
+              avatar: firebaseUser.photoURL
+            });
+            const userData = response.data.user;
+            userData.isFirebase = true;
+            
+            setUser(userData);
+            sessionStorage.setItem('user', JSON.stringify(userData));
+            
+            // Sync FCM token in background
+            syncFcmToken();
+          } catch (err) {
+            console.error('Backend Firebase Auth failed', err);
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          console.log("🔥 Firebase User logged out");
+          // Only clear if standard user is also not present
+          const storedUser = sessionStorage.getItem('user');
+          if (storedUser) {
+             try {
+                const parsed = JSON.parse(storedUser);
+                if (parsed.isFirebase) {
+                    setUser(null);
+                    sessionStorage.removeItem('user');
+                }
+             } catch(e) {}
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
   }, []);
 
   const login = async ({ email, password }) => {
@@ -159,6 +205,13 @@ export const AuthProvider = ({ children }) => {
       await api.post('/auth/logout');
     } catch (err) {
       console.error('Logout API error:', err.message);
+    }
+    
+    // Firebase logout
+    try {
+      await logoutGoogle();
+    } catch (err) {
+      console.error('Firebase Logout error:', err.message);
     }
     
     setUser(null);

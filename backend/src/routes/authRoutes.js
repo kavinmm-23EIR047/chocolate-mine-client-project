@@ -45,6 +45,9 @@ router.post('/register', validate(signupSchema), authController.signup);
 // POST /api/v1/auth/login
 router.post('/login', validate(loginSchema), authController.login);
 
+// POST /api/v1/auth/firebase-login
+router.post('/firebase-login', authController.firebaseLogin);
+
 // GET /api/v1/auth/me
 router.get('/me', protect, authController.getMe);
 

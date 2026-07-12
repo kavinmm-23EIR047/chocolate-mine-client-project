@@ -4,6 +4,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, ArrowRight, ChevronRight, Eye, EyeOff, Cake, Candy } from 'lucide-react';
 import Button from '../components/ui/Button';
+import { signInWithGoogle } from '../firebase';
 
 const GoogleIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -30,8 +31,22 @@ const Login = () => {
     }
   }, [searchParams]);
 
-  const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const user = await signInWithGoogle();
+      toast.success(`Welcome back, ${user.displayName || 'Explorer'}!`);
+      navigate('/');
+    } catch (err) {
+      if (err.code === 'auth/popup-closed-by-user') {
+        toast.error('Sign-in cancelled. Please try again.');
+      } else {
+        toast.error('Google Authentication Failed. Please try again.');
+        console.error('Firebase Auth Error:', err);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {

@@ -407,11 +407,11 @@ const AdminOrders = () => {
                       <OrderStatusBadge status={order.orderStatus} />
                     </td>
                     <td className="px-4 py-4 text-right">
-                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                       <div className="flex items-center justify-end gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                           {/* View Order Details Button - Shows full modal */}
                           <button 
                             onClick={() => handleViewOrderDetails(order._id)}
-                            className="p-2 hover:bg-secondary/10 text-muted hover:text-secondary rounded-xl transition-colors"
+                            className="p-2 hover:bg-secondary/10 text-muted hover:text-secondary rounded-xl transition-colors shrink-0"
                             title="View Order Details"
                           >
                             <Eye size={18} />

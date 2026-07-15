@@ -76,7 +76,20 @@ exports.getProducts = asyncHandler(async (req, res) => {
       query.category = category.toLowerCase();
     }
   }
-  if (subCategory) query.subCategory = subCategory.toLowerCase();
+  if (subCategory) {
+    const subCatLower = subCategory.toLowerCase();
+    // Replace spaces or hyphens with a regex that matches either, to handle "red velvet" vs "red-velvet"
+    const regexPattern = subCatLower.split(/[\s-]+/).join('[\\s-]+');
+    
+    query.$and = query.$and || [];
+    query.$and.push({
+      $or: [
+        { subCategory: { $regex: regexPattern, $options: 'i' } },
+        { cakeType: { $regex: regexPattern, $options: 'i' } },
+        { 'variants.flavor': { $regex: regexPattern, $options: 'i' } }
+      ]
+    });
+  }
   if (cakeType) query.cakeType = cakeType;
   if (location) query.location = location.toLowerCase();
   

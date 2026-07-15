@@ -202,6 +202,44 @@ exports.googleSuccess = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Firebase Auth Backend Synchronization
+// @route   POST /api/v1/auth/firebase-login
+exports.firebaseLogin = asyncHandler(async (req, res, next) => {
+  const { email, name, avatar } = req.body;
+
+  if (!email) {
+    return next(new AppError('Email is required for Firebase Login', 400));
+  }
+
+  const trimmedEmail = email.trim().toLowerCase();
+  let user = await User.findOne({ email: trimmedEmail });
+
+  if (!user) {
+    // Create new user if they don't exist
+    user = await User.create({
+      name: name || 'Google User',
+      email: trimmedEmail,
+      active: true,
+      isVerified: true,
+      provider: 'google'
+    });
+    
+    try {
+      const notificationManager = require('../services/notificationManager');
+      notificationManager.notifyNewUserRegistration(user).catch(err => console.error('Notification Error:', err));
+    } catch (err) {
+      console.error('Notification Error:', err);
+    }
+  } else {
+    // Update last active
+    user.lastActiveAt = Date.now();
+    await user.save({ validateBeforeSave: false });
+  }
+
+  // Issue standard JWT cookies so the rest of the app works seamlessly
+  sendTokenResponse(user, 200, res);
+});
+
 // @desc    Forgot Password - Generate OTP and send email
 // @route   POST /api/v1/auth/forgot-password
 // @desc    Forgot Password - Generate OTP and send email

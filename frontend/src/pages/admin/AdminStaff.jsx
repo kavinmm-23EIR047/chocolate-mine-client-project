@@ -168,16 +168,16 @@ const AdminStaff = () => {
                        </button>
                     </td>
                     <td className="px-6 py-4 text-right">
-                       <div className="flex items-center justify-end gap-2">
+                       <div className="flex items-center justify-end gap-2 shrink-0">
                           <button 
                             onClick={() => handleOpenEdit(member)}
-                            className="p-2 hover:bg-border rounded-xl text-muted hover:text-secondary transition-all"
+                            className="p-2 hover:bg-border rounded-xl text-muted hover:text-secondary transition-all shrink-0"
                           >
                             <Edit2 size={16} />
                           </button>
                           <button 
                             onClick={() => handleDelete(member._id)}
-                            className="p-2 hover:bg-error/10 rounded-xl text-muted hover:text-error transition-all"
+                            className="p-2 hover:bg-error/10 rounded-xl text-muted hover:text-error transition-all shrink-0"
                           >
                             <Trash2 size={16} />
                           </button>

@@ -61,14 +61,10 @@ const computePricing = ({ cartItems, addressLat, addressLng, discount = 0 }) => 
     return sum + unitPrice * qty;
   }, 0);
 
+  // Set to 0 for testing product price only
   let deliveryCharge = 0;
-  if (Number.isFinite(addressLat) && Number.isFinite(addressLng)) {
-    const distanceKm = calculateDistanceKm(SHOP_LAT, SHOP_LNG, addressLat, addressLng);
-    deliveryCharge = Math.max(DELIVERY_MIN_FEE, Math.round(distanceKm * DELIVERY_PER_KM_RATE));
-  }
-
-  const convenienceFee = Math.round(subtotal * 0.02);
-  const gst = Math.round(subtotal * 0.18);
+  const convenienceFee = 0;
+  const gst = 0;
   const total = subtotal + deliveryCharge + convenienceFee + gst - (Number(discount) || 0);
   return { subtotal, deliveryCharge, convenienceFee, gst, total };
 };

@@ -501,22 +501,29 @@ const ProductForm = () => {
                 </div>
               </div>
 
-              {categories.find(c => formData.category.includes((c.name || '').toLowerCase()))?.subCategories?.length > 0 && (
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-muted uppercase tracking-widest">Subcategory</label>
-                  <select 
-                    name="subCategory" 
-                    value={formData.subCategory} 
-                    onChange={handleChange} 
-                    className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold capitalize"
-                  >
-                    <option value="">Select Subcategory</option>
-                    {categories.find(c => formData.category.includes((c.name || '').toLowerCase())).subCategories.map(sub => (
-                      <option key={sub} value={sub}>{sub.replace(/-/g, ' ')}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {(() => {
+                const selectedCatsWithSub = categories.filter(c => formData.category.includes((c.name || '').toLowerCase()) && c.subCategories?.length > 0);
+                if (selectedCatsWithSub.length > 0) {
+                  const allSubCategories = selectedCatsWithSub.flatMap(c => c.subCategories);
+                  return (
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-muted uppercase tracking-widest">Subcategory</label>
+                      <select 
+                        name="subCategory" 
+                        value={formData.subCategory} 
+                        onChange={handleChange} 
+                        className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold capitalize"
+                      >
+                        <option value="">Select Subcategory</option>
+                        {allSubCategories.map(sub => (
+                          <option key={sub} value={sub}>{sub.replace(/-/g, ' ')}</option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <div className="space-y-2">
                 <label className="text-xs font-black text-muted uppercase tracking-widest">Short Description</label>

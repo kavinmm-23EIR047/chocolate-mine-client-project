@@ -20,6 +20,7 @@ const FilterSidebar = ({
   const [expanded, setExpanded] = useState({
     search: true,
     categories: true,
+    subcategories: true,
     occasions: true,
     rating: true,
     price: true,
@@ -237,6 +238,48 @@ const FilterSidebar = ({
                           }`}
                         >
                           {category} {isCustom && '✨'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Sub Categories Section */}
+        {localFilters.categories?.some(c => c.toLowerCase().includes('birthday cake')) && (
+          <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+            {renderAccordionHeader('subcategories', 'Flavours')}
+            <AnimatePresence>
+              {expanded.subcategories && (
+                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+                  <div className="flex flex-wrap gap-2">
+                    {['Vanilla', 'Chocolate', 'Red Velvet'].map((flavor) => {
+                      const isActive = localFilters.subCategory?.toLowerCase() === flavor.toLowerCase();
+                      return (
+                        <button
+                          key={flavor}
+                          onClick={(e) => {
+                            if (e) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                            const newFilters = { 
+                              ...localFilters, 
+                              subCategory: isActive ? '' : flavor 
+                            };
+                            setLocalFilters(newFilters);
+                            onApply(newFilters);
+                          }}
+                          className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                            isActive 
+                              ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
+                              : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
+                          }`}
+                        >
+                          {flavor}
                         </button>
                       );
                     })}

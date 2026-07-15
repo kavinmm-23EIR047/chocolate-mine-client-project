@@ -477,7 +477,7 @@ const Checkout = () => {
         deliveryInfo.position.lng
       );
       setDistance(dist);
-      setDeliveryFee(Math.max(30, Math.round(dist * 4)));
+      setDeliveryFee(0);
       if (dist > DELIVERY_RADIUS) {
         setLocationValid(false);
         setLocationError('Delivery available only inside Coimbatore service area (within 30km).');
@@ -644,8 +644,8 @@ const Checkout = () => {
     0
   );
   const couponDiscount = cartItems.reduce((s, i) => s + getItemCouponDiscount(i) * i.qty, 0);
-  const gst = Math.round(subtotal * 0.18);
-  const convenienceFee = Math.round(subtotal * 0.02);
+  const gst = 0;
+  const convenienceFee = 0;
   const clientTotal = subtotal + deliveryFee + gst + convenienceFee;
   const displayTotal = backendTotal !== null ? backendTotal : clientTotal;
 

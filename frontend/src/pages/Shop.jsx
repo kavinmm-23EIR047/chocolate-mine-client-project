@@ -72,6 +72,7 @@ const Shop = () => {
   useEffect(() => {
     const filters = {};
     if (activeCategories.length > 0) filters.categories = activeCategories;
+    if (activeSubCategory) filters.subCategory = activeSubCategory;
     if (activeOccasion !== 'all') filters.occasions = [activeOccasion];
     if (activeRating > 0) filters.ratings = [activeRating];
     if (priceRange[0] > 10 || priceRange[1] < 10000) {
@@ -152,6 +153,12 @@ const Shop = () => {
       updates.category = filters.categories.join(',');
     } else {
       updates.category = 'all';
+    }
+    
+    if (filters.subCategory) {
+      updates.subCategory = filters.subCategory;
+    } else {
+      updates.subCategory = '';
     }
     
     if (filters.occasions?.length) {
@@ -341,9 +348,11 @@ const Shop = () => {
     
     // SubCategory Filter
     if (activeSubCategory) {
+      const subLower = activeSubCategory.toLowerCase().replace(/[\s-]/g, '');
       products = products.filter(p => 
-        p.subCategory?.toLowerCase() === activeSubCategory.toLowerCase() || 
-        p.cakeType?.toLowerCase() === activeSubCategory.toLowerCase()
+        (p.subCategory && p.subCategory.toLowerCase().replace(/[\s-]/g, '').includes(subLower)) || 
+        (p.cakeType && p.cakeType.toLowerCase().replace(/[\s-]/g, '').includes(subLower)) ||
+        (p.variants && p.variants.some(v => v.flavor && v.flavor.toLowerCase().replace(/[\s-]/g, '').includes(subLower)))
       );
     }
     

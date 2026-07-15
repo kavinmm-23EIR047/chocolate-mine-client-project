@@ -13,6 +13,13 @@ import { useDeliveryLocation } from '../context/LocationContext';
 import FilterSidebar from '../components/filter/FilterSidebar';
 import FilterDrawer from '../components/filter/FilterDrawer';
 
+const getBaseFilterWord = (term) => {
+  const lower = term.toLowerCase();
+  if (lower.includes('anniversary')) return 'anniversary';
+  if (lower.includes('birthday')) return 'birthday';
+  return lower.replace(/[\s-]/g, '');
+};
+
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -46,11 +53,32 @@ const Shop = () => {
   const { location } = useDeliveryLocation();
 
   // Get filter values from URL with proper defaults
-  const activeCategories = searchParams.get('category') && searchParams.get('category') !== 'all' 
+  const rawCategories = searchParams.get('category') && searchParams.get('category') !== 'all' 
     ? searchParams.get('category').split(',').map(c => c.trim()).filter(Boolean) 
     : [];
+  const rawOccasion = searchParams.get('occasion') || 'all';
+
+  const hasAnniversaryCat = rawCategories.some(c => c.toLowerCase() === 'anniversary' || c.toLowerCase() === 'anniversary-gift');
+  const hasAnniversaryOcc = rawOccasion.toLowerCase() === 'anniversary' || rawOccasion.toLowerCase() === 'anniversary-gift';
+
+  const hasBirthdayCat = rawCategories.some(c => c.toLowerCase() === 'birthday' || c.toLowerCase() === 'birthday-cakes');
+  const hasBirthdayOcc = rawOccasion.toLowerCase() === 'birthday' || rawOccasion.toLowerCase() === 'birthday-gifts';
+
+  let activeCategories = [...rawCategories];
+  if (hasAnniversaryCat || hasAnniversaryOcc) {
+    if (!activeCategories.includes('anniversary')) activeCategories.push('anniversary');
+  }
+  if (hasBirthdayCat || hasBirthdayOcc) {
+    if (!activeCategories.includes('birthday-cakes')) activeCategories.push('birthday-cakes');
+  }
+
+  let activeOccasion = rawOccasion;
+  if (hasAnniversaryCat || hasAnniversaryOcc) {
+    activeOccasion = 'anniversary-gift';
+  } else if (hasBirthdayCat || hasBirthdayOcc) {
+    activeOccasion = 'birthday-gifts';
+  }
   const activeSubCategory = searchParams.get('subCategory') || '';
-  const activeOccasion = searchParams.get('occasion') || 'all';
   const activeRating = Number(searchParams.get('rating')) || 0;
   const sortBy = searchParams.get('sort') || 'newest';
   const searchQuery = searchParams.get('search') || '';
@@ -338,11 +366,13 @@ const Shop = () => {
     if (activeCategories.length > 0) {
       products = products.filter(p => {
         const prodCats = Array.isArray(p.category) ? p.category : [p.category || ''];
-        return activeCategories.some(ac => 
-          prodCats.some(pc => 
-            typeof pc === 'string' && pc.toLowerCase().replace(/-/g, ' ') === ac.toLowerCase().replace(/-/g, ' ')
-          )
-        );
+        const prodOccs = Array.isArray(p.occasion) ? p.occasion : [p.occasion || ''];
+        return activeCategories.some(ac => {
+          const baseAc = getBaseFilterWord(ac);
+          const catMatch = prodCats.some(pc => typeof pc === 'string' && getBaseFilterWord(pc).includes(baseAc));
+          const occMatch = prodOccs.some(po => typeof po === 'string' && getBaseFilterWord(po).includes(baseAc));
+          return catMatch || occMatch;
+        });
       });
     }
     
@@ -358,9 +388,13 @@ const Shop = () => {
     
     // Occasion Filter
     if (activeOccasion !== 'all') {
-      products = products.filter(p => 
-        p.occasion?.some(o => o.toLowerCase() === activeOccasion.toLowerCase())
-      );
+      products = products.filter(p => {
+        const baseOcc = getBaseFilterWord(activeOccasion);
+        const prodCats = Array.isArray(p.category) ? p.category : [p.category || ''];
+        const isOccasionMatch = p.occasion?.some(o => typeof o === 'string' && getBaseFilterWord(o).includes(baseOcc));
+        const isCategoryMatch = prodCats.some(pc => typeof pc === 'string' && getBaseFilterWord(pc).includes(baseOcc));
+        return isOccasionMatch || isCategoryMatch;
+      });
     }
     
     // Rating Filter
@@ -582,7 +616,22 @@ const Shop = () => {
               } else {
                 newCats = [...activeCategories, cat.name];
               }
-              updateSearchParam('category', newCats.length > 0 ? newCats.join(',') : 'all');
+              
+              if (cat.name.toLowerCase() === 'anniversary') {
+                if (activeCategories.includes(cat.name)) {
+                  updateMultipleSearchParams({ category: newCats.length > 0 ? newCats.join(',') : 'all', occasion: 'all' });
+                } else {
+                  updateMultipleSearchParams({ category: newCats.length > 0 ? newCats.join(',') : 'all', occasion: 'anniversary-gift' });
+                }
+              } else if (cat.name.toLowerCase() === 'birthday-cakes' || cat.name.toLowerCase() === 'birthday') {
+                if (activeCategories.includes(cat.name)) {
+                  updateMultipleSearchParams({ category: newCats.length > 0 ? newCats.join(',') : 'all', occasion: 'all' });
+                } else {
+                  updateMultipleSearchParams({ category: newCats.length > 0 ? newCats.join(',') : 'all', occasion: 'birthday-gifts' });
+                }
+              } else {
+                updateSearchParam('category', newCats.length > 0 ? newCats.join(',') : 'all');
+              }
             }}
             className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
               activeCategories.includes(cat.name)

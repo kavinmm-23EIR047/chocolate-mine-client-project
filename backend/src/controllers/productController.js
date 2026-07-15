@@ -45,6 +45,16 @@ const applyCoupon = (product) => {
   }
   return { code, finalPrice, saved, discountText: type === 'percent' ? `${value}% OFF` : `Save ₹${saved}` };
 };
+function getBaseFilterPattern(term) {
+  const lower = term.toLowerCase();
+  if (lower.includes('anniversary')) {
+    return 'anniversary';
+  }
+  if (lower.includes('birthday')) {
+    return 'birthday';
+  }
+  return lower.replace(/-/g, '[\\s-]*');
+}
 
 exports.getProducts = asyncHandler(async (req, res) => {
   const { 
@@ -70,11 +80,15 @@ exports.getProducts = asyncHandler(async (req, res) => {
   if (featured) query.featured = featured === 'true';
   if (bestseller) query.bestseller = bestseller === 'true';
   if (category) {
-    if (category.includes(',')) {
-      query.category = { $in: category.split(',').map(c => c.trim().toLowerCase()) };
-    } else {
-      query.category = category.toLowerCase();
-    }
+    const categoriesList = category.split(',').map(c => c.trim());
+    const regexPattern = categoriesList.map(c => getBaseFilterPattern(c)).join('|');
+    query.$and = query.$and || [];
+    query.$and.push({
+      $or: [
+        { category: { $regex: regexPattern, $options: 'i' } },
+        { occasion: { $regex: regexPattern, $options: 'i' } }
+      ]
+    });
   }
   if (subCategory) {
     const subCatLower = subCategory.toLowerCase();
@@ -94,8 +108,14 @@ exports.getProducts = asyncHandler(async (req, res) => {
   if (location) query.location = location.toLowerCase();
   
   if (occasion) {
-    const occasionName = occasion.replace(/-/g, ' ');
-    query.occasion = { $in: [occasionName] };
+    const regexPattern = getBaseFilterPattern(occasion);
+    query.$and = query.$and || [];
+    query.$and.push({
+      $or: [
+        { occasion: { $regex: regexPattern, $options: 'i' } },
+        { category: { $regex: regexPattern, $options: 'i' } }
+      ]
+    });
   }
 
   // Filter by rating
@@ -105,9 +125,17 @@ exports.getProducts = asyncHandler(async (req, res) => {
 
   // Filter by price
   if (minPrice || maxPrice) {
-    query.price = {};
-    if (minPrice) query.price.$gte = parseFloat(minPrice);
-    if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    const priceCond = {};
+    if (minPrice) priceCond.$gte = parseFloat(minPrice);
+    if (maxPrice) priceCond.$lte = parseFloat(maxPrice);
+    
+    query.$and = query.$and || [];
+    query.$and.push({
+      $or: [
+        { price: priceCond },
+        { 'variants.price': priceCond }
+      ]
+    });
   }
 
   // Integrated search

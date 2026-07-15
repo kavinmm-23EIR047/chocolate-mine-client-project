@@ -215,10 +215,10 @@ const Footer = () => {
             <h4 className="text-[11px] font-black uppercase tracking-[0.35em] mb-6 text-accent">Quick Shop</h4>
             <ul className="space-y-3.5">
               {[
-                { name: 'Birthday', path: '/occasion/birthday' },
-                { name: 'Anniversary', path: '/occasion/anniversary' },
-                { name: 'Wedding', path: '/occasion/wedding' },
-                { name: 'Congratulations', path: '/occasion/congratulations' }
+                { name: 'Birthday', path: '/shop?category=birthday' },
+                { name: 'Anniversary', path: '/shop?category=anniversary' },
+                { name: 'Wedding', path: '/shop?category=wedding' },
+                { name: 'Congratulations', path: '/shop?category=congratulations' }
               ].map((item, i) => (
                 <li key={i}>
                   <Link to={item.path} className="text-muted hover:text-primary transition-all text-xs uppercase tracking-wider block font-medium hover:translate-x-1 duration-200">

@@ -90,7 +90,26 @@ const FilterSidebar = ({
       ? current.filter(c => c !== category) 
       : [...current, category];
     
-    const newFilters = { ...localFilters, categories: updated };
+    let newFilters = { ...localFilters, categories: updated };
+
+    // Coordinate anniversary category with anniversary-gift occasion
+    if (category.toLowerCase() === 'anniversary') {
+      const currentOcc = localFilters.occasions || [];
+      const updatedOcc = current.includes(category)
+        ? currentOcc.filter(o => o !== 'anniversary-gift')
+        : [...currentOcc.filter(o => o !== 'anniversary-gift'), 'anniversary-gift'];
+      newFilters.occasions = updatedOcc;
+    }
+
+    // Coordinate birthday-cakes category with birthday-gifts occasion
+    if (category.toLowerCase() === 'birthday-cakes' || category.toLowerCase() === 'birthday') {
+      const currentOcc = localFilters.occasions || [];
+      const updatedOcc = current.includes(category)
+        ? currentOcc.filter(o => o !== 'birthday-gifts')
+        : [...currentOcc.filter(o => o !== 'birthday-gifts'), 'birthday-gifts'];
+      newFilters.occasions = updatedOcc;
+    }
+
     setLocalFilters(newFilters);
     onApply(newFilters);
   }, [localFilters, onApply]);
@@ -105,7 +124,26 @@ const FilterSidebar = ({
       ? current.filter(o => o !== occasionId)
       : [occasionId]; 
       
-    const newFilters = { ...localFilters, occasions: updated };
+    let newFilters = { ...localFilters, occasions: updated };
+
+    // Coordinate anniversary-gift occasion with anniversary category
+    if (occasionId === 'anniversary-gift') {
+      const currentCat = localFilters.categories || [];
+      const updatedCat = current.includes(occasionId)
+        ? currentCat.filter(c => c.toLowerCase() !== 'anniversary')
+        : [...currentCat.filter(c => c.toLowerCase() !== 'anniversary'), 'anniversary'];
+      newFilters.categories = updatedCat;
+    }
+
+    // Coordinate birthday-gifts occasion with birthday-cakes category
+    if (occasionId === 'birthday-gifts') {
+      const currentCat = localFilters.categories || [];
+      const updatedCat = current.includes(occasionId)
+        ? currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday')
+        : [...currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday'), 'birthday-cakes'];
+      newFilters.categories = updatedCat;
+    }
+
     setLocalFilters(newFilters);
     onApply(newFilters);
   }, [localFilters, onApply]);

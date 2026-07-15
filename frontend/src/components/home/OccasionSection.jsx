@@ -31,7 +31,7 @@ const OccasionSection = () => {
 
   const handleOccasionClick = (occasionName) => {
     const slug = occasionName.toLowerCase().replace(/\s+/g, '-');
-    navigate(`/occasion/${slug}`);
+    navigate(`/shop?occasion=${slug}`);
   };
 
   return (

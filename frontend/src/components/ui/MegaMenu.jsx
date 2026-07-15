@@ -81,16 +81,19 @@ const MegaMenu = () => {
               >
                 ALL
               </Link>
-              {occasions.map((occ) => (
-                <Link 
-                  key={occ._id} 
-                  to={`/occasion/${occ.name.toLowerCase()}`}
-                  onClick={() => setIsOpen(false)}
-                  className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
-                >
-                  {occ.name}
-                </Link>
-              ))}
+              {occasions.map((occ) => {
+                const slug = occ.name.toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <Link 
+                    key={occ._id} 
+                    to={`/shop?occasion=${slug}`}
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
+                  >
+                    {occ.name}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

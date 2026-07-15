@@ -264,7 +264,7 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center justify-start gap-8 xl:gap-10 tv:gap-14 py-2 tv:py-3 border-t border-border/10 bg-navbar responsive-container relative">
           <MegaMenu />
           <Link to="/custom-cake" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Custom Cakes</Link>
-          <Link to="/occasion/anniversary" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Anniversary</Link>
+          <Link to="/shop?category=anniversary" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Anniversary</Link>
           <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Bestseller</Link>
           <Link to="/shop?featured=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-4">Features</Link>
         </div>

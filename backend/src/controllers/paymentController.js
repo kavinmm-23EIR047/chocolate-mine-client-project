@@ -81,11 +81,16 @@ const generateOrderNumber = () => {
 
 const isValidObjectIdString = (value) => /^[0-9a-fA-F]{24}$/.test(String(value || ''));
 
-const isCustomBuilderItem = (item) => (
-  String(item?.productId || '').startsWith('custom-') ||
-  item?.category === 'Custom Cakes' ||
-  !!item?.options?.theme
-);
+const isCustomBuilderItem = (item) => {
+  const catStr = Array.isArray(item?.category)
+    ? item.category.join(' ').toLowerCase()
+    : String(item?.category || '').toLowerCase();
+  return (
+    String(item?.productId || '').startsWith('custom-') ||
+    catStr.includes('custom cakes') ||
+    !!item?.options?.theme
+  );
+};
 
 const getCustomBuilderObjectId = (item) => {
   const productId = String(item?.productId || '');
@@ -201,8 +206,13 @@ const validateAddress = (address) => {
   if (!address) throw new Error('Address is required');
   if (!address.fullName?.trim()) throw new Error('Full name is required in address');
   if (!address.phone?.trim()) throw new Error('Phone number is required in address');
-  const phoneDigits = address.phone.replace(/\D/g, '');
-  if (phoneDigits.length !== 10) throw new Error('Phone number must be 10 digits');
+  let phoneDigits = address.phone.replace(/\D/g, '');
+  if (phoneDigits.startsWith('91') && phoneDigits.length === 12) {
+    phoneDigits = phoneDigits.slice(2);
+  } else if (phoneDigits.startsWith('0') && phoneDigits.length === 11) {
+    phoneDigits = phoneDigits.slice(1);
+  }
+  if (phoneDigits.length !== 10) throw new Error(`Phone number must be 10 digits (got ${phoneDigits.length} digits: ${phoneDigits})`);
   return true;
 };
 
@@ -210,7 +220,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
   const { address, discount, couponCode, deliveryDate, deliverySlot, directItem, notes, cakeMessage } = req.body;
 
   if (!req.user?._id) throw new AppError('Unauthorized user', 401);
-  try { validateAddress(address); } catch (err) { throw new AppError(err.message, 400); }
+  try {
+    validateAddress(address);
+  } catch (err) {
+    console.error('❌ Address validation failed:', err.message, 'Address payload:', address);
+    throw new AppError(err.message, 400);
+  }
 
   let normalizedSlot = deliverySlot;
   const slotMap = {
@@ -235,12 +250,17 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         dbProductId = parts[parts.length - 1];
       }
       const product = await Product.findById(dbProductId);
-      if (!product || product.stock === false)
+      if (!product || product.stock === false) {
+        console.error('❌ Stock validation failed for directItem product ID:', dbProductId, 'Found product:', product?.name, 'Stock state:', product?.stock);
         throw new AppError(`Stock error: ${product?.name || 'Item'} is out of stock`, 400);
+      }
 
       let isCustomCake = false;
       let customDetails = null;
-      if (product.category === 'Custom Cakes' || (directItem.options && directItem.options.theme)) {
+      const categoryStr = Array.isArray(product.category)
+        ? product.category.join(' ').toLowerCase()
+        : String(product.category || '').toLowerCase();
+      if (categoryStr.includes('custom cakes') || (directItem.options && directItem.options.theme)) {
         isCustomCake = true;
         const tierNum = directItem.options.tier ? parseInt(directItem.options.tier.replace(/\D/g, '')) || 1 : 1;
         customDetails = {
@@ -253,8 +273,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       }
 
       let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
-      const isCake = product.category && product.category.toLowerCase().includes('cake');
-      const isBento = product.category && product.category.toLowerCase() === 'bento-cakes';
+      const isCake = categoryStr.includes('cake');
+      const isBento = categoryStr.includes('bento-cakes');
       if (isCake && !isCustomCake) {
         const selectedWeight = directItem.selectedWeight || (directItem.options && directItem.options.weight) || (isBento ? '250g' : '500g');
         const multiplier = getWeightMultiplier(selectedWeight);
@@ -311,11 +331,17 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           dbProductId = parts[parts.length - 1];
         }
         const product = await Product.findById(dbProductId);
-        if (!product || product.stock === false) throw new AppError(`Stock error: ${product?.name || 'Item'} is out of stock`, 400);
+        if (!product || product.stock === false) {
+          console.error('❌ Stock validation failed for cart item product ID:', dbProductId, 'Found product:', product?.name, 'Stock state:', product?.stock);
+          throw new AppError(`Stock error: ${product?.name || 'Item'} is out of stock`, 400);
+        }
 
         let isCustomCake = false;
         let customDetails = null;
-        if (product.category === 'Custom Cakes' || (item.options && item.options.theme)) {
+        const categoryStr = Array.isArray(product.category)
+          ? product.category.join(' ').toLowerCase()
+          : String(product.category || '').toLowerCase();
+        if (categoryStr.includes('custom cakes') || (item.options && item.options.theme)) {
           isCustomCake = true;
           const tierNum = item.options.tier ? parseInt(item.options.tier.replace(/\D/g, '')) || 1 : 1;
           customDetails = {
@@ -328,8 +354,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         }
 
         let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
-        const isCake = product.category && product.category.toLowerCase().includes('cake');
-        const isBento = product.category && product.category.toLowerCase() === 'bento-cakes';
+        const isCake = categoryStr.includes('cake');
+        const isBento = categoryStr.includes('bento-cakes');
         if (isCake && !isCustomCake) {
           const selectedWeight = item.options?.weight || item.selectedWeight || (isBento ? '250g' : '500g');
           const multiplier = getWeightMultiplier(selectedWeight);
@@ -368,12 +394,18 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       // Fallback to cached cart
       const cartKey = `cart:${req.user._id}`;
       const cartData = await cacheService.get(cartKey);
-      if (!cartData) throw new AppError('Cart is empty', 400);
+      if (!cartData) {
+        console.error('❌ Cart is empty (no cache data found for user):', req.user._id);
+        throw new AppError('Cart is empty', 400);
+      }
       cart = typeof cartData === 'string' ? JSON.parse(cartData) : cartData;
     }
   }
 
-  if (!cart.items?.length) throw new AppError('Cart is empty', 400);
+  if (!cart.items?.length) {
+    console.error('❌ Cart items array is empty or undefined:', cart);
+    throw new AppError('Cart is empty', 400);
+  }
 
   // Duplicate order prevention
   const existingPendingOrder = await Order.findOne({
@@ -410,8 +442,10 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         dbProductId = parts[parts.length - 1];
       }
       const product = await Product.findById(dbProductId);
-      if (!product || product.stock === false)
+      if (!product || product.stock === false) {
+        console.error('❌ Stock validation failed for product ID:', dbProductId, 'Found product:', product?.name, 'Stock state:', product?.stock);
         throw new AppError(`Stock error: ${product?.name || 'Item'} is currently out of stock`, 400);
+      }
     }
   }
 
@@ -448,7 +482,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       couponCode: item.activeCouponCode,
       selectedFlavor: item.selectedFlavor,
       selectedWeight: item.selectedWeight,
-      category: item.category,
+      category: Array.isArray(item.category) ? item.category.join(', ') : String(item.category || ''),
       discountAmount: ((item.price ?? 0) - (item.finalPrice ?? item.price ?? 0)) * item.qty,
       isCustomCake: item.isCustomCake || false,
       customDetails: item.customDetails || null

@@ -22,8 +22,11 @@ const getItemPriceDetails = (product, selectedFlavor = null, selectedWeight = nu
   let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
   let variantPrice = null;
   
-  const isCake = product.category && product.category.toLowerCase().includes('cake');
-  const isBento = product.category && product.category.toLowerCase() === 'bento-cakes';
+  const categoryStr = Array.isArray(product.category)
+    ? product.category.join(' ').toLowerCase()
+    : String(product.category || '').toLowerCase();
+  const isCake = categoryStr.includes('cake');
+  const isBento = categoryStr.includes('bento-cakes');
 
   // If this is a cake with variants and we have selected flavor/weight
   if (product.hasVariants && product.variants && product.variants.length > 0 && selectedFlavor && selectedWeight) {

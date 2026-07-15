@@ -436,8 +436,8 @@ const FilterSidebar = ({
                         onClick={(e) => handleRatingToggle(rating, e)}
                         className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl transition-all border ${
                           isActive 
-                            ? 'bg-white/[0.04] border-[#EBD1C6]/30' 
-                            : 'border-transparent bg-transparent hover:bg-white/[0.02]'
+                            ? 'bg-white/[0.05] border-[#E6B25A]' 
+                            : 'border-[#3A211B]/40 bg-transparent hover:bg-white/[0.02]'
                         }`}
                       >
                         <div className="flex gap-1.5">

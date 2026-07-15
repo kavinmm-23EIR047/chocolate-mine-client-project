@@ -289,6 +289,62 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const wish = (e) => { e.preventDefault(); e.stopPropagation(); if (product?._id) toggleWishlist(product._id); };
 
+  const getDisplayCategory = () => {
+    const rawCategories = Array.isArray(product?.category) 
+      ? product.category 
+      : [product?.category || ''];
+      
+    const plainStrings = [];
+    
+    rawCategories.forEach(item => {
+      if (typeof item === 'string') {
+        const trimmed = item.trim();
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(p => {
+                if (typeof p === 'string') plainStrings.push(p);
+              });
+              return;
+            }
+          } catch (e) {}
+        }
+        plainStrings.push(item);
+      } else if (item) {
+        plainStrings.push(String(item));
+      }
+    });
+
+    const cleanStrings = plainStrings
+      .map(str => str.replace(/\\"/g, '').replace(/"/g, '').trim())
+      .filter(Boolean);
+
+    const rawCat = cleanStrings[0] || '';
+    if (!rawCat) return '';
+    
+    const formattedCat = rawCat.split(/[\s-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    
+    if (product?.subCategory && typeof product.subCategory === 'string' && product.subCategory.trim() !== '') {
+      let rawSub = product.subCategory.trim();
+      if (rawSub.startsWith('[') && rawSub.endsWith(']')) {
+        try {
+          const parsedSub = JSON.parse(rawSub);
+          if (Array.isArray(parsedSub) && parsedSub.length > 0) {
+            rawSub = parsedSub[0];
+          }
+        } catch {}
+      }
+      const cleanSub = rawSub.replace(/\\"/g, '').replace(/"/g, '').trim();
+      if (cleanSub) {
+        const formattedSub = cleanSub.split(/[\s-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        return `${formattedCat} (${formattedSub})`;
+      }
+    }
+    
+    return formattedCat;
+  };
+
   if (!product) return null;
 
   // ─── Horizontal Layout ─────────────────────
@@ -308,6 +364,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
               {discountPct > 0 && <AnimatedProductBadge type="discount" value={discountPct} />}
             </div>
 
+            {getDisplayCategory() && (
+              <span className="text-[11px] md:text-xs font-extrabold text-[#B59C94] uppercase tracking-wider mb-1 block">
+                {getDisplayCategory()}
+              </span>
+            )}
             <h3 className="text-[14px] sm:text-[15px] font-bold leading-tight break-words" style={{ color: 'var(--heading)' }}>
               {product.name}
             </h3>
@@ -442,6 +503,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             {discountPct > 0 && <AnimatedProductBadge type="discount" value={discountPct} />}
           </div>
 
+          {getDisplayCategory() && (
+            <span className="text-[11px] md:text-xs font-extrabold text-[#B59C94] uppercase tracking-wider mb-1 block">
+              {getDisplayCategory()}
+            </span>
+          )}
           <h3 className="text-[14px] md:text-[15px] font-bold leading-tight mb-1 break-words" style={{ color: 'var(--heading)' }}>
             {product.name}
           </h3>

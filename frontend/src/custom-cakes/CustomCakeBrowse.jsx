@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useWishlist } from '../context/WishlistContext';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Eye, Check, Layers, Search, ChevronDown, Star, ChevronRight, Settings2, Heart, List, LayoutGrid, SlidersHorizontal, X } from 'lucide-react';
+import { Filter, Eye, Check, Layers, Search, ChevronDown, ChevronUp, RotateCcw, Star, ChevronRight, Settings2, Heart, List, LayoutGrid, SlidersHorizontal, X } from 'lucide-react';
 import { TIERS } from './customCakeData';
 
 // Premium Bolded Veg Icon 
@@ -28,50 +29,111 @@ export default function CustomCakeBrowse({
   const [mobileLayout, setMobileLayout] = useState('grid');
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  // ── Filter Panel (desktop sidebar) ──
-  const FilterPanel = () => (
-    <div className="space-y-7">
-      <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Tiers</h3>
-        <div className="flex flex-col gap-2">
-          <button onClick={() => setSelectedTier(null)}
-            className={`w-full text-left px-3 py-2.5 rounded-lg text-[12px] font-bold transition-all flex items-center justify-between ${selectedTier === null
-                ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
-                : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-              }`}>
-            <span>All Tiers</span>
-            {selectedTier === null && <Check size={14} />}
-          </button>
-          {TIERS.map(tier => (
-            <button key={tier.id} onClick={() => setSelectedTier(tier.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-[12px] font-bold transition-all flex items-center justify-between ${selectedTier === tier.id
-                  ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
-                  : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-                }`}>
-              <span>{tier.shortName} <span className="text-[10px] font-normal opacity-80">({tier.layers} Layers)</span></span>
-              {selectedTier === tier.id && <Check size={14} />}
-            </button>
-          ))}
-        </div>
-      </section>
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (selectedTier !== null) count += 1;
+    if (themeSearchFilter !== '') count += 1;
+    if (priceSortFilter !== '') count += 1;
+    return count;
+  };
 
-      <section>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80 mb-3">Sort By</h3>
-        <div className="relative">
-          <select
-            value={priceSortFilter}
-            onChange={(e) => setPriceSortFilter(e.target.value)}
-            className="w-full appearance-none bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg pl-3 pr-8 py-2.5 text-[12px] font-bold outline-none cursor-pointer"
+  // ── Filter Panel (desktop sidebar) ──
+  const FilterPanel = () => {
+    const [expandedSections, setExpandedSections] = useState({
+      tiers: true,
+      sort: true
+    });
+
+    const toggleSection = (sec) => {
+      setExpandedSections(prev => ({ ...prev, [sec]: !prev[sec] }));
+    };
+
+    return (
+      <div className="space-y-4">
+        {/* Tiers Accordion */}
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01]">
+          <button
+            onClick={() => toggleSection('tiers')}
+            className="w-full flex items-center justify-between py-4 px-4 text-left group transition-colors"
           >
-            <option value="">Default Sorting</option>
-            <option value="asc">Price: Low to High</option>
-            <option value="desc">Price: High to Low</option>
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">Tiers</h3>
+            {expandedSections.tiers ? (
+              <ChevronUp size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
+            ) : (
+              <ChevronDown size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
+            )}
+          </button>
+          <AnimatePresence>
+            {expandedSections.tiers && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="flex flex-wrap gap-2.5">
+                  <button
+                    onClick={() => setSelectedTier(null)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                      selectedTier === null
+                        ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                        : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                    }`}
+                  >
+                    All Tiers
+                  </button>
+                  {TIERS.map((tier) => {
+                    const isActive = selectedTier === tier.id;
+                    return (
+                      <button
+                        key={tier.id}
+                        onClick={() => setSelectedTier(isActive ? null : tier.id)}
+                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                          isActive
+                            ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                            : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                        }`}
+                      >
+                        {tier.shortName}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </section>
-    </div>
-  );
+
+        {/* Sort By Accordion */}
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01]">
+          <button
+            onClick={() => toggleSection('sort')}
+            className="w-full flex items-center justify-between py-4 px-4 text-left group transition-colors"
+          >
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">Sort By</h3>
+            {expandedSections.sort ? (
+              <ChevronUp size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
+            ) : (
+              <ChevronDown size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
+            )}
+          </button>
+          <AnimatePresence>
+            {expandedSections.sort && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="relative">
+                  <select
+                    value={priceSortFilter}
+                    onChange={(e) => setPriceSortFilter(e.target.value)}
+                    className="w-full appearance-none bg-black/30 border border-[#3A211B] text-[#ecded9] font-bold text-sm py-3 pl-3.5 pr-8 rounded-lg focus:outline-none focus:border-[#E6B25A] cursor-pointer"
+                  >
+                    <option value="" className="bg-[#1A0E0B]">Default Sorting</option>
+                    <option value="asc" className="bg-[#1A0E0B]">Price: Low to High</option>
+                    <option value="desc" className="bg-[#1A0E0B]">Price: High to Low</option>
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    );
+  };
 
   // ── Mobile Top Bar (only shown if not hiding filters) ──
   const MobileTopBar = () => (
@@ -146,10 +208,15 @@ export default function CustomCakeBrowse({
   return (
     <div className="space-y-6">
       {/* ── Desktop Page Header ── */}
-      <div className="hidden sm:block relative overflow-hidden rounded-2xl bg-[var(--footer)] p-6 sm:p-10 border border-white/5 shadow-xl">
+      <div className="hidden sm:block relative mb-8 overflow-hidden rounded-2xl bg-[var(--footer)] p-6 sm:p-10 border border-white/5 shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/8 via-transparent to-[var(--accent)]/8 pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div>
+            <nav className="flex items-center gap-2 mb-2">
+              <Link to="/" className="text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-[var(--primary)] transition-colors">Home</Link>
+              <span className="text-white/40">/</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white">Custom Cakes</span>
+            </nav>
             <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">Custom Cakes</h1>
             <p className="text-sm text-white/80 font-medium max-w-md">Choose your tier and theme to start configuring your dream cake.</p>
           </div>
@@ -176,7 +243,7 @@ export default function CustomCakeBrowse({
                 </button>
               )}
             </div>
-            <span className="text-[11px] font-bold text-white/80 bg-white/5 px-4 py-1.5 rounded-lg border border-white/10">
+            <span className="text-xs font-bold text-white/60 bg-white/5 px-3 py-1 rounded-full border border-white/10 select-none">
               {filteredThemes.length} {filteredThemes.length === 1 ? 'Theme' : 'Themes'}
             </span>
           </div>
@@ -196,11 +263,84 @@ export default function CustomCakeBrowse({
 
       <MobileTopBar />
 
+      {/* Active Filters Display */}
+      {getActiveFilterCount() > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-6 sm:mb-8 select-none">
+          <span className="text-xs font-black text-[var(--muted)] uppercase tracking-wider">Active Filters:</span>
+          
+          {selectedTier !== null && (
+            <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+              Tier: {TIERS.find(t => t.id === selectedTier)?.shortName || `Tier ${selectedTier}`}
+              <button 
+                onClick={() => setSelectedTier(null)}
+                className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          
+          {themeSearchFilter !== '' && (
+            <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+              Search: "{themeSearchFilter}"
+              <button 
+                onClick={() => setThemeSearchFilter('')}
+                className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          
+          {priceSortFilter !== '' && (
+            <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+              Sort: {priceSortFilter === 'asc' ? 'Price Low to High' : 'Price High to Low'}
+              <button 
+                onClick={() => setPriceSortFilter('')}
+                className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          
+          <button
+            onClick={() => {
+              setSelectedTier(null);
+              setThemeSearchFilter('');
+              setPriceSortFilter('');
+            }}
+            className="h-8 px-3.5 text-xs font-bold text-[#E6B25A] hover:text-[#F0C46E] hover:underline transition-colors ml-2 select-none flex items-center"
+          >
+            Clear All
+          </button>
+        </div>
+      )}
+
       <div className="flex gap-6 lg:gap-8">
-        {/* ── Desktop Sidebar Panel – hidden when filters are hidden ── */}
+        {/* ── Desktop Sidebar Panel ── */}
         {!hideFilters && (
-          <aside className="hidden lg:block w-64 shrink-0">
-            <div className="sticky top-20"><FilterPanel /></div>
+          <aside className="hidden lg:block w-[360px] bg-[#1A0E0B] text-[#ecded9] rounded-2xl border border-[#3A211B] h-fit sticky top-[135px] p-6 shadow-lg shadow-black/20 shrink-0">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#3A211B] select-none">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal size={16} className="text-[#E6B25A]" />
+                <h2 className="text-base font-black uppercase tracking-wider text-white">Filters</h2>
+              </div>
+              {(selectedTier !== null || themeSearchFilter !== '' || priceSortFilter !== '') && (
+                <button 
+                  onClick={() => {
+                    setSelectedTier(null);
+                    setThemeSearchFilter('');
+                    setPriceSortFilter('');
+                  }}
+                  className="flex items-center gap-1 text-xs font-bold text-[#E6B25A] hover:text-[#F0C46E] transition-colors"
+                >
+                  <RotateCcw size={12} />
+                  Reset All
+                </button>
+              )}
+            </div>
+            <FilterPanel />
           </aside>
         )}
 

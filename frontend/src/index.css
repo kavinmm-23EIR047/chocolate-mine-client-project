@@ -505,6 +505,27 @@ h6 {
   @apply bg-border-muted rounded-full hover:bg-muted;
 }
 
+/* Custom Scrollbar Utility */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(42, 24, 19, 0.2);
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(232, 211, 203, 0.25);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 211, 203, 0.55);
+}
+
 /* Swiper */
 .swiper-pagination-bullet {
   width: 6px !important;

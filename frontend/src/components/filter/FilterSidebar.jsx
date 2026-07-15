@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Star, ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { Star, ChevronDown, ChevronUp, Search, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FilterSidebar = ({ 
@@ -36,7 +36,8 @@ const FilterSidebar = ({
     if (propCategories.length === 0 && products.length > 0) {
       const allCategories = products.flatMap(p => Array.isArray(p.category) ? p.category : [p.category]).filter(Boolean);
       const uniqueCategories = [...new Set(allCategories)];
-      setCategories(uniqueCategories);
+      // Convert string categories to object shape { name, label }
+      setCategories(uniqueCategories.map(c => typeof c === 'string' ? { name: c.toLowerCase(), label: c.replace(/-/g, ' ') } : c));
     } else {
       setCategories(propCategories);
     }
@@ -66,6 +67,24 @@ const FilterSidebar = ({
     { id: 'gift-for-him', label: 'Gift for Him' },
   ];
 
+  // Calculate active filter count for display
+  const getActiveFilterCount = useCallback(() => {
+    let count = 0;
+    if (localFilters.categories?.length) {
+      count += localFilters.categories.filter(c => c !== 'all' && c.toLowerCase() !== 'all').length;
+    }
+    if (localFilters.subCategory) count += 1;
+    if (localFilters.occasions?.length && !localFilters.occasions.includes('all')) {
+      count += localFilters.occasions.length;
+    }
+    if (localFilters.ratings?.length) count += localFilters.ratings.length;
+    if (localFilters.priceRange && (localFilters.priceRange.min > 10 || localFilters.priceRange.max < 10000)) {
+      count += 1;
+    }
+    if (localFilters.sort?.length && localFilters.sort[0] !== 'newest') count += 1;
+    return count;
+  }, [localFilters]);
+
   // Handle search with debounce
   const handleSearchChange = useCallback((e) => {
     const value = e.target.value;
@@ -79,35 +98,45 @@ const FilterSidebar = ({
     }, 300);
   }, [onSearch]);
 
-  const handleCategoryToggle = useCallback((category, e) => {
+  const handleCategoryToggle = useCallback((categoryName, e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
-    const current = localFilters.categories || [];
-    const updated = current.includes(category) 
-      ? current.filter(c => c !== category) 
-      : [...current, category];
+    let newFilters = { ...localFilters };
     
-    let newFilters = { ...localFilters, categories: updated };
+    if (categoryName === 'all') {
+      newFilters.categories = [];
+      newFilters.occasions = []; // If Category All is clicked, clear occasion too
+      newFilters.subCategory = '';
+    } else {
+      const current = localFilters.categories || [];
+      const isAlreadyActive = current.includes(categoryName);
+      
+      const updated = isAlreadyActive 
+        ? current.filter(c => c !== categoryName) 
+        : [...current.filter(c => c !== 'all'), categoryName];
+      
+      newFilters.categories = updated;
 
-    // Coordinate anniversary category with anniversary-gift occasion
-    if (category.toLowerCase() === 'anniversary') {
-      const currentOcc = localFilters.occasions || [];
-      const updatedOcc = current.includes(category)
-        ? currentOcc.filter(o => o !== 'anniversary-gift')
-        : [...currentOcc.filter(o => o !== 'anniversary-gift'), 'anniversary-gift'];
-      newFilters.occasions = updatedOcc;
-    }
+      // Coordinate anniversary category with anniversary-gift occasion
+      if (categoryName.toLowerCase() === 'anniversary') {
+        const currentOcc = localFilters.occasions || [];
+        const updatedOcc = isAlreadyActive
+          ? currentOcc.filter(o => o !== 'anniversary-gift')
+          : [...currentOcc.filter(o => o !== 'anniversary-gift'), 'anniversary-gift'];
+        newFilters.occasions = updatedOcc;
+      }
 
-    // Coordinate birthday-cakes category with birthday-gifts occasion
-    if (category.toLowerCase() === 'birthday-cakes' || category.toLowerCase() === 'birthday') {
-      const currentOcc = localFilters.occasions || [];
-      const updatedOcc = current.includes(category)
-        ? currentOcc.filter(o => o !== 'birthday-gifts')
-        : [...currentOcc.filter(o => o !== 'birthday-gifts'), 'birthday-gifts'];
-      newFilters.occasions = updatedOcc;
+      // Coordinate birthday category with birthday-gifts occasion
+      if (categoryName.toLowerCase() === 'birthday-cakes' || categoryName.toLowerCase() === 'birthday') {
+        const currentOcc = localFilters.occasions || [];
+        const updatedOcc = isAlreadyActive
+          ? currentOcc.filter(o => o !== 'birthday-gifts')
+          : [...currentOcc.filter(o => o !== 'birthday-gifts'), 'birthday-gifts'];
+        newFilters.occasions = updatedOcc;
+      }
     }
 
     setLocalFilters(newFilters);
@@ -119,29 +148,40 @@ const FilterSidebar = ({
       e.preventDefault();
       e.stopPropagation();
     }
-    const current = localFilters.occasions || [];
-    const updated = current.includes(occasionId)
-      ? current.filter(o => o !== occasionId)
-      : [occasionId]; 
+    
+    let newFilters = { ...localFilters };
+    
+    if (occasionId === 'all') {
+      newFilters.occasions = [];
+      newFilters.categories = [];
+      newFilters.subCategory = '';
+    } else {
+      const current = localFilters.occasions || [];
+      const isAlreadyActive = current.includes(occasionId);
       
-    let newFilters = { ...localFilters, occasions: updated };
+      const updated = isAlreadyActive
+        ? current.filter(o => o !== occasionId)
+        : [occasionId]; 
+        
+      newFilters.occasions = updated;
 
-    // Coordinate anniversary-gift occasion with anniversary category
-    if (occasionId === 'anniversary-gift') {
-      const currentCat = localFilters.categories || [];
-      const updatedCat = current.includes(occasionId)
-        ? currentCat.filter(c => c.toLowerCase() !== 'anniversary')
-        : [...currentCat.filter(c => c.toLowerCase() !== 'anniversary'), 'anniversary'];
-      newFilters.categories = updatedCat;
-    }
+      // Coordinate anniversary-gift occasion with anniversary category name
+      if (occasionId === 'anniversary-gift') {
+        const currentCat = localFilters.categories || [];
+        const updatedCat = isAlreadyActive
+          ? currentCat.filter(c => c.toLowerCase() !== 'anniversary')
+          : [...currentCat.filter(c => c.toLowerCase() !== 'anniversary'), 'anniversary'];
+        newFilters.categories = updatedCat;
+      }
 
-    // Coordinate birthday-gifts occasion with birthday-cakes category
-    if (occasionId === 'birthday-gifts') {
-      const currentCat = localFilters.categories || [];
-      const updatedCat = current.includes(occasionId)
-        ? currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday')
-        : [...currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday'), 'birthday-cakes'];
-      newFilters.categories = updatedCat;
+      // Coordinate birthday-gifts occasion with birthday-cakes category name
+      if (occasionId === 'birthday-gifts') {
+        const currentCat = localFilters.categories || [];
+        const updatedCat = isAlreadyActive
+          ? currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday')
+          : [...currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday'), 'birthday-cakes'];
+        newFilters.categories = updatedCat;
+      }
     }
 
     setLocalFilters(newFilters);
@@ -191,50 +231,62 @@ const FilterSidebar = ({
     return (localFilters.ratings || []).includes(rating);
   }, [localFilters.ratings]);
 
-  const containerClasses = isMobileDrawer
-    ? "w-full bg-[#1A0F0D] text-white h-full overflow-y-auto custom-scrollbar p-5"
-    : "hidden lg:block w-[320px] bg-[#1A0F0D] text-white rounded-xl shadow-xl border border-white/5 h-fit sticky top-[100px] max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar p-6";
-
   const renderAccordionHeader = (id, label) => (
     <button 
       onClick={() => toggleSection(id)}
       className="flex items-center justify-between w-full py-4 px-4 text-left group"
     >
-      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90 group-hover:text-primary transition-colors">{label}</h3>
+      <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">{label}</h3>
       {expanded[id] ? (
-        <ChevronUp size={16} className="text-white/50 group-hover:text-primary transition-colors" />
+        <ChevronUp size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
       ) : (
-        <ChevronDown size={16} className="text-white/50 group-hover:text-primary transition-colors" />
+        <ChevronDown size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
       )}
     </button>
   );
 
+  const containerClasses = isMobileDrawer
+    ? "w-full bg-[#1A0E0B] text-[#ecded9] h-full overflow-y-auto custom-scrollbar p-6"
+    : "hidden lg:block w-[360px] bg-[#1A0E0B] text-[#ecded9] rounded-2xl border border-[#3A211B] h-fit sticky top-[135px] p-6 shadow-lg shadow-black/20 shrink-0";
+
   return (
     <aside className={containerClasses}>
+      {/* Sidebar Header (Only Desktop) */}
       {!isMobileDrawer && (
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-          <h2 className="text-xl font-black text-white tracking-tight">Filters</h2>
-          <button onClick={() => onReset()} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
-            <X size={14} className="text-white/60 hover:text-white" />
-          </button>
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#3A211B] select-none">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={16} className="text-[#E6B25A]" />
+            <h2 className="text-base font-black uppercase tracking-wider text-white">Filters</h2>
+          </div>
+          
+          {getActiveFilterCount() > 0 && (
+            <button 
+              onClick={onReset}
+              className="flex items-center gap-1 text-xs font-bold text-[#E6B25A] hover:text-[#F0C46E] transition-colors"
+            >
+              <RotateCcw size={12} />
+              Reset All
+            </button>
+          )}
         </div>
       )}
 
-      <div className="space-y-2">
+      {/* Main filters contents */}
+      <div className="space-y-4">
         {/* Search Section */}
-        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
           {renderAccordionHeader('search', 'Search Products')}
           <AnimatePresence>
             {expanded.search && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
                 <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
                   <input
                     type="text"
                     value={localSearchTerm}
                     onChange={handleSearchChange}
                     placeholder="Search for products..."
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-primary text-white placeholder:text-white/30"
+                    className="w-full pl-10 pr-4 py-3 text-sm bg-black/30 border border-[#3A211B] rounded-lg focus:outline-none focus:border-[#E6B25A] text-white placeholder:text-white/20 transition-colors"
                   />
                 </div>
               </motion.div>
@@ -244,38 +296,40 @@ const FilterSidebar = ({
 
         {/* Categories Section */}
         {categories.length > 0 && (
-          <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
             {renderAccordionHeader('categories', 'Categories')}
             <AnimatePresence>
               {expanded.categories && (
-                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
-                  <div className="flex flex-wrap gap-2">
+                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                  <div className="flex flex-wrap gap-2.5">
                     <button
-                      onClick={(e) => handleCategoryToggle('All', e)}
+                      onClick={(e) => handleCategoryToggle('all', e)}
                       className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                        !(localFilters.categories?.length) || localFilters.categories.includes('All')
+                        !(localFilters.categories?.length) || localFilters.categories.includes('all')
                           ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
-                          : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
+                          : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
                       }`}
                     >
                       All
                     </button>
-                    {categories.filter(c => c !== 'All' && c.toLowerCase() !== 'all').map((category) => {
-                      const isActive = (localFilters.categories || []).includes(category);
-                      const isCustom = category.toLowerCase().includes('custom cakes');
+                    {categories.filter(c => c.name !== 'all' && c.name !== 'All').map((category) => {
+                      const categoryName = typeof category === 'string' ? category : category.name;
+                      const categoryLabel = typeof category === 'string' ? category : category.label;
+                      const isActive = (localFilters.categories || []).includes(categoryName);
+                      const isCustom = categoryName.toLowerCase().includes('custom');
                       return (
                         <button
-                          key={category}
-                          onClick={(e) => handleCategoryToggle(category, e)}
+                          key={categoryName}
+                          onClick={(e) => handleCategoryToggle(categoryName, e)}
                           className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
                             isCustom 
-                              ? 'bg-gradient-to-r from-amber-400 to-pink-500 text-white border-transparent shadow-lg shadow-pink-500/20'
+                              ? 'bg-gradient-to-r from-amber-400 to-pink-500 text-white border-transparent shadow-md shadow-pink-500/10'
                               : isActive 
                                 ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
-                                : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
+                                : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
                           }`}
                         >
-                          {category} {isCustom && '✨'}
+                          {categoryLabel} {isCustom && '✨'}
                         </button>
                       );
                     })}
@@ -286,14 +340,14 @@ const FilterSidebar = ({
           </div>
         )}
 
-        {/* Sub Categories Section */}
+        {/* Sub Categories Section (Flavours) */}
         {localFilters.categories?.some(c => c.toLowerCase().includes('birthday cake')) && (
-          <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+          <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
             {renderAccordionHeader('subcategories', 'Flavours')}
             <AnimatePresence>
               {expanded.subcategories && (
-                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
-                  <div className="flex flex-wrap gap-2">
+                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                  <div className="flex flex-wrap gap-2.5">
                     {['Vanilla', 'Chocolate', 'Red Velvet'].map((flavor) => {
                       const isActive = localFilters.subCategory?.toLowerCase() === flavor.toLowerCase();
                       return (
@@ -314,7 +368,7 @@ const FilterSidebar = ({
                           className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
                             isActive 
                               ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
-                              : 'bg-transparent border-white/20 text-white/80 hover:border-white/50'
+                              : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
                           }`}
                         >
                           {flavor}
@@ -329,21 +383,21 @@ const FilterSidebar = ({
         )}
 
         {/* Occasions Section */}
-        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
           {renderAccordionHeader('occasions', 'Occasions')}
           <AnimatePresence>
             {expanded.occasions && (
-              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
-                <div className="flex flex-wrap gap-2">
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="grid grid-cols-2 gap-2.5">
                   <button
-                    onClick={(e) => handleOccasionToggle('All', e)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                      !(localFilters.occasions?.length) || localFilters.occasions.includes('All')
-                        ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent w-[48%]'
-                        : 'bg-transparent border-white/20 text-white/80 hover:border-white/50 w-[48%]'
+                    onClick={(e) => handleOccasionToggle('all', e)}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all border ${
+                      !(localFilters.occasions?.length) || localFilters.occasions.includes('all')
+                        ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                        : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
                     }`}
                   >
-                    <div className="text-left w-full">All</div>
+                    All
                   </button>
                   {occasions.map((occ) => {
                     const isActive = (localFilters.occasions || []).includes(occ.id);
@@ -351,13 +405,13 @@ const FilterSidebar = ({
                       <button
                         key={occ.id}
                         onClick={(e) => handleOccasionToggle(occ.id, e)}
-                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                        className={`px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all border ${
                           isActive 
-                            ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent w-[48%]' 
-                            : 'bg-transparent border-white/20 text-white/80 hover:border-white/50 w-[48%]'
+                            ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
+                            : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
                         }`}
                       >
-                        <div className="text-left w-full">{occ.label}</div>
+                        {occ.label}
                       </button>
                     );
                   })}
@@ -368,28 +422,30 @@ const FilterSidebar = ({
         </div>
 
         {/* Min Rating Section */}
-        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
           {renderAccordionHeader('rating', 'Min. Rating')}
           <AnimatePresence>
             {expanded.rating && (
-              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
-                <div className="space-y-3">
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="space-y-2.5">
                   {[4, 3, 2].map((rating) => {
                     const isActive = isRatingActive(rating);
                     return (
                       <div 
                         key={rating}
                         onClick={(e) => handleRatingToggle(rating, e)}
-                        className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-all ${
-                          isActive ? 'bg-white/10' : 'hover:bg-white/5'
+                        className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl transition-all border ${
+                          isActive 
+                            ? 'bg-white/[0.04] border-[#EBD1C6]/30' 
+                            : 'border-transparent bg-transparent hover:bg-white/[0.02]'
                         }`}
                       >
-                        <div className="flex gap-1">
+                        <div className="flex gap-1.5">
                           {[...Array(5)].map((_, i) => (
                             <Star 
                               key={i} 
-                              size={14} 
-                              className={i < rating ? "fill-amber-400 text-amber-400" : "text-white/20"} 
+                              size={16} 
+                              className={i < rating ? "fill-[#E6B25A] text-[#E6B25A]" : "text-white/10"} 
                             />
                           ))}
                         </div>
@@ -404,71 +460,44 @@ const FilterSidebar = ({
         </div>
 
         {/* Price Section */}
-        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
           <button 
             onClick={() => toggleSection('price')}
             className="flex items-center justify-between w-full py-4 px-4 text-left group"
           >
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90 group-hover:text-primary transition-colors">
-              Price — ₹{priceRange.min} - ₹{priceRange.max === 10000 ? '10,000+' : priceRange.max}
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">
+              Price — ₹{priceRange.min} - ₹{priceRange.max === 10000 ? '10k+' : priceRange.max}
             </h3>
-            {expanded.price ? <ChevronUp size={16} className="text-white/50" /> : <ChevronDown size={16} className="text-white/50" />}
+            {expanded.price ? <ChevronUp size={16} className="text-[#A18881]/55" /> : <ChevronDown size={16} className="text-[#A18881]/55" />}
           </button>
           
           <AnimatePresence>
             {expanded.price && (
-              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
-                <div className="flex gap-3 mb-6">
-                  <div className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3">
-                    <label className="text-[10px] font-bold text-white/50 mb-1 block">Min</label>
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-black/30 border border-[#3A211B] rounded-xl p-3.5">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1 block">Min (₹)</label>
                     <input
                       type="number"
                       value={priceRange.min}
                       onChange={(e) => handlePriceRangeChange('min', e.target.value, e)}
                       onBlur={handlePriceApply}
+                      onKeyDown={(e) => e.key === 'Enter' && handlePriceApply()}
                       className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
                     />
                   </div>
-                  <div className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3">
-                    <label className="text-[10px] font-bold text-white/50 mb-1 block">Max</label>
+                  <span className="text-white/30 text-sm font-bold px-1">—</span>
+                  <div className="flex-1 bg-black/30 border border-[#3A211B] rounded-xl p-3.5">
+                    <label className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1 block">Max (₹)</label>
                     <input
                       type="number"
                       value={priceRange.max}
                       onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
                       onBlur={handlePriceApply}
+                      onKeyDown={(e) => e.key === 'Enter' && handlePriceApply()}
                       className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
                     />
                   </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="relative h-10 bg-black/40 rounded-full border border-white/10 flex items-center px-4">
-                    <input 
-                      type="range" 
-                      min="0" max="5000" 
-                      value={priceRange.min} 
-                      onChange={(e) => handlePriceRangeChange('min', e.target.value, e)}
-                      onMouseUp={handlePriceApply}
-                      onTouchEnd={handlePriceApply}
-                      className="w-full accent-[#EBD1C6]" 
-                    />
-                  </div>
-                  <div className="relative h-10 bg-black/40 rounded-full border border-white/10 flex items-center px-4">
-                    <input 
-                      type="range" 
-                      min="0" max="10000" 
-                      value={priceRange.max} 
-                      onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
-                      onMouseUp={handlePriceApply}
-                      onTouchEnd={handlePriceApply}
-                      className="w-full accent-[#EBD1C6]" 
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex justify-between text-[10px] font-bold text-white/40 mt-4 px-1">
-                  <span>₹10</span>
-                  <span>₹10,000+</span>
                 </div>
               </motion.div>
             )}
@@ -476,24 +505,24 @@ const FilterSidebar = ({
         </div>
 
         {/* Sort By Section */}
-        <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 mb-4">
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-2">
           {renderAccordionHeader('sort', 'Sort By')}
           <AnimatePresence>
             {expanded.sort && (
-              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-5 overflow-hidden">
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
                 <div className="relative">
                   <select 
-                    className="w-full appearance-none bg-black/40 border border-white/10 text-white font-bold text-sm py-3 px-4 rounded-xl focus:outline-none focus:border-primary"
+                    className="w-full appearance-none bg-black/30 border border-[#3A211B] text-[#ecded9] font-bold text-sm py-3 pl-3.5 pr-8 rounded-lg focus:outline-none focus:border-[#E6B25A] cursor-pointer"
                     value={localFilters.sort?.[0] || 'newest'}
                     onChange={handleSortChange}
                   >
-                    <option value="newest">Newest First</option>
-                    <option value="popular">Popularity</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="rating">Rating</option>
+                    <option value="newest" className="bg-[#1A0E0B]">Newest First</option>
+                    <option value="popular" className="bg-[#1A0E0B]">Popularity</option>
+                    <option value="price-low" className="bg-[#1A0E0B]">Price: Low to High</option>
+                    <option value="price-high" className="bg-[#1A0E0B]">Price: High to Low</option>
+                    <option value="rating" className="bg-[#1A0E0B]">Rating</option>
                   </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+                  <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
                 </div>
               </motion.div>
             )}

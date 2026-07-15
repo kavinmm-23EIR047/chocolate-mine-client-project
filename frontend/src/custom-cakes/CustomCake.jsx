@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
-  Star, Heart, ChevronDown, ChevronUp, Layers, Filter, Eye, Search, Settings2, X
+  Star, Heart, ChevronDown, ChevronUp, Layers, Filter, Eye, Search, Settings2, X, SlidersHorizontal
 } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode } from 'swiper/modules';
@@ -27,28 +27,27 @@ import CustomCakeDetail from './CustomCakeDetail';
 
 // ─── HELPER: Accordion Section Card ────────────────────────────────────
 const SectionCard = ({ title, expanded, onToggle, children }) => (
-  <div className="bg-[var(--card)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
+  <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01]">
     <button
       onClick={onToggle}
-      className="w-full flex items-center justify-between p-3.5 bg-[var(--heading)]/5 hover:bg-[var(--heading)]/10 transition-colors border-b border-[var(--border)]"
+      className="w-full flex items-center justify-between py-4 px-4 text-left group transition-colors"
     >
-      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--heading)]/80">
+      <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">
         {title}
       </h3>
       {expanded ? (
-        <ChevronUp size={18} className="text-[var(--heading)]/60" />
+        <ChevronUp size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
       ) : (
-        <ChevronDown size={18} className="text-[var(--heading)]/60" />
+        <ChevronDown size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
       )}
     </button>
     <AnimatePresence>
       {expanded && (
         <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="px-3.5 pb-3.5 pt-3"
+          initial={{ height: 0 }}
+          animate={{ height: 'auto' }}
+          exit={{ height: 0 }}
+          className="px-4 pb-4 overflow-hidden"
         >
           {children}
         </motion.div>
@@ -126,6 +125,17 @@ export default function CustomCake() {
 
   const [dbThemes, setDbThemes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setIsFiltering(true);
+      const timer = setTimeout(() => {
+        setIsFiltering(false);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedTier, themeSearchFilter, priceSortFilter]);
 
   useEffect(() => {
     const loadDbData = async () => {
@@ -444,17 +454,29 @@ export default function CustomCake() {
         expanded={expandedSections.tiers}
         onToggle={() => toggleSection('tiers')}
       >
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2.5">
+          <button
+            onClick={() => setSelectedTier(null)}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+              selectedTier === null
+                ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+            }`}
+          >
+            All Tiers
+          </button>
           {[1, 2, 3].map((num) => {
             const tier = getTierById(num);
+            const isActive = selectedTier === num;
             return (
               <button
                 key={num}
-                onClick={() => setSelectedTier(selectedTier === num ? null : num)}
-                className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all ${selectedTier === num
-                    ? 'bg-[var(--primary)] text-[var(--button-text)] shadow-sm'
-                    : 'bg-[var(--heading)]/5 text-[var(--heading)]/80 border border-[var(--heading)]/10 hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-                  }`}
+                onClick={() => setSelectedTier(isActive ? null : num)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                  isActive
+                    ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                    : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                }`}
               >
                 {tier?.shortName || `Tier ${num}`}
               </button>
@@ -470,13 +492,13 @@ export default function CustomCake() {
         onToggle={() => toggleSection('search')}
       >
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
           <input
             type="text"
             placeholder="Search by theme name..."
             value={themeSearchFilter}
             onChange={(e) => setThemeSearchFilter(e.target.value)}
-            className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg py-2 pl-9 pr-3 text-sm font-medium focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
+            className="w-full pl-10 pr-4 py-3 text-sm bg-black/30 border border-[#3A211B] rounded-lg focus:outline-none focus:border-[#E6B25A] text-white placeholder:text-white/20 transition-colors"
           />
         </div>
       </SectionCard>
@@ -487,15 +509,18 @@ export default function CustomCake() {
         expanded={expandedSections.sort}
         onToggle={() => toggleSection('sort')}
       >
-        <select
-          value={priceSortFilter}
-          onChange={(e) => setPriceSortFilter(e.target.value)}
-          className="w-full bg-[var(--heading)]/5 border border-[var(--heading)]/10 text-[var(--heading)] rounded-lg p-2.5 text-[12px] font-bold outline-none cursor-pointer"
-        >
-          <option value="">Default</option>
-          <option value="asc">Price: Low → High</option>
-          <option value="desc">Price: High → Low</option>
-        </select>
+        <div className="relative">
+          <select
+            value={priceSortFilter}
+            onChange={(e) => setPriceSortFilter(e.target.value)}
+            className="w-full appearance-none bg-black/30 border border-[#3A211B] text-[#ecded9] font-bold text-sm py-3 pl-3.5 pr-8 rounded-lg focus:outline-none focus:border-[#E6B25A] cursor-pointer"
+          >
+            <option value="" className="bg-[#1A0E0B]">Default</option>
+            <option value="asc" className="bg-[#1A0E0B]">Price: Low → High</option>
+            <option value="desc" className="bg-[#1A0E0B]">Price: High → Low</option>
+          </select>
+          <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+        </div>
       </SectionCard>
 
       {/* Reset */}
@@ -505,7 +530,7 @@ export default function CustomCake() {
           setThemeSearchFilter('');
           setPriceSortFilter('');
         }}
-        className="w-full py-3 border border-dashed border-[var(--heading)]/20 rounded-lg text-[12px] font-bold text-[var(--heading)]/80 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all"
+        className="w-full py-3.5 border border-[#3A211B] bg-white/[0.01] hover:bg-white/[0.03] text-white/70 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all"
       >
         Reset All Filters
       </button>
@@ -517,28 +542,30 @@ export default function CustomCake() {
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans">
 
       {/* ── BREADCRUMB ── */}
-      <div className="bg-[var(--card)] border-b border-[var(--border)] py-3">
-        <div className="responsive-container flex items-center gap-1.5 text-xs text-[var(--muted)] overflow-x-auto no-scrollbar">
-          <button onClick={() => navigate('/')} className="hover:text-[var(--primary)] font-medium flex items-center gap-1">
-            <ArrowLeft size={12} /> Home
-          </button>
-          <span className="opacity-40">/</span>
-          <button onClick={goBackToBrowse} className={`font-medium ${themeIdx === null ? 'font-bold text-[var(--heading)]' : 'hover:text-[var(--primary)]'}`}>
-            Custom Cakes
-          </button>
-          {selectedTier && <><span className="opacity-40">/</span><span className={themeIdx === null ? 'font-bold text-[var(--heading)]' : ''}>{currentTier?.shortName}</span></>}
-          {theme && <><span className="opacity-40">/</span><span className="font-bold text-[var(--heading)]">{theme.name}</span></>}
+      {themeIdx !== null && (
+        <div className="bg-[var(--card)] border-b border-[var(--border)] py-3">
+          <div className="responsive-container flex items-center gap-1.5 text-xs text-[var(--muted)] overflow-x-auto no-scrollbar">
+            <button onClick={() => navigate('/')} className="hover:text-[var(--primary)] font-medium flex items-center gap-1">
+              <ArrowLeft size={12} /> Home
+            </button>
+            <span className="opacity-40">/</span>
+            <button onClick={goBackToBrowse} className={`font-medium ${themeIdx === null ? 'font-bold text-[var(--heading)]' : 'hover:text-[var(--primary)]'}`}>
+              Custom Cakes
+            </button>
+            {selectedTier && <><span className="opacity-40">/</span><span className={themeIdx === null ? 'font-bold text-[var(--heading)]' : ''}>{currentTier?.shortName}</span></>}
+            {theme && <><span className="opacity-40">/</span><span className="font-bold text-[var(--heading)]">{theme.name}</span></>}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── MAIN ── */}
-      <main className="responsive-container py-6 pb-40 lg:pb-8 tv:py-10">
+      <main className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 pb-40 lg:pb-8 tv:py-10">
         {themeIdx === null ? (
           <>
             {/* Render browse grid */}
             <CustomCakeBrowse
               filteredThemes={filteredThemes}
-              loading={loading}
+              loading={loading || isFiltering}
               selectedTier={selectedTier}
               setSelectedTier={setSelectedTier}
               themeSearchFilter={themeSearchFilter}
@@ -546,7 +573,7 @@ export default function CustomCake() {
               priceSortFilter={priceSortFilter}
               setPriceSortFilter={setPriceSortFilter}
               selectTheme={selectTheme}
-              hideFilters={true}
+              hideFilters={false}
               onToggleFilter={() => setIsFilterOpen(true)}
               onToggleDesktopFilter={() => setIsDesktopFilterOpen(true)}
             />
@@ -594,27 +621,54 @@ export default function CustomCake() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={() => setIsFilterOpen(false)}
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] sm:hidden"
                   />
-                  <motion.div
+                  <motion.aside
                     initial={{ x: '100%' }}
                     animate={{ x: 0 }}
                     exit={{ x: '100%' }}
-                    transition={{ type: 'spring', damping: 28 }}
-                    className="fixed right-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-[var(--card)] z-[210] p-5 overflow-y-auto shadow-2xl border-l border-[var(--border)]"
+                    transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+                    className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[380px] h-full bg-[#1A0E0B] z-[210] flex flex-col text-[#ecded9] border-l border-[#3A211B] shadow-[0_0_50px_rgba(0,0,0,0.8)] sm:hidden"
                   >
-                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--border)]">
-                      <h2 className="text-lg font-bold text-[var(--heading)]">Filters</h2>
-                      <button onClick={() => setIsFilterOpen(false)} className="p-2 bg-[var(--card-soft)] rounded-full text-[var(--muted)] hover:text-[var(--heading)] transition-colors">
+                    {/* Header */}
+                    <div className="flex justify-between items-center py-5 px-6 border-b border-[#3A211B] bg-[#2A1813] select-none">
+                      <div className="flex items-center gap-2">
+                        <SlidersHorizontal size={16} className="text-[#E6B25A]" />
+                        <h2 className="text-base font-black uppercase tracking-wider text-white">Filters</h2>
+                      </div>
+                      <button 
+                        onClick={() => setIsFilterOpen(false)} 
+                        className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center text-[#A18881] hover:text-white transition-colors"
+                      >
                         <X size={18} />
                       </button>
                     </div>
-                    <FilterPanel />
-                    <button onClick={() => setIsFilterOpen(false)}
-                      className="w-full mt-6 py-3.5 bg-[var(--primary)] text-[var(--button-text)] rounded-lg text-[13px] font-bold shadow-md">
-                      Show Results
-                    </button>
-                  </motion.div>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[#1A0E0B]">
+                      <FilterPanel />
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-5 border-t border-[#3A211B] bg-[#2A1813] flex gap-3">
+                      <button 
+                        onClick={() => {
+                          setSelectedTier(null);
+                          setThemeSearchFilter('');
+                          setPriceSortFilter('');
+                        }}
+                        className="flex-1 py-3.5 border border-[#3A211B] bg-[#1A0E0B] text-white hover:bg-black/20 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                      >
+                        Reset
+                      </button>
+                      <button 
+                        onClick={() => setIsFilterOpen(false)}
+                        className="flex-[2] py-3.5 bg-[#E6B25A] hover:bg-[#F0C46E] text-[#120806] rounded-xl text-xs font-black uppercase tracking-wider shadow-lg shadow-[#E6B25A]/10 transition-all"
+                      >
+                        Show Results
+                      </button>
+                    </div>
+                  </motion.aside>
                 </>
               )}
             </AnimatePresence>

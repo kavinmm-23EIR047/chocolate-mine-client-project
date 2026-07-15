@@ -20,6 +20,11 @@ const getBaseFilterWord = (term) => {
   return lower.replace(/[\s-]/g, '');
 };
 
+const formatLabel = (str) => {
+  if (!str) return '';
+  return str.split(/[\s-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+};
+
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -337,7 +342,7 @@ const Shop = () => {
   }, []);
 
   // Fetch products with filters
-  const { data: productRes, isLoading: loading } = useGetProductsQuery({ 
+  const { data: productRes, isLoading, isFetching } = useGetProductsQuery({ 
     page: 1, 
     limit: 2000,
     category: activeCategories.length > 0 ? activeCategories.join(',') : undefined,
@@ -347,6 +352,20 @@ const Shop = () => {
     minPrice: priceRange[0] > 10 ? priceRange[0] : undefined,
     maxPrice: priceRange[1] < 10000 ? priceRange[1] : undefined,
   });
+
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsFiltering(true);
+      const timer = setTimeout(() => {
+        setIsFiltering(false);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [activeCategories, activeSubCategory, activeOccasion, activeRating, priceRange, sortBy, searchQuery]);
+
+  const loading = isLoading || isFetching || isFiltering;
 
   const products = productRes?.data || [];
 
@@ -653,7 +672,7 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-[var(--background)] pt-8 sm:pt-12 lg:pt-16 pb-24">
-      <div className="responsive-container">
+      <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Desktop Header */}
         <div className="hidden sm:block relative mb-8 overflow-hidden rounded-2xl bg-[var(--footer)] p-6 sm:p-10 border border-white/5 shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/8 via-transparent to-[var(--accent)]/8 pointer-events-none" />
@@ -722,19 +741,19 @@ const Shop = () => {
 
         {/* Active Filters Display */}
         {getActiveFilterCount() > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
-            <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Active Filters:</span>
+          <div className="flex flex-wrap items-center gap-2 mb-6 sm:mb-8 select-none">
+            <span className="text-xs font-black text-[var(--muted)] uppercase tracking-wider">Active Filters:</span>
             
             {activeCategories.map(ac => (
-              <span key={ac} className="px-3 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded-full text-[10px] font-bold flex items-center gap-1">
-                Category: {categories.find(c => c.name === ac)?.label || ac}
+              <span key={ac} className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+                Category: {categories.find(c => c.name === ac)?.label || formatLabel(ac)}
                 <button 
                   onClick={(e) => {
                     e.preventDefault();
                     const newCats = activeCategories.filter(c => c !== ac);
                     updateSearchParam('category', newCats.length > 0 ? newCats.join(',') : 'all');
                   }}
-                  className="hover:text-[var(--primary)]/70"
+                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
                 >
                   ×
                 </button>
@@ -742,11 +761,11 @@ const Shop = () => {
             ))}
             
             {activeSubCategory && (
-              <span className="px-3 py-1 bg-blue-500/10 text-blue-600 rounded-full text-[10px] font-bold flex items-center gap-1">
-                {activeSubCategory.replace(/-/g, ' ')}
+              <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+                {formatLabel(activeSubCategory)}
                 <button 
                   onClick={() => updateSearchParam('subCategory', '')}
-                  className="hover:text-blue-600/70"
+                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
                 >
                   ×
                 </button>
@@ -754,11 +773,11 @@ const Shop = () => {
             )}
             
             {activeOccasion !== 'all' && (
-              <span className="px-3 py-1 bg-secondary/10 text-secondary rounded-full text-[10px] font-bold flex items-center gap-1">
-                {occasions.find(o => o.name === activeOccasion)?.label || activeOccasion}
+              <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+                Occasion: {occasions.find(o => o.name === activeOccasion)?.label || formatLabel(activeOccasion)}
                 <button 
                   onClick={(e) => handleOccasionClick(e, 'all')}
-                  className="hover:text-secondary/70"
+                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
                 >
                   ×
                 </button>
@@ -766,11 +785,11 @@ const Shop = () => {
             )}
             
             {activeRating > 0 && (
-              <span className="px-3 py-1 bg-yellow-500/10 text-yellow-600 rounded-full text-[10px] font-bold flex items-center gap-1">
-                {activeRating}★ & up
+              <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+                {activeRating} ★ & Up
                 <button 
                   onClick={(e) => handleRatingClick(e, activeRating)}
-                  className="hover:text-yellow-600/70"
+                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
                 >
                   ×
                 </button>
@@ -778,15 +797,15 @@ const Shop = () => {
             )}
             
             {(priceRange[0] > 10 || priceRange[1] < 10000) && (
-              <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-[10px] font-bold flex items-center gap-1">
-                ₹{priceRange[0]} - ₹{priceRange[1]}
+              <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+                Price: ₹{priceRange[0]} - ₹{priceRange[1]}
                 <button 
                   onClick={() => {
                     setPriceRange([10, 10000]);
                     updateSearchParam('minPrice', 10);
                     updateSearchParam('maxPrice', 10000);
                   }}
-                  className="hover:text-green-600/70"
+                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
                 >
                   ×
                 </button>
@@ -794,11 +813,11 @@ const Shop = () => {
             )}
             
             {sortBy !== 'newest' && (
-              <span className="px-3 py-1 bg-purple-500/10 text-purple-600 rounded-full text-[10px] font-bold flex items-center gap-1">
-                Sort: {sortBy.replace('-', ' ')}
+              <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
+                Sort: {formatLabel(sortBy)}
                 <button 
                   onClick={() => updateSearchParam('sort', 'newest')}
-                  className="hover:text-purple-600/70"
+                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
                 >
                   ×
                 </button>
@@ -807,7 +826,7 @@ const Shop = () => {
             
             <button
               onClick={clearFilters}
-              className="px-3 py-1 text-[10px] font-bold text-[var(--muted)] hover:text-[var(--heading)] transition-colors"
+              className="h-8 px-3.5 text-xs font-bold text-[#E6B25A] hover:text-[#F0C46E] hover:underline transition-colors ml-2 select-none flex items-center"
             >
               Clear All
             </button>
@@ -824,7 +843,7 @@ const Shop = () => {
             onSearch={handleFilterSearch}
             searchTerm={searchTerm}
             products={products}
-            categories={categories.map(c => c.label)}
+            categories={categories}
           />
 
           <main className="flex-1 min-w-0">
@@ -891,7 +910,7 @@ const Shop = () => {
         onSearch={handleFilterSearch}
         searchTerm={searchTerm}
         products={products}
-        categories={categories.map(c => c.label)}
+        categories={categories}
       />
 
     </div>

@@ -61,6 +61,8 @@ const ProductDetails = () => {
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [availableAddons, setAvailableAddons] = useState([]);
+  const [selectedAddons, setSelectedAddons] = useState([]);
 
   // Fetch similar products in the same category
   const { data: similarRes } = useGetProductsQuery({
@@ -74,11 +76,30 @@ const ProductDetails = () => {
   }, { skip: !(Array.isArray(product?.category) ? product.category.length > 0 : product?.category) });
 
   useEffect(() => {
+    // Fetch Addons
+    import('../services/productService').then(({ default: productService }) => {
+      productService.getActiveAddons().then(res => {
+        setAvailableAddons(res.data?.data || []);
+      }).catch(err => console.error('Failed to fetch addons:', err));
+    });
+  }, []);
+
+  useEffect(() => {
     if (relatedRes?.data && product) {
       const filtered = relatedRes.data.filter(p => (p._id?.$oid || p._id) !== productId);
       setRelatedProducts(filtered.slice(0, 4));
     }
   }, [relatedRes, product, productId]);
+
+  const handleAddonToggle = (addon) => {
+    setSelectedAddons(prev => {
+      const exists = prev.find(a => a._id === addon._id);
+      if (exists) {
+        return prev.filter(a => a._id !== addon._id);
+      }
+      return [...prev, { ...addon, qty: 1 }];
+    });
+  };
 
   const [activeTab, setActiveTab] = useState('description');
   const [imgZoom, setImgZoom] = useState(false);
@@ -259,7 +280,7 @@ const ProductDetails = () => {
           if (showCustomWeightInput && customWeight) options.weight = customWeight;
           else if (selectedWeight) options.weight = selectedWeight;
         }
-        dispatch(addToCart({ product, qty: quantity, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
+        dispatch(addToCart({ product, qty: quantity, options, variantPrice: isCakeWithVariants ? currentPrice : null, addons: selectedAddons }));
         toast.success(`${quantity} item(s) added to cart`);
       }
 
@@ -301,7 +322,7 @@ const ProductDetails = () => {
       else { toast.error('Please select weight'); setAddingToCart(false); return; }
     }
 
-    dispatch(addToCart({ product, qty: 1, options, variantPrice: isCakeWithVariants ? currentPrice : null }));
+    dispatch(addToCart({ product, qty: 1, options, variantPrice: isCakeWithVariants ? currentPrice : null, addons: selectedAddons }));
     toast.success(`Item added to cart!`);
     setAddingToCart(false);
   };
@@ -331,6 +352,7 @@ const ProductDetails = () => {
       qty: quantity,
       price: isCakeWithVariants ? currentPrice : product.price,
       options: options,
+      addons: selectedAddons,
       coupon: product.coupon?.enabled ? product.coupon : null
     };
 
@@ -453,6 +475,35 @@ const ProductDetails = () => {
                 handleCustomWeightSubmit={handleCustomWeightSubmit}
                 isInStock={isInStock}
               />
+
+              {availableAddons.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-black text-heading uppercase tracking-widest mb-3">Frequently Bought Together (Add-ons)</h3>
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {availableAddons.map(addon => {
+                      const isSelected = selectedAddons.some(a => a._id === addon._id);
+                      return (
+                        <div
+                          key={addon._id}
+                          onClick={() => handleAddonToggle(addon)}
+                          className={`flex flex-col items-center gap-2 p-3 min-w-[120px] rounded-2xl border cursor-pointer transition-all ${isSelected ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/50'}`}
+                        >
+                          <div className="w-16 h-16 rounded-full overflow-hidden border border-border bg-white">
+                            <img src={addon.image} alt={addon.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[11px] font-bold text-heading uppercase truncate w-24">{addon.name}</p>
+                            <p className="text-xs font-black text-primary">₹{addon.price}</p>
+                          </div>
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${isSelected ? 'bg-primary border-primary text-white' : 'border-border text-transparent'}`}>
+                            <CheckCircle2 size={12} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <ProductPricing
                 product={product}

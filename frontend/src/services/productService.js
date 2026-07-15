@@ -12,6 +12,7 @@ const productService = {
   delete: (id) => api.delete(`/products/${id}`),
   validateCoupon: (productId, code) =>
     api.post('/coupon/validate', { productId, code }),
+  getActiveAddons: () => api.get('/addons/active'),
 };
 
 export default productService;

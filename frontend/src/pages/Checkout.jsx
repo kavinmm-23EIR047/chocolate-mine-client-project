@@ -879,6 +879,7 @@ const Checkout = () => {
               selectedWeight: directItem.selectedWeight,
               appliedCoupon: couponCodeForApi,
               options: directItem.options,
+              addons: directItem.addons,
             }
             : undefined,
           items: cartItemsFromRedux,

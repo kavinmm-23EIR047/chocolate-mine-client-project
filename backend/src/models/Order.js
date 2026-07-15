@@ -144,7 +144,15 @@ const orderSchema = new mongoose.Schema(
           top: { type: String },
           left: { type: String },
           right: { type: String }
-        }
+        },
+
+        addons: [{
+          addonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Addon' },
+          name: { type: String },
+          price: { type: Number },
+          qty: { type: Number, default: 1 },
+          image: { type: String }
+        }]
       }
     ],
 

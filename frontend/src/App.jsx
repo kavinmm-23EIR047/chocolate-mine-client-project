@@ -102,6 +102,7 @@ import AdminStaff from './pages/admin/AdminStaff';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import CategoryManager from './pages/admin/CategoryManager';
 import OccasionManager from './pages/admin/OccasionManager';
+import AddonManager from './pages/admin/AddonManager';
 import AdminBanner from './pages/admin/AdminBanner';
 import AdminCustomCakes from './pages/admin/AdminCustomCakes';
 import AdminReviews from './pages/admin/AdminReviews';
@@ -264,6 +265,7 @@ function App() {
                   <Route path="analytics" element={<AdminAnalytics />} />
                   <Route path="categories" element={<CategoryManager />} />
                   <Route path="occasions" element={<OccasionManager />} />
+                  <Route path="addons" element={<AddonManager />} />
                   <Route path="banners" element={<AdminBanner />} />
                   <Route path="custom-cakes" element={<AdminCustomCakes />} />
                   <Route path="reviews" element={<AdminReviews />} />

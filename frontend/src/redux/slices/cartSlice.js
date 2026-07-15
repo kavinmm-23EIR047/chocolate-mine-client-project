@@ -10,11 +10,12 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const { product, qty, options, variantPrice } = action.payload;
+      const { product, qty, options, variantPrice, addons } = action.payload;
       const existingItem = state.items.find(
         (item) =>
           item.productId === product._id &&
-          JSON.stringify(item.options) === JSON.stringify(options)
+          JSON.stringify(item.options) === JSON.stringify(options) &&
+          JSON.stringify(item.addons) === JSON.stringify(addons)
       );
 
       if (existingItem) {
@@ -31,6 +32,7 @@ const cartSlice = createSlice({
           variantPrice: variantPrice,
           qty,
           options,
+          addons: addons || [],
           selectedFlavor: options?.flavor || options?.color || null,
           selectedWeight: options?.weight || null,
           stock: product.stock, // Store initial stock for quick reference

@@ -58,7 +58,15 @@ const computePricing = ({ cartItems, addressLat, addressLng, discount = 0 }) => 
   const subtotal = cartItems.reduce((sum, item) => {
     const unitPrice = Number(item.finalPrice ?? item.price ?? 0);
     const qty = Number(item.qty ?? 0);
-    return sum + unitPrice * qty;
+    
+    let itemTotal = unitPrice * qty;
+    if (item.addons && Array.isArray(item.addons)) {
+      item.addons.forEach(addon => {
+        itemTotal += Number(addon.price || 0) * (addon.qty || 1) * qty;
+      });
+    }
+    
+    return sum + itemTotal;
   }, 0);
 
   // Set to 0 for testing product price only
@@ -303,9 +311,9 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           productId: product._id, name: product.name, qty: directItem.qty, price: product.price, image: product.image,
           finalPrice, activeCouponCode, selectedFlavor: directItem.selectedFlavor || (directItem.options && (directItem.options.color || directItem.options.flavor)),
           selectedWeight: directItem.selectedWeight || (directItem.options && directItem.options.weight), isCustomCake, customDetails,
-          category: product.category
+          category: product.category, addons: directItem.addons
         }],
-        total: finalPrice * directItem.qty
+        total: (finalPrice * directItem.qty) + (directItem.addons?.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1) * directItem.qty), 0) || 0)
       };
     }
   } else {
@@ -381,9 +389,14 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
           productId: product._id, name: product.name, qty: item.qty, price: product.price, image: product.image,
           finalPrice, activeCouponCode, selectedFlavor: item.options?.color || item.options?.flavor || item.selectedFlavor,
           selectedWeight: item.options?.weight || item.selectedWeight, isCustomCake, customDetails,
-          category: product.category
+          category: product.category, addons: item.addons
         });
-        total += finalPrice * item.qty;
+        
+        let addonSum = 0;
+        if (item.addons && Array.isArray(item.addons)) {
+          addonSum = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
+        }
+        total += (finalPrice + addonSum) * item.qty;
       }
       cart = { items: validatedItems, total };
     } else {
@@ -481,7 +494,14 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       category: Array.isArray(item.category) ? item.category.join(', ') : String(item.category || ''),
       discountAmount: ((item.price ?? 0) - (item.finalPrice ?? item.price ?? 0)) * item.qty,
       isCustomCake: item.isCustomCake || false,
-      customDetails: item.customDetails || null
+      customDetails: item.customDetails || null,
+      addons: item.addons ? item.addons.map(a => ({
+        addonId: a._id || a.addonId,
+        name: a.name,
+        price: a.price,
+        qty: a.qty || 1,
+        image: a.image
+      })) : []
     })),
     subtotal,
     deliveryCharge,

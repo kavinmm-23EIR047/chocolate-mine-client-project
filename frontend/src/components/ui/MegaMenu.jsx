@@ -40,7 +40,7 @@ const MegaMenu = () => {
 
       {/* Mega Menu Dropdown Container */}
       <div 
-        className={`absolute top-full left-0 w-[600px] bg-card border border-border/20 shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 origin-top-left z-[300] ${
+        className={`absolute top-full left-0 w-[720px] lg:w-[760px] bg-card border border-border/20 shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 origin-top-left z-[300] ${
           isOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'
         }`}
       >
@@ -100,14 +100,14 @@ const MegaMenu = () => {
         </div>
         
         {/* Bottom Quick Links Bar */}
-        <div className="bg-primary/5 p-4 flex items-center justify-between border-t border-border/10">
-          <Link to="/custom-cake" onClick={() => setIsOpen(false)} className="text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
+        <div className="bg-primary/5 px-6 py-4 flex items-center justify-between gap-6 border-t border-border/10 select-none">
+          <Link to="/custom-cake" onClick={() => setIsOpen(false)} className="text-xs md:text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors whitespace-nowrap">
             ✨ Custom Cakes Builder
           </Link>
-          <Link to="/shop?bestseller=true" onClick={() => setIsOpen(false)} className="text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
+          <Link to="/shop?bestseller=true" onClick={() => setIsOpen(false)} className="text-xs md:text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors whitespace-nowrap">
             🔥 View Bestsellers
           </Link>
-          <Link to="/shop?featured=true" onClick={() => setIsOpen(false)} className="text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors">
+          <Link to="/shop?featured=true" onClick={() => setIsOpen(false)} className="text-xs md:text-sm font-black text-heading uppercase tracking-widest hover:text-primary transition-colors whitespace-nowrap">
             ⭐ Featured Products
           </Link>
         </div>

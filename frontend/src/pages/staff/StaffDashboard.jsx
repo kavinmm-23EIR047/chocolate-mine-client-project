@@ -241,7 +241,7 @@ const StaffDashboard = () => {
       console.error('Failed to parse user session in StaffDashboard', e);
     }
 
-    socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    socketRef.current = io(import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000'), {
       transports: ['websocket'],
       withCredentials: true
     });

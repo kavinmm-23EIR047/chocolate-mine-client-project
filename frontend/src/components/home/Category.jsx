@@ -5,7 +5,7 @@ import api from '../../utils/api';
 import fallbackCakeImg from '../../assets/cake.png';
 
 const FALLBACK_IMAGE = fallbackCakeImg;
-const IMAGE_BASE_URL = "http://localhost:5000";
+const IMAGE_BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v1', '') : (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
 
 const HighlightCircle = ({ image, name, isActive, onClick, index }) => {
   // Premium designer backdrops matching the reference UI perfectly

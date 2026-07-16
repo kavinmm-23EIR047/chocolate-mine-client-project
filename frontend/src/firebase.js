@@ -92,6 +92,7 @@ export const requestFirebaseNotificationPermission = async () => {
     return null;
   }
 };
+console.log("Firebase Config:", firebaseConfig);
 
 export const onMessageListener = (callback) => {
   if (!messaging) return;

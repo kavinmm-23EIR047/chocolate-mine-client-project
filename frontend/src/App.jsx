@@ -1,350 +1,350 @@
-import React, { useState, useEffect, useCallback } from 'react'; // VERSION 1.1
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
-import { WishlistProvider } from './context/WishlistContext';
-import { LocationProvider } from './context/LocationContext';
-import { onMessageListener } from './firebase';
+// import React, { useState, useEffect, useCallback } from 'react'; // VERSION 1.1
+// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// import { Toaster } from 'react-hot-toast';
+// import { ThemeProvider } from './context/ThemeContext';
+// import { AuthProvider } from './context/AuthContext';
+// import { WishlistProvider } from './context/WishlistContext';
+// import { LocationProvider } from './context/LocationContext';
+// import { onMessageListener } from './firebase';
 
-// Layouts
-import UserLayout from './components/layouts/UserLayout';
-import AdminLayout from './components/layouts/AdminLayout';
-import StaffLayout from './components/layouts/StaffLayout';
+// // Layouts
+// import UserLayout from './components/layouts/UserLayout';
+// import AdminLayout from './components/layouts/AdminLayout';
+// import StaffLayout from './components/layouts/StaffLayout';
 
-// Guards
-import { ProtectedRoute, AdminRoute, StaffRoute, GuestRoute } from './routes/Guards';
+// // Guards
+// import { ProtectedRoute, AdminRoute, StaffRoute, GuestRoute } from './routes/Guards';
 
-// Pages
-import Home from './pages/Home';
-import ProductDetails from './product/ProductDetails';
-import OccasionProducts from './pages/OccasionProducts';
-import OrderTracking from './pages/OrderTracking';
-import Checkout from './pages/Checkout';
-import OrderSuccess from './pages/OrderSuccess';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Cart from './pages/Cart';
-import ForgotPassword from './pages/ForgotPassword';
-import OAuthCallback from './pages/OAuthCallback';
-import ReviewPage from './pages/ReviewPage';
-import Contact from './pages/Contact';
-import Help from './pages/Help';
-import Stores from './pages/Stores';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsConditions from './pages/TermsConditions';
-import RefundPolicy from './pages/RefundPolicy';
+// // Pages
+// import Home from './pages/Home';
+// import ProductDetails from './product/ProductDetails';
+// import OccasionProducts from './pages/OccasionProducts';
+// import OrderTracking from './pages/OrderTracking';
+// import Checkout from './pages/Checkout';
+// import OrderSuccess from './pages/OrderSuccess';
+// import Login from './pages/Login';
+// import Register from './pages/Register';
+// import Cart from './pages/Cart';
+// import ForgotPassword from './pages/ForgotPassword';
+// import OAuthCallback from './pages/OAuthCallback';
+// import ReviewPage from './pages/ReviewPage';
+// import Contact from './pages/Contact';
+// import Help from './pages/Help';
+// import Stores from './pages/Stores';
+// import PrivacyPolicy from './pages/PrivacyPolicy';
+// import TermsConditions from './pages/TermsConditions';
+// import RefundPolicy from './pages/RefundPolicy';
 
-// Premium User Dashboard Layout
-import DashboardLayout from './components/layout/DashboardLayout';
-import DashboardHome from './pages/user/DashboardHome';
-import ProfileDetails from './pages/user/ProfileDetails';
-import AddressManager from './pages/user/AddressManager';
-import AccountSettings from './pages/user/AccountSettings';
-import OrderHistory from './pages/user/OrderHistory';
-import OrderDetails from './pages/user/OrderDetails';
-import Wishlist from './pages/user/Wishlist';
-import MyReviews from './pages/user/Reviews';
-import UserNotifications from './pages/user/Notifications';
-import Shop from './pages/Shop';
-import CustomCake from './custom-cakes/CustomCake';
-import BrandIntroLoader from './components/BrandIntroLoader.jsx';
+// // Premium User Dashboard Layout
+// import DashboardLayout from './components/layout/DashboardLayout';
+// import DashboardHome from './pages/user/DashboardHome';
+// import ProfileDetails from './pages/user/ProfileDetails';
+// import AddressManager from './pages/user/AddressManager';
+// import AccountSettings from './pages/user/AccountSettings';
+// import OrderHistory from './pages/user/OrderHistory';
+// import OrderDetails from './pages/user/OrderDetails';
+// import Wishlist from './pages/user/Wishlist';
+// import MyReviews from './pages/user/Reviews';
+// import UserNotifications from './pages/user/Notifications';
+// import Shop from './pages/Shop';
+// import CustomCake from './custom-cakes/CustomCake';
+// import BrandIntroLoader from './components/BrandIntroLoader.jsx';
 
-import { useLocation } from 'react-router-dom';
+// import { useLocation } from 'react-router-dom';
 
-// Import socket service for initialization
-import { joinUserRoom, joinAdminRoom, joinStaffRoom, disconnectSocket } from './sockets/socketManager';
-import { useAuth } from './context/AuthContext';
+// // Import socket service for initialization
+// import { joinUserRoom, joinAdminRoom, joinStaffRoom, disconnectSocket } from './sockets/socketManager';
+// import { useAuth } from './context/AuthContext';
 
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [pathname]);
-  return null;
-};
+// const ScrollToTop = () => {
+//   const { pathname } = useLocation();
+//   useEffect(() => {
+//     window.scrollTo({ top: 0, behavior: 'instant' });
+//   }, [pathname]);
+//   return null;
+// };
 
-// Socket Initializer Component
-const SocketInitializer = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+// // Socket Initializer Component
+// const SocketInitializer = ({ children }) => {
+//   const { user, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      // Join appropriate room based on user role
-      if (user.role === 'admin') {
-        joinAdminRoom();
-        console.log('Admin joined admin room');
-      } else if (user.role === 'staff') {
-        joinStaffRoom(user._id);
-        console.log('Staff joined staff room:', user._id);
-      } else {
-        joinUserRoom(user._id);
-        console.log('User joined user room:', user._id);
-      }
-    }
+//   useEffect(() => {
+//     if (isAuthenticated && user) {
+//       // Join appropriate room based on user role
+//       if (user.role === 'admin') {
+//         joinAdminRoom();
+//         console.log('Admin joined admin room');
+//       } else if (user.role === 'staff') {
+//         joinStaffRoom(user._id);
+//         console.log('Staff joined staff room:', user._id);
+//       } else {
+//         joinUserRoom(user._id);
+//         console.log('User joined user room:', user._id);
+//       }
+//     }
 
-    return () => {
-      // Global disconnect handled in main.jsx if needed, 
-      // but we could also disconnect on logout here.
-    };
-  }, [isAuthenticated, user]);
+//     return () => {
+//       // Global disconnect handled in main.jsx if needed, 
+//       // but we could also disconnect on logout here.
+//     };
+//   }, [isAuthenticated, user]);
 
-  return <>{children}</>;
-};
+//   return <>{children}</>;
+// };
 
-// Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminGoogleReviews from './pages/admin/AdminGoogleReviews';
-import AdminProducts from './pages/admin/AdminProducts';
-import ProductForm from './pages/admin/ProductForm';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminStaff from './pages/admin/AdminStaff';
-import AdminAnalytics from './pages/admin/AdminAnalytics';
-import CategoryManager from './pages/admin/CategoryManager';
-import OccasionManager from './pages/admin/OccasionManager';
-import AddonManager from './pages/admin/AddonManager';
-import AdminBanner from './pages/admin/AdminBanner';
-import AdminCustomCakes from './pages/admin/AdminCustomCakes';
-import AdminReviews from './pages/admin/AdminReviews';
-import StaffDashboard from './pages/staff/StaffDashboard';
+// // Admin Pages
+// import AdminDashboard from './pages/admin/AdminDashboard';
+// import AdminGoogleReviews from './pages/admin/AdminGoogleReviews';
+// import AdminProducts from './pages/admin/AdminProducts';
+// import ProductForm from './pages/admin/ProductForm';
+// import AdminOrders from './pages/admin/AdminOrders';
+// import AdminStaff from './pages/admin/AdminStaff';
+// import AdminAnalytics from './pages/admin/AdminAnalytics';
+// import CategoryManager from './pages/admin/CategoryManager';
+// import OccasionManager from './pages/admin/OccasionManager';
+// import AddonManager from './pages/admin/AddonManager';
+// import AdminBanner from './pages/admin/AdminBanner';
+// import AdminCustomCakes from './pages/admin/AdminCustomCakes';
+// import AdminReviews from './pages/admin/AdminReviews';
+// import StaffDashboard from './pages/staff/StaffDashboard';
 
-/** Full-screen premium brand intro once per browser tab session */
-function BrandIntroGate() {
-  // TEMPORARILY DISABLED AS REQUESTED
-  return null;
-  const [visible, setVisible] = useState(() => {
-    try {
-      return !sessionStorage.getItem('tcm_brand_intro_done');
-    } catch {
-      return true;
-    }
-  });
+// /** Full-screen premium brand intro once per browser tab session */
+// function BrandIntroGate() {
+//   // TEMPORARILY DISABLED AS REQUESTED
+//   return null;
+//   const [visible, setVisible] = useState(() => {
+//     try {
+//       return !sessionStorage.getItem('tcm_brand_intro_done');
+//     } catch {
+//       return true;
+//     }
+//   });
 
-  const onIntroDone = useCallback(() => {
-    try {
-      sessionStorage.setItem('tcm_brand_intro_done', '1');
-    } catch {
-      /* ignore */
-    }
-    setVisible(false);
-  }, []);
+//   const onIntroDone = useCallback(() => {
+//     try {
+//       sessionStorage.setItem('tcm_brand_intro_done', '1');
+//     } catch {
+//       /* ignore */
+//     }
+//     setVisible(false);
+//   }, []);
 
-  return <BrandIntroLoader show={visible} onFinish={onIntroDone} logoHoldMs={2500} />;
-}
+//   return <BrandIntroLoader show={visible} onFinish={onIntroDone} logoHoldMs={2500} />;
+// }
 
-import { toast } from 'react-hot-toast'; // Import toast if missing
-import { getSocket } from './sockets/socketManager';
+// import { toast } from 'react-hot-toast'; // Import toast if missing
+// import { getSocket } from './sockets/socketManager';
 
-// Handles foreground push notifications and global socket events
-const GlobalNotificationHandler = () => {
-  useEffect(() => {
-    // 1. Firebase Foreground Push Notifications
-    const unsubscribe = onMessageListener((payload) => {
-      // Support both standard notification payloads AND data-only payloads
-      const title = payload.data?.title || payload.notification?.title;
-      const body = payload.data?.message || payload.notification?.body;
+// // Handles foreground push notifications and global socket events
+// const GlobalNotificationHandler = () => {
+//   useEffect(() => {
+//     // 1. Firebase Foreground Push Notifications
+//     const unsubscribe = onMessageListener((payload) => {
+//       // Support both standard notification payloads AND data-only payloads
+//       const title = payload.data?.title || payload.notification?.title;
+//       const body = payload.data?.message || payload.notification?.body;
 
-      if (title || body) {
-        toast.success(
-          <div className="flex flex-col gap-1">
-            <span className="font-bold">{title || 'The Chocolate Mine'}</span>
-            <span className="text-xs">{body || 'You have a new update'}</span>
-          </div>,
-          { duration: 6000, icon: '🍫' }
-        );
-      }
-    });
+//       if (title || body) {
+//         toast.success(
+//           <div className="flex flex-col gap-1">
+//             <span className="font-bold">{title || 'The Chocolate Mine'}</span>
+//             <span className="text-xs">{body || 'You have a new update'}</span>
+//           </div>,
+//           { duration: 6000, icon: '🍫' }
+//         );
+//       }
+//     });
 
-    // 2. Global Socket Listeners
-    const socket = getSocket();
-    if (socket) {
-      socket.on('product_updated', (data) => {
-        toast.success(
-          <div className="flex flex-col gap-1">
-            <span className="font-bold">Product Updated</span>
-            <span className="text-xs">{data.message || `${data.name} has been updated.`}</span>
-          </div>,
-          { duration: 6000, icon: '🔄' }
-        );
-      });
-    }
+//     // 2. Global Socket Listeners
+//     const socket = getSocket();
+//     if (socket) {
+//       socket.on('product_updated', (data) => {
+//         toast.success(
+//           <div className="flex flex-col gap-1">
+//             <span className="font-bold">Product Updated</span>
+//             <span className="text-xs">{data.message || `${data.name} has been updated.`}</span>
+//           </div>,
+//           { duration: 6000, icon: '🔄' }
+//         );
+//       });
+//     }
 
-    return () => {
-      if (typeof unsubscribe === 'function') unsubscribe();
-      if (socket) socket.off('product_updated');
-    };
-  }, []);
-  return null;
-};
-
-function App() {
-  return (
-    <AuthProvider>
-      <LocationProvider>
-        <WishlistProvider>
-          <ThemeProvider>
-            <BrandIntroGate />
-            <Router>
-              <ScrollToTop />
-              <SocketInitializer />
-              <GlobalNotificationHandler />
-              <Toaster
-                position="bottom-center"
-                toastOptions={{
-                  className: 'toast-premium',
-                  duration: 4000,
-                  style: {
-                    background: 'var(--card)',
-                    color: 'var(--foreground)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '16px',
-                    padding: '12px 20px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    boxShadow: 'var(--shadow-premium)',
-                  }
-                }}
-              />
-              <Routes>
-                {/* Public/User Routes */}
-                <Route element={<UserLayout />}>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/custom-cake" element={<CustomCake />} />
-                  <Route path="/product/:slug" element={<ProductDetails />} />
-                  <Route path="/occasion/:name" element={<OccasionProducts />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/track/:orderId?" element={<OrderTracking />} />
-                  <Route path="/order-success" element={<OrderSuccess />} />
-                  <Route path="/oauth-callback" element={<OAuthCallback />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/stores" element={<Stores />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/terms" element={<TermsConditions />} />
-                  <Route path="/refund" element={<RefundPolicy />} />
-
-                  {/* Guest only */}
-                  <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-                  <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-
-                  {/* Protected User */}
-                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                  <Route path="/review/:orderId" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
-
-                  {/* Legacy Redirects */}
-                  <Route path="/profile" element={<Navigate to="/account/dashboard" replace />} />
-                  <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
-
-                  {/* Premium Dashboard */}
-                  <Route path="/account" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<DashboardHome />} />
-                    <Route path="profile" element={<ProfileDetails />} />
-                    <Route path="addresses" element={<AddressManager />} />
-                    <Route path="settings" element={<AccountSettings />} />
-                    <Route path="orders" element={<OrderHistory />} />
-                    <Route path="orders/:id" element={<OrderDetails />} />
-                    <Route path="notifications" element={<UserNotifications />} />
-                    <Route path="wishlist" element={<Wishlist />} />
-                    <Route path="reviews" element={<MyReviews />} />
-                  </Route>
-                </Route>
-
-
-
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="products/create" element={<ProductForm />} />
-                  <Route path="products/edit/:id" element={<ProductForm />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="staff" element={<AdminStaff />} />
-                  <Route path="analytics" element={<AdminAnalytics />} />
-                  <Route path="categories" element={<CategoryManager />} />
-                  <Route path="occasions" element={<OccasionManager />} />
-                  <Route path="addons" element={<AddonManager />} />
-                  <Route path="banners" element={<AdminBanner />} />
-                  <Route path="custom-cakes" element={<AdminCustomCakes />} />
-                  <Route path="reviews" element={<AdminReviews />} />
-                  <Route path="google-reviews" element={<AdminGoogleReviews />} />
-                  <Route path="settings" element={<AdminDashboard />} />
-                </Route>
-
-                {/* Staff Routes */}
-                <Route path="/staff" element={<StaffRoute><StaffLayout /></StaffRoute>}>
-                  <Route index element={<Navigate to="/staff/dashboard" replace />} />
-                  <Route path="dashboard" element={<StaffDashboard />} />
-                  <Route path="orders/new" element={<StaffDashboard />} />
-                  <Route path="orders/active" element={<StaffDashboard />} />
-                  <Route path="orders/history" element={<StaffDashboard />} />
-                  <Route path="orders/out-for-delivery" element={<StaffDashboard />} />
-                  <Route path="orders/delivered" element={<StaffDashboard />} />
-                </Route>
-              </Routes>
-            </Router>
-          </ThemeProvider>
-        </WishlistProvider>
-      </LocationProvider>
-    </AuthProvider>
-  );
-}
-
-export default App;
+//     return () => {
+//       if (typeof unsubscribe === 'function') unsubscribe();
+//       if (socket) socket.off('product_updated');
+//     };
+//   }, []);
+//   return null;
+// };
 
 // function App() {
 //   return (
-//     <div
-//       style={{
-//         minHeight: "100vh",
-//         display: "flex",
-//         justifyContent: "center",
-//         alignItems: "center",
-//         background: "#f8f8f8",
-//         fontFamily: "Arial, sans-serif",
-//         textAlign: "center",
-//         padding: "20px",
-//       }}
-//     >
-//       <div>
-//         <h1
-//           style={{
-//             fontSize: "3rem",
-//             color: "#6b3f1d",
-//             marginBottom: "20px",
-//           }}
-//         >
-//           🚧 Under Maintenance
-//         </h1>
+//     <AuthProvider>
+//       <LocationProvider>
+//         <WishlistProvider>
+//           <ThemeProvider>
+//             <BrandIntroGate />
+//             <Router>
+//               <ScrollToTop />
+//               <SocketInitializer />
+//               <GlobalNotificationHandler />
+//               <Toaster
+//                 position="bottom-center"
+//                 toastOptions={{
+//                   className: 'toast-premium',
+//                   duration: 4000,
+//                   style: {
+//                     background: 'var(--card)',
+//                     color: 'var(--foreground)',
+//                     border: '1px solid var(--border)',
+//                     borderRadius: '16px',
+//                     padding: '12px 20px',
+//                     fontSize: '14px',
+//                     fontWeight: '600',
+//                     boxShadow: 'var(--shadow-premium)',
+//                   }
+//                 }}
+//               />
+//               <Routes>
+//                 {/* Public/User Routes */}
+//                 <Route element={<UserLayout />}>
+//                   <Route path="/" element={<Home />} />
+//                   <Route path="/shop" element={<Shop />} />
+//                   <Route path="/custom-cake" element={<CustomCake />} />
+//                   <Route path="/product/:slug" element={<ProductDetails />} />
+//                   <Route path="/occasion/:name" element={<OccasionProducts />} />
+//                   <Route path="/cart" element={<Cart />} />
+//                   <Route path="/track/:orderId?" element={<OrderTracking />} />
+//                   <Route path="/order-success" element={<OrderSuccess />} />
+//                   <Route path="/oauth-callback" element={<OAuthCallback />} />
+//                   <Route path="/contact" element={<Contact />} />
+//                   <Route path="/help" element={<Help />} />
+//                   <Route path="/stores" element={<Stores />} />
+//                   <Route path="/privacy" element={<PrivacyPolicy />} />
+//                   <Route path="/terms" element={<TermsConditions />} />
+//                   <Route path="/refund" element={<RefundPolicy />} />
 
-//         <p
-//           style={{
-//             fontSize: "1.2rem",
-//             color: "#555",
-//             marginBottom: "10px",
-//           }}
-//         >
-//           We're making some improvements to serve you better.
-//         </p>
+//                   {/* Guest only */}
+//                   <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+//                   <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+//                   <Route path="/forgot-password" element={<ForgotPassword />} />
 
-//         <p
-//           style={{
-//             fontSize: "1rem",
-//             color: "#777",
-//           }}
-//         >
-//           The Chocolate Mine website will be back shortly.
-//         </p>
-//       </div>
-//     </div>
+//                   {/* Protected User */}
+//                   <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+//                   <Route path="/review/:orderId" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
+
+//                   {/* Legacy Redirects */}
+//                   <Route path="/profile" element={<Navigate to="/account/dashboard" replace />} />
+//                   <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
+
+//                   {/* Premium Dashboard */}
+//                   <Route path="/account" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+//                     <Route index element={<Navigate to="dashboard" replace />} />
+//                     <Route path="dashboard" element={<DashboardHome />} />
+//                     <Route path="profile" element={<ProfileDetails />} />
+//                     <Route path="addresses" element={<AddressManager />} />
+//                     <Route path="settings" element={<AccountSettings />} />
+//                     <Route path="orders" element={<OrderHistory />} />
+//                     <Route path="orders/:id" element={<OrderDetails />} />
+//                     <Route path="notifications" element={<UserNotifications />} />
+//                     <Route path="wishlist" element={<Wishlist />} />
+//                     <Route path="reviews" element={<MyReviews />} />
+//                   </Route>
+//                 </Route>
+
+
+
+//                 {/* Admin Routes */}
+//                 <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+//                   <Route path="dashboard" element={<AdminDashboard />} />
+//                   <Route path="products" element={<AdminProducts />} />
+//                   <Route path="products/create" element={<ProductForm />} />
+//                   <Route path="products/edit/:id" element={<ProductForm />} />
+//                   <Route path="orders" element={<AdminOrders />} />
+//                   <Route path="staff" element={<AdminStaff />} />
+//                   <Route path="analytics" element={<AdminAnalytics />} />
+//                   <Route path="categories" element={<CategoryManager />} />
+//                   <Route path="occasions" element={<OccasionManager />} />
+//                   <Route path="addons" element={<AddonManager />} />
+//                   <Route path="banners" element={<AdminBanner />} />
+//                   <Route path="custom-cakes" element={<AdminCustomCakes />} />
+//                   <Route path="reviews" element={<AdminReviews />} />
+//                   <Route path="google-reviews" element={<AdminGoogleReviews />} />
+//                   <Route path="settings" element={<AdminDashboard />} />
+//                 </Route>
+
+//                 {/* Staff Routes */}
+//                 <Route path="/staff" element={<StaffRoute><StaffLayout /></StaffRoute>}>
+//                   <Route index element={<Navigate to="/staff/dashboard" replace />} />
+//                   <Route path="dashboard" element={<StaffDashboard />} />
+//                   <Route path="orders/new" element={<StaffDashboard />} />
+//                   <Route path="orders/active" element={<StaffDashboard />} />
+//                   <Route path="orders/history" element={<StaffDashboard />} />
+//                   <Route path="orders/out-for-delivery" element={<StaffDashboard />} />
+//                   <Route path="orders/delivered" element={<StaffDashboard />} />
+//                 </Route>
+//               </Routes>
+//             </Router>
+//           </ThemeProvider>
+//         </WishlistProvider>
+//       </LocationProvider>
+//     </AuthProvider>
 //   );
 // }
 
 // export default App;
+
+function App() {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "#f8f8f8",
+        fontFamily: "Arial, sans-serif",
+        textAlign: "center",
+        padding: "20px",
+      }}
+    >
+      <div>
+        <h1
+          style={{
+            fontSize: "3rem",
+            color: "#6b3f1d",
+            marginBottom: "20px",
+          }}
+        >
+          🚧 Under Maintenance
+        </h1>
+
+        <p
+          style={{
+            fontSize: "1.2rem",
+            color: "#555",
+            marginBottom: "10px",
+          }}
+        >
+          We're making some improvements to serve you better.
+        </p>
+
+        <p
+          style={{
+            fontSize: "1rem",
+            color: "#777",
+          }}
+        >
+          The Chocolate Mine website will be back shortly.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default App;
 // App.jsx - Maintenance Page Only
-// This component renders a "Under Maintenance" landing page
-// No external resources, no loading of unfinished code
+This component renders a "Under Maintenance" landing page
+No external resources, no loading of unfinished code
 
 

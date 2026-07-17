@@ -344,7 +344,5 @@ function App() {
 
 export default App;
 // App.jsx - Maintenance Page Only
-This component renders a "Under Maintenance" landing page
-No external resources, no loading of unfinished code
 
 

@@ -153,6 +153,14 @@ const adminService = {
   ---------------------------------------- */
   getGoogleAnalytics: () => api.get('/admin/social-media/google'),
   getInstagramStats: () => api.get('/admin/social-media/instagram'),
+
+  /* ----------------------------------------
+     Addon Management
+  ---------------------------------------- */
+  getAddons: () => api.get('/addons'),
+  createAddon: (formData) => api.post('/addons', formData),
+  updateAddon: (id, formData) => api.put(`/addons/${id}`, formData),
+  deleteAddon: (id) => api.delete(`/addons/${id}`),
 };
 
 export default adminService;

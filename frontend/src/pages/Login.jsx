@@ -31,23 +31,33 @@ const Login = () => {
     }
   }, [searchParams]);
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      const user = await signInWithGoogle();
-      toast.success(`Welcome back, ${user.displayName || 'Explorer'}!`);
-      navigate('/');
-    } catch (err) {
-      if (err.code === 'auth/popup-closed-by-user') {
-        toast.error('Sign-in cancelled. Please try again.');
-      } else {
-        toast.error('Google Authentication Failed. Please try again.');
-        console.error('Firebase Auth Error:', err);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleGoogleLogin = async () => {
+  try {
+    setLoading(true);
+
+    console.log("===== GOOGLE LOGIN STARTED =====");
+
+    const user = await signInWithGoogle();
+
+    console.log("Firebase User:", user);
+
+    toast.success(`Welcome back, ${user.displayName || "Explorer"}!`);
+
+    navigate("/");
+  } catch (err) {
+    console.log("============== FIREBASE ERROR ==============");
+    console.log("Error Code:", err.code);
+    console.log("Error Message:", err.message);
+    console.log("Custom Data:", err.customData);
+    console.log("Email:", err.customData?.email);
+    console.log("Credential:", err.credential);
+    console.log("Complete Error:", err);
+
+    toast.error(err.message || "Google Authentication Failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

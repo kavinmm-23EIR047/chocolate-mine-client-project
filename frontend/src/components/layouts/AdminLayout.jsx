@@ -20,6 +20,7 @@ import {
   Cake,
   MessageSquare,
   Star,
+  PlusSquare,
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -34,6 +35,7 @@ const menuItems = [
   { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/admin/categories', label: 'Categories', icon: Tag },
   { path: '/admin/occasions', label: 'Occasions', icon: Gift },
+  { path: '/admin/addons', label: 'Add-ons', icon: PlusSquare },
   { path: '/admin/banners', label: 'Banners', icon: ImageIcon },
   { path: '/admin/custom-cakes', label: 'Custom Cakes', icon: Cake },
   { path: '/admin/reviews', label: 'Reviews', icon: MessageSquare },

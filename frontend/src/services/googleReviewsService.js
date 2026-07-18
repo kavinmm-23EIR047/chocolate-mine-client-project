@@ -42,7 +42,7 @@ const googleReviewsService = {
   // Get export URL
   getExportUrl: () => {
     // using api.defaults.baseURL to get backend URL
-    const baseUrl = api.defaults.baseURL || 'http://localhost:5000/api/v1';
+    const baseUrl = api.defaults.baseURL || (import.meta.env.PROD ? window.location.origin + '/api/v1' : 'http://localhost:5000/api/v1');
     return `${baseUrl}${GOOGLE_REVIEWS_URL}/export/excel`;
   }
 };

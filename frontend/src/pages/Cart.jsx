@@ -43,22 +43,38 @@ const Cart = () => {
 
   // ==================== PRICE CALCULATION LOGIC ====================
   const getItemBasePrice = (item) => {
+    let base = 0;
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
-    if (!Number.isNaN(vp) && vp > 0) return vp;
-
-    const hasOfferPrice =
-      item.offerPrice !== undefined &&
-      item.offerPrice !== null &&
-      Number(item.offerPrice) > 0 &&
-      Number(item.offerPrice) < Number(item.price);
-
-    return hasOfferPrice ? Number(item.offerPrice) : Number(item.price);
+    if (!Number.isNaN(vp) && vp > 0) base = vp;
+    else {
+      const hasOfferPrice =
+        item.offerPrice !== undefined &&
+        item.offerPrice !== null &&
+        Number(item.offerPrice) > 0 &&
+        Number(item.offerPrice) < Number(item.price);
+      base = hasOfferPrice ? Number(item.offerPrice) : Number(item.price);
+    }
+    
+    if (item.addons && Array.isArray(item.addons)) {
+      item.addons.forEach(addon => {
+        base += Number(addon.price || 0) * (addon.qty || 1);
+      });
+    }
+    return base;
   };
 
   const getItemMrp = (item) => {
+    let mrp = 0;
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
-    if (!Number.isNaN(vp) && vp > 0) return vp;
-    return Number(item.price ?? 0);
+    if (!Number.isNaN(vp) && vp > 0) mrp = vp;
+    else mrp = Number(item.price ?? 0);
+    
+    if (item.addons && Array.isArray(item.addons)) {
+      item.addons.forEach(addon => {
+        mrp += Number(addon.price || 0) * (addon.qty || 1);
+      });
+    }
+    return mrp;
   };
 
   const getItemCouponDiscount = (item) => {
@@ -250,6 +266,20 @@ const Cart = () => {
                                 <p className="text-xs text-muted font-medium">Weight: {item.selectedWeight}</p>
                               )}
                             </>
+                          )}
+                          
+                          {item.addons && item.addons.length > 0 && (
+                            <div className="mt-1.5 p-2 bg-card-soft border border-border/40 rounded-lg">
+                              <p className="text-[9px] text-muted font-black uppercase tracking-widest mb-1">Add-ons included:</p>
+                              <div className="flex flex-col gap-1">
+                                {item.addons.map((addon, idx) => (
+                                  <div key={idx} className="flex justify-between items-center text-xs text-foreground font-medium pr-1">
+                                    <span className="flex items-center gap-1.5"><Plus size={10} className="text-primary"/> {addon.name}</span>
+                                    <span>{formatCurrency(addon.price)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           )}
 
                           <div className="mt-3 space-y-1.5 text-xs font-medium text-muted">

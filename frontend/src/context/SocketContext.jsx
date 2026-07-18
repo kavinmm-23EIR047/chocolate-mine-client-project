@@ -30,7 +30,7 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api/v1', '');
+    const baseUrl = (import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin + '/api/v1' : 'http://localhost:5000')).replace('/api/v1', '');
     
     // Initialize socket connection
     const socket = io(baseUrl, {

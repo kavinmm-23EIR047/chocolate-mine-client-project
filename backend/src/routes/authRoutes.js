@@ -65,7 +65,8 @@ router.get(
 router.get(
   '/google/callback',
   (req, res, next) => {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://chocolate-mine-client-project.vercel.app';
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
     passport.authenticate('google', { 
       failureRedirect: `${frontendUrl}/login?error=GoogleAuthFailed`, 
       session: false 

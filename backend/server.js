@@ -46,7 +46,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5174',
   'https://chocolate-mine-client-project.vercel.app',
   'https://thechocolatemine.in',
-  process.env.FRONTEND_URL
+  require('./src/utils/urlUtils').getFrontendUrl()
 ]
   .filter(Boolean)
   .map(origin => origin.replace(/\/$/, '')); // Remove trailing slashes

@@ -111,7 +111,8 @@ const generateStaffSheet = async (order, item) => {
 
 const sendStaffWhatsApp = async (order, item) => {
   const { customDetails, designImages } = item;
-  const message = `🎂 New Custom Cake Order #${order.orderNumber}\n\n${customDetails.shape?.toUpperCase()} | ${customDetails.tiers} Tier | ${customDetails.weight}\nFlavour: ${customDetails.flavour}\nTheme: ${customDetails.designTheme}\nMsg: ${customDetails.messageOnCake || 'N/A'}\n\nOpen Dashboard: ${process.env.FRONTEND_URL}/staff/orders`;
+  const { getFrontendUrl } = require('../utils/urlUtils');
+  const message = `🎂 New Custom Cake Order #${order.orderNumber}\n\n${customDetails.shape?.toUpperCase()} | ${customDetails.tiers} Tier | ${customDetails.weight}\nFlavour: ${customDetails.flavour}\nTheme: ${customDetails.designTheme}\nMsg: ${customDetails.messageOnCake || 'N/A'}\n\nOpen Dashboard: ${getFrontendUrl()}/staff/orders`;
   
   await telegramService.sendStaffAlert(message, designImages?.preview);
   order.customCakeWhatsAppSent = true;
@@ -120,7 +121,8 @@ const sendStaffWhatsApp = async (order, item) => {
 
 const sendUserConfirmation = async (order, item) => {
   const { designImages } = item;
-  const caption = `✅ Your custom cake order #${order.orderNumber} is confirmed.\n\nTrack: ${process.env.FRONTEND_URL}/account/orders/${order._id}`;
+  const { getFrontendUrl } = require('../utils/urlUtils');
+  const caption = `✅ Your custom cake order #${order.orderNumber} is confirmed.\n\nTrack: ${getFrontendUrl()}/account/orders/${order._id}`;
   
   if (designImages?.preview) {
     await telegramService.sendMediaWhatsApp(order.userId.phone, designImages.preview, caption);

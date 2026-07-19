@@ -12,6 +12,7 @@ import SearchOverlay from './search/SearchOverlay';
 import ThemeToggle from './ui/ThemeToggle';
 import NotificationDropdown from './ui/NotificationDropdown';
 import MegaMenu from './ui/MegaMenu';
+import Logo from './Logo';
 
 const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.items);
@@ -50,25 +51,7 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const LogoMark = ({ containerClass = "w-[95px] sm:w-[110px] lg:w-[120px] tv:w-[150px]" }) => (
-    <div className={`flex flex-col items-center text-inherit font-sans py-1 my-auto ${containerClass}`}>
-      <div className="w-full flex justify-between text-[8px] sm:text-[8.5px] lg:text-[9.5px] font-black uppercase leading-none select-none text-inherit/90 tracking-normal mb-1 px-[0.5px]">
-        <span>T</span><span>H</span><span>E</span>
-        <span className="w-[8%]"></span>
-        <span>C</span><span>H</span><span>O</span><span>C</span><span>O</span><span>L</span><span>A</span><span>T</span><span>E</span>
-      </div>
-      <svg
-        viewBox="0 0 325 90"
-        className="w-full h-auto fill-current text-inherit transition-colors"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M0 86V0h25.5l29.5 45L84.5 0H110v86H87V32L61.5 71h-13L23 32v54H0z" />
-        <path d="M131 0h24v86h-24V0z" />
-        <path d="M176 86V0h24.5l37.5 56V0h24v86h-23.5L200 29v57h-24z" />
-        <path d="M283 0h42v21h-18v12h14v20h-14v12h18v21h-42V0z" />
-      </svg>
-    </div>
-  );
+  // Using imported Logo component instead of inline LogoMark
 
   return (
     <>
@@ -92,7 +75,7 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center justify-between gap-4 py-3 min-h-[65px] tv:min-h-[84px]">
             <div className="flex items-center gap-6 shrink-0">
               <Link to="/" className="shrink-0 block select-none group pr-1">
-                <LogoMark />
+                <Logo className="w-[120px] sm:w-[140px] lg:w-[160px] h-auto object-contain" />
               </Link>
 
               <div className="relative shrink-0" ref={locationDropdownRef}>
@@ -192,8 +175,8 @@ const Navbar = () => {
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                   </svg>
                 </button>
-                <Link to="/" className="block select-none group flex-shrink-0">
-                  <LogoMark containerClass="w-[95px] sm:w-[115px]" />
+                <Link to="/" className="shrink-0 block select-none group pr-1 pl-1">
+                  <Logo className="w-[110px] sm:w-[130px] h-auto object-contain" />
                 </Link>
               </div>
 

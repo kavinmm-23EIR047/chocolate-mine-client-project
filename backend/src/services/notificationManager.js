@@ -243,7 +243,8 @@ exports.handleStatusChange = async (order, status) => {
     }
 
     const trackingNumber = populatedOrder.orderNumber || populatedOrder._id.toString();
-    const trackingLink = `${process.env.FRONTEND_URL}/account/orders/${populatedOrder._id}`;
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const trackingLink = `${getFrontendUrl()}/account/orders/${populatedOrder._id}`;
     const userPhone = populatedOrder.userId.phone || populatedOrder.address?.phone;
     
     // WEB UPDATE (SOCKET)
@@ -268,7 +269,8 @@ exports.handleStatusChange = async (order, status) => {
       const invoiceService = require('./invoiceService');
       await invoiceService.sendInvoiceAfterDelivery(populatedOrder._id, true);
       if (userPhone) {
-        await telegramService.sendDelivered(userPhone, trackingNumber, `${process.env.FRONTEND_URL}/review`, populatedOrder.userId._id);
+        const { getFrontendUrl } = require('../utils/urlUtils');
+        await telegramService.sendDelivered(userPhone, trackingNumber, `${getFrontendUrl()}/review`, populatedOrder.userId._id);
       }
     }
 

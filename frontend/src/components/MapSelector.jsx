@@ -40,16 +40,49 @@ const LocationMarker = ({ position, setPosition, setAddress }) => {
   );
 };
 
+const MapUpdater = ({ position }) => {
+  const map = useMapEvents({});
+  React.useEffect(() => {
+    if (position) {
+      map.setView(position, map.getZoom());
+    }
+  }, [position, map]);
+  return null;
+};
+
 const MapSelector = ({ onSelect }) => {
   const [position, setPosition] = useState({ 
     lat: Number(import.meta.env.VITE_SHOP_LAT) || 11.00454, 
     lng: Number(import.meta.env.VITE_SHOP_LNG) || 76.97511 
   }); 
   const [address, setAddress] = useState("The Chocolate Mine Shop, Coimbatore");
-
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleConfirm = () => {
     onSelect({ position, address });
+  };
+
+  const handleSearch = async (e) => {
+    if (e.key !== 'Enter' || !address.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+      const data = await res.json();
+      
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        setPosition({ lat: parseFloat(lat), lng: parseFloat(lon) });
+        setAddress(display_name); // Update with the formatted address
+      } else {
+        alert("Location not found. Please try a different search.");
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      alert("Error searching for location.");
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -58,12 +91,16 @@ const MapSelector = ({ onSelect }) => {
         <div className="relative">
           <input 
             type="text" 
-            placeholder="Search your area..." 
-            className="input-field pl-10"
+            placeholder="Search your area and press Enter..." 
+            className="input-field pl-10 w-full"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            onKeyDown={handleSearch}
           />
           <Search className="absolute left-3 top-3 text-[var(--muted)]" size={18} />
+          {isSearching && (
+            <div className="absolute right-3 top-3 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          )}
         </div>
       </div>
 
@@ -77,6 +114,7 @@ const MapSelector = ({ onSelect }) => {
             setPosition={setPosition} 
             setAddress={setAddress} 
           />
+          <MapUpdater position={position} />
         </MapContainer>
         
         <button className="absolute bottom-4 right-4 z-[1000] p-3 bg-[var(--card)] rounded-full shadow-2xl text-[var(--secondary)] border border-[var(--border)] hover:scale-110 transition-transform">

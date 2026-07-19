@@ -261,7 +261,7 @@ const Navbar = () => {
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 left-0 bottom-0 w-full sm:w-[82%] sm:max-w-[360px] bg-card z-[220] shadow-2xl flex flex-col">
               <div className="p-4 border-b border-border/15">
                 <div className="flex justify-between items-center mb-4">
-                  <LogoMark containerClass="w-[115px]" />
+                  <Logo className="w-[130px] h-auto object-contain" />
                   <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-xl text-heading hover:bg-heading/10 transition-all active:scale-95 flex items-center justify-center" aria-label="Close menu"><X size={22} /></button>
                 </div>
               </div>

@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa';
 import Button from './ui/Button';
 import PureVegBadge from './ui/PureVegBadge';
+import Logo from './Logo';
 
 const Footer = () => {
   return (
@@ -76,23 +77,7 @@ const Footer = () => {
 
             {/* Logo */}
             <Link to="/" className="block select-none group">
-              <div className="flex flex-col items-center font-sans w-[130px] sm:w-[150px]">
-                <div className="w-full flex justify-between text-[9px] sm:text-[10px] font-black uppercase leading-none tracking-normal mb-1.5 px-[0.5px] text-current">
-                  <span>T</span><span>H</span><span>E</span>
-                  <span className="w-[8%]"></span>
-                  <span>C</span><span>H</span><span>O</span><span>C</span><span>O</span><span>L</span><span>A</span><span>T</span><span>E</span>
-                </div>
-                <svg
-                  viewBox="0 0 325 90"
-                  className="w-full h-auto fill-current transition-colors duration-300"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M0 86V0h25.5l29.5 45L84.5 0H110v86H87V32L61.5 71h-13L23 32v54H0z" />
-                  <path d="M131 0h24v86h-24V0z" />
-                  <path d="M176 86V0h24.5l37.5 56V0h24v86h-23.5L200 29v57h-24z" />
-                  <path d="M283 0h42v21h-18v12h14v20h-14v12h18v21h-42V0z" />
-                </svg>
-              </div>
+              <Logo className="w-[140px] sm:w-[170px] h-auto object-contain" variant="dark" />
             </Link>
 
             <p className="text-sm sm:text-base font-medium opacity-80 max-w-md leading-relaxed italic">

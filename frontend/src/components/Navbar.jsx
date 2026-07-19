@@ -62,14 +62,14 @@ const Navbar = () => {
         className="w-full h-auto fill-current text-inherit transition-colors"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* M - Styled with sharp outer peaks sloping inward */}
-        <path d="M0 86V0l28 22 27 38 27-38L110 0v86H85V38L55 72 25 38v48H0z" />
+        {/* M - Solid bold with sharp top peaks (steep slant, no shoulder) */}
+        <path d="M0 86V0L25.5 20L55 53L84.5 20L110 0v86H87V32L55 71 23 32v54H0z" />
         
         {/* I - Standard block */}
         <path d="M131 0h24v86h-24V0z" />
         
-        {/* N - Styled with sharp top-left and top-right peaks */}
-        <path d="M176 86V0l62 86h24V0l-26 22v64h-25V32L176 86z" />
+        {/* N - Solid bold with sharp top-left peak and flat top-right */}
+        <path d="M176 86V0L200.5 20L238 56V0h24v86h-23.5L200 29v57h-24z" />
         
         {/* E - Standard block */}
         <path d="M283 0h42v21h-18v12h14v20h-14v12h18v21h-42V0z" />

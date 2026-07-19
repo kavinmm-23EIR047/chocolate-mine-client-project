@@ -334,7 +334,20 @@ const sendPaymentFailure = (phone, amount, customerName) => {
 
 const sendInternalOrderAlert = (to, order) => {
   const itemsList = order.items.map(item => formatAdminOrderItem(item)).join('\n');
-  const address = `${order.address.fullName}, ${order.address.houseNo}, ${order.address.street}, ${order.address.city} - ${order.address.pincode}`;
+  
+  const addrParts = [];
+  if (order.address.fullName) addrParts.push(order.address.fullName);
+  if (order.address.houseNo) addrParts.push(order.address.houseNo);
+  if (order.address.street) addrParts.push(order.address.street);
+  if (order.address.landmark) addrParts.push(`Landmark: ${order.address.landmark}`);
+  if (order.address.city) addrParts.push(order.address.city);
+  if (order.address.pincode) addrParts.push(order.address.pincode);
+  const address = addrParts.join(', ');
+
+  let mapsUrlMsg = '';
+  if (order.address.lat && order.address.lng) {
+    mapsUrlMsg = `\n🗺️ *Directions:* https://www.google.com/maps/search/?api=1&query=${order.address.lat},${order.address.lng}`;
+  }
   
   const message = `🍫 *New Order Received*\n\n` +
     `🆔 *Order ID:* ${order.orderNumber}\n` +
@@ -345,7 +358,8 @@ const sendInternalOrderAlert = (to, order) => {
     `💰 *Total Amount:* ₹${order.total}\n` +
     `📅 *Delivery Date:* ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
     `⏰ *Delivery Slot:* ${order.deliverySlot || 'N/A'}\n` +
-    `📅 *Ordered Time:* ${new Date(order.createdAt).toLocaleString()}\n\n` +
+    `📅 *Ordered Time:* ${new Date(order.createdAt).toLocaleString()}` +
+    mapsUrlMsg + `\n\n` +
     `Please check admin dashboard now.`;
   return sendWhatsApp(to, message, 'admin');
 };

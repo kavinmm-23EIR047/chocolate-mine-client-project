@@ -106,7 +106,7 @@ const AddressManager = () => {
 
 const AddressModal = ({ address, onClose, onSuccess }) => {
   const [formData, setFormData] = useState(address || {
-    fullName: '', phone: '', houseNo: '', street: '', pincode: '', type: 'Home', isDefault: false
+    fullName: '', phone: '', houseNo: '', street: '', landmark: '', pincode: '', type: 'Home', isDefault: false
   });
   const [showMap, setShowMap] = useState(false);
 
@@ -176,8 +176,12 @@ const AddressModal = ({ address, onClose, onSuccess }) => {
               <input className="input-field" value={formData.houseNo} onChange={e => setFormData({ ...formData, houseNo: e.target.value })} placeholder="e.g. 102, Green Apartments" required />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2">Street/Landmark</label>
-              <input className="input-field" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} placeholder="e.g. Opp. Central Mall" required />
+              <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2">Street Address</label>
+              <input className="input-field" value={formData.street} onChange={e => setFormData({ ...formData, street: e.target.value })} placeholder="e.g. MG Road, Near Park" required />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2">Landmark</label>
+              <input className="input-field" value={formData.landmark || ''} onChange={e => setFormData({ ...formData, landmark: e.target.value })} placeholder="e.g. Opp. Central Mall" required />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2">Pincode</label>

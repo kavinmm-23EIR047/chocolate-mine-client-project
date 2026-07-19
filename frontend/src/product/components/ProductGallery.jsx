@@ -119,16 +119,16 @@ const ProductGallery = ({
       )}
 
       {/* ── VALUE HIGHLIGHTS GRID (Desktop View Only) ── */}
-      <div className="hidden lg:grid grid-cols-3 gap-6">
+      <div className="hidden lg:grid grid-cols-3 gap-3">
         {[
           { icon: Sparkles, label: 'Handcrafted', sub: '100% Artisanal' },
           { icon: RotateCcw, label: 'Fresh Daily', sub: 'Baked today' },
           { icon: ShieldCheck, label: 'Secure Pay', sub: '100% safe' },
         ].map(({ icon: Icon, label, sub }) => (
-          <div key={label} className="bg-card rounded-3xl border border-border/50 p-5 xl:p-6 flex flex-col items-center text-center gap-2 hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
-            <Icon size={24} className="text-primary mb-1 xl:w-7 xl:h-7" />
+          <div key={label} className="bg-card rounded-2xl border border-border/50 p-3 xl:p-4 flex flex-col items-center text-center gap-1.5 hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
+            <Icon size={20} className="text-primary xl:w-6 xl:h-6" />
             <p className="text-xs xl:text-sm font-black uppercase tracking-wider text-heading">{label}</p>
-            <p className="text-xs text-muted font-medium">{sub}</p>
+            <p className="text-[11px] text-muted font-medium">{sub}</p>
           </div>
         ))}
       </div>

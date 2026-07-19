@@ -120,6 +120,18 @@ const cartSlice = createSlice({
       state.appliedCoupon = action.payload;
       localStorage.setItem('appliedCoupon', JSON.stringify(action.payload));
     },
+    updateCartItemAddons: (state, action) => {
+      const { productId, addons, options } = action.payload;
+      const item = state.items.find(
+        (i) =>
+          i.productId === productId &&
+          JSON.stringify(i.options) === JSON.stringify(options)
+      );
+      if (item) {
+        item.addons = addons || [];
+      }
+      localStorage.setItem('cartItems', JSON.stringify(state.items));
+    },
     // Realtime stock sync for cart
     syncCartStock: (state, action) => {
       const { productId, newStock, variantUpdate } = action.payload;
@@ -138,5 +150,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addToCart, removeFromCart, updateCartQty, clearCart, setCoupon, syncCartStock } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateCartQty, clearCart, setCoupon, updateCartItemAddons, syncCartStock } = cartSlice.actions;
 export default cartSlice.reducer;

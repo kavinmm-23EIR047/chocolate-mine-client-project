@@ -200,9 +200,13 @@ exports.generateInvoiceBuffer = async (orderId) => {
     const ROW_PAD = 8;
 
     order.items.forEach(function(item, idx) {
-      const qty   = Number(item.qty   || 0);
-      const price = Number(item.price || 0);
-      const total = qty * price;
+      const qty = Number(item.qty || 0);
+      const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
+      let addonTotal = 0;
+      if (item.addons && Array.isArray(item.addons)) {
+        addonTotal = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0) * qty;
+      }
+      const total = (qty * finalUnitPrice) + addonTotal;
       const nameText = item.name || '—';
 
       // Build subtitle with flavor/weight
@@ -213,11 +217,19 @@ exports.generateInvoiceBuffer = async (orderId) => {
         ? (item.customDetails && item.customDetails.flavour ? item.customDetails.flavour : resolvedFlavor)
         : (showFlavor ? resolvedFlavor : '');
       const subParts = [flavorDisplay, weight].filter(Boolean);
-      const subtitle = subParts.length > 0 ? subParts.join(' · ') : '';
+      if (Number(item.price) > finalUnitPrice) {
+        subParts.push(`Original: Rs. ${Number(item.price).toFixed(2)}`);
+      }
+      let subtitle = subParts.length > 0 ? subParts.join(' · ') : '';
+      
+      if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
+        const addonStr = item.addons.map(a => `+ Addon: ${a.name} (x${a.qty || 1}) - Rs. ${(a.price * (a.qty || 1)).toFixed(2)}`).join('\n');
+        subtitle = subtitle ? `${subtitle}\n${addonStr}` : addonStr;
+      }
 
       // Calculate row height based on name + optional subtitle
       const nameH = doc.heightOfString(nameText, { font: 'Helvetica', fontSize: 9, width: COL_W.desc });
-      const subH = subtitle ? doc.heightOfString(subtitle, { font: 'Helvetica-Oblique', fontSize: 7.5, width: COL_W.desc }) + 2 : 0;
+      const subH = subtitle ? doc.heightOfString(subtitle, { font: 'Helvetica-Oblique', fontSize: 7.5, width: COL_W.desc }) + 4 : 0;
       const rowH = Math.max(nameH + subH + ROW_PAD * 2, 26);
 
       // Explicit alternate background tracking row strips
@@ -236,7 +248,7 @@ exports.generateInvoiceBuffer = async (orderId) => {
         doc.text(subtitle, COL.desc, cy + nameH + 1, { width: COL_W.desc, align: 'left' });
       }
       doc.font('Helvetica').fontSize(9).fillColor(COLORS.brandText);
-      doc.text('Rs. ' + price.toFixed(2),   COL.unitPrice, cy, { width: COL_W.unitPrice, align: 'right' });
+      doc.text('Rs. ' + finalUnitPrice.toFixed(2),   COL.unitPrice, cy, { width: COL_W.unitPrice, align: 'right' });
       doc.text('Rs. ' + total.toFixed(2),   COL.amount,    cy, { width: COL_W.amount,    align: 'right' });
 
       rowY += rowH;

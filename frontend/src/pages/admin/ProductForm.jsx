@@ -979,8 +979,6 @@ const ProductForm = () => {
                         className="w-full bg-input border border-input-border px-3 py-2 rounded-lg outline-none font-bold text-sm"
                       >
                         <option value="percent">Percent (%)</option>
-                        <option value="flat">Flat (₹)</option>
-                        <option value="price">Fixed Price</option>
                       </select>
                     </div>
                     <div className="space-y-2">

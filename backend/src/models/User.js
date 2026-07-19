@@ -64,6 +64,7 @@ const userSchema = new mongoose.Schema({
     phone: String,
     houseNo: String,
     street: String,
+    landmark: String,
     city: { type: String, default: 'Coimbatore' },
     pincode: String,
     lat: Number,

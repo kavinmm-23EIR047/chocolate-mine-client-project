@@ -274,8 +274,11 @@ const Cart = () => {
                               <div className="flex flex-col gap-1">
                                 {item.addons.map((addon, idx) => (
                                   <div key={idx} className="flex justify-between items-center text-xs text-foreground font-medium pr-1">
-                                    <span className="flex items-center gap-1.5"><Plus size={10} className="text-primary"/> {addon.name}</span>
-                                    <span>{formatCurrency(addon.price)}</span>
+                                    <span className="flex items-center gap-1.5">
+                                      <Plus size={10} className="text-primary"/> {addon.name}
+                                      <span className="text-[10px] text-muted/60 font-bold ml-1">x{addon.qty || 1}</span>
+                                    </span>
+                                    <span>{formatCurrency(addon.price * (addon.qty || 1))}</span>
                                   </div>
                                 ))}
                               </div>

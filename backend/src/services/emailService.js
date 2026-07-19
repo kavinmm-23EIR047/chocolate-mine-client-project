@@ -124,8 +124,22 @@ const emailService = {
       const flavorDisplay = item.isCustomCake
         ? (item.customDetails?.flavour || resolvedFlavor)
         : (showFlavor ? resolvedFlavor : '');
-      const subtag = [flavorDisplay, weight].filter(Boolean).join(' · ');
-      const lineTotal = (Number(item.price) || 0) * (Number(item.qty) || 1);
+      const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
+      
+      const subtagParts = [flavorDisplay, weight];
+      if (Number(item.price) > finalUnitPrice) {
+        subtagParts.push(`Original: ₹${Number(item.price).toFixed(2)}`);
+      }
+      let subtag = subtagParts.filter(Boolean).join(' · ');
+      
+      let addonTotal = 0;
+      if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
+        const addonList = item.addons.map(a => `+ ${a.name} (x${a.qty || 1}) - ₹${(a.price * (a.qty || 1)).toFixed(2)}`).join('<br/>');
+        subtag = subtag ? `${subtag}<br/><span style="color: #A06050;">${addonList}</span>` : `<span style="color: #A06050;">${addonList}</span>`;
+        addonTotal = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
+      }
+      
+      const lineTotal = (finalUnitPrice * Number(item.qty || 1)) + (addonTotal * Number(item.qty || 1));
 
       return `
         <tr>
@@ -173,8 +187,29 @@ const emailService = {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colspan="2" style="padding: 10px 12px; text-align: right; font-weight: 700; font-size: 13px;">Total</td>
-                    <td style="padding: 10px 12px; text-align: right; font-weight: 800; font-size: 14px;">₹${Number(order.total || 0).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E; border-top: 1px solid #D1C5C3;">Subtotal</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E; border-top: 1px solid #D1C5C3;">₹${Number(order.subtotal || 0).toFixed(2)}</td>
+                  </tr>
+                  ${Number(order.discount || 0) > 0 ? `
+                  <tr>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #2E7D32;">Discount</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #2E7D32;">-₹${Number(order.discount).toFixed(2)}</td>
+                  </tr>` : ''}
+                  <tr>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">Delivery Charge</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.deliveryCharge || 0).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">GST (18%)</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.gst || 0).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">Convenience Fee (2%)</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.convenienceFee || 0).toFixed(2)}</td>
+                  </tr>
+                  <tr style="background-color: #381A14; color: #fff;">
+                    <td colspan="2" style="padding: 10px 12px; text-align: right; font-weight: 700; font-size: 13px; color: #fff; border-radius: 0 0 0 8px;">Grand Total</td>
+                    <td style="padding: 10px 12px; text-align: right; font-weight: 800; font-size: 14px; color: #fff; border-radius: 0 0 8px 0;">₹${Number(order.total || 0).toFixed(2)}</td>
                   </tr>
                 </tfoot>
               </table>

@@ -299,7 +299,7 @@ const Profile = () => {
 
 const AddressModal = ({ address, onClose, onSuccess }) => {
   const [formData, setFormData] = useState(address || {
-    fullName: '', phone: '', houseNo: '', street: '', pincode: '', type: 'Home', isDefault: false
+    fullName: '', phone: '', houseNo: '', street: '', landmark: '', pincode: '', type: 'Home', isDefault: false
   });
   const [showMap, setShowMap] = useState(false);
 
@@ -389,11 +389,21 @@ const AddressModal = ({ address, onClose, onSuccess }) => {
               />
             </div>
             <div className="space-y-2 min-w-0">
-              <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2 block">Street/Landmark</label>
+              <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2 block">Street Address</label>
               <input
                 className="input-field w-full px-4 py-3 rounded-xl border border-border bg-surface focus:ring-2 focus:ring-primary/20 transition-all"
                 value={formData.street}
                 onChange={e => setFormData({ ...formData, street: e.target.value })}
+                placeholder="e.g. MG Road, Near Park"
+                required
+              />
+            </div>
+            <div className="space-y-2 min-w-0">
+              <label className="text-[10px] font-black text-muted uppercase tracking-widest ml-2 block">Landmark</label>
+              <input
+                className="input-field w-full px-4 py-3 rounded-xl border border-border bg-surface focus:ring-2 focus:ring-primary/20 transition-all"
+                value={formData.landmark || ''}
+                onChange={e => setFormData({ ...formData, landmark: e.target.value })}
                 placeholder="e.g. Opp. Central Mall"
                 required
               />

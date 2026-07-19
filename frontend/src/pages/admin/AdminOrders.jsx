@@ -66,10 +66,30 @@ const OrderDetailsModal = ({ order, onClose }) => {
           {/* Customer Info */}
           <div className="mb-6 p-4 bg-card-soft border border-border/40 rounded-xl">
             <h4 className="font-bold text-sm mb-2 text-heading">Customer Details</h4>
-            <p className="text-sm">{order.address?.fullName}</p>
+            <p className="text-sm font-black text-heading">{order.address?.fullName}</p>
             <p className="text-sm text-muted">{order.address?.phone}</p>
-            <p className="text-sm text-muted mt-1">{order.address?.houseNo}, {order.address?.street}</p>
+            <p className="text-sm text-muted mt-1">
+              {order.address?.houseNo && `${order.address.houseNo}, `}
+              {order.address?.street}
+            </p>
+            {order.address?.landmark && (
+              <p className="text-sm text-muted font-bold">Landmark: {order.address.landmark}</p>
+            )}
             <p className="text-sm text-muted">{order.address?.city}, {order.address?.pincode}</p>
+            
+            {order.address?.lat && order.address?.lng && (
+              <p className="text-sm mt-3">
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${order.address.lat},${order.address.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 rounded-lg text-xs font-black uppercase tracking-wider transition-colors"
+                >
+                  📍 View Location & Directions
+                </a>
+              </p>
+            )}
+
             {order.deliveryDate && (
               <p className="text-sm font-bold text-primary mt-3">
                 Delivery Date: {new Date(order.deliveryDate).toLocaleDateString()}

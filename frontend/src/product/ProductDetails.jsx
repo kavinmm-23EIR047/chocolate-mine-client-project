@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Star, Share2, CheckCircle2, ChevronRight, Sparkles
+  Star, Share2, CheckCircle2, ChevronRight, Sparkles, Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -99,6 +99,34 @@ const ProductDetails = () => {
       }
       return [...prev, { ...addon, qty: 1 }];
     });
+  };
+
+  const handleAddonIncrement = (addon) => {
+    setSelectedAddons(prev => {
+      const exists = prev.find(a => a._id === addon._id);
+      if (exists) {
+        return prev.map(a => a._id === addon._id ? { ...a, qty: (a.qty || 1) + 1 } : a);
+      }
+      return [...prev, { ...addon, qty: 1 }];
+    });
+  };
+
+  const handleAddonDecrement = (addon) => {
+    setSelectedAddons(prev => {
+      const exists = prev.find(a => a._id === addon._id);
+      if (exists) {
+        if ((exists.qty || 1) <= 1) {
+          return prev.filter(a => a._id !== addon._id);
+        }
+        return prev.map(a => a._id === addon._id ? { ...a, qty: (a.qty || 1) - 1 } : a);
+      }
+      return prev;
+    });
+  };
+
+  const selectedAddonQty = (addon) => {
+    const exists = selectedAddons.find(a => a._id === addon._id);
+    return exists ? (exists.qty || 1) : 0;
   };
 
   const [activeTab, setActiveTab] = useState('description');
@@ -250,7 +278,8 @@ const ProductDetails = () => {
   const totalSavings = totalOriginalPrice - totalFinalPrice;
   const totalSavingsPct = totalOriginalPrice > 0 ? Math.round((totalSavings / totalOriginalPrice) * 100) : 0;
 
-  const finalPrice = totalFinalPrice;
+  const addonSum = selectedAddons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
+  const finalPrice = totalFinalPrice + addonSum;
   const couponSavings = couponSavingsPerUnit * quantity;
 
   const isInStock = isCake ? (selectedStock !== false) : productAvailable;
@@ -353,7 +382,7 @@ const ProductDetails = () => {
       price: isCakeWithVariants ? currentPrice : product.price,
       options: options,
       addons: selectedAddons,
-      coupon: product.coupon?.enabled ? product.coupon : null
+      coupon: (product.coupon?.enabled && isCouponApplied) ? product.coupon : null
     };
 
     navigate('/checkout', { state: { directItem } });
@@ -413,11 +442,11 @@ const ProductDetails = () => {
 
       <div className="max-w-[1400px] w-full mx-auto px-4 lg:px-8 xl:px-12 lg:py-10">
         {/* ── TOP SECTION: Gallery + Pricing ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-start mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start mb-6">
           
           {/* ── LEFT — IMAGE SECTION ── */}
           {/* Note: Ensure inside your internal ProductGallery component, the root layout handles aspect-[9/16] or aspect-[3/4] using object-contain with background #e3cbb3 */}
-          <div className="w-full space-y-6">
+          <div className="w-full space-y-4">
             <ProductGallery
               product={product}
               displayImage={displayImage}
@@ -433,7 +462,7 @@ const ProductDetails = () => {
           </div>
 
           {/* ── RIGHT — DETAILS ── */}
-          <div className="w-full lg:sticky lg:top-24 space-y-6 px-1 lg:px-0">
+          <div className="w-full lg:sticky lg:top-24 space-y-4 px-1 lg:px-0">
             <div className="bg-card rounded-[2rem] sm:rounded-[2.5rem] border border-border/50 p-5 sm:p-10 shadow-card hover:shadow-premium transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[11px] font-black text-primary uppercase bg-primary/5 px-4 py-1.5 rounded-full tracking-widest border border-primary/10">
@@ -478,25 +507,61 @@ const ProductDetails = () => {
 
               {availableAddons.length > 0 && (
                 <div className="mb-8">
-                  <h3 className="text-sm font-black text-heading uppercase tracking-widest mb-3">Frequently Bought Together (Add-ons)</h3>
-                  <div className="flex gap-3 overflow-x-auto pb-2">
+                  <h3 className="text-sm sm:text-base font-black text-heading uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-1.5 h-5 bg-primary rounded-full"></span>
+                    Frequently Bought Together (Add-ons)
+                  </h3>
+                  <div className="flex flex-col gap-3">
                     {availableAddons.map(addon => {
                       const isSelected = selectedAddons.some(a => a._id === addon._id);
+                      const qty = selectedAddonQty(addon);
                       return (
                         <div
                           key={addon._id}
-                          onClick={() => handleAddonToggle(addon)}
-                          className={`flex flex-col items-center gap-2 p-3 min-w-[120px] rounded-2xl border cursor-pointer transition-all ${isSelected ? 'border-primary bg-primary/5' : 'border-border bg-card hover:border-primary/50'}`}
+                          className={`flex items-center gap-4 p-3 sm:p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-primary/60 bg-primary/5 shadow-sm' : 'border-border/30 bg-card hover:border-primary/30'}`}
                         >
-                          <div className="w-16 h-16 rounded-full overflow-hidden border border-border bg-white">
+                          {/* Left: Addon Image */}
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-border/20 bg-white shrink-0">
                             <img src={addon.image} alt={addon.name} className="w-full h-full object-cover" />
                           </div>
-                          <div className="text-center">
-                            <p className="text-[11px] font-bold text-heading uppercase truncate w-24">{addon.name}</p>
-                            <p className="text-xs font-black text-primary">₹{addon.price}</p>
+
+                          {/* Middle: Name & Price */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm sm:text-base font-black text-heading uppercase tracking-tight truncate">{addon.name}</p>
+                            <p className="text-sm sm:text-base font-black text-primary mt-0.5">₹{addon.price} <span className="text-xs text-muted/50 font-bold lowercase">/ each</span></p>
+                            {isSelected && (
+                              <p className="text-xs text-success-text font-bold mt-1">
+                                Total: ₹{addon.price * qty}
+                              </p>
+                            )}
                           </div>
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${isSelected ? 'bg-primary border-primary text-white' : 'border-border text-transparent'}`}>
-                            <CheckCircle2 size={12} />
+
+                          {/* Right: Add / Qty Controls */}
+                          <div className="shrink-0">
+                            {isSelected ? (
+                              <div className="flex items-center gap-0 bg-emerald-600 rounded-xl overflow-hidden shadow-md select-none" onClick={(e) => e.stopPropagation()}>
+                                <button 
+                                  onClick={() => handleAddonDecrement(addon)} 
+                                  className="px-3 py-2 text-white font-black text-base hover:bg-emerald-700 transition-colors"
+                                >
+                                  −
+                                </button>
+                                <span className="px-3 py-2 text-white font-black text-sm min-w-[36px] text-center bg-emerald-700">{qty}</span>
+                                <button 
+                                  onClick={() => handleAddonIncrement(addon)} 
+                                  className="px-3 py-2 text-white font-black text-base hover:bg-emerald-700 transition-colors"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleAddonToggle(addon)}
+                                className="px-4 py-2 rounded-xl border-2 border-primary/30 text-primary font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-primary/10 transition-all"
+                              >
+                                + Add
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -507,7 +572,7 @@ const ProductDetails = () => {
 
               <ProductPricing
                 product={product}
-                currentPrice={currentPrice}
+                currentPrice={currentPrice + addonSum}
                 finalPrice={finalPrice}
                 offerDiscount={offerDiscount}
                 totalSavingsPct={totalSavingsPct}
@@ -516,6 +581,7 @@ const ProductDetails = () => {
                 applyingCoupon={applyingCoupon}
                 handleApplyCoupon={handleApplyCoupon}
                 handleRemoveCoupon={handleRemoveCoupon}
+                addonSum={addonSum}
               />
 
               <ProductActionButtons

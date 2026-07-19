@@ -27,11 +27,13 @@ import {
   Smartphone,
   Wallet,
   Edit,
+  Send,
   Trash2,
+  Plus,
 } from 'lucide-react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { clearCart, setCoupon, removeFromCart } from '../redux/slices/cartSlice';
+import { clearCart, setCoupon, removeFromCart, updateCartItemAddons } from '../redux/slices/cartSlice';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
@@ -232,7 +234,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const directItem = location.state?.directItem;
+  const [localDirectItem, setLocalDirectItem] = useState(location.state?.directItem || null);
+  const directItem = localDirectItem;
   
   // Load saved state from sessionStorage on mount
   const loadSavedState = () => {
@@ -252,7 +255,14 @@ const Checkout = () => {
         deliveryDate: savedDeliveryDate ? new Date(savedDeliveryDate) : null,
         deliverySlot: savedDeliverySlot || null,
         selectedPayMethod: savedPayMethod || null,
-        localCoupon: savedLocalCoupon || '',
+        localCoupon: (() => {
+          if (!savedLocalCoupon) return '';
+          try {
+            return JSON.parse(savedLocalCoupon);
+          } catch {
+            return savedLocalCoupon;
+          }
+        })(),
       };
     } catch (error) {
       console.error('Error loading saved state:', error);
@@ -307,6 +317,90 @@ const Checkout = () => {
   }, [selectedPayMethod]);
 
   const isProcessingPayment = useRef(false);
+
+  const [availableAddons, setAvailableAddons] = useState([]);
+
+  useEffect(() => {
+    api.get('/addons/active')
+      .then(res => {
+        setAvailableAddons(res.data?.data || []);
+      })
+      .catch(err => console.error('Failed to fetch active addons:', err));
+  }, []);
+
+  const handleCheckoutAddonIncrement = (item, addon) => {
+    if (directItem) {
+      const exists = directItem.addons?.find(a => a._id === addon._id || a.addonId === addon._id);
+      let updatedAddons;
+      if (exists) {
+        updatedAddons = directItem.addons.map(a =>
+          a._id === addon._id || a.addonId === addon._id
+            ? { ...a, qty: (a.qty || 1) + 1 }
+            : a
+        );
+      } else {
+        updatedAddons = [...(directItem.addons || []), { ...addon, qty: 1 }];
+      }
+      setLocalDirectItem(prev => ({ ...prev, addons: updatedAddons }));
+    } else {
+      const exists = item.addons?.find(a => a._id === addon._id || a.addonId === addon._id);
+      let updatedAddons;
+      if (exists) {
+        updatedAddons = item.addons.map(a =>
+          a._id === addon._id || a.addonId === addon._id
+            ? { ...a, qty: (a.qty || 1) + 1 }
+            : a
+        );
+      } else {
+        updatedAddons = [...(item.addons || []), { ...addon, qty: 1 }];
+      }
+      dispatch(updateCartItemAddons({
+        productId: item.productId,
+        addons: updatedAddons,
+        options: item.options
+      }));
+    }
+    setBackendTotal(null); // Reset backend total to force recalculation
+  };
+
+  const handleCheckoutAddonDecrement = (item, addon) => {
+    if (directItem) {
+      const target = directItem.addons?.find(a => a._id === addon._id || a.addonId === addon._id);
+      let updatedAddons;
+      if (target && (target.qty || 1) <= 1) {
+        updatedAddons = directItem.addons.filter(a => a._id !== addon._id && a.addonId !== addon._id);
+      } else if (target) {
+        updatedAddons = directItem.addons.map(a =>
+          a._id === addon._id || a.addonId === addon._id
+            ? { ...a, qty: (a.qty || 1) - 1 }
+            : a
+        );
+      } else {
+        updatedAddons = directItem.addons || [];
+      }
+      setLocalDirectItem(prev => ({ ...prev, addons: updatedAddons }));
+    } else {
+      const target = item.addons?.find(a => a._id === addon._id || a.addonId === addon._id);
+      let updatedAddons;
+      if (target && (target.qty || 1) <= 1) {
+        updatedAddons = item.addons.filter(a => a._id !== addon._id && a.addonId !== addon._id);
+      } else if (target) {
+        updatedAddons = item.addons.map(a =>
+          a._id === addon._id || a.addonId === addon._id
+            ? { ...a, qty: (a.qty || 1) - 1 }
+            : a
+        );
+      } else {
+        updatedAddons = item.addons || [];
+      }
+      dispatch(updateCartItemAddons({
+        productId: item.productId,
+        addons: updatedAddons,
+        options: item.options
+      }));
+    }
+    setBackendTotal(null); // Reset backend total to force recalculation
+  };
 
   const [deliveryInfo, setDeliveryInfo] = useState(savedState.deliveryInfo || { address: null, position: null });
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -368,6 +462,7 @@ const Checkout = () => {
       phone: '',  // store only 10 digits
       houseNo: '',
       street: '',
+      landmark: '',
     }
   );
 
@@ -387,6 +482,7 @@ const Checkout = () => {
   const SHOP_LAT = import.meta.env.VITE_SHOP_LAT || 11.004540031168712;
   const SHOP_LNG = import.meta.env.VITE_SHOP_LNG || 76.97510955713153;
   const DELIVERY_RADIUS = import.meta.env.VITE_DELIVERY_RADIUS_KM || 30;
+
 
   const [locationValid, setLocationValid] = useState(true);
   const [locationError, setLocationError] = useState('');
@@ -409,7 +505,7 @@ const Checkout = () => {
   // Save local coupon to sessionStorage
   useEffect(() => {
     if (localCoupon) {
-      sessionStorage.setItem(STORAGE_KEYS.LOCAL_COUPON, localCoupon);
+      sessionStorage.setItem(STORAGE_KEYS.LOCAL_COUPON, typeof localCoupon === 'object' ? JSON.stringify(localCoupon) : localCoupon);
     } else {
       sessionStorage.removeItem(STORAGE_KEYS.LOCAL_COUPON);
     }
@@ -477,7 +573,7 @@ const Checkout = () => {
         deliveryInfo.position.lng
       );
       setDistance(dist);
-      setDeliveryFee(0);
+      setDeliveryFee(Math.round(dist * 10));
       if (dist > DELIVERY_RADIUS) {
         setLocationValid(false);
         setLocationError('Delivery available only inside Coimbatore service area (within 30km).');
@@ -611,19 +707,31 @@ const Checkout = () => {
 
   const getItemOriginalPrice = (item) => {
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
-    if (!Number.isNaN(vp) && vp > 0) return vp;
-    return Number(item.price);
+    const base = !Number.isNaN(vp) && vp > 0 ? vp : Number(item.price);
+    let addonSum = 0;
+    if (item.addons && Array.isArray(item.addons)) {
+      addonSum = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
+    }
+    return base + addonSum;
   };
 
   const getItemBasePrice = (item) => {
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
-    if (!Number.isNaN(vp) && vp > 0) return vp;
+    let base = !Number.isNaN(vp) && vp > 0 ? vp : Number(item.price);
 
     const hasOffer =
       item.offerPrice != null &&
       Number(item.offerPrice) > 0 &&
       Number(item.offerPrice) < Number(item.price);
-    return hasOffer ? Number(item.offerPrice) : Number(item.price);
+    if (hasOffer && Number.isNaN(vp)) {
+      base = Number(item.offerPrice);
+    }
+
+    let addonSum = 0;
+    if (item.addons && Array.isArray(item.addons)) {
+      addonSum = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
+    }
+    return base + addonSum;
   };
 
   const getItemCouponDiscount = (item) => {
@@ -632,7 +740,19 @@ const Checkout = () => {
       : getCouponCodeString(appliedCouponFromRedux);
     if (!code || !item.coupon?.enabled) return 0;
     if (code !== getCouponCodeString(item.coupon.code)) return 0;
-    return getCouponUnitDiscount(getItemBasePrice(item), item.coupon);
+    
+    // Coupon discount applies to the product base price (excluding addons)
+    const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
+    let prodPrice = !Number.isNaN(vp) && vp > 0 ? vp : Number(item.price);
+    const hasOffer =
+      item.offerPrice != null &&
+      Number(item.offerPrice) > 0 &&
+      Number(item.offerPrice) < Number(item.price);
+    if (hasOffer && Number.isNaN(vp)) {
+      prodPrice = Number(item.offerPrice);
+    }
+    
+    return getCouponUnitDiscount(prodPrice, item.coupon);
   };
 
   const getFinalItemPrice = (item) => getItemBasePrice(item) - getItemCouponDiscount(item);
@@ -644,12 +764,60 @@ const Checkout = () => {
     0
   );
   const couponDiscount = cartItems.reduce((s, i) => s + getItemCouponDiscount(i) * i.qty, 0);
-  const gst = 0;
-  const convenienceFee = 0;
-  const clientTotal = subtotal + deliveryFee + gst + convenienceFee;
-  const displayTotal = backendTotal !== null ? backendTotal : clientTotal;
+
+  // Separate product-only and addon-only totals for clear display
+  const productOnlyTotal = cartItems.reduce((s, i) => {
+    const vp = i.variantPrice != null ? Number(i.variantPrice) : NaN;
+    const base = !Number.isNaN(vp) && vp > 0 ? vp : Number(i.price);
+    return s + base * i.qty;
+  }, 0);
+  const addonOnlyTotal = cartItems.reduce((s, i) => {
+    if (!i.addons || !Array.isArray(i.addons)) return s;
+    return s + i.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0) * i.qty;
+  }, 0);
 
   const isAddressSelected = !!deliveryInfo.position;
+  const gst = Math.round(subtotal * 0.18);
+  const convenienceFee = Math.round(subtotal * 0.02);
+  const clientTotal = subtotal + (isAddressSelected ? deliveryFee : 0) + gst + convenienceFee;
+  const displayTotal = backendTotal !== null ? backendTotal : clientTotal;
+
+  const availableUnappliedCoupons = useMemo(() => {
+    if (hasAppliedCoupon) return [];
+    const coupons = [];
+    cartItems.forEach(item => {
+      const p = item.product || item;
+      const couponObj = item.coupon || p.coupon;
+      if (couponObj?.enabled && couponObj?.code) {
+        const code = String(couponObj.code).trim().toUpperCase();
+        if (code && !coupons.some(c => c.code === code)) {
+          const basePrice = getItemBasePrice(item);
+          const savings = getCouponUnitDiscount(basePrice, couponObj) * item.qty;
+          if (savings > 0) {
+            coupons.push({
+              code,
+              savings,
+              itemName: item.name || p.name
+            });
+          }
+        }
+      }
+    });
+    return coupons;
+  }, [cartItems, hasAppliedCoupon]);
+
+  // Auto-set shop pickup details if order total is under ₹100
+  useEffect(() => {
+    if (subtotal < 100) {
+      setDeliveryInfo({
+        address: 'Shop Pickup',
+        position: { lat: Number(SHOP_LAT), lng: Number(SHOP_LNG) }
+      });
+      setLocationValid(true);
+      setDistance(0);
+      setDeliveryFee(0);
+    }
+  }, [subtotal, SHOP_LAT, SHOP_LNG]);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -675,6 +843,7 @@ const Checkout = () => {
       phone: addr.phone.replace(/\D/g, '').slice(-10),
       houseNo: addr.houseNo,
       street: addr.street,
+      landmark: addr.landmark || '',
     });
     setActiveStep(2);
   };
@@ -701,6 +870,7 @@ const Checkout = () => {
       phone: addr.phone.replace(/\D/g, '').slice(-10),
       houseNo: addr.houseNo,
       street: addr.street,
+      landmark: addr.landmark || '',
     });
     setDeliveryInfo({
       address: `${addr.houseNo}, ${addr.street}`,
@@ -735,8 +905,13 @@ const Checkout = () => {
   const handleDeliverHere = () => {
     if (!addressDetails.fullName.trim()) return toast.error('Please enter recipient name');
     if (!validatePhoneNumber(addressDetails.phone)) return toast.error('Please enter a valid 10-digit phone number');
-    if (!deliveryInfo.position) return toast.error('Please select delivery location on map');
-    if (!locationValid) return toast.error(locationError || 'Location outside service area');
+    if (subtotal >= 100) {
+      if (!addressDetails.houseNo?.trim()) return toast.error('Please enter house/flat number');
+      if (!addressDetails.street?.trim()) return toast.error('Please enter street address');
+      if (!addressDetails.landmark?.trim()) return toast.error('Please enter a landmark');
+      if (!deliveryInfo.position) return toast.error('Please select delivery location on map');
+      if (!locationValid) return toast.error(locationError || 'Location outside service area');
+    }
     setActiveStep(2);
   };
 
@@ -760,11 +935,16 @@ const Checkout = () => {
   const validateForm = () => {
     if (!addressDetails.fullName.trim()) { toast.error('Please enter full name'); return false; }
     if (!validatePhoneNumber(addressDetails.phone.trim())) { toast.error('Please enter a valid 10-digit phone number'); return false; }
-    if (!deliveryInfo.position) { toast.error('Please select delivery location on map'); return false; }
+    if (subtotal >= 100) {
+      if (!addressDetails.houseNo?.trim()) { toast.error('Please enter house/flat number'); return false; }
+      if (!addressDetails.street?.trim()) { toast.error('Please enter street address'); return false; }
+      if (!addressDetails.landmark?.trim()) { toast.error('Please enter a landmark'); return false; }
+      if (!deliveryInfo.position) { toast.error('Please select delivery location on map'); return false; }
+      if (!locationValid) { toast.error(locationError || 'Location outside service area'); return false; }
+    }
     if (!deliverySlot) { toast.error('Please select a delivery slot'); return false; }
     const sel = slots.find((s) => s.value === deliverySlot);
     if (sel && !isSlotAvailableForDate(sel, deliveryDate, currentTime)) { toast.error('Selected slot is no longer available.'); return false; }
-    if (!locationValid) { toast.error(locationError || 'Location outside service area'); return false; }
     return true;
   };
 
@@ -773,7 +953,7 @@ const Checkout = () => {
     if (!code) return toast.error('Enter coupon code');
     if (directItem) {
       if (directItem.coupon?.enabled && getCouponCodeString(directItem.coupon.code).toUpperCase() === code) {
-        setLocalCoupon(code);
+        setLocalCoupon(directItem.coupon);
         toast.success(`Coupon ${code} applied`);
         setCouponInput('');
       } else {
@@ -822,29 +1002,36 @@ const Checkout = () => {
 
     if (!user) { toast.error('Session expired. Please login again.'); navigate('/login'); return; }
 
+    const isWhatsAppOrder = subtotal < 100;
+
     const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
-    if (!razorpayKey) { toast.error('Payment configuration error.'); return; }
+    if (!isWhatsAppOrder && !razorpayKey) { toast.error('Payment configuration error.'); return; }
 
     try {
       isProcessingPayment.current = true;
       setLoading(true);
-      setLoaderText('Preparing your order...');
+      setLoaderText(isWhatsAppOrder ? 'Placing WhatsApp Order...' : 'Preparing checkout...');
 
       const interval = setInterval(() => {
         setLoaderText((p) => {
-          const m = ['Confirming address...', 'Calculating total...', 'Almost there...'];
+          const m = isWhatsAppOrder 
+            ? ['Saving order details...', 'Generating message...', 'Almost there...']
+            : ['Confirming address...', 'Calculating total...', 'Almost there...'];
           const i = m.indexOf(p) + 1;
           return i < m.length ? m[i] : p;
         });
       }, 2000);
 
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        clearInterval(interval);
-        setLoading(false);
-        isProcessingPayment.current = false;
-        toast.error('Payment gateway unavailable.');
-        return;
+      let loaded = false;
+      if (!isWhatsAppOrder) {
+        loaded = await loadRazorpayScript();
+        if (!loaded) {
+          clearInterval(interval);
+          setLoading(false);
+          isProcessingPayment.current = false;
+          toast.error('Payment gateway unavailable.');
+          return;
+        }
       }
 
       const cakeMessage = shouldShowCustomCakeRequest ? customCakeRequest?.messageOnCake?.trim() || '' : '';
@@ -859,11 +1046,13 @@ const Checkout = () => {
       const res = await api.post(
         '/payment/create-order',
         {
+          paymentMethod: isWhatsAppOrder ? 'WHATSAPP' : 'ONLINE',
           address: {
             fullName: addressDetails.fullName,
             phone: addressDetails.phone,
-            houseNo: addressDetails.houseNo,
-            street: addressDetails.street || deliveryInfo.address,
+            houseNo: isWhatsAppOrder ? 'Shop Pickup' : addressDetails.houseNo,
+            street: isWhatsAppOrder ? 'Shop Pickup' : (addressDetails.street || deliveryInfo.address),
+            landmark: isWhatsAppOrder ? 'Shop Pickup' : addressDetails.landmark,
             city: 'Coimbatore',
             pincode: '641001',
             lat: deliveryInfo.position?.lat,
@@ -890,7 +1079,87 @@ const Checkout = () => {
         }
       );
 
-      const { razorpayOrder, orderId } = res.data.data;
+      const { razorpayOrder, orderId, orderNumber } = res.data.data;
+
+      if (isWhatsAppOrder) {
+        clearInterval(interval);
+        
+        if (!directItem) {
+          dispatch(clearCart());
+        }
+        clearCustomCakeRequest();
+        setCustomCakeRequest(null);
+        clearSavedCheckoutData();
+        setLoading(false);
+        isProcessingPayment.current = false;
+        
+        const adminPhone = import.meta.env.VITE_ADMIN_PHONE || '9363265477';
+        const orderNum = orderNumber || `ORD-${orderId.slice(-6).toUpperCase()}`;
+        
+        // Build items text list
+        const itemsList = cartItems.map(item => {
+          const optStr = item.selectedFlavor || item.selectedWeight ? ` (${[item.selectedFlavor, item.selectedWeight].filter(Boolean).join(', ')})` : '';
+          const origPrice = getItemOriginalPrice(item);
+          const basePrice = getItemBasePrice(item);
+          const finalItemPrice = getFinalItemPrice(item);
+          
+          let priceDetails = ``;
+          if (origPrice > basePrice) {
+            priceDetails = ` (Original: ₹${origPrice}, Offer: ₹${basePrice})`;
+          }
+          
+          let addonStr = '';
+          if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
+            const addonList = item.addons.map(a => `${a.name} (x${a.qty || 1}) - ₹${a.price * (a.qty || 1)}`).join(', ');
+            addonStr = `\n   └ Addons: ${addonList}`;
+          }
+          
+          return `• ${item.name} x ${item.qty}${optStr} - ₹${finalItemPrice * item.qty}${priceDetails}${addonStr}`;
+        }).join('\n');
+
+        const isDelivery = subtotal >= 100;
+        let addressText = ``;
+        if (isDelivery) {
+          const addrParts = [];
+          if (addressDetails.houseNo) addrParts.push(addressDetails.houseNo);
+          if (addressDetails.street) addrParts.push(addressDetails.street);
+          if (addressDetails.landmark) addrParts.push(`Landmark: ${addressDetails.landmark}`);
+          addrParts.push(`Coimbatore`);
+          addressText = `📍 *Delivery Address:* ${addrParts.join(', ')}`;
+          if (deliveryInfo.position) {
+            addressText += `\n🗺️ *Directions:* https://www.google.com/maps/search/?api=1&query=${deliveryInfo.position.lat},${deliveryInfo.position.lng}`;
+          }
+        } else {
+          addressText = `📍 *Pickup Address:* The Chocolate Mine Shop, Coimbatore.`;
+        }
+        
+        const messageText = `🍫 *New ${isDelivery ? 'Delivery' : 'Shop Pickup'} Order*\n\n` +
+          `🆔 *Order Number:* #${orderNum}\n` +
+          `👤 *Customer Name:* ${addressDetails.fullName}\n` +
+          `📞 *Customer Phone:* ${addressDetails.phone}\n` +
+          `${addressText}\n\n` +
+          `🍰 *Items:*\n${itemsList}\n\n` +
+          `💰 *Pricing Breakdown:*\n` +
+          `   Subtotal: ₹${subtotal}\n` +
+          (couponDiscount > 0 ? `   Coupon Discount: -₹${couponDiscount}\n` : '') +
+          (isDelivery ? `   Delivery Fee: ₹${deliveryFee}\n` : '') +
+          `   GST (18%): ₹${gst}\n` +
+          `   Convenience Fee (2%): ₹${convenienceFee}\n` +
+          `   *Total Amount:* ₹${clientTotal}\n\n` +
+          `📅 *${isDelivery ? 'Delivery' : 'Pickup'} Date:* ${new Date(deliveryDate).toLocaleDateString()}\n` +
+          `⏰ *${isDelivery ? 'Delivery' : 'Pickup'} Slot:* ${deliverySlot || 'N/A'}\n\n` +
+          `Please confirm my order. Thank you!`;
+          
+        const waLink = `https://wa.me/91${adminPhone}?text=${encodeURIComponent(messageText)}`;
+        
+        toast.success("Order registered! Redirecting to WhatsApp...");
+        window.open(waLink, '_blank');
+        navigate("/order-success", {
+          state: { orderId },
+        });
+        return;
+      }
+
       if (!razorpayOrder?.id) throw new Error('Invalid order response');
 
       const confirmedAmount = razorpayOrder.amount / 100;
@@ -1051,7 +1320,7 @@ const Checkout = () => {
       <ScooterLoader isVisible={loading} text={loaderText} />
 
       <div className="bg-navbar text-navbar-text border-b border-border sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 min-w-0">
+        <div className="w-full max-w-none mx-auto px-4 lg:px-8 xl:px-16 py-3 sm:py-4 min-w-0">
           <div className="flex items-center gap-2 text-xs text-muted">
             <button
               onClick={() => navigate('/cart')}
@@ -1065,19 +1334,29 @@ const Checkout = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8 overflow-x-hidden">
+      <div className="w-full max-w-none mx-auto px-4 lg:px-8 xl:px-16 py-4 sm:py-8 overflow-x-hidden">
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-8 w-full min-w-0">
 
           {/* LEFT COLUMN */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 w-full min-w-0">
 
+            {subtotal < 100 && (
+              <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-2 border-amber-500/30 rounded-2xl p-4 sm:p-5 flex items-start gap-3 shadow-sm">
+                <span className="text-xl shrink-0">⚠️</span>
+                <div className="text-sm text-amber-800 dark:text-amber-300 font-medium">
+                  <p className="font-black uppercase tracking-widest text-xs mb-1">Notice: Minimum Order for Delivery</p>
+                  Orders below <span className="font-black text-primary">₹100</span> are not eligible for home delivery. Please proceed as a <span className="font-bold text-primary">Shop Pickup Order</span> and you can send details directly via WhatsApp.
+                </div>
+              </div>
+            )}
+
             {/* STEP 1: DELIVERY ADDRESS */}
             <div data-step="1" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden">
               <StepBadge
                 n="1"
-                label="Delivery Address"
+                label={subtotal >= 100 ? "Delivery Address" : "Customer Details"}
                 isActive={activeStep === 1}
-                isCompleted={!!deliveryInfo.position}
+                isCompleted={subtotal < 100 ? (!!addressDetails.fullName.trim() && validatePhoneNumber(addressDetails.phone)) : !!deliveryInfo.position}
                 onEdit={() => setActiveStep(1)}
                 summary={deliveryInfo.position ? `${addressDetails.fullName} • ${formatPhoneForDisplay(addressDetails.phone)}` : null}
               />
@@ -1091,7 +1370,7 @@ const Checkout = () => {
                   >
                     <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
 
-                      {savedAddresses.length > 0 && (
+                      {subtotal >= 100 && savedAddresses.length > 0 && (
                         <div className="space-y-3">
                           <p className="text-xs text-heading font-black uppercase tracking-widest opacity-80">Saved Addresses</p>
                           <div className="grid gap-3 w-full min-w-0">
@@ -1148,15 +1427,17 @@ const Checkout = () => {
                         </div>
                       )}
 
-                      <button
-                        onClick={() => setShowMap(true)}
-                        className="w-full p-2.5 sm:p-4 border-2 border-dashed border-primary/30 dark:border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/50 transition-all"
-                      >
-                        <MapPin size={15} className="shrink-0" /> 
-                        <span className="truncate">Add / Update Location on Map</span>
-                      </button>
+                      {subtotal >= 100 && (
+                        <button
+                          onClick={() => setShowMap(true)}
+                          className="w-full p-2.5 sm:p-4 border-2 border-dashed border-primary/30 dark:border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/50 transition-all"
+                        >
+                          <MapPin size={15} className="shrink-0" /> 
+                          <span className="truncate">Add / Update Location on Map</span>
+                        </button>
+                      )}
 
-                      {deliveryInfo.position && (
+                      {subtotal >= 100 && deliveryInfo.position && (
                         <motion.div
                           initial={{ opacity: 0, scale: 0.97 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -1215,41 +1496,58 @@ const Checkout = () => {
                             <p className="text-[10px] sm:text-xs text-red-500 font-bold ml-1">Enter valid 10-digit number</p>
                           )}
                         </div>
-                        <div className="space-y-1.5 sm:space-y-2">
-                          <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
-                            <Home size={12} /> House / Flat No. *
-                          </label>
-                          <input
-                            className="input-field text-sm sm:text-base min-w-0"
-                            placeholder="Apartment, studio…"
-                            value={addressDetails.houseNo}
-                            onChange={(e) => setAddressDetails({ ...addressDetails, houseNo: e.target.value })}
-                            type="text"
-                          />
-                        </div>
-                        <div className="space-y-1.5 sm:space-y-2">
-                          <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
-                            <MapPin size={12} /> Street / Landmark *
-                          </label>
-                          <input
-                            className="input-field text-sm sm:text-base min-w-0"
-                            placeholder="Nearby building or area"
-                            value={addressDetails.street}
-                            onChange={(e) => setAddressDetails({ ...addressDetails, street: e.target.value })}
-                            type="text"
-                          />
-                        </div>
+
+                        {subtotal >= 100 && (
+                          <>
+                            <div className="space-y-1.5 sm:space-y-2">
+                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <Home size={12} /> House / Flat No. *
+                              </label>
+                              <input
+                                className="input-field text-sm sm:text-base min-w-0"
+                                placeholder="Apartment, studio…"
+                                value={addressDetails.houseNo}
+                                onChange={(e) => setAddressDetails({ ...addressDetails, houseNo: e.target.value })}
+                                type="text"
+                              />
+                            </div>
+                            <div className="space-y-1.5 sm:space-y-2">
+                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <MapPin size={12} /> Street Address *
+                              </label>
+                              <input
+                                className="input-field text-sm sm:text-base min-w-0"
+                                placeholder="Street name, area"
+                                value={addressDetails.street}
+                                onChange={(e) => setAddressDetails({ ...addressDetails, street: e.target.value })}
+                                type="text"
+                              />
+                            </div>
+                            <div className="space-y-1.5 sm:space-y-2 sm:col-span-2">
+                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <Tag size={12} className="text-muted" /> Landmark *
+                              </label>
+                              <input
+                                className="input-field text-sm sm:text-base min-w-0"
+                                placeholder="e.g. Opp. Central Mall"
+                                value={addressDetails.landmark || ''}
+                                onChange={(e) => setAddressDetails({ ...addressDetails, landmark: e.target.value })}
+                                type="text"
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       {locationValid && deliveryInfo.position && (
                         <div className="pt-4 flex justify-end gap-3">
-                          {editingAddressId && (
+                          {subtotal >= 100 && editingAddressId && (
                             <Button onClick={handleUpdateAddress} className="btn-secondary px-6 border-primary/20 text-primary">
                               Update Address
                             </Button>
                           )}
                           <Button onClick={handleDeliverHere} className="btn-primary px-8">
-                            Deliver Here
+                            {subtotal >= 100 ? 'Deliver Here' : 'Confirm Details'}
                           </Button>
                         </div>
                       )}
@@ -1457,9 +1755,9 @@ const Checkout = () => {
                 n="4"
                 label="Payment Method"
                 isActive={activeStep === 4}
-                isCompleted={!!selectedPayMethod}
+                isCompleted={subtotal < 100 ? true : !!selectedPayMethod}
                 onEdit={() => setActiveStep(4)}
-                summary={selectedPayMethod ? PAYMENT_METHODS.find(m => m.id === selectedPayMethod)?.label : null}
+                summary={subtotal < 100 ? "WhatsApp Shop Pickup" : (selectedPayMethod ? PAYMENT_METHODS.find(m => m.id === selectedPayMethod)?.label : null)}
               />
               <AnimatePresence>
                 {activeStep === 4 && (
@@ -1470,78 +1768,97 @@ const Checkout = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="p-4 sm:p-5 space-y-4">
-                      <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card-soft/80 border-2 border-border-muted backdrop-blur-sm">
-                        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
-                          <img src={paymentLogos.razorpay} alt="Razorpay" className="w-6 h-6 object-contain" />
+                      {subtotal < 100 ? (
+                        <div className="p-4 sm:p-5 rounded-2xl bg-success/5 border-2 border-success/20 space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center text-success shrink-0">
+                              <Smartphone size={20} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-black text-heading uppercase tracking-widest leading-none mb-1.5">WhatsApp Pickup Order</p>
+                              <p className="text-[10px] text-success-text font-black uppercase tracking-widest leading-none">Self-Pickup from Shop</p>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted leading-relaxed font-bold">
+                            No online payment required now. Your order details will be sent directly to our shop WhatsApp chat. You can pick up the order and pay directly at the shop.
+                          </p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-black text-heading uppercase tracking-widest leading-none mb-1">Secure Payment via Razorpay</p>
-                          <p className="text-[10px] text-muted font-bold uppercase tracking-widest opacity-60 leading-none">PCI DSS Compliant · 256-bit SSL Encryption</p>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card-soft/80 border-2 border-border-muted backdrop-blur-sm">
+                            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
+                              <img src={paymentLogos.razorpay} alt="Razorpay" className="w-6 h-6 object-contain" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-black text-heading uppercase tracking-widest leading-none mb-1">Secure Payment via Razorpay</p>
+                              <p className="text-[10px] text-muted font-bold uppercase tracking-widest opacity-60 leading-none">PCI DSS Compliant · 256-bit SSL Encryption</p>
+                            </div>
+                            <Lock size={13} className="text-muted/40 shrink-0" />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                            {PAYMENT_METHODS.map((method) => {
+                              const Icon = method.icon;
+                              const selected = selectedPayMethod === method.id;
+                              return (
+                                <button
+                                  key={method.id}
+                                  onClick={() => setSelectedPayMethod(selected ? null : method.id)}
+                                  className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
+                                      ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
+                                      : `border-border-muted bg-surface/20 hover:bg-surface/40 hover:border-primary/30`
+                                    }`}
+                                >
+                                  <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${method.gradient} flex items-center justify-center shadow-sm`}>
+                                      <Icon size={17} className="text-white" />
+                                    </div>
+                                    {selected && (
+                                      <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center shrink-0 shadow-sm border border-primary/20">
+                                        <CheckCircle2 size={12} className="text-button-text" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <p className="font-black text-heading text-xs sm:text-sm uppercase tracking-wide truncate">{method.label}</p>
+                                  <p className="text-[10px] text-muted font-bold mt-0.5 uppercase tracking-widest truncate">{method.sub}</p>
+                                  <div className="flex items-center gap-2 mt-3 sm:mt-4 flex-wrap">
+                                    {method.logos.map((logo) => (
+                                      <div
+                                        key={logo.name}
+                                        className="flex items-center justify-center rounded-lg shadow-sm overflow-hidden h-8 sm:h-9 px-1.5 bg-white/10 dark:bg-white backdrop-blur-sm border border-white/5 dark:border-transparent"
+                                      >
+                                        <img
+                                          src={logo.url}
+                                          alt={logo.name}
+                                          className="h-4 sm:h-5 w-auto max-w-[40px] object-contain"
+                                          onError={(e) => (e.target.style.display = 'none')}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                              </button>
+                            );
+                          })}
                         </div>
-                        <Lock size={13} className="text-muted/40 shrink-0" />
-                      </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
-                        {PAYMENT_METHODS.map((method) => {
-                          const Icon = method.icon;
-                          const selected = selectedPayMethod === method.id;
-                          return (
-                            <button
-                              key={method.id}
-                              onClick={() => setSelectedPayMethod(selected ? null : method.id)}
-                              className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
-                                  ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
-                                  : `border-border-muted bg-surface/20 hover:bg-surface/40 hover:border-primary/30`
-                                }`}
-                            >
-                              <div className="flex items-start justify-between mb-2 sm:mb-3">
-                                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${method.gradient} flex items-center justify-center shadow-sm`}>
-                                  <Icon size={17} className="text-white" />
-                                </div>
-                                {selected && (
-                                  <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center shrink-0 shadow-sm border border-primary/20">
-                                    <CheckCircle2 size={12} className="text-button-text" />
-                                  </div>
-                                )}
-                              </div>
-                              <p className="font-black text-heading text-xs sm:text-sm uppercase tracking-wide truncate">{method.label}</p>
-                              <p className="text-[10px] text-muted font-bold mt-0.5 uppercase tracking-widest truncate">{method.sub}</p>
-                              <div className="flex items-center gap-2 mt-3 sm:mt-4 flex-wrap">
-                                {method.logos.map((logo) => (
-                                  <div
-                                    key={logo.name}
-                                    className="flex items-center justify-center rounded-lg shadow-sm overflow-hidden h-8 sm:h-9 px-1.5 bg-white/10 dark:bg-white backdrop-blur-sm border border-white/5 dark:border-transparent"
-                                  >
-                                    <img
-                                      src={logo.url}
-                                      alt={logo.name}
-                                      className="h-4 sm:h-5 w-auto max-w-[40px] object-contain"
-                                      onError={(e) => (e.target.style.display = 'none')}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                        <p className="text-[9px] text-muted/50 text-center font-bold uppercase tracking-widest italic pt-2">
+                          Selecting a method pre-fills its tab in Razorpay checkout
+                        </p>
+                      </>
+                    )}
 
-                      <p className="text-[9px] text-muted/50 text-center font-bold uppercase tracking-widest italic">
-                        Selecting a method pre-fills its tab in Razorpay checkout
-                      </p>
-
-                      <div className="pt-4 flex justify-between gap-2 sm:gap-3">
-                        <Button onClick={() => setActiveStep(3)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
-                        <Button
-                          onClick={() => {
-                            document.getElementById('order-summary-section')?.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                          className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
-                          disabled={!selectedPayMethod}
-                        >
-                          Order Summary
-                        </Button>
-                      </div>
+                    <div className="pt-4 flex justify-between gap-2 sm:gap-3">
+                      <Button onClick={() => setActiveStep(3)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
+                      <Button
+                        onClick={() => {
+                          document.getElementById('order-summary-section')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
+                        disabled={subtotal < 100 ? false : !selectedPayMethod}
+                      >
+                        Order Summary
+                      </Button>
+                    </div>
                     </div>
                   </motion.div>
                 )}
@@ -1560,154 +1877,177 @@ const Checkout = () => {
                 className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden w-full min-w-0"
               >
                 {/* ... Order summary content remains the same ... */}
-                <div className="p-4 sm:p-5 border-b border-border/30 bg-gradient-to-r from-card-soft to-card">
-                  <div className="flex items-center gap-2">
-                    <Package size={15} className="text-primary" />
-                    <h3 className="font-black text-heading text-xs sm:text-sm uppercase tracking-widest truncate">Order Summary</h3>
-                    <span className="ml-auto text-xs bg-primary/10 text-primary font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest shrink-0">
+                <div className="p-5 sm:p-6 border-b border-border/30 bg-gradient-to-r from-card-soft to-card">
+                  <div className="flex items-center gap-3">
+                    <Package size={20} className="text-primary" />
+                    <h3 className="font-black text-heading text-sm sm:text-lg uppercase tracking-widest truncate">Order Summary</h3>
+                    <span className="ml-auto text-xs sm:text-sm bg-primary/10 text-primary font-black px-2.5 py-1 rounded-full uppercase tracking-widest shrink-0">
                       {cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}
                     </span>
                   </div>
                 </div>
 
-                <div className="max-h-48 sm:max-h-56 overflow-y-auto divide-y divide-border/20 custom-scrollbar">
+                <div className="max-h-[70vh] overflow-y-auto divide-y divide-border/20 custom-scrollbar">
                   {cartItems.map((item) => (
                     <div
                       key={`${item.productId}-${item.options?.color || item.selectedFlavor || ''}-${item.options?.weight || item.selectedWeight || ''}`}
-                      className="flex gap-3 p-3 sm:p-4 w-full min-w-0"
+                      className="flex gap-4 p-4 sm:p-5 w-full min-w-0"
                     >
-                      <img src={item.image} className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-border/10 shrink-0" alt={item.name} />
+                      <img src={item.image} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-border/10 shrink-0" alt={item.name} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
+                        <p className="text-sm sm:text-base font-black text-heading truncate uppercase tracking-tight">{item.name}</p>
                         {getItemDescription(item) && (
-                          <p className="text-[11px] text-muted/80 font-medium mt-0.5 leading-snug line-clamp-2">
+                          <p className="text-xs sm:text-sm text-muted/80 font-medium mt-1 leading-snug line-clamp-2">
                             {getItemDescription(item)}
                           </p>
                         )}
-                        {(Array.isArray(item?.category) ? item.category.includes('Custom Cakes') : item?.category === 'Custom Cakes') || item.productId?.startsWith?.('custom-') ? (
-                          <>
-                            {(item.options?.color || item.selectedFlavor) && <p className="text-[11px] text-muted font-bold mt-0.5">Color: {item.options?.color || item.selectedFlavor}</p>}
-                            {(item.options?.flavor || item.selectedFlavor) && <p className="text-[11px] text-muted font-bold">Flavor: {item.options?.flavor || item.selectedFlavor}</p>}
-                            {(item.options?.weight || item.selectedWeight) && <p className="text-[11px] text-muted font-bold">Weight: {item.options?.weight || item.selectedWeight}</p>}
-                          </>
-                        ) : (
-                          <>
-                            {item.selectedFlavor && <p className="text-[11px] text-muted font-bold mt-0.5">Flavor: {item.selectedFlavor}</p>}
-                            {item.selectedWeight && <p className="text-[11px] text-muted font-bold">Weight: {item.selectedWeight}</p>}
-                          </>
+                        {(() => {
+                          const displayFlavor = item.selectedFlavor || item.options?.flavor || item.options?.color;
+                          const displayWeight = item.selectedWeight || item.options?.weight;
+                          return (
+                            <>
+                              {displayFlavor && <p className="text-xs sm:text-sm text-muted font-bold mt-1">Flavor: {displayFlavor}</p>}
+                              {displayWeight && <p className="text-xs sm:text-sm text-muted font-bold">Weight: {displayWeight}</p>}
+                            </>
+                          );
+                        })()}
+                        
+                        {item.addons && item.addons.length > 0 && (
+                          <div className="mt-2 p-3 bg-card-soft border border-border/40 rounded-xl">
+                            <p className="text-xs sm:text-sm text-muted font-black uppercase tracking-widest mb-2">Add-ons included:</p>
+                            <div className="flex flex-col gap-2">
+                              {item.addons.map((addon, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-xs sm:text-sm text-heading font-medium">
+                                  <span className="flex items-center gap-2">
+                                    <Plus size={14} className="text-primary"/> {addon.name}
+                                    <span className="text-xs text-muted/60 font-bold ml-1">x{addon.qty || 1}</span>
+                                  </span>
+                                  <div className="flex items-center gap-3">
+                                    <span className="mr-1 text-muted/80 font-bold">{formatCurrency(addon.price * (addon.qty || 1))}</span>
+                                    <div className="flex items-center gap-1 bg-muted/10 rounded-full px-3 py-1 select-none">
+                                      <button 
+                                        onClick={() => handleCheckoutAddonDecrement(item, addon)} 
+                                        className="hover:scale-110 font-black text-sm sm:text-base px-1.5 text-heading"
+                                      >
+                                        −
+                                      </button>
+                                      <span className="text-xs sm:text-sm font-black w-5 text-center">{addon.qty || 1}</span>
+                                      <button 
+                                        onClick={() => handleCheckoutAddonIncrement(item, addon)} 
+                                        className="hover:scale-110 font-black text-sm sm:text-base px-1.5 text-heading"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )}
-                        <p className="text-xs text-muted/60 font-black mt-1">QTY {item.qty}</p>
+
+                        {availableAddons.length > 0 && (
+                          <div className="mt-2.5 flex flex-wrap gap-1.5 items-center">
+                            <span className="text-xs text-muted/60 font-black uppercase tracking-widest mr-1">Add:</span>
+                            {availableAddons
+                              .filter(addon => !item.addons?.some(a => a._id === addon._id || a.addonId === addon._id))
+                              .map(addon => (
+                                <button
+                                  key={addon._id}
+                                  onClick={() => handleCheckoutAddonIncrement(item, addon)}
+                                  className="text-xs font-black text-muted hover:text-primary bg-muted/5 hover:bg-primary/10 border border-border/40 rounded-full px-3 py-1 transition-all uppercase tracking-wider"
+                                >
+                                  + {addon.name} (₹{addon.price})
+                                </button>
+                              ))}
+                          </div>
+                        )}
+                        
+                        <p className="text-xs sm:text-sm text-muted/60 font-black mt-2">QTY {item.qty}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="font-black text-heading text-sm">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
-                        {Number(item.price) > getFinalItemPrice(item) && (
-                          <p className="text-[9px] line-through text-muted/40 font-bold">{formatCurrency(Number(item.price) * item.qty)}</p>
+                        <p className="font-black text-heading text-base sm:text-lg">
+                          {formatCurrency((getFinalItemPrice(item) - (item.addons?.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0) || 0)) * item.qty)}
+                        </p>
+                        {Number(item.price) > (getFinalItemPrice(item) - (item.addons?.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0) || 0)) && (
+                          <p className="text-xs line-through text-muted/40 font-bold">{formatCurrency(Number(item.price) * item.qty)}</p>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-4 sm:p-5 space-y-2.5 sm:space-y-3 border-t border-border/30 text-sm">
-                  <div className="flex justify-between font-bold text-xs sm:text-sm uppercase tracking-widest">
-                    <span className="text-muted">Total MRP</span>
-                    <span className="text-heading">{formatCurrency(originalTotal)}</span>
+                <div className="p-5 sm:p-6 space-y-3 sm:space-y-4 border-t border-border/30 text-sm sm:text-base">
+                  <div className="flex justify-between font-bold text-sm sm:text-base uppercase tracking-widest">
+                    <span className="text-muted">Product Price</span>
+                    <span className="text-heading">{formatCurrency(productOnlyTotal)}</span>
                   </div>
+                  {addonOnlyTotal > 0 && (
+                    <div className="flex justify-between font-bold text-sm sm:text-base uppercase tracking-widest text-primary">
+                      <span>Add-ons Total</span>
+                      <span>+ {formatCurrency(addonOnlyTotal)}</span>
+                    </div>
+                  )}
                   {offerDiscount > 0 && (
-                    <div className="flex justify-between text-success-text font-black text-xs sm:text-sm uppercase tracking-widest">
+                    <div className="flex justify-between text-success-text font-black text-sm sm:text-base uppercase tracking-widest">
                       <span>Offer Discount</span>
                       <span>− {formatCurrency(offerDiscount)}</span>
                     </div>
                   )}
                   {couponDiscount > 0 && (
-                    <div className="flex justify-between text-success-text font-black text-xs sm:text-sm uppercase tracking-widest">
+                    <div className="flex justify-between text-success-text font-black text-sm sm:text-base uppercase tracking-widest">
                       <span>Coupon ({appliedCouponDisplay})</span>
                       <span>− {formatCurrency(couponDiscount)}</span>
                     </div>
                   )}
-                  <div className="border-t border-border/30 pt-2 flex justify-between font-black text-xs sm:text-sm uppercase tracking-widest">
+                  <div className="border-t border-border/30 pt-3 flex justify-between font-black text-sm sm:text-base uppercase tracking-widest">
                     <span className="text-muted">Subtotal</span>
                     <span className="text-heading">{formatCurrency(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted font-medium">Delivery Fee</span>
-                    <span className="font-black text-heading">{isAddressSelected ? formatCurrency(deliveryFee) : '—'}</span>
-                  </div>
-                  <div className="flex justify-between text-xs sm:text-sm">
+                  {subtotal >= 100 ? (
+                    <div className="flex justify-between text-sm sm:text-base">
+                      <span className="text-muted font-medium">Delivery Fee</span>
+                      <span className="font-black text-heading">{isAddressSelected ? formatCurrency(deliveryFee) : '—'}</span>
+                    </div>
+                  ) : (
+                    <div className="flex justify-between text-sm sm:text-base">
+                      <span className="text-muted font-medium">Shop Pickup</span>
+                      <span className="font-black text-success-text">FREE</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm sm:text-base">
                     <span className="text-muted font-medium">GST (18%)</span>
-                    <span className="font-black text-heading">{isAddressSelected ? formatCurrency(gst) : '—'}</span>
+                    <span className="font-black text-heading">{formatCurrency(gst)}</span>
                   </div>
-                  <div className="flex justify-between text-xs sm:text-sm">
-                    <span className="text-muted font-medium">Convenience Fee</span>
-                    <span className="font-black text-heading">{isAddressSelected ? formatCurrency(convenienceFee) : '—'}</span>
+                  <div className="flex justify-between text-sm sm:text-base">
+                    <span className="text-muted font-medium">Convenience Fee (2%)</span>
+                    <span className="font-black text-heading">{formatCurrency(convenienceFee)}</span>
                   </div>
 
                   {(offerDiscount + couponDiscount) > 0 && (
-                    <div className="flex items-center justify-between bg-success-light border-2 border-success/30 rounded-xl px-3 py-2 text-success-text font-black text-xs uppercase tracking-widest w-full min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <Star size={11} /> You Save
+                    <div className="flex items-center justify-between bg-success-light border-2 border-success/30 rounded-xl px-4 py-3 text-success-text font-black text-sm sm:text-base uppercase tracking-widest w-full min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Star size={14} /> You Save
                       </div>
                       <span>− {formatCurrency(offerDiscount + couponDiscount)}</span>
                     </div>
                   )}
 
-                  <div className="border-t border-border/30 pt-3">
+                  <div className="border-t border-border/30 pt-4">
                     <div className="flex justify-between items-baseline font-black w-full min-w-0">
-                      <span className="text-sm sm:text-base text-heading uppercase tracking-widest">Total</span>
+                      <span className="text-base sm:text-lg text-heading uppercase tracking-widest">Total</span>
                       <div className="text-right">
-                        <span className="text-xl sm:text-2xl text-primary tracking-tight">{isAddressSelected ? formatCurrency(displayTotal) : '—'}</span>
+                        <span className="text-2xl sm:text-3xl text-primary tracking-tight">{formatCurrency(displayTotal)}</span>
                         {backendTotal !== null && (
-                          <p className="text-[9px] text-success-text font-black uppercase tracking-widest mt-0.5">✓ Confirmed by server</p>
+                          <p className="text-xs text-success-text font-black uppercase tracking-widest mt-1">✓ Confirmed by server</p>
                         )}
                       </div>
                     </div>
-                    {!isAddressSelected && <p className="text-[10px] text-warning-text mt-2 text-center font-bold">Select delivery address to see total</p>}
+                    {subtotal >= 100 && !isAddressSelected && <p className="text-xs sm:text-sm text-warning-text mt-2 text-center font-bold">Select delivery address to calculate delivery fee</p>}
                   </div>
                 </div>
 
-                {!hasAppliedCoupon && cartItems.length > 0 && (
-                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0 border-t border-border/30 space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-black text-muted uppercase tracking-widest pt-4">
-                      <Tag size={13} /> Apply Coupon
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        className="input-field font-black uppercase tracking-widest h-10 sm:h-11 flex-1 min-w-0 text-sm"
-                        placeholder="COUPON CODE"
-                        value={couponInput}
-                        disabled={couponBusy || hasAppliedCoupon}
-                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                        onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => handleApplyCoupon()}
-                        disabled={couponBusy || hasAppliedCoupon}
-                        className="bg-primary text-button-text hover:brightness-110 px-4 sm:px-5 h-10 sm:h-11 shrink-0 text-[10px] uppercase tracking-widest"
-                      >
-                        {couponBusy ? '…' : 'Apply'}
-                      </Button>
-                    </div>
-                    {availableCoupons.length > 0 && (
-                      <>
-                        <p className="text-[10px] text-heading font-black uppercase tracking-widest opacity-80">Available on this order</p>
-                        <div className="flex flex-wrap gap-2">
-                          {availableCoupons.map((code) => (
-                            <button
-                              key={code}
-                              type="button"
-                              disabled={couponBusy}
-                              onClick={() => handleApplyCoupon(code)}
-                              className="px-3 py-1.5 rounded-lg text-[10px] font-black text-heading font-mono hover:bg-primary/10 transition-colors border-2 border-border-muted bg-card-soft/60 uppercase tracking-widest"
-                            >
-                              {code}
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+
 
                 {hasAppliedCoupon && (
                   <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 p-3 sm:p-3.5 bg-success-light rounded-2xl flex justify-between items-center border-2 border-success/30">
@@ -1720,18 +2060,48 @@ const Checkout = () => {
                 )}
 
                 <div className="p-4 sm:p-5 pt-0">
+                  {availableUnappliedCoupons.length > 0 && (
+                    <div className="mb-4 p-3.5 bg-warning-light rounded-2xl border-2 border-warning/20 text-warning-text flex gap-3 items-center justify-between">
+                      <div className="flex gap-3 items-center min-w-0 flex-1">
+                        <div className="bg-card p-2 rounded-xl border border-warning/10 shrink-0">
+                          <Sparkles size={16} className="text-warning-text animate-pulse" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-black uppercase tracking-wider">Forgot to apply coupon?</p>
+                          <p className="text-xs font-bold mt-0.5 leading-snug">
+                            Apply <span className="font-mono font-black">{availableUnappliedCoupons[0].code}</span> to save {formatCurrency(availableUnappliedCoupons[0].savings)}!
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleApplyCoupon(availableUnappliedCoupons[0].code)}
+                        className="bg-primary text-button-text font-black uppercase tracking-widest text-[10px] px-4 py-2 rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-sm shrink-0 border border-primary/20"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  )}
                   <Button
                     onClick={handlePlaceOrder}
                     className="w-full h-12 sm:h-14 text-xs sm:text-sm font-black uppercase tracking-widest rounded-2xl"
                     disabled={
                       !addressDetails.fullName.trim() ||
-                      !addressDetails.phone.trim() ||
-                      !deliveryInfo.position ||
-                      !selectedPayMethod
+                      !validatePhoneNumber(addressDetails.phone) ||
+                      (subtotal >= 100 && (!deliveryInfo.position || !selectedPayMethod))
                     }
                   >
-                    <Lock size={12} className="mr-1 inline shrink-0" />
-                    <span className="truncate">{`Pay Securely ${isAddressSelected ? formatCurrency(displayTotal) : ''}`}</span>
+                    {subtotal < 100 ? (
+                      <>
+                        <Send size={12} className="mr-1 inline shrink-0" />
+                        <span className="truncate">Order via WhatsApp • {formatCurrency(displayTotal)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock size={12} className="mr-1 inline shrink-0" />
+                        <span className="truncate">{`Pay Securely ${isAddressSelected ? formatCurrency(displayTotal) : ''}`}</span>
+                      </>
+                    )}
                   </Button>
                 </div>
 

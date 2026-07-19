@@ -12,7 +12,8 @@ const ProductPricing = ({
   isCouponApplied,
   applyingCoupon,
   handleApplyCoupon,
-  handleRemoveCoupon
+  handleRemoveCoupon,
+  addonSum = 0
 }) => {
   return (
     <>
@@ -31,9 +32,15 @@ const ProductPricing = ({
 
         <div className="bg-muted/5 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-3 text-sm font-bold border border-border/20">
           <div className="flex justify-between text-muted/60 uppercase text-[11px] sm:text-xs tracking-widest gap-2">
-            <span>MRP (Inclusive of all taxes)</span>
-            <span className="text-right">{formatCurrency(currentPrice)}</span>
+            <span>Product Base Price</span>
+            <span className="text-right">{formatCurrency(finalPrice - addonSum)}</span>
           </div>
+          {addonSum > 0 && (
+            <div className="flex justify-between text-primary uppercase text-[11px] sm:text-xs tracking-widest gap-2">
+              <span>Add-ons Total</span>
+              <span className="text-right">+ {formatCurrency(addonSum)}</span>
+            </div>
+          )}
           {offerDiscount > 0 && (
             <div className="flex justify-between text-success-text uppercase text-[11px] sm:text-xs tracking-widest gap-2">
               <span>Offer Savings</span>
@@ -47,7 +54,7 @@ const ProductPricing = ({
             </div>
           )}
           <div className="border-t border-border/30 pt-3 flex items-center justify-between font-black text-heading text-base sm:text-lg tracking-tight">
-            <span className="uppercase text-[11px] sm:text-xs tracking-widest text-muted">Final Price</span>
+            <span className="uppercase text-[11px] sm:text-xs tracking-widest text-muted">Final Total Price</span>
             <span>{formatCurrency(finalPrice)}</span>
           </div>
         </div>

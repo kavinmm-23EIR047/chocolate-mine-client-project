@@ -190,6 +190,7 @@ const orderSchema = new mongoose.Schema(
       phone: { type: String, required: true },
       houseNo: { type: String },
       street: { type: String },
+      landmark: { type: String },
       city: { type: String },
       pincode: { type: String },
       lat: { type: Number },

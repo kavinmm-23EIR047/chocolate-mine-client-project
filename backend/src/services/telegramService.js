@@ -60,17 +60,30 @@ const getDisplayFlavor = (item) => {
  * @returns {string} Formatted item string (multi-line if custom cake)
  */
 const formatOrderItem = (item) => {
+  const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
+  const origPrice = Number(item.price || 0);
+  let priceDetails = ``;
+  if (origPrice > finalUnitPrice) {
+    priceDetails = ` (Orig: ₹${origPrice}, Offer: ₹${finalUnitPrice})`;
+  } else {
+    priceDetails = ` (₹${finalUnitPrice})`;
+  }
+
+  let addonStr = '';
+  if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
+    const addonList = item.addons.map(a => `${a.name} (x${a.qty || 1}) - ₹${a.price * (a.qty || 1)}`).join(', ');
+    addonStr = `\n   └ Addons: ${addonList}`;
+  }
+
   if (item.isCustomCake && item.customDetails) {
     const cd = item.customDetails;
-    let details = `🎨 *${item.name}* (x${item.qty})\n`;
+    let details = `🎨 *${item.name}* (x${item.qty})${priceDetails}\n`;
     if (cd.designTheme) details += `   Theme: ${cd.designTheme}\n`;
     if (cd.flavour) details += `   Flavor: ${cd.flavour}\n`;
     if (cd.weight) details += `   Weight: ${cd.weight}\n`;
     if (cd.messageOnCake) {
-      // Clean up the message: remove default "Name: , Age: , Message: None"
       let cleanedMsg = cd.messageOnCake.trim();
       if (cleanedMsg !== 'Name: , Age: , Message: None' && cleanedMsg !== 'Name: , Age: , Message:') {
-        // Extract only the message part after "Message: "
         const match = cleanedMsg.match(/Message:\s*(.*)$/i);
         if (match && match[1]) {
           cleanedMsg = match[1].trim();
@@ -78,18 +91,20 @@ const formatOrderItem = (item) => {
         if (cleanedMsg && cleanedMsg !== 'None') details += `   🎂 Message: ${cleanedMsg}\n`;
       }
     }
+    if (addonStr) details += `   ${addonStr.trim()}\n`;
     return details.trim();
   }
   
   // Normal product
-  let details = `🍰 *${item.name}* (x${item.qty})`;
+  let details = `🍰 *${item.name}* (x${item.qty})${priceDetails}`;
   const resolvedFlavor = getDisplayFlavor(item);
   const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
   const showWeight = item.selectedWeight;
-  if (showFlavor || showWeight) {
+  if (showFlavor || showWeight || addonStr) {
     details += `\n`;
     if (showFlavor) details += `   Flavor: ${resolvedFlavor}\n`;
     if (showWeight) details += `   Weight: ${showWeight}\n`;
+    if (addonStr) details += `   ${addonStr.trim()}\n`;
   }
   return details.trim();
 };
@@ -122,18 +137,38 @@ const sendInternalOrderAlert = (phone, order) => {
   
   // Build detailed items list with custom cake support
   const itemsList = orderObj.items.map(item => formatOrderItem(item)).join('\n');
-  const address = `${orderObj.address.fullName}, ${orderObj.address.houseNo}, ${orderObj.address.street}, ${orderObj.address.city} - ${orderObj.address.pincode}`;
+  
+  const addrParts = [];
+  if (orderObj.address.fullName) addrParts.push(orderObj.address.fullName);
+  if (orderObj.address.houseNo) addrParts.push(orderObj.address.houseNo);
+  if (orderObj.address.street) addrParts.push(orderObj.address.street);
+  if (orderObj.address.landmark) addrParts.push(`Landmark: ${orderObj.address.landmark}`);
+  if (orderObj.address.city) addrParts.push(orderObj.address.city);
+  if (orderObj.address.pincode) addrParts.push(orderObj.address.pincode);
+  const address = addrParts.join(', ');
+
+  let mapsUrlMsg = '';
+  if (orderObj.address.lat && orderObj.address.lng) {
+    mapsUrlMsg = `\n🗺️ *Directions:* https://www.google.com/maps/search/?api=1&query=${orderObj.address.lat},${orderObj.address.lng}`;
+  }
   
   const message = `🍫 *New Order Received*\n\n` +
     `🆔 *Order ID:* ${orderObj.orderNumber}\n` +
     `👤 *Customer Name:* ${orderObj.address.fullName}\n` +
     `📞 *Customer Phone:* ${orderObj.address.phone}\n` +
-    `📍 *Full Address:* ${address}\n` +
-    `🍰 *Ordered Items:*\n${itemsList}\n` +
-    `💰 *Total Amount:* ₹${orderObj.total}\n` +
+    `📍 *Full Address:* ${address}\n\n` +
+    `🍰 *Ordered Items:*\n${itemsList}\n\n` +
+    `💰 *Pricing Breakdown:*\n` +
+    `   Subtotal: ₹${orderObj.subtotal}\n` +
+    (orderObj.discount > 0 ? `   Discount: -₹${orderObj.discount}\n` : '') +
+    `   Delivery Charge: ₹${orderObj.deliveryCharge}\n` +
+    `   GST (18%): ₹${orderObj.gst}\n` +
+    `   Convenience Fee (2%): ₹${orderObj.convenienceFee}\n` +
+    `   *Grand Total:* ₹${orderObj.total}\n\n` +
     `📅 *Delivery Date:* ${orderObj.deliveryDate ? new Date(orderObj.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
     `⏰ *Delivery Slot:* ${orderObj.deliverySlot || 'N/A'}\n` +
-    `📅 *Ordered Time:* ${new Date(orderObj.createdAt).toLocaleString()}\n\n` +
+    `📅 *Ordered Time:* ${new Date(orderObj.createdAt).toLocaleString()}` +
+    mapsUrlMsg + `\n\n` +
     `Please check admin dashboard now.`;
 
   return sendTelegram(message);

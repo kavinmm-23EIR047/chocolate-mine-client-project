@@ -54,7 +54,9 @@ const getWeightMultiplier = (weightStr) => {
   return 1;
 };
 
-const computePricing = ({ cartItems, addressLat, addressLng, discount = 0 }) => {
+
+
+const computePricing = ({ cartItems, addressLat, addressLng, discount = 0, paymentMethod = 'ONLINE' }) => {
   const subtotal = cartItems.reduce((sum, item) => {
     const unitPrice = Number(item.finalPrice ?? item.price ?? 0);
     const qty = Number(item.qty ?? 0);
@@ -69,11 +71,16 @@ const computePricing = ({ cartItems, addressLat, addressLng, discount = 0 }) => 
     return sum + itemTotal;
   }, 0);
 
-  // Set to 0 for testing product price only
   let deliveryCharge = 0;
-  const convenienceFee = 0;
-  const gst = 0;
+  if (paymentMethod !== 'WHATSAPP' && addressLat && addressLng) {
+    const distance = calculateDistanceKm(SHOP_LAT, SHOP_LNG, addressLat, addressLng);
+    deliveryCharge = Math.round(distance * 10);
+  }
+  
+  const convenienceFee = Math.round(subtotal * 0.02);
+  const gst = Math.round(subtotal * 0.18);
   const total = subtotal + deliveryCharge + convenienceFee + gst - (Number(discount) || 0);
+  
   return { subtotal, deliveryCharge, convenienceFee, gst, total };
 };
 
@@ -221,7 +228,7 @@ const validateAddress = (address) => {
 };
 
 exports.createRazorpayOrder = asyncHandler(async (req, res) => {
-  const { address, discount, couponCode, deliveryDate, deliverySlot, directItem, notes, cakeMessage } = req.body;
+  const { address, discount, couponCode, deliveryDate, deliverySlot, directItem, notes, cakeMessage, paymentMethod = 'ONLINE' } = req.body;
 
   if (!req.user?._id) throw new AppError('Unauthorized user', 401);
   try {
@@ -416,30 +423,6 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     throw new AppError('Cart is empty', 400);
   }
 
-  // Duplicate order prevention
-  const existingPendingOrder = await Order.findOne({
-    userId: req.user._id,
-    paymentStatus: 'pending',
-    orderStatus: 'confirmed',
-    createdAt: { $gt: new Date(Date.now() - 5 * 60 * 1000) }
-  });
-  if (existingPendingOrder?.razorpayOrderId) {
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        razorpayOrder: { id: existingPendingOrder.razorpayOrderId },
-        orderId: existingPendingOrder._id,
-        pricing: {
-          subtotal: existingPendingOrder.subtotal,
-          deliveryCharge: existingPendingOrder.deliveryCharge,
-          convenienceFee: existingPendingOrder.convenienceFee,
-          gst: existingPendingOrder.gst,
-          total: existingPendingOrder.total
-        }
-      }
-    });
-  }
-
   // Stock validation (skip custom cakes)
   if (!directItem) {
     for (const item of cart.items) {
@@ -463,20 +446,51 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     addressLat: Number(address?.lat),
     addressLng: Number(address?.lng),
     discount: 0,
+    paymentMethod,
   });
 
-  let razorpayOrder;
-  try {
-    razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(total * 100),
-      currency: 'INR',
-      receipt: `receipt_${Date.now()}`,
-      payment_capture: 1
+  // Duplicate order prevention (only reuse if pricing matches)
+  const existingPendingOrder = await Order.findOne({
+    userId: req.user._id,
+    paymentStatus: 'pending',
+    orderStatus: 'confirmed',
+    createdAt: { $gt: new Date(Date.now() - 5 * 60 * 1000) }
+  });
+  if (existingPendingOrder?.razorpayOrderId && existingPendingOrder.total === total) {
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        razorpayOrder: { id: existingPendingOrder.razorpayOrderId },
+        orderId: existingPendingOrder._id,
+        pricing: {
+          subtotal: existingPendingOrder.subtotal,
+          deliveryCharge: existingPendingOrder.deliveryCharge,
+          convenienceFee: existingPendingOrder.convenienceFee,
+          gst: existingPendingOrder.gst,
+          total: existingPendingOrder.total
+        }
+      }
     });
-  } catch (error) {
-    console.error('Razorpay order creation error:', error);
-    const errMsg = error.message || error.description || JSON.stringify(error);
-    throw new AppError(`Failed to create Razorpay order: ${errMsg}`, 500);
+  }
+
+  if (paymentMethod === 'ONLINE' && subtotal < 100) {
+    throw new AppError('Orders below ₹100 are not eligible for delivery. Please place your order via WhatsApp.', 400);
+  }
+
+  let razorpayOrder = null;
+  if (paymentMethod === 'ONLINE') {
+    try {
+      razorpayOrder = await razorpay.orders.create({
+        amount: Math.round(total * 100),
+        currency: 'INR',
+        receipt: `receipt_${Date.now()}`,
+        payment_capture: 1
+      });
+    } catch (error) {
+      console.error('Razorpay order creation error:', error);
+      const errMsg = error.message || error.description || JSON.stringify(error);
+      throw new AppError(`Failed to create Razorpay order: ${errMsg}`, 500);
+    }
   }
 
   const order = await Order.create({
@@ -509,7 +523,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     gst,
     total,
     discount: 0,
-    paymentMethod: 'ONLINE',
+    paymentMethod,
     paymentStatus: 'pending',
     orderStatus: 'confirmed',
     address: {
@@ -517,6 +531,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       phone: address.phone?.trim(),
       houseNo: address.houseNo?.trim() || '',
       street: address.street?.trim() || '',
+      landmark: address.landmark?.trim() || '',
       city: address.city?.trim() || 'Coimbatore',
       pincode: address.pincode?.trim() || '641001',
       lat: address.lat ?? null,
@@ -526,15 +541,22 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     deliverySlot: normalizedSlot,
     notes: typeof notes === 'string' && notes.trim() ? notes.trim() : undefined,
     cakeMessage: typeof cakeMessage === 'string' && cakeMessage.trim() ? cakeMessage.trim().slice(0, 500) : undefined,
-    razorpayOrderId: razorpayOrder.id,
+    razorpayOrderId: razorpayOrder ? razorpayOrder.id : undefined,
     paymentAttemptAt: new Date()
   });
 
-  await Payment.create({ orderId: order._id, razorpayOrderId: razorpayOrder.id, amount: total, status: 'created' });
+  if (razorpayOrder) {
+    await Payment.create({ orderId: order._id, razorpayOrderId: razorpayOrder.id, amount: total, status: 'created' });
+  }
+
+  if (paymentMethod === 'WHATSAPP') {
+    const notificationManager = require('../services/notificationManager');
+    await notificationManager.notifyOrderSuccess(order);
+  }
 
   res.status(200).json({
     status: 'success',
-    data: { razorpayOrder, orderId: order._id, pricing: { subtotal, deliveryCharge, convenienceFee, gst, total } }
+    data: { razorpayOrder, orderId: order._id, orderNumber: order.orderNumber, pricing: { subtotal, deliveryCharge, convenienceFee, gst, total } }
   });
 });
 

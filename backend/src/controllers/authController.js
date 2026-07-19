@@ -170,9 +170,8 @@ exports.getMe = asyncHandler(async (req, res) => {
 
 // @desc    Google OAuth Success Redirect
 exports.googleSuccess = asyncHandler(async (req, res) => {
-  const frontendUrl =
-    process.env.FRONTEND_URL ||
-    'https://chocolate-mine-client-project.vercel.app';
+  const { getFrontendUrl } = require('../utils/urlUtils');
+  const frontendUrl = getFrontendUrl();
 
   if (req.user) {
     const accessToken = generateAccessToken(req.user._id);

@@ -58,7 +58,8 @@ const getThemeStyles = () => `
 
 // Generates a responsive block logo precisely cloning the heavy condensed typography of image_a3db4a.png
 const getLogoMarkup = () => {
-  const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+  const { getFrontendUrl } = require('../utils/urlUtils');
+  const frontendUrl = getFrontendUrl();
   return `
     <div style="text-align: center; margin-bottom: 28px; user-select: none;">
       <a href="${frontendUrl}" style="text-decoration: none; display: inline-block;">
@@ -113,7 +114,8 @@ const getDisplayFlavor = (item) => {
 const emailService = {
   sendOrderConfirmed: async (email, order) => {
     const quote = "All you need is love. But a little chocolate now and then doesn't hurt.";
-    const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
     // Build items table rows
@@ -227,7 +229,8 @@ const emailService = {
   },
 
   sendPacked: async (email, order) => {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
     return await sendMail({
@@ -262,7 +265,8 @@ const emailService = {
   },
 
   sendDispatched: async (email, order) => {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
 
     return await sendMail({
@@ -297,7 +301,8 @@ const emailService = {
   },
 
   sendDelivered: async (email, order, pdfBuffer = null) => {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
     const feedbackLink = `${frontendUrl}/review/${order._id}`;
 
     return await sendMail({
@@ -339,7 +344,8 @@ const emailService = {
   },
 
   sendUserPaymentFailed: async (email, order, reason) => {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://thechocolatemine.com';
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
     const ordersLink = `${frontendUrl}/account/orders`;
 
     return await sendMail({

@@ -525,7 +525,16 @@ const Cart = () => {
                     </div>
                   )}
 
-                  <Button onClick={() => navigate("/checkout")} className="w-full mt-2">
+                  <Button 
+                    onClick={() => {
+                      if (subtotal < 500) {
+                        toast.error("Purchase price is not eligible for delivery. Add more products for online delivery.");
+                      } else {
+                        navigate("/checkout");
+                      }
+                    }} 
+                    className="w-full mt-2"
+                  >
                     PROCEED TO CHECKOUT
                     <ArrowRight size={16} className="ml-2" />
                   </Button>

@@ -806,18 +806,13 @@ const Checkout = () => {
     return coupons;
   }, [cartItems, hasAppliedCoupon]);
 
-  // Auto-set shop pickup details if order total is under ₹100
+  // Block checkout if order total is under ₹500
   useEffect(() => {
-    if (subtotal < 100) {
-      setDeliveryInfo({
-        address: 'Shop Pickup',
-        position: { lat: Number(SHOP_LAT), lng: Number(SHOP_LNG) }
-      });
-      setLocationValid(true);
-      setDistance(0);
-      setDeliveryFee(0);
+    if (subtotal < 500) {
+      toast.error("Purchase price is not eligible for delivery. Add more products for online delivery.");
+      navigate("/cart");
     }
-  }, [subtotal, SHOP_LAT, SHOP_LNG]);
+  }, [subtotal, navigate]);
 
   useEffect(() => {
     const fetchAddresses = async () => {

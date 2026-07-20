@@ -806,9 +806,8 @@ const Checkout = () => {
     return coupons;
   }, [cartItems, hasAppliedCoupon]);
 
-  // Auto-set shop pickup details if order total is under ₹100
   useEffect(() => {
-    if (subtotal < 100) {
+    if (subtotal < 300) {
       setDeliveryInfo({
         address: 'Shop Pickup',
         position: { lat: Number(SHOP_LAT), lng: Number(SHOP_LNG) }
@@ -905,7 +904,7 @@ const Checkout = () => {
   const handleDeliverHere = () => {
     if (!addressDetails.fullName.trim()) return toast.error('Please enter recipient name');
     if (!validatePhoneNumber(addressDetails.phone)) return toast.error('Please enter a valid 10-digit phone number');
-    if (subtotal >= 100) {
+    if (subtotal >= 300) {
       if (!addressDetails.houseNo?.trim()) return toast.error('Please enter house/flat number');
       if (!addressDetails.street?.trim()) return toast.error('Please enter street address');
       if (!addressDetails.landmark?.trim()) return toast.error('Please enter a landmark');
@@ -935,7 +934,7 @@ const Checkout = () => {
   const validateForm = () => {
     if (!addressDetails.fullName.trim()) { toast.error('Please enter full name'); return false; }
     if (!validatePhoneNumber(addressDetails.phone.trim())) { toast.error('Please enter a valid 10-digit phone number'); return false; }
-    if (subtotal >= 100) {
+    if (subtotal >= 300) {
       if (!addressDetails.houseNo?.trim()) { toast.error('Please enter house/flat number'); return false; }
       if (!addressDetails.street?.trim()) { toast.error('Please enter street address'); return false; }
       if (!addressDetails.landmark?.trim()) { toast.error('Please enter a landmark'); return false; }
@@ -1002,7 +1001,7 @@ const Checkout = () => {
 
     if (!user) { toast.error('Session expired. Please login again.'); navigate('/login'); return; }
 
-    const isWhatsAppOrder = subtotal < 100;
+    const isWhatsAppOrder = subtotal < 300;
 
     const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
     if (!isWhatsAppOrder && !razorpayKey) { toast.error('Payment configuration error.'); return; }
@@ -1117,7 +1116,7 @@ const Checkout = () => {
           return `• ${item.name} x ${item.qty}${optStr} - ₹${finalItemPrice * item.qty}${priceDetails}${addonStr}`;
         }).join('\n');
 
-        const isDelivery = subtotal >= 100;
+        const isDelivery = subtotal >= 300;
         let addressText = ``;
         if (isDelivery) {
           const addrParts = [];
@@ -1340,12 +1339,12 @@ const Checkout = () => {
           {/* LEFT COLUMN */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 w-full min-w-0">
 
-            {subtotal < 100 && (
+            {subtotal < 300 && (
               <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-2 border-amber-500/30 rounded-2xl p-4 sm:p-5 flex items-start gap-3 shadow-sm">
                 <span className="text-xl shrink-0">⚠️</span>
                 <div className="text-sm text-amber-800 dark:text-amber-300 font-medium">
                   <p className="font-black uppercase tracking-widest text-xs mb-1">Notice: Minimum Order for Delivery</p>
-                  Orders below <span className="font-black text-primary">₹100</span> are not eligible for home delivery. Please proceed as a <span className="font-bold text-primary">Shop Pickup Order</span> and you can send details directly via WhatsApp.
+                  Orders below <span className="font-black text-primary">₹300</span> are not eligible for home delivery. Please increase your cart value for delivery, or proceed as a <span className="font-bold text-primary">Shop Pickup Order</span> to buy directly at our shop.
                 </div>
               </div>
             )}
@@ -1354,9 +1353,9 @@ const Checkout = () => {
             <div data-step="1" className="bg-card rounded-2xl sm:rounded-3xl shadow-card border-2 border-border-card overflow-hidden">
               <StepBadge
                 n="1"
-                label={subtotal >= 100 ? "Delivery Address" : "Customer Details"}
+                label={subtotal >= 300 ? "Delivery Address" : "Customer Details"}
                 isActive={activeStep === 1}
-                isCompleted={subtotal < 100 ? (!!addressDetails.fullName.trim() && validatePhoneNumber(addressDetails.phone)) : !!deliveryInfo.position}
+                isCompleted={subtotal < 300 ? (!!addressDetails.fullName.trim() && validatePhoneNumber(addressDetails.phone)) : !!deliveryInfo.position}
                 onEdit={() => setActiveStep(1)}
                 summary={deliveryInfo.position ? `${addressDetails.fullName} • ${formatPhoneForDisplay(addressDetails.phone)}` : null}
               />
@@ -1370,7 +1369,7 @@ const Checkout = () => {
                   >
                     <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
 
-                      {subtotal >= 100 && savedAddresses.length > 0 && (
+                      {subtotal >= 300 && savedAddresses.length > 0 && (
                         <div className="space-y-3">
                           <p className="text-xs text-heading font-black uppercase tracking-widest opacity-80">Saved Addresses</p>
                           <div className="grid gap-3 w-full min-w-0">
@@ -1427,7 +1426,7 @@ const Checkout = () => {
                         </div>
                       )}
 
-                      {subtotal >= 100 && (
+                      {subtotal >= 300 && (
                         <button
                           onClick={() => setShowMap(true)}
                           className="w-full p-2.5 sm:p-4 border-2 border-dashed border-primary/30 dark:border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/50 transition-all"
@@ -1437,7 +1436,7 @@ const Checkout = () => {
                         </button>
                       )}
 
-                      {subtotal >= 100 && deliveryInfo.position && (
+                      {subtotal >= 300 && deliveryInfo.position && (
                         <motion.div
                           initial={{ opacity: 0, scale: 0.97 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -1497,7 +1496,7 @@ const Checkout = () => {
                           )}
                         </div>
 
-                        {subtotal >= 100 && (
+                        {subtotal >= 300 && (
                           <>
                             <div className="space-y-1.5 sm:space-y-2">
                               <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
@@ -1541,13 +1540,13 @@ const Checkout = () => {
 
                       {locationValid && deliveryInfo.position && (
                         <div className="pt-4 flex justify-end gap-3">
-                          {subtotal >= 100 && editingAddressId && (
+                          {subtotal >= 300 && editingAddressId && (
                             <Button onClick={handleUpdateAddress} className="btn-secondary px-6 border-primary/20 text-primary">
                               Update Address
                             </Button>
                           )}
                           <Button onClick={handleDeliverHere} className="btn-primary px-8">
-                            {subtotal >= 100 ? 'Deliver Here' : 'Confirm Details'}
+                            {subtotal >= 300 ? 'Deliver Here' : 'Confirm Details'}
                           </Button>
                         </div>
                       )}
@@ -1755,9 +1754,9 @@ const Checkout = () => {
                 n="4"
                 label="Payment Method"
                 isActive={activeStep === 4}
-                isCompleted={subtotal < 100 ? true : !!selectedPayMethod}
+                isCompleted={subtotal < 300 ? true : !!selectedPayMethod}
                 onEdit={() => setActiveStep(4)}
-                summary={subtotal < 100 ? "WhatsApp Shop Pickup" : (selectedPayMethod ? PAYMENT_METHODS.find(m => m.id === selectedPayMethod)?.label : null)}
+                summary={subtotal < 300 ? "WhatsApp Shop Pickup" : (selectedPayMethod ? PAYMENT_METHODS.find(m => m.id === selectedPayMethod)?.label : null)}
               />
               <AnimatePresence>
                 {activeStep === 4 && (
@@ -1768,7 +1767,7 @@ const Checkout = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="p-4 sm:p-5 space-y-4">
-                      {subtotal < 100 ? (
+                      {subtotal < 300 ? (
                         <div className="p-4 sm:p-5 rounded-2xl bg-success/5 border-2 border-success/20 space-y-3">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center text-success shrink-0">
@@ -1854,7 +1853,7 @@ const Checkout = () => {
                           document.getElementById('order-summary-section')?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
-                        disabled={subtotal < 100 ? false : !selectedPayMethod}
+                        disabled={subtotal < 300 ? false : !selectedPayMethod}
                       >
                         Order Summary
                       </Button>
@@ -2004,7 +2003,7 @@ const Checkout = () => {
                     <span className="text-muted">Subtotal</span>
                     <span className="text-heading">{formatCurrency(subtotal)}</span>
                   </div>
-                  {subtotal >= 100 ? (
+                  {subtotal >= 300 ? (
                     <div className="flex justify-between text-sm sm:text-base">
                       <span className="text-muted font-medium">Delivery Fee</span>
                       <span className="font-black text-heading">{isAddressSelected ? formatCurrency(deliveryFee) : '—'}</span>
@@ -2043,7 +2042,7 @@ const Checkout = () => {
                         )}
                       </div>
                     </div>
-                    {subtotal >= 100 && !isAddressSelected && <p className="text-xs sm:text-sm text-warning-text mt-2 text-center font-bold">Select delivery address to calculate delivery fee</p>}
+                    {subtotal >= 300 && !isAddressSelected && <p className="text-xs sm:text-sm text-warning-text mt-2 text-center font-bold">Select delivery address to calculate delivery fee</p>}
                   </div>
                 </div>
 
@@ -2088,10 +2087,10 @@ const Checkout = () => {
                     disabled={
                       !addressDetails.fullName.trim() ||
                       !validatePhoneNumber(addressDetails.phone) ||
-                      (subtotal >= 100 && (!deliveryInfo.position || !selectedPayMethod))
+                      (subtotal >= 300 && (!deliveryInfo.position || !selectedPayMethod))
                     }
                   >
-                    {subtotal < 100 ? (
+                    {subtotal < 300 ? (
                       <>
                         <Send size={12} className="mr-1 inline shrink-0" />
                         <span className="truncate">Order via WhatsApp • {formatCurrency(displayTotal)}</span>

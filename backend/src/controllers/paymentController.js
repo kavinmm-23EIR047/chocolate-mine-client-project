@@ -473,8 +473,8 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     });
   }
 
-  if (paymentMethod === 'ONLINE' && subtotal < 100) {
-    throw new AppError('Orders below ₹100 are not eligible for delivery. Please place your order via WhatsApp.', 400);
+  if (paymentMethod === 'ONLINE' && subtotal < 300) {
+    throw new AppError('Orders below ₹300 are not eligible for delivery. Please increase your cart value for delivery, or proceed as a Shop Pickup Order.', 400);
   }
 
   let razorpayOrder = null;

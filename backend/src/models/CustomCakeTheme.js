@@ -20,6 +20,10 @@ const customCakeThemeSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  category: [{
+    type: String,
+    trim: true
+  }],
   tiers: {
     tier1: { 
       isActive: { type: Boolean, default: true }, 

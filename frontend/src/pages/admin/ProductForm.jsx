@@ -86,7 +86,7 @@ const ProductForm = () => {
     const fetchMeta = async () => {
       try {
         const [catRes, occRes] = await Promise.all([
-          adminService.getCategories(),
+          adminService.getCategories({ type: 'ordinary' }),
           adminService.getOccasions()
         ]);
         setCategories(catRes.data.data || []);

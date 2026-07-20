@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Star, ChevronDown, ChevronUp, Search, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Star, ChevronDown, ChevronUp, Search, RotateCcw, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FilterSidebar = ({ 
@@ -12,6 +13,7 @@ const FilterSidebar = ({
   categories: propCategories = [],
   isMobileDrawer = false
 }) => {
+  const navigate = useNavigate();
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const [priceRange, setPriceRange] = useState({ min: 10, max: 10000 });
   const [categories, setCategories] = useState(propCategories);
@@ -103,6 +105,13 @@ const FilterSidebar = ({
       e.preventDefault();
       e.stopPropagation();
     }
+
+    // Check if clicked category is a Custom Cake category
+    const catObj = categories.find(c => (c.name || '').toLowerCase() === (categoryName || '').toLowerCase());
+    if (catObj && catObj.categoryType === 'custom') {
+      navigate(`/custom-cake?category=${encodeURIComponent(categoryName)}`);
+      return;
+    }
     
     let newFilters = { ...localFilters };
     
@@ -119,29 +128,11 @@ const FilterSidebar = ({
         : [...current.filter(c => c !== 'all'), categoryName];
       
       newFilters.categories = updated;
-
-      // Coordinate anniversary category with anniversary-gift occasion
-      if (categoryName.toLowerCase() === 'anniversary') {
-        const currentOcc = localFilters.occasions || [];
-        const updatedOcc = isAlreadyActive
-          ? currentOcc.filter(o => o !== 'anniversary-gift')
-          : [...currentOcc.filter(o => o !== 'anniversary-gift'), 'anniversary-gift'];
-        newFilters.occasions = updatedOcc;
-      }
-
-      // Coordinate birthday category with birthday-gifts occasion
-      if (categoryName.toLowerCase() === 'birthday-cakes' || categoryName.toLowerCase() === 'birthday') {
-        const currentOcc = localFilters.occasions || [];
-        const updatedOcc = isAlreadyActive
-          ? currentOcc.filter(o => o !== 'birthday-gifts')
-          : [...currentOcc.filter(o => o !== 'birthday-gifts'), 'birthday-gifts'];
-        newFilters.occasions = updatedOcc;
-      }
     }
 
     setLocalFilters(newFilters);
     onApply(newFilters);
-  }, [localFilters, onApply]);
+  }, [categories, localFilters, navigate, onApply]);
 
   const handleOccasionToggle = useCallback((occasionId, e) => {
     if (e) {
@@ -315,21 +306,27 @@ const FilterSidebar = ({
                     {categories.filter(c => c.name !== 'all' && c.name !== 'All').map((category) => {
                       const categoryName = typeof category === 'string' ? category : category.name;
                       const categoryLabel = typeof category === 'string' ? category : category.label;
+                      const isCustom = typeof category === 'object' && category.categoryType === 'custom';
                       const isActive = (localFilters.categories || []).includes(categoryName);
-                      const isCustom = categoryName.toLowerCase().includes('custom');
                       return (
                         <button
                           key={categoryName}
                           onClick={(e) => handleCategoryToggle(categoryName, e)}
-                          className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                          className={`px-3.5 py-2 rounded-full text-xs font-black transition-all border flex items-center gap-1.5 ${
                             isCustom 
-                              ? 'bg-gradient-to-r from-amber-400 to-pink-500 text-white border-transparent shadow-md shadow-pink-500/10'
+                              ? 'bg-gradient-to-r from-[#E6B25A]/20 via-[#F0C46E]/30 to-[#E6B25A]/20 border-[#E6B25A] text-[#E6B25A] hover:bg-[#E6B25A]/40 hover:text-white shadow-sm shadow-[#E6B25A]/20'
                               : isActive 
                                 ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
                                 : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
                           }`}
                         >
-                          {categoryLabel} {isCustom && '✨'}
+                          {isCustom && <Sparkles size={13} className="text-[#E6B25A] shrink-0" />}
+                          <span>{categoryLabel}</span>
+                          {isCustom && (
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#E6B25A]/25 text-[#E6B25A] border border-[#E6B25A]/40">
+                              Custom
+                            </span>
+                          )}
                         </button>
                       );
                     })}

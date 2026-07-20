@@ -11,6 +11,7 @@ const ThemeBuilder = ({ themeId, onBack }) => {
     description: '',
     isActive: true,
     displayOrder: 0,
+    category: [],
     tiers: {
       tier1: { isActive: true, price: 0 },
       tier2: { isActive: false, price: 0 },
@@ -19,6 +20,8 @@ const ThemeBuilder = ({ themeId, onBack }) => {
     flavors: [],
     colors: []
   });
+
+  const [categories, setCategories] = useState([]);
 
   const [globalColors, setGlobalColors] = useState([]);
   const [themeColors, setThemeColors] = useState([]); // Kept for backwards-compatible loading of old colors if needed
@@ -42,10 +45,13 @@ const ThemeBuilder = ({ themeId, onBack }) => {
       setLoading(true);
       await adminService.seedCustomCakeDefaults(); // Ensure defaults exist
       
-      const [colorsRes, flavoursRes] = await Promise.all([
+      const [colorsRes, flavoursRes, categoriesRes] = await Promise.all([
         adminService.getCustomCakeColors(),
-        adminService.getCustomCakeFlavours()
+        adminService.getCustomCakeFlavours(),
+        adminService.getCategories({ type: 'custom' })
       ]);
+
+      setCategories(categoriesRes.data?.data || []);
 
       const colorsData = colorsRes.data.data || [];
       const flavoursData = flavoursRes.data.data || [];
@@ -80,6 +86,7 @@ const ThemeBuilder = ({ themeId, onBack }) => {
 
           setTheme({
             ...existingTheme,
+            category: existingTheme.category || [],
             flavors: finalFlavors,
             colors: finalColors
           });
@@ -340,6 +347,40 @@ const ThemeBuilder = ({ themeId, onBack }) => {
         <div className="space-y-1.5">
           <label className="text-xs font-black text-muted uppercase">Description</label>
           <textarea value={theme.description} onChange={e => setTheme({...theme, description: e.target.value})} className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold" rows="2" />
+        </div>
+        <div className="space-y-3">
+          <label className="text-xs font-black text-muted uppercase">Categories</label>
+          <div className="flex flex-wrap gap-2">
+            {categories.length > 0
+              ? categories.map(c => {
+                  const normalized = (c.name || '').toLowerCase();
+                  const isSelected = (theme.category || []).includes(normalized);
+                  return (
+                    <button
+                      key={c._id}
+                      type="button"
+                      onClick={() => {
+                        const cats = theme.category || [];
+                        setTheme({
+                          ...theme,
+                          category: isSelected
+                            ? cats.filter(cat => cat !== normalized)
+                            : [...cats, normalized]
+                        });
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all border-2 ${
+                        isSelected
+                          ? 'bg-primary border-primary text-button-text shadow-lift'
+                          : 'bg-input border-input-border text-muted hover:border-primary/50'
+                      }`}
+                    >
+                      {c.label || c.name}
+                    </button>
+                  );
+                })
+              : <p className="text-xs text-muted italic">Loading categories...</p>
+            }
+          </div>
         </div>
         <div className="flex items-center gap-2 pt-2">
           <input type="checkbox" id="isActive" checked={theme.isActive} onChange={e => setTheme({...theme, isActive: e.target.checked})} className="w-4 h-4 text-primary" />

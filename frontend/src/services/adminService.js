@@ -45,7 +45,7 @@ const adminService = {
   /* ----------------------------------------
      Category Management
   ---------------------------------------- */
-  getCategories: () => api.get('/categories'),
+  getCategories: (params) => api.get('/categories', { params }),
 
   createCategory: (formData) =>
     api.post('/categories', formData),

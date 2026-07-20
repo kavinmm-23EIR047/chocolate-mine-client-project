@@ -22,6 +22,11 @@ const categorySchema = new mongoose.Schema({
     required: [true, 'Category image is required']
   },
   imagePublicId: { type: String },
+  categoryType: {
+    type: String,
+    enum: ['ordinary', 'custom', 'both'],
+    default: 'both'
+  },
   active: { type: Boolean, default: true }
 }, { timestamps: true });
 

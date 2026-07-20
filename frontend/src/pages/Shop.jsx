@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SlidersHorizontal, Search, X, Star, ChevronDown, ChevronUp, LayoutGrid, List, ChevronLeft, ChevronRight
@@ -14,10 +14,8 @@ import FilterSidebar from '../components/filter/FilterSidebar';
 import FilterDrawer from '../components/filter/FilterDrawer';
 
 const getBaseFilterWord = (term) => {
-  const lower = term.toLowerCase();
-  if (lower.includes('anniversary')) return 'anniversary';
-  if (lower.includes('birthday')) return 'birthday';
-  return lower.replace(/[\s-]/g, '');
+  if (!term) return '';
+  return term.toLowerCase().replace(/[\s-]/g, '');
 };
 
 const formatLabel = (str) => {
@@ -26,6 +24,7 @@ const formatLabel = (str) => {
 };
 
 const Shop = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -63,32 +62,15 @@ const Shop = () => {
     : [];
   const rawOccasion = searchParams.get('occasion') || 'all';
 
-  const hasAnniversaryCat = rawCategories.some(c => c.toLowerCase() === 'anniversary' || c.toLowerCase() === 'anniversary-gift');
-  const hasAnniversaryOcc = rawOccasion.toLowerCase() === 'anniversary' || rawOccasion.toLowerCase() === 'anniversary-gift';
-
-  const hasBirthdayCat = rawCategories.some(c => c.toLowerCase() === 'birthday' || c.toLowerCase() === 'birthday-cakes');
-  const hasBirthdayOcc = rawOccasion.toLowerCase() === 'birthday' || rawOccasion.toLowerCase() === 'birthday-gifts';
-
-  let activeCategories = [...rawCategories];
-  if (hasAnniversaryCat || hasAnniversaryOcc) {
-    if (!activeCategories.includes('anniversary')) activeCategories.push('anniversary');
-  }
-  if (hasBirthdayCat || hasBirthdayOcc) {
-    if (!activeCategories.includes('birthday-cakes')) activeCategories.push('birthday-cakes');
-  }
-
-  let activeOccasion = rawOccasion;
-  if (hasAnniversaryCat || hasAnniversaryOcc) {
-    activeOccasion = 'anniversary-gift';
-  } else if (hasBirthdayCat || hasBirthdayOcc) {
-    activeOccasion = 'birthday-gifts';
-  }
+  const activeCategories = rawCategories;
+  const activeOccasion = rawOccasion;
   const activeSubCategory = searchParams.get('subCategory') || '';
   const activeRating = Number(searchParams.get('rating')) || 0;
   const sortBy = searchParams.get('sort') || 'newest';
   const searchQuery = searchParams.get('search') || '';
   const isBestseller = searchParams.get('bestseller') === 'true';
   const isFeatured = searchParams.get('featured') === 'true';
+  const isOffers = searchParams.get('offers') === 'true' || searchParams.get('offer') === 'true';
 
   const [priceRange, setPriceRange] = useState([
     Number(searchParams.get('minPrice')) || 10,
@@ -299,16 +281,17 @@ const Shop = () => {
     const fetchFilters = async () => {
       try {
         const [categoriesRes, occasionsRes] = await Promise.all([
-          api.get('/categories'),
+          api.get('/categories', { params: { activeOnly: true } }),
           api.get('/occasions')
         ]);
         
         const dbCats = categoriesRes.data?.data || categoriesRes.data || [];
         setCategories([
           { name: 'all', label: 'All' },
-          ...dbCats.filter(c => c.isActive !== false).map(c => ({
+          ...dbCats.filter(c => c.isActive !== false && c.active !== false).map(c => ({
             name: c.name,
             label: c.label || c.name.replace(/-/g, ' '),
+            categoryType: c.categoryType || 'both',
             subCategories: c.subCategories || [],
           })),
         ]);
@@ -316,30 +299,32 @@ const Shop = () => {
         const dbOcc = occasionsRes.data?.data || occasionsRes.data || [];
         setOccasions([
           { name: 'all', label: 'All' },
-          ...dbOcc.filter(o => o.isActive !== false).map(o => ({
+          ...dbOcc.filter(o => o.isActive !== false && o.active !== false).map(o => ({
             name: o.name,
             label: o.label || o.name.replace(/-/g, ' '),
           })),
         ]);
       } catch (error) {
         console.error('Error fetching filters:', error);
-        // Fallback categories
-        setCategories([
-          { name: 'all', label: 'All' },
-          { name: 'anniversary', label: 'Anniversary' },
-          { name: 'birthday-cakes', label: 'Birthday Cakes' },
-          { name: 'chocolates', label: 'Chocolates' },
-          { name: 'desserts', label: 'Desserts' },
-        ]);
-        setOccasions([
-          { name: 'all', label: 'All' },
-          { name: 'birthday-gifts', label: 'Birthday Gifts' },
-          { name: 'gift-for-him', label: 'Gift for Him' },
-        ]);
+        setCategories([{ name: 'all', label: 'All' }]);
+        setOccasions([{ name: 'all', label: 'All' }]);
       }
     };
     fetchFilters();
   }, []);
+
+  // Redirect to custom cake page if a custom-only category is selected
+  useEffect(() => {
+    if (activeCategories.length > 0 && categories.length > 0) {
+      for (const catName of activeCategories) {
+        const catObj = categories.find(c => (c.name || '').toLowerCase() === catName.toLowerCase());
+        if (catObj && catObj.categoryType === 'custom') {
+          navigate(`/custom-cake?category=${encodeURIComponent(catName)}`);
+          return;
+        }
+      }
+    }
+  }, [activeCategories, categories, navigate]);
 
   // Fetch products with filters
   const { data: productRes, isLoading, isFetching } = useGetProductsQuery({ 
@@ -351,6 +336,9 @@ const Shop = () => {
     rating: activeRating > 0 ? activeRating : undefined,
     minPrice: priceRange[0] > 10 ? priceRange[0] : undefined,
     maxPrice: priceRange[1] < 10000 ? priceRange[1] : undefined,
+    bestseller: isBestseller ? 'true' : undefined,
+    featured: isFeatured ? 'true' : undefined,
+    offers: isOffers ? 'true' : undefined,
   });
 
   const [isFiltering, setIsFiltering] = useState(false);
@@ -366,7 +354,7 @@ const Shop = () => {
       }, 350);
       return () => clearTimeout(timer);
     }
-  }, [categoryString, activeSubCategory, activeOccasion, activeRating, priceMin, priceMax, sortBy, searchQuery]);
+  }, [categoryString, activeSubCategory, activeOccasion, activeRating, priceMin, priceMax, sortBy, searchQuery, isBestseller, isFeatured, isOffers]);
 
   const loading = isLoading || isFetching || isFiltering;
 
@@ -384,16 +372,13 @@ const Shop = () => {
       );
     }
 
-    // Category Filter
+    // Category Filter - strict category matching only
     if (activeCategories.length > 0) {
       products = products.filter(p => {
         const prodCats = Array.isArray(p.category) ? p.category : [p.category || ''];
-        const prodOccs = Array.isArray(p.occasion) ? p.occasion : [p.occasion || ''];
         return activeCategories.some(ac => {
           const baseAc = getBaseFilterWord(ac);
-          const catMatch = prodCats.some(pc => typeof pc === 'string' && getBaseFilterWord(pc).includes(baseAc));
-          const occMatch = prodOccs.some(po => typeof po === 'string' && getBaseFilterWord(po).includes(baseAc));
-          return catMatch || occMatch;
+          return prodCats.some(pc => typeof pc === 'string' && getBaseFilterWord(pc).includes(baseAc));
         });
       });
     }
@@ -502,8 +487,15 @@ const Shop = () => {
     }
     
     // Bestseller and Featured filters
-    if (isBestseller) products = products.filter(p => p.bestseller === true);
-    if (isFeatured) products = products.filter(p => p.featured === true);
+    if (isFeatured) {
+      products = products.filter(p => p.featured);
+    }
+    if (isBestseller) {
+      products = products.filter(p => p.bestseller);
+    }
+    if (isOffers) {
+      products = products.filter(p => (p.offerPrice && p.offerPrice > 0) || p.coupon?.enabled || (p.price && p.offerPrice && p.price > p.offerPrice));
+    }
 
     return products;
   }, [
@@ -516,12 +508,13 @@ const Shop = () => {
     searchQuery, 
     isBestseller, 
     isFeatured, 
+    isOffers,
     sortBy, 
     location
   ]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 8;
+  const ITEMS_PER_PAGE = 50;
 
   useEffect(() => {
     setCurrentPage(1);

@@ -24,7 +24,10 @@ export default function CustomCakeBrowse({
   selectTheme,
   hideFilters = false,
   onToggleFilter,
-  onToggleDesktopFilter
+  onToggleDesktopFilter,
+  categoryFilter = '',
+  setCategoryFilter = () => {},
+  categories = []
 }) {
   const [mobileLayout, setMobileLayout] = useState('grid');
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -33,7 +36,7 @@ export default function CustomCakeBrowse({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedTier, themeSearchFilter, priceSortFilter]);
+  }, [selectedTier, themeSearchFilter, priceSortFilter, categoryFilter]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -51,12 +54,14 @@ export default function CustomCakeBrowse({
     if (selectedTier !== null) count += 1;
     if (themeSearchFilter !== '') count += 1;
     if (priceSortFilter !== '') count += 1;
+    if (categoryFilter !== '') count += 1;
     return count;
   };
 
   // ── Filter Panel (desktop sidebar) ──
   const FilterPanel = () => {
     const [expandedSections, setExpandedSections] = useState({
+      categories: true,
       tiers: true,
       sort: true
     });
@@ -107,6 +112,56 @@ export default function CustomCakeBrowse({
                         }`}
                       >
                         {tier.shortName}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Categories Accordion */}
+        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01]">
+          <button
+            onClick={() => toggleSection('categories')}
+            className="w-full flex items-center justify-between py-4 px-4 text-left group transition-colors"
+          >
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">Categories</h3>
+            {expandedSections.categories ? (
+              <ChevronUp size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
+            ) : (
+              <ChevronDown size={16} className="text-[#A18881]/60 group-hover:text-[#EBD1C6] transition-colors" />
+            )}
+          </button>
+          <AnimatePresence>
+            {expandedSections.categories && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                <div className="flex flex-wrap gap-2.5">
+                  <button
+                    onClick={() => setCategoryFilter('')}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                      categoryFilter === ''
+                        ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                        : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {(categories || []).map(c => {
+                    const slug = (c.name || '').toLowerCase();
+                    const isActive = categoryFilter.toLowerCase() === slug;
+                    return (
+                      <button
+                        key={c._id}
+                        onClick={() => setCategoryFilter(isActive ? '' : slug)}
+                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                          isActive
+                            ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                            : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                        }`}
+                      >
+                        {c.label || c.name}
                       </button>
                     );
                   })}

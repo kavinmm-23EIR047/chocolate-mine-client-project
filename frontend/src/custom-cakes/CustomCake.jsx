@@ -78,6 +78,7 @@ export default function CustomCake() {
 
   // ── Accordion State ──────────────────────────────────────
   const [expandedSections, setExpandedSections] = useState({
+    categories: true,
     tiers: true,
     search: true,
     sort: true,
@@ -122,8 +123,10 @@ export default function CustomCake() {
   // Filter States
   const [themeSearchFilter, setThemeSearchFilter] = useState('');
   const [priceSortFilter, setPriceSortFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const [dbThemes, setDbThemes] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFiltering, setIsFiltering] = useState(false);
 
@@ -135,18 +138,22 @@ export default function CustomCake() {
       }, 350);
       return () => clearTimeout(timer);
     }
-  }, [selectedTier, themeSearchFilter, priceSortFilter]);
+  }, [selectedTier, themeSearchFilter, priceSortFilter, categoryFilter]);
 
   useEffect(() => {
     const loadDbData = async () => {
       try {
         setLoading(true);
-        const [themesRes] = await Promise.all([
-          api.get('/custom-cakes/themes')
+        const [themesRes, catsRes] = await Promise.all([
+          api.get('/custom-cakes/themes'),
+          api.get('/categories', { params: { activeOnly: true, type: 'custom' } })
         ]);
 
         if (themesRes.data?.data) {
           setDbThemes(themesRes.data.data);
+        }
+        if (catsRes.data?.data) {
+          setDbCategories(catsRes.data.data);
         }
       } catch (err) {
         console.error('Failed to load custom cake data:', err);
@@ -163,6 +170,7 @@ export default function CustomCake() {
   useEffect(() => {
     const tierParam = searchParams.get('tier');
     const themeParam = searchParams.get('theme');
+    const categoryParam = searchParams.get('category');
 
     if (tierParam) {
       const tierNum = parseInt(tierParam, 10);
@@ -174,6 +182,10 @@ export default function CustomCake() {
     if (themeParam) {
       themeIdToKeep.current = themeParam;
     }
+
+    if (categoryParam) {
+      setCategoryFilter(categoryParam);
+    }
   }, [searchParams]);
 
   // ── DERIVED ────────────────────────────────────────────────
@@ -181,6 +193,7 @@ export default function CustomCake() {
     let result = dbThemes
       .filter(t => !selectedTier || (t.tiers && t.tiers[`tier${selectedTier}`]?.isActive))
       .filter(t => !themeSearchFilter || t.name.toLowerCase().includes(themeSearchFilter.toLowerCase()))
+      .filter(t => !categoryFilter || (t.category && t.category.some(c => c.toLowerCase().includes(categoryFilter.toLowerCase()))))
       .map(t => {
         const mappedFlavors = (t.colors || []).filter(c => c.isActive).map(c => {
           let imgUrl = c.images?.[`tier${selectedTier || 1}`] || c.images?.tier1;
@@ -228,7 +241,7 @@ export default function CustomCake() {
     }
 
     return result;
-  }, [dbThemes, selectedTier, themeSearchFilter, priceSortFilter]);
+  }, [dbThemes, selectedTier, themeSearchFilter, priceSortFilter, categoryFilter]);
 
   const theme = themeIdx !== null ? filteredThemes[themeIdx] : null;
   const weight = WEIGHTS[weightIdx];
@@ -485,6 +498,43 @@ export default function CustomCake() {
         </div>
       </SectionCard>
 
+      {/* Categories */}
+      <SectionCard
+        title="Categories"
+        expanded={expandedSections.categories}
+        onToggle={() => toggleSection('categories')}
+      >
+        <div className="flex flex-wrap gap-2.5">
+          <button
+            onClick={() => setCategoryFilter('')}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+              categoryFilter === ''
+                ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+            }`}
+          >
+            All
+          </button>
+          {dbCategories.map(c => {
+            const slug = (c.name || '').toLowerCase();
+            const isActive = categoryFilter.toLowerCase() === slug;
+            return (
+              <button
+                key={c._id}
+                onClick={() => setCategoryFilter(isActive ? '' : slug)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                  isActive
+                    ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent'
+                    : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                }`}
+              >
+                {c.label || c.name}
+              </button>
+            );
+          })}
+        </div>
+      </SectionCard>
+
       {/* Search */}
       <SectionCard
         title="Search Themes"
@@ -529,6 +579,7 @@ export default function CustomCake() {
           setSelectedTier(null);
           setThemeSearchFilter('');
           setPriceSortFilter('');
+          setCategoryFilter('');
         }}
         className="w-full py-3.5 border border-[#3A211B] bg-white/[0.01] hover:bg-white/[0.03] text-white/70 hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all"
       >
@@ -576,6 +627,9 @@ export default function CustomCake() {
               hideFilters={false}
               onToggleFilter={() => setIsFilterOpen(true)}
               onToggleDesktopFilter={() => setIsDesktopFilterOpen(true)}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              categories={dbCategories}
             />
 
             {/* ── Desktop Filter Drawer ── */}
@@ -656,6 +710,7 @@ export default function CustomCake() {
                           setSelectedTier(null);
                           setThemeSearchFilter('');
                           setPriceSortFilter('');
+                          setCategoryFilter('');
                         }}
                         className="flex-1 py-3.5 border border-[#3A211B] bg-[#1A0E0B] text-white hover:bg-black/20 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
                       >

@@ -5,8 +5,16 @@ const cloudinaryService = require('../services/cloudinaryService');
 
 // GET /api/v1/categories
 exports.getCategories = asyncHandler(async (req, res) => {
-  const { activeOnly } = req.query;
+  const { activeOnly, type } = req.query;
   const filter = activeOnly === 'true' ? { active: true } : {};
+  if (type) {
+    filter.$or = [
+      { categoryType: type },
+      { categoryType: 'both' },
+      { categoryType: { $exists: false } },
+      { categoryType: null }
+    ];
+  }
   const categories = await Category.find(filter).sort('name');
   res.status(200).json({ status: 'success', data: categories });
 });
@@ -32,7 +40,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
   console.log('Body:', req.body);
   console.log('File:', req.file);
   
-  const { name, label, subCategories } = req.body;
+  const { name, label, subCategories, categoryType } = req.body;
   
   if (!name) {
     return next(new AppError('Category name is required', 400));
@@ -84,6 +92,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
   const category = await Category.create({
     name: name.trim().toLowerCase(),
     label: label || name.trim(),
+    categoryType: categoryType || 'both',
     subCategories: subCategories ? (Array.isArray(subCategories) ? subCategories : JSON.parse(subCategories)).map(s => s.trim().toLowerCase()) : [],
     image: imageUrl,
     imagePublicId: imagePublicId
@@ -102,7 +111,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     return next(new AppError('Category not found', 404));
   }
 
-  const { name, label, active, subCategories } = req.body;
+  const { name, label, active, subCategories, categoryType } = req.body;
   
   if (name) {
     const existingCategory = await Category.findOne({ 
@@ -116,6 +125,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
   }
   
   if (label !== undefined) category.label = label;
+  if (categoryType !== undefined) category.categoryType = categoryType;
   if (active !== undefined) category.active = active === 'true' || active === true;
   if (subCategories !== undefined) category.subCategories = (Array.isArray(subCategories) ? subCategories : JSON.parse(subCategories)).map(s => s.trim().toLowerCase());
 

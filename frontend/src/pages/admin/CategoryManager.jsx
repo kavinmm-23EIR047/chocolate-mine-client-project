@@ -11,7 +11,7 @@ const CategoryManager = () => {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ name: '', label: '', imageFile: null });
+  const [form, setForm] = useState({ name: '', label: '', categoryType: 'both', imageFile: null });
 
   const fetchCategories = async () => {
     try {
@@ -28,14 +28,14 @@ const CategoryManager = () => {
   useEffect(() => { fetchCategories(); }, []);
 
   const resetForm = () => {
-    setForm({ name: '', label: '', imageFile: null });
+    setForm({ name: '', label: '', categoryType: 'both', imageFile: null });
     setEditId(null);
     setShowForm(false);
   };
 
   const handleEdit = (cat) => {
     setEditId(cat._id);
-    setForm({ name: cat.name, label: cat.label || cat.name, imageFile: null });
+    setForm({ name: cat.name, label: cat.label || cat.name, categoryType: cat.categoryType || 'both', imageFile: null });
     setShowForm(true);
   };
 
@@ -49,6 +49,7 @@ const CategoryManager = () => {
       const fd = new FormData();
       fd.append('name', form.name.trim());
       fd.append('label', form.label.trim() || form.name.trim());
+      fd.append('categoryType', form.categoryType || 'both');
       if (form.imageFile) fd.append('image', form.imageFile);
 
       if (editId) {
@@ -115,7 +116,7 @@ const CategoryManager = () => {
           >
             <h3 className="font-black text-heading text-lg mb-5">{editId ? 'Edit Category' : 'New Category'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-black text-muted uppercase tracking-widest">Name (slug)</label>
                   <input
@@ -135,6 +136,18 @@ const CategoryManager = () => {
                     placeholder="e.g. Premium Cakes"
                     className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold"
                   />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black text-muted uppercase tracking-widest">Applies To</label>
+                  <select
+                    value={form.categoryType}
+                    onChange={e => setForm(p => ({ ...p, categoryType: e.target.value }))}
+                    className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold cursor-pointer"
+                  >
+                    <option value="both">Both (Ordinary & Custom)</option>
+                    <option value="ordinary">Ordinary Cake Only</option>
+                    <option value="custom">Custom Cake Only</option>
+                  </select>
                 </div>
               </div>
               <ImageUpload
@@ -185,7 +198,10 @@ const CategoryManager = () => {
             >
               <div className="aspect-video relative overflow-hidden">
                 <img src={cat.image} alt={cat.label || cat.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-between p-3">
+                  <span className="self-end text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-black/60 text-amber-300 backdrop-blur-sm">
+                    {cat.categoryType === 'ordinary' ? 'Ordinary' : cat.categoryType === 'custom' ? 'Custom' : 'Both'}
+                  </span>
                   <p className="text-white text-sm font-black uppercase tracking-widest truncate">{cat.label || cat.name}</p>
                 </div>
               </div>

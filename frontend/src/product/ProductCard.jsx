@@ -27,17 +27,17 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
     bestseller: {
       style: { background: 'var(--badge-bestseller-bg)', color: 'var(--badge-bestseller-text)', borderColor: 'var(--badge-bestseller-border)' },
       text: "Best Seller",
-      icon: <Flame className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current shrink-0" strokeWidth={2.5} />
+      icon: <Flame className="w-2.5 h-2.5 md:w-3 md:h-3 fill-current shrink-0 animate-bounce" strokeWidth={2.5} />
     },
     featured: {
       style: { background: 'var(--badge-featured-bg)', color: 'var(--badge-featured-text)', borderColor: 'var(--badge-featured-border)' },
       text: "Featured",
-      icon: <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" strokeWidth={2.5} />
+      icon: <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0 text-amber-400" strokeWidth={2.5} />
     },
     discount: {
-      style: { background: 'var(--badge-discount-bg)', color: 'var(--badge-discount-text)', borderColor: 'var(--badge-discount-border)' },
+      style: { background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(245, 158, 11, 0.9))', color: '#ffffff', borderColor: 'rgba(239, 68, 68, 0.5)' },
       text: `${value}% OFF`,
-      icon: <Percent strokeWidth={3.5} className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" />
+      icon: <Sparkles strokeWidth={3} className="w-2.5 h-2.5 md:w-3 md:h-3 shrink-0 text-amber-200 animate-spin" style={{ animationDuration: '4s' }} />
     },
     new: {
       style: { background: 'var(--badge-new-bg)', color: 'var(--badge-new-text)', borderColor: 'var(--badge-new-border)' },
@@ -63,14 +63,14 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.9, y: 2 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      whileHover={{ scale: 1.05, y: -1 }}
-      className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-[9px] md:text-[10px] font-black tracking-wider uppercase shadow-sm relative overflow-hidden border"
+      whileHover={{ scale: 1.06, y: -1 }}
+      className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-[9px] md:text-[10px] font-black tracking-wider uppercase shadow-md relative overflow-hidden border"
       style={badge.style}
     >
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -skew-x-12"
         animate={{ x: ['-100%', '200%'] }}
-        transition={{ repeat: Infinity, duration: 2.5, ease: "linear", repeatDelay: 1 }}
+        transition={{ repeat: Infinity, duration: 2.2, ease: "linear", repeatDelay: 0.8 }}
       />
       <span className="relative z-10 flex items-center gap-1">
         {badge.icon}
@@ -83,28 +83,39 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
 const LotteryCoupon = ({ coupon }) => {
   if (!coupon) return null;
 
-  return (
-    <div
-      className="relative mt-2 w-full flex items-center justify-center overflow-hidden rounded-md border-[1.5px] border-dashed pointer-events-none"
-      style={{
-        background: 'var(--badge-coupon-bg)',
-        borderColor: 'var(--accent)',
-        minHeight: '32px'
-      }}
-    >
-      <div className="absolute -left-1.5 w-3 h-3 rounded-full border border-dashed border-r-0" style={{ background: 'var(--card)', borderColor: 'var(--accent)' }} />
-      <div className="absolute -right-1.5 w-3 h-3 rounded-full border border-dashed border-l-0" style={{ background: 'var(--card)', borderColor: 'var(--accent)' }} />
+  const discountVal = coupon.type === 'percent' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`;
 
-      <div className="flex flex-col items-center justify-center py-1 w-full">
-        <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--badge-coupon-text)' }}>
-          <Ticket size={11} strokeWidth={2.5} />
+  return (
+    <motion.div
+      initial={{ scale: 0.98 }}
+      animate={{ scale: [0.98, 1.01, 0.98] }}
+      transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}
+      className="relative mt-2.5 w-full flex items-center justify-between px-3 py-1.5 overflow-hidden rounded-lg border border-[#D49B35]/70 dark:border-[#E6B25A]/60 bg-gradient-to-r from-[#FFF6E5] via-[#FDE8C5] to-[#FFF6E5] dark:from-[#E6B25A]/15 dark:via-[#F0C46E]/25 dark:to-[#E6B25A]/15 shadow-sm pointer-events-none group"
+    >
+      {/* Light Shimmer Beam Effect */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/20 dark:via-white/30 to-transparent -skew-x-12"
+        animate={{ x: ['-100%', '200%'] }}
+        transition={{ repeat: Infinity, duration: 2.6, ease: 'linear', repeatDelay: 1 }}
+      />
+
+      {/* Ticket Cutout Circles */}
+      <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-[#D49B35]/70 dark:border-[#E6B25A]/50 bg-[var(--card)]" />
+      <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-[#D49B35]/70 dark:border-[#E6B25A]/50 bg-[var(--card)]" />
+
+      <div className="flex items-center gap-1.5 pl-1.5 relative z-10">
+        <Sparkles size={13} className="text-[#B37B15] dark:text-[#E6B25A] animate-spin shrink-0" style={{ animationDuration: '6s' }} />
+        <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-[#7A4B00] dark:text-[#E6B25A]">
           {coupon.code}
-        </div>
-        <div className="text-[8px] font-bold mt-[1px]" style={{ color: 'var(--muted)' }}>
-          Apply inside to get {coupon.type === 'percent' ? `${coupon.value}% OFF` : `₹${coupon.value} OFF`}
-        </div>
+        </span>
       </div>
-    </div>
+
+      <div className="pr-1.5 flex items-center gap-1 relative z-10">
+        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wide text-white bg-[#9E6500] dark:bg-[#E6B25A]/40 px-2 py-0.5 rounded border border-[#7A4B00] dark:border-[#E6B25A]/50 shadow-sm">
+          SAVE {discountVal}
+        </span>
+      </div>
+    </motion.div>
   );
 };
 
@@ -374,9 +385,15 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
             </h3>
 
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-              <span className="text-[14px] font-extrabold" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
+              <span className="text-[14px] sm:text-[16px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
               {hasOffer && (
-                <span className="text-[10px] line-through" style={{ color: 'var(--muted)' }}>₹{mrp}</span>
+                <>
+                  <span className="text-[10px] sm:text-[11px] line-through" style={{ color: 'var(--muted)' }}>₹{mrp}</span>
+                  <span className="text-[9px] sm:text-[10px] font-black text-white bg-emerald-800 dark:bg-emerald-900 border border-emerald-900 dark:border-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">
+                    <Sparkles size={10} className="text-amber-300" />
+                    {discountPct}% OFF
+                  </span>
+                </>
               )}
             </div>
 
@@ -533,7 +550,13 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[15px] md:text-[17px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
           {hasOffer && (
-            <span className="text-[11px] md:text-[12px] line-through" style={{ color: 'var(--muted)' }}>₹{mrp}</span>
+            <>
+              <span className="text-[11px] md:text-[12px] line-through" style={{ color: 'var(--muted)' }}>₹{mrp}</span>
+              <span className="text-[9px] md:text-[10px] font-black text-white bg-emerald-800 dark:bg-emerald-900 border border-emerald-900 dark:border-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-pulse">
+                <Sparkles size={10} className="text-amber-300" />
+                {discountPct}% OFF
+              </span>
+            </>
           )}
         </div>
 

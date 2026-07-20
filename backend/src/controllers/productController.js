@@ -63,6 +63,7 @@ exports.getProducts = asyncHandler(async (req, res) => {
     sort, 
     featured, 
     bestseller, 
+    offers,
     category, 
     subCategory,
     cakeType,
@@ -79,6 +80,15 @@ exports.getProducts = asyncHandler(async (req, res) => {
 
   if (featured) query.featured = featured === 'true';
   if (bestseller) query.bestseller = bestseller === 'true';
+  if (offers === 'true') {
+    query.$and = query.$and || [];
+    query.$and.push({
+      $or: [
+        { offerPrice: { $gt: 0 } },
+        { 'coupon.enabled': true }
+      ]
+    });
+  }
   if (category) {
     const categoriesList = category.split(',').map(c => c.trim());
     const regexPattern = categoriesList.map(c => getBaseFilterPattern(c)).join('|');

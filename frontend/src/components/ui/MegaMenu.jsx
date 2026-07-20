@@ -14,7 +14,7 @@ const MegaMenu = () => {
       try {
         setLoading(true);
         const [catRes, occRes] = await Promise.all([
-          api.get('/categories').catch(() => ({ data: { data: [] } })),
+          api.get('/categories', { params: { activeOnly: true } }).catch(() => ({ data: { data: [] } })),
           api.get('/occasions').catch(() => ({ data: { data: [] } }))
         ]);
         setCategories(catRes.data?.data || []);
@@ -57,16 +57,22 @@ const MegaMenu = () => {
               >
                 ALL
               </Link>
-              {categories.map((cat) => (
-                <Link 
-                  key={cat._id} 
-                  to={`/shop?category=${cat.name.toLowerCase()}`}
-                  onClick={() => setIsOpen(false)}
-                  className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
-                >
-                  {cat.name}
-                </Link>
-              ))}
+              {categories.map((cat) => {
+                const isCustom = cat.categoryType === 'custom';
+                const targetPath = isCustom
+                  ? `/custom-cake?category=${encodeURIComponent(cat.name.toLowerCase())}`
+                  : `/shop?category=${encodeURIComponent(cat.name.toLowerCase())}`;
+                return (
+                  <Link 
+                    key={cat._id} 
+                    to={targetPath}
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs font-bold text-heading/80 hover:text-primary uppercase tracking-normal transition-colors block whitespace-nowrap"
+                  >
+                    {cat.label || cat.name}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

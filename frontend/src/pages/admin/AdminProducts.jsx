@@ -51,7 +51,7 @@ const AdminProducts = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await adminService.getCategories();
+        const res = await adminService.getCategories({ type: 'ordinary' });
         setDbCategories(res.data?.data || []);
       } catch (err) {
         // ignore

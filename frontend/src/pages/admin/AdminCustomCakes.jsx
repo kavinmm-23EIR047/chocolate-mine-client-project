@@ -118,6 +118,7 @@ const AdminCustomCakes = () => {
             <thead>
               <tr className="border-b border-border text-left bg-border/20">
                 <th className="px-6 py-4 text-xs font-black text-muted uppercase">Theme Name</th>
+                <th className="px-6 py-4 text-xs font-black text-muted uppercase">Categories</th>
                 <th className="px-6 py-4 text-xs font-black text-muted uppercase">Status</th>
                 <th className="px-6 py-4 text-xs font-black text-muted uppercase">Tiers Enabled</th>
                 <th className="px-6 py-4 text-xs font-black text-muted uppercase text-right">Actions</th>
@@ -129,6 +130,16 @@ const AdminCustomCakes = () => {
                   <td className="px-6 py-5">
                     <p className="font-black text-heading text-sm">{theme.name}</p>
                     <p className="font-bold text-muted text-xs truncate max-w-xs">{theme.description}</p>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex flex-wrap gap-1">
+                      {theme.category?.length > 0
+                        ? theme.category.map(cat => (
+                            <span key={cat} className="bg-secondary/10 text-secondary text-[10px] font-black px-2 py-0.5 rounded uppercase">{cat.replace(/-/g, ' ')}</span>
+                          ))
+                        : <span className="text-muted text-[10px] font-black uppercase">None</span>
+                      }
+                    </div>
                   </td>
                   <td className="px-6 py-5">
                     <span className={`text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider ${theme.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
@@ -156,7 +167,7 @@ const AdminCustomCakes = () => {
                 </tr>
               ))}
               {themes.length === 0 && (
-                <tr><td colSpan="4" className="text-center py-12 text-muted font-bold">No themes found. Click "Create New Theme" to begin.</td></tr>
+                <tr><td colSpan="5" className="text-center py-12 text-muted font-bold">No themes found. Click "Create New Theme" to begin.</td></tr>
               )}
             </tbody>
             </table>
@@ -185,6 +196,18 @@ const AdminCustomCakes = () => {
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-black text-muted uppercase tracking-widest">Description</span>
                       <p className="font-bold text-muted text-xs">{theme.description || 'No description'}</p>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-border/20">
+                      <span className="text-[10px] font-black text-muted uppercase tracking-widest">Categories</span>
+                      <div className="flex flex-wrap gap-1 justify-end">
+                        {theme.category?.length > 0
+                          ? theme.category.map(cat => (
+                              <span key={cat} className="bg-secondary/10 text-secondary text-[10px] font-black px-2 py-0.5 rounded uppercase">{cat.replace(/-/g, ' ')}</span>
+                            ))
+                          : <span className="text-muted text-[10px] font-black uppercase">None</span>
+                        }
+                      </div>
                     </div>
 
                     <div className="flex justify-between items-center mt-2 pt-2 border-t border-border/20">

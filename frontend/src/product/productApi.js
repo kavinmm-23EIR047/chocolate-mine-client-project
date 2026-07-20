@@ -27,6 +27,7 @@ export const productApi = apiSlice.injectEndpoints({
         if (params.search) queryParams.set('search', params.search);
         if (params.bestseller) queryParams.set('bestseller', params.bestseller);
         if (params.featured) queryParams.set('featured', params.featured);
+        if (params.offers) queryParams.set('offers', params.offers);
         if (params.location) queryParams.set('location', params.location);
         
         // For debugging - log the URL

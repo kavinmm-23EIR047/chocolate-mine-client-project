@@ -90,7 +90,7 @@ const LotteryCoupon = ({ coupon }) => {
       initial={{ scale: 0.98 }}
       animate={{ scale: [0.98, 1.01, 0.98] }}
       transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}
-      className="relative mt-2.5 w-full flex items-center justify-between px-3 py-1.5 overflow-hidden rounded-lg border border-[#D49B35]/70 dark:border-[#E6B25A]/60 bg-gradient-to-r from-[#FFF6E5] via-[#FDE8C5] to-[#FFF6E5] dark:from-[#E6B25A]/15 dark:via-[#F0C46E]/25 dark:to-[#E6B25A]/15 shadow-sm pointer-events-none group"
+      className="relative mt-1.5 md:mt-2.5 w-full flex items-center justify-between px-1.5 md:px-3 py-1 overflow-hidden rounded-md md:rounded-lg border border-[#D49B35]/70 dark:border-[#E6B25A]/60 bg-gradient-to-r from-[#FFF6E5] via-[#FDE8C5] to-[#FFF6E5] dark:from-[#E6B25A]/15 dark:via-[#F0C46E]/25 dark:to-[#E6B25A]/15 shadow-sm pointer-events-none group min-h-[26px] md:min-h-[32px]"
     >
       {/* Light Shimmer Beam Effect */}
       <motion.div
@@ -100,18 +100,18 @@ const LotteryCoupon = ({ coupon }) => {
       />
 
       {/* Ticket Cutout Circles */}
-      <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-[#D49B35]/70 dark:border-[#E6B25A]/50 bg-[var(--card)]" />
-      <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-[#D49B35]/70 dark:border-[#E6B25A]/50 bg-[var(--card)]" />
+      <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border border-[#D49B35]/70 dark:border-[#E6B25A]/50 bg-[var(--card)]" />
+      <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border border-[#D49B35]/70 dark:border-[#E6B25A]/50 bg-[var(--card)]" />
 
-      <div className="flex items-center gap-1.5 pl-1.5 relative z-10">
-        <Sparkles size={13} className="text-[#B37B15] dark:text-[#E6B25A] animate-spin shrink-0" style={{ animationDuration: '6s' }} />
-        <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-[#7A4B00] dark:text-[#E6B25A]">
+      <div className="flex items-center gap-1 pl-1 md:pl-1.5 relative z-10 min-w-0">
+        <Sparkles size={11} className="text-[#B37B15] dark:text-[#E6B25A] animate-spin shrink-0 hidden sm:inline-block md:w-3 md:h-3" style={{ animationDuration: '6s' }} />
+        <span className="text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-wider text-[#7A4B00] dark:text-[#E6B25A] truncate">
           {coupon.code}
         </span>
       </div>
 
-      <div className="pr-1.5 flex items-center gap-1 relative z-10">
-        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wide text-white bg-[#9E6500] dark:bg-[#E6B25A]/40 px-2 py-0.5 rounded border border-[#7A4B00] dark:border-[#E6B25A]/50 shadow-sm">
+      <div className="pr-1 md:pr-1.5 flex items-center gap-1 relative z-10 shrink-0">
+        <span className="text-[7.5px] sm:text-[8.5px] md:text-[9.5px] font-black uppercase tracking-tight text-white bg-[#9E6500] dark:bg-[#E6B25A]/40 px-1 md:px-1.5 py-0.5 rounded border border-[#7A4B00] dark:border-[#E6B25A]/50 shadow-sm whitespace-nowrap leading-none">
           SAVE {discountVal}
         </span>
       </div>

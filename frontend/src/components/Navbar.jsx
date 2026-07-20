@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, ShoppingCart, User, Menu, X, MapPin, Heart, ChevronDown, ShoppingBag, LogIn,
-  Cake, SlidersHorizontal, Bell, Sparkles
+  Cake, SlidersHorizontal, Bell, Sparkles, Flame, Zap, Star
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext';
@@ -260,44 +260,161 @@ const Navbar = () => {
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[210]" />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 left-0 bottom-0 w-full sm:w-[82%] sm:max-w-[360px] bg-card z-[220] shadow-2xl flex flex-col">
-              <div className="p-4 border-b border-border/15">
-                <div className="flex justify-between items-center mb-4">
-                  <Logo className="w-[130px] h-auto object-contain" />
-                  <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-xl text-heading hover:bg-heading/10 transition-all active:scale-95 flex items-center justify-center" aria-label="Close menu"><X size={22} /></button>
-                </div>
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setIsMenuOpen(false)} 
+              className="fixed inset-0 bg-black/60 backdrop-blur-md z-[210]" 
+            />
+            
+            <motion.div 
+              initial={{ x: '-100%' }} 
+              animate={{ x: 0 }} 
+              exit={{ x: '-100%' }} 
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }} 
+              className="fixed top-2 bottom-2 left-0 w-[85%] max-w-[340px] bg-card border border-l-0 border-border/30 rounded-r-[28px] z-[220] shadow-2xl flex flex-col overflow-hidden"
+            >
+              {/* Drawer Header */}
+              <div className="p-4 sm:p-5 border-b border-border/15 flex items-center justify-between bg-surface/50">
+                <Logo className="w-[120px] h-auto object-contain" />
+                <button 
+                  onClick={() => setIsMenuOpen(false)} 
+                  className="w-9 h-9 rounded-full bg-border/20 hover:bg-border/40 text-heading transition-all flex items-center justify-center active:scale-95" 
+                  aria-label="Close menu"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-3 space-y-0.5">
-                {[
-                  { label: 'Shop All Cakes', icon: ShoppingBag, path: '/shop' },
-                  { label: 'Custom Cake', icon: Cake, path: '/custom-cake' },
-                  { label: 'My Cart', icon: ShoppingCart, path: '/cart', badge: cartCount },
-                  { label: 'My Wishlist', icon: Heart, path: '/account/wishlist' },
-                  { label: 'Manage Profile', icon: User, path: '/account/profile' },
-                  { label: user ? 'Logout' : 'Login / Register', icon: LogIn, path: user ? '#' : '/login', isLogout: !!user },
-                ].map((item, i) => {
-                  const content = (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors"><item.icon size={15} className="text-primary" /></div>
-                        <span className="font-bold text-[11px] uppercase tracking-wide text-heading">{item.label}</span>
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
+                
+                {/* SECTION 1: MAIN MENU */}
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/80 mb-2 block px-2">
+                    Explore Menu
+                  </span>
+                  <div className="space-y-1">
+                    <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors text-primary shrink-0">
+                        <ShoppingBag size={16} />
                       </div>
-                      {item.badge > 0 && <span className="bg-accent text-[#120807] text-[9px] font-black px-1.5 py-0.5 rounded-md">{item.badge}</span>}
-                    </>
-                  );
+                      <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">Shop All Cakes</span>
+                    </Link>
 
-                  if (item.isLogout) {
-                    return (
-                      <button key={i} onClick={async () => { setIsMenuOpen(false); await logout(); }} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-primary/8 transition-colors group min-h-[48px]">{content}</button>
-                    );
-                  }
+                    {/* Custom Cakes with Sub Tiers */}
+                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-2 space-y-1.5 mt-1">
+                      <Link to="/custom-cake" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-2 py-1">
+                        <div className="flex items-center gap-2.5">
+                          <Sparkles size={16} className="text-primary animate-pulse" />
+                          <span className="font-extrabold text-sm text-primary uppercase tracking-wide">Custom Cakes</span>
+                        </div>
+                        <span className="text-[9px] font-black px-2 py-0.5 rounded bg-primary/20 text-primary border border-primary/30">✨ DEDICATED</span>
+                      </Link>
+                      
+                      <div className="grid grid-cols-3 gap-1 pt-1 border-t border-primary/15">
+                        <Link to="/custom-cake?tier=1" onClick={() => setIsMenuOpen(false)} className="text-[10px] font-bold text-center py-1 rounded bg-card/60 hover:bg-primary/20 text-heading hover:text-primary transition-colors">1 Tier</Link>
+                        <Link to="/custom-cake?tier=2" onClick={() => setIsMenuOpen(false)} className="text-[10px] font-bold text-center py-1 rounded bg-card/60 hover:bg-primary/20 text-heading hover:text-primary transition-colors">2 Tiers</Link>
+                        <Link to="/custom-cake?tier=3" onClick={() => setIsMenuOpen(false)} className="text-[10px] font-bold text-center py-1 rounded bg-card/60 hover:bg-primary/20 text-heading hover:text-primary transition-colors">3 Tiers</Link>
+                      </div>
+                    </div>
 
-                  return (
-                    <Link key={i} to={item.path} onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between p-3 rounded-xl hover:bg-primary/8 transition-colors group min-h-[48px]">{content}</Link>
-                  );
-                })}
+                    <Link to="/shop?offers=true" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-amber-500/10 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
+                          <Flame size={16} />
+                        </div>
+                        <span className="font-extrabold text-sm text-heading group-hover:text-amber-500 transition-colors">Offer Cakes</span>
+                      </div>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">🔥 HOT</span>
+                    </Link>
+
+                    <Link to="/shop?bestseller=true" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Star size={16} />
+                      </div>
+                      <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">Bestsellers</span>
+                    </Link>
+
+                    <Link to="/shop?featured=true" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Zap size={16} />
+                      </div>
+                      <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">Featured Items</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* SECTION 2: MY ACCOUNT & BAG */}
+                <div className="pt-3 border-t border-border/15">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/80 mb-2 block px-2">
+                    My Account
+                  </span>
+                  <div className="space-y-1">
+                    <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <ShoppingCart size={16} />
+                        </div>
+                        <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">My Cart</span>
+                      </div>
+                      {cartCount > 0 && (
+                        <span className="bg-accent text-[#120807] text-[10px] font-black px-2 py-0.5 rounded-full">
+                          {cartCount}
+                        </span>
+                      )}
+                    </Link>
+
+                    <Link to="/account/wishlist" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Heart size={16} />
+                      </div>
+                      <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">My Wishlist</span>
+                    </Link>
+
+                    <Link to="/account/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <User size={16} />
+                      </div>
+                      <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">Manage Profile</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* SECTION 3: AUTH ACTION */}
+                <div className="pt-3 border-t border-border/15">
+                  {user ? (
+                    <button 
+                      onClick={async () => { setIsMenuOpen(false); await logout(); }} 
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-extrabold text-sm transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0">
+                        <LogIn size={16} />
+                      </div>
+                      <span>Logout Account</span>
+                    </button>
+                  ) : (
+                    <Link 
+                      to="/login" 
+                      onClick={() => setIsMenuOpen(false)} 
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-button-text font-extrabold text-sm transition-colors justify-center shadow-md"
+                    >
+                      <LogIn size={16} />
+                      <span>Sign In / Register</span>
+                    </Link>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-3.5 border-t border-border/15 bg-surface/50 text-[11px] font-extrabold text-muted flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <MapPin size={13} className="text-primary" />
+                  <span className="uppercase">{deliveryCity === 'pan india' ? 'PAN INDIA' : (deliveryCity?.toUpperCase() || 'COIMBATORE')}</span>
+                </div>
+                <ThemeToggle buttonClass="p-1.5 rounded-lg hover:bg-border/20 transition-colors" iconClass="text-heading" />
               </div>
             </motion.div>
           </>

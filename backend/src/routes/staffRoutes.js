@@ -5,8 +5,8 @@ const { restrictTo } = require('../middleware/role');
 
 const router = express.Router();
 
-// Staff only access (admin should not access staff routes)
-router.use(protect, restrictTo('staff'));
+// Staff only access (admin should also access staff routes for testing/management)
+router.use(protect, restrictTo('staff', 'admin'));
 
 // Staff Dashboard - shows delivery stats
 router.get('/dashboard', staffController.getStaffDashboard);
@@ -17,6 +17,10 @@ router.get('/orders/processing', staffController.getProcessingOrders);
 router.get('/orders/packed', staffController.getPackedOrders);
 router.get('/orders/out-for-delivery', staffController.getOutForDeliveryOrders);
 router.get('/orders/delivered', staffController.getDeliveredOrders);
+
+// In-shop order routes (must be before :id param routes)
+router.post('/orders/in-shop', staffController.createInShopOrder);
+router.get('/orders/in-shop', staffController.getInShopOrders);
 
 // Get single order details
 router.get('/orders/:id', staffController.getOrderDetails);

@@ -69,7 +69,7 @@ const Navbar = () => {
           <div className="absolute bottom-4 right-10"><Cake size={22} strokeWidth={1.2} className="text-heading" /></div>
         </div>
 
-        <div className="responsive-container pb-5 lg:pb-0 relative z-10">
+        <div className="responsive-container pb-3 lg:pb-0 relative z-10">
 
           {/* DESKTOP LAYOUT ROW */}
           <div className="hidden lg:flex items-center justify-between gap-4 py-3 min-h-[65px] tv:min-h-[84px]">
@@ -162,7 +162,7 @@ const Navbar = () => {
           </div>
 
           {/* MOBILE VIEW LAYOUT */}
-          <div className="lg:hidden flex flex-col gap-5 pt-5 pb-2">
+          <div className="lg:hidden flex flex-col gap-4 pt-3 pb-1">
 
             {/* Top Row: Menu + Logo + Actions */}
             <div className="flex items-center justify-between w-full px-1">
@@ -175,7 +175,7 @@ const Navbar = () => {
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                   </svg>
                 </button>
-                <Link to="/" className="shrink-0 block select-none group pr-1 pl-1">
+                <Link to="/" className="shrink-0 block select-none group pr-0.5 pl-0">
                   <Logo className="w-[110px] sm:w-[130px] h-auto object-contain" />
                 </Link>
               </div>

@@ -30,7 +30,7 @@ function generateSKU(productName, category, flavor, weight, index) {
   return `${nameCode}-${categoryCode}-${flavorCode}-${weightCode}-${dateCode}-${seqNum}`;
 }
 
-const orderSchema = new mongoose.Schema(
+const inShopOrderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, unique: true, sparse: true },
     trackingCode: { type: String, unique: true, sparse: true },
@@ -216,8 +216,8 @@ const orderSchema = new mongoose.Schema(
 );
 
 // Generate SKU for each item before saving
-orderSchema.pre('save', async function() {
-  // Generate TCM formatted order number if not exists
+inShopOrderSchema.pre('save', async function() {
+  // Generate INSHOP formatted order number if not exists
   if (!this.orderNumber) {
     try {
       const year = new Date().getFullYear();
@@ -225,7 +225,7 @@ orderSchema.pre('save', async function() {
 
       // Find the last order for the current year sorted by orderNumber descending
       const lastOrder = await this.constructor.findOne({
-        orderNumber: new RegExp(`^TCM-${year}-`)
+        orderNumber: new RegExp(`^INSHOP-${year}-`)
       }).sort({ orderNumber: -1 });
 
       if (lastOrder && lastOrder.orderNumber) {
@@ -253,7 +253,7 @@ orderSchema.pre('save', async function() {
       
       while (!isUnique && attempts < 100) {
         const nextNumStr = nextNumVal.toString().padStart(4, '0');
-        tcmCode = `TCM-${year}-${nextNumStr}`;
+        tcmCode = `INSHOP-${year}-${nextNumStr}`;
         
         const existing = await this.constructor.findOne({ orderNumber: tcmCode });
         if (!existing) {
@@ -287,7 +287,7 @@ orderSchema.pre('save', async function() {
 });
 
 // Method to get SKU for tracking
-orderSchema.methods.getOrderSKUs = function() {
+inShopOrderSchema.methods.getOrderSKUs = function() {
   return this.items.map(item => ({
     name: item.name,
     sku: item.sku,
@@ -295,10 +295,10 @@ orderSchema.methods.getOrderSKUs = function() {
   }));
 };
 
-orderSchema.index({ userId: 1 });
-orderSchema.index({ orderStatus: 1 });
-orderSchema.index({ paymentStatus: 1 });
-orderSchema.index({ createdAt: -1 });
+inShopOrderSchema.index({ userId: 1 });
+inShopOrderSchema.index({ orderStatus: 1 });
+inShopOrderSchema.index({ paymentStatus: 1 });
+inShopOrderSchema.index({ createdAt: -1 });
 
 
 // ==========================================
@@ -306,7 +306,7 @@ orderSchema.index({ createdAt: -1 });
 // ==========================================
 const excelService = require('../services/excelService');
 
-orderSchema.post('save', async function(doc) {
+inShopOrderSchema.post('save', async function(doc) {
   try {
     if (doc) await excelService.appendToExcel(this.constructor.modelName || this.modelName, doc);
   } catch (err) {
@@ -314,7 +314,7 @@ orderSchema.post('save', async function(doc) {
   }
 });
 
-orderSchema.post(['findOneAndUpdate', 'updateOne', 'findByIdAndUpdate'], async function(doc) {
+inShopOrderSchema.post(['findOneAndUpdate', 'updateOne', 'findByIdAndUpdate'], async function(doc) {
   try {
     const modelName = this.model.modelName;
     const query = this.getQuery();
@@ -329,7 +329,7 @@ orderSchema.post(['findOneAndUpdate', 'updateOne', 'findByIdAndUpdate'], async f
   }
 });
 
-orderSchema.post(['findOneAndDelete', 'deleteOne', 'findByIdAndDelete'], async function(doc) {
+inShopOrderSchema.post(['findOneAndDelete', 'deleteOne', 'findByIdAndDelete'], async function(doc) {
   try {
     const modelName = this.model.modelName;
     if (doc && doc._id) {
@@ -345,4 +345,4 @@ orderSchema.post(['findOneAndDelete', 'deleteOne', 'findByIdAndDelete'], async f
   }
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('InShopOrder', inShopOrderSchema);

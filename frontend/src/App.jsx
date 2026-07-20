@@ -282,6 +282,8 @@ function App() {
                   <Route path="orders/history" element={<StaffDashboard />} />
                   <Route path="orders/out-for-delivery" element={<StaffDashboard />} />
                   <Route path="orders/delivered" element={<StaffDashboard />} />
+                  <Route path="orders/create-inshop" element={<StaffDashboard />} />
+                  <Route path="orders/in-shop-history" element={<StaffDashboard />} />
                 </Route>
               </Routes>
             </Router>

@@ -387,14 +387,15 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   }
 
   // Handle variant data for cakes (with multiple images per flavor)
-  const isCakes = Array.isArray(body.category) ? body.category.includes('cakes') : false;
+  const isCakes = Array.isArray(body.category) ? body.category.some(c => typeof c === 'string' && (c.includes('cake') || c.includes('bento'))) : false;
   if (isCakes) {
     if (body.flavors && typeof body.flavors === 'string') {
       try {
         const parsedFlavors = JSON.parse(body.flavors);
-        // Ensure each flavor has images array
+        // Ensure each flavor has price and images array
         body.flavors = parsedFlavors.map(flavor => ({
           name: flavor.name,
+          price: flavor.price || 0,
           images: flavor.images || []
         }));
       } catch (e) {}
@@ -556,7 +557,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
   // Handle variant data for cakes (with multiple images per flavor)
   const finalCategory = body.category || product.category || [];
-  const isCakes = Array.isArray(finalCategory) ? finalCategory.includes('cakes') : false;
+  const isCakes = Array.isArray(finalCategory) ? finalCategory.some(c => typeof c === 'string' && (c.includes('cake') || c.includes('bento'))) : false;
   if (isCakes) {
     if (body.flavors !== undefined) {
       if (typeof body.flavors === 'string') {
@@ -564,6 +565,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           const parsedFlavors = JSON.parse(body.flavors);
           product.flavors = parsedFlavors.map(flavor => ({
             name: flavor.name,
+            price: flavor.price || 0,
             images: flavor.images || []
           }));
         } catch (e) {}

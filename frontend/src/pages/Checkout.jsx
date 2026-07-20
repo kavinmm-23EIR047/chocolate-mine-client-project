@@ -236,7 +236,7 @@ const Checkout = () => {
 
   const [localDirectItem, setLocalDirectItem] = useState(location.state?.directItem || null);
   const directItem = localDirectItem;
-  
+
   // Load saved state from sessionStorage on mount
   const loadSavedState = () => {
     try {
@@ -740,7 +740,7 @@ const Checkout = () => {
       : getCouponCodeString(appliedCouponFromRedux);
     if (!code || !item.coupon?.enabled) return 0;
     if (code !== getCouponCodeString(item.coupon.code)) return 0;
-    
+
     // Coupon discount applies to the product base price (excluding addons)
     const vp = item.variantPrice != null ? Number(item.variantPrice) : NaN;
     let prodPrice = !Number.isNaN(vp) && vp > 0 ? vp : Number(item.price);
@@ -751,7 +751,7 @@ const Checkout = () => {
     if (hasOffer && Number.isNaN(vp)) {
       prodPrice = Number(item.offerPrice);
     }
-    
+
     return getCouponUnitDiscount(prodPrice, item.coupon);
   };
 
@@ -806,8 +806,9 @@ const Checkout = () => {
     return coupons;
   }, [cartItems, hasAppliedCoupon]);
 
+  // Auto-set shop pickup details if order total is under ₹100
   useEffect(() => {
-    if (subtotal < 300) {
+    if (subtotal < 100) {
       setDeliveryInfo({
         address: 'Shop Pickup',
         position: { lat: Number(SHOP_LAT), lng: Number(SHOP_LNG) }
@@ -816,7 +817,7 @@ const Checkout = () => {
       setDistance(0);
       setDeliveryFee(0);
     }
-  }, [subtotal, SHOP_LAT, SHOP_LNG]);
+  }, [subtotal, navigate]);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -1013,7 +1014,7 @@ const Checkout = () => {
 
       const interval = setInterval(() => {
         setLoaderText((p) => {
-          const m = isWhatsAppOrder 
+          const m = isWhatsAppOrder
             ? ['Saving order details...', 'Generating message...', 'Almost there...']
             : ['Confirming address...', 'Calculating total...', 'Almost there...'];
           const i = m.indexOf(p) + 1;
@@ -1038,7 +1039,7 @@ const Checkout = () => {
       const notesMerged = [builderNotes, orderNotesExtra.trim()].filter(Boolean).join('\n\n');
 
       // FIXED: Safely extract coupon code for API
-      const couponCodeForApi = directItem 
+      const couponCodeForApi = directItem
         ? getCouponCodeForApi(localCoupon)
         : getCouponCodeForApi(appliedCouponFromRedux);
 
@@ -1082,7 +1083,7 @@ const Checkout = () => {
 
       if (isWhatsAppOrder) {
         clearInterval(interval);
-        
+
         if (!directItem) {
           dispatch(clearCart());
         }
@@ -1091,28 +1092,28 @@ const Checkout = () => {
         clearSavedCheckoutData();
         setLoading(false);
         isProcessingPayment.current = false;
-        
+
         const adminPhone = import.meta.env.VITE_ADMIN_PHONE || '9363265477';
         const orderNum = orderNumber || `ORD-${orderId.slice(-6).toUpperCase()}`;
-        
+
         // Build items text list
         const itemsList = cartItems.map(item => {
           const optStr = item.selectedFlavor || item.selectedWeight ? ` (${[item.selectedFlavor, item.selectedWeight].filter(Boolean).join(', ')})` : '';
           const origPrice = getItemOriginalPrice(item);
           const basePrice = getItemBasePrice(item);
           const finalItemPrice = getFinalItemPrice(item);
-          
+
           let priceDetails = ``;
           if (origPrice > basePrice) {
             priceDetails = ` (Original: ₹${origPrice}, Offer: ₹${basePrice})`;
           }
-          
+
           let addonStr = '';
           if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
             const addonList = item.addons.map(a => `${a.name} (x${a.qty || 1}) - ₹${a.price * (a.qty || 1)}`).join(', ');
             addonStr = `\n   └ Addons: ${addonList}`;
           }
-          
+
           return `• ${item.name} x ${item.qty}${optStr} - ₹${finalItemPrice * item.qty}${priceDetails}${addonStr}`;
         }).join('\n');
 
@@ -1131,7 +1132,7 @@ const Checkout = () => {
         } else {
           addressText = `📍 *Pickup Address:* The Chocolate Mine Shop, Coimbatore.`;
         }
-        
+
         const messageText = `🍫 *New ${isDelivery ? 'Delivery' : 'Shop Pickup'} Order*\n\n` +
           `🆔 *Order Number:* #${orderNum}\n` +
           `👤 *Customer Name:* ${addressDetails.fullName}\n` +
@@ -1148,9 +1149,9 @@ const Checkout = () => {
           `📅 *${isDelivery ? 'Delivery' : 'Pickup'} Date:* ${new Date(deliveryDate).toLocaleDateString()}\n` +
           `⏰ *${isDelivery ? 'Delivery' : 'Pickup'} Slot:* ${deliverySlot || 'N/A'}\n\n` +
           `Please confirm my order. Thank you!`;
-          
+
         const waLink = `https://wa.me/91${adminPhone}?text=${encodeURIComponent(messageText)}`;
-        
+
         toast.success("Order registered! Redirecting to WhatsApp...");
         window.open(waLink, '_blank');
         navigate("/order-success", {
@@ -1293,7 +1294,7 @@ const Checkout = () => {
 
   const availableCoupons = useMemo(() => {
     const s = new Set();
-    cartItems.forEach((i) => { 
+    cartItems.forEach((i) => {
       if (i.coupon?.enabled) {
         const code = getCouponCodeString(i.coupon.code);
         if (code) s.add(code);
@@ -1378,8 +1379,8 @@ const Checkout = () => {
                                 key={addr._id}
                                 onClick={() => handleSelectAddress(addr)}
                                 className={`w-full min-w-0 text-left p-3 sm:p-4 border-2 rounded-2xl transition-all relative overflow-hidden group cursor-pointer ${selectedAddressId === addr._id
-                                    ? 'border-primary bg-primary/5 shadow-md'
-                                    : 'border-border-muted hover:border-primary/40 bg-surface/20'
+                                  ? 'border-primary bg-primary/5 shadow-md'
+                                  : 'border-border-muted hover:border-primary/40 bg-surface/20'
                                   }`}
                               >
                                 <div className="flex justify-between items-start gap-2 min-w-0">
@@ -1431,7 +1432,7 @@ const Checkout = () => {
                           onClick={() => setShowMap(true)}
                           className="w-full p-2.5 sm:p-4 border-2 border-dashed border-primary/30 dark:border-border-card rounded-2xl flex items-center justify-center gap-2 text-primary font-black text-xs sm:text-sm uppercase tracking-widest hover:bg-primary/5 hover:border-primary/50 transition-all"
                         >
-                          <MapPin size={15} className="shrink-0" /> 
+                          <MapPin size={15} className="shrink-0" />
                           <span className="truncate">Add / Update Location on Map</span>
                         </button>
                       )}
@@ -1441,8 +1442,8 @@ const Checkout = () => {
                           initial={{ opacity: 0, scale: 0.97 }}
                           animate={{ opacity: 1, scale: 1 }}
                           className={`w-full min-w-0 p-3 sm:p-4 rounded-2xl border-2 flex items-start gap-3 ${locationValid
-                              ? 'bg-success-light border-success/40'
-                              : 'bg-error-light border-error/40'
+                            ? 'bg-success-light border-success/40'
+                            : 'bg-error-light border-error/40'
                             }`}
                         >
                           <Navigation size={15} className={`mt-0.5 shrink-0 ${locationValid ? 'text-success-text' : 'text-error-text'}`} />
@@ -1607,10 +1608,10 @@ const Checkout = () => {
                             onClick={() => slot.available && setDeliverySlot(slot.value)}
                             disabled={!slot.available}
                             className={`relative p-3 sm:p-4 rounded-2xl border-2 transition-all text-center ${!slot.available
-                                ? 'opacity-40 cursor-not-allowed border-border-muted bg-muted/5'
-                                : deliverySlot === slot.value
-                                  ? 'border-primary bg-primary/5 shadow-md'
-                                  : 'border-border-muted hover:border-primary/40 bg-surface/30'
+                              ? 'opacity-40 cursor-not-allowed border-border-muted bg-muted/5'
+                              : deliverySlot === slot.value
+                                ? 'border-primary bg-primary/5 shadow-md'
+                                : 'border-border-muted hover:border-primary/40 bg-surface/30'
                               }`}
                           >
                             <span className="text-lg sm:text-xl block mb-1">{slot.emoji}</span>
@@ -1696,7 +1697,7 @@ const Checkout = () => {
                           </div>
                           <div className="text-right flex flex-col items-end justify-between shrink-0">
                             <p className="font-black text-heading text-sm sm:text-base">{formatCurrency(getFinalItemPrice(item) * item.qty)}</p>
-                            
+
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1716,13 +1717,13 @@ const Checkout = () => {
                           </div>
                         </div>
                       ))}
-                      
+
                       <div className="space-y-4 pt-2">
                         {shouldShowCustomCakeRequest ? (
                           <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 sm:p-5 space-y-3">
                             <div className="flex items-start justify-between gap-3">
                               <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-primary">From custom cake builder</p>
-                              <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-accent hover:underline flex items-center gap-1"><Edit size={12}/> Edit</Link>
+                              <Link to="/custom-cake" className="text-xs font-black uppercase tracking-widest text-accent hover:underline flex items-center gap-1"><Edit size={12} /> Edit</Link>
                             </div>
                             <pre className="text-[11px] sm:text-xs text-muted font-medium whitespace-pre-wrap leading-relaxed font-sans bg-card-soft p-3 rounded-xl border border-border/30">
                               {getFormattedCustomNotes()}
@@ -1804,8 +1805,8 @@ const Checkout = () => {
                                   key={method.id}
                                   onClick={() => setSelectedPayMethod(selected ? null : method.id)}
                                   className={`w-full min-w-0 text-left p-3 sm:p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${selected
-                                      ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
-                                      : `border-border-muted bg-surface/20 hover:bg-surface/40 hover:border-primary/30`
+                                    ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-md`
+                                    : `border-border-muted bg-surface/20 hover:bg-surface/40 hover:border-primary/30`
                                     }`}
                                 >
                                   <div className="flex items-start justify-between mb-2 sm:mb-3">
@@ -1835,29 +1836,29 @@ const Checkout = () => {
                                       </div>
                                     ))}
                                   </div>
-                              </button>
-                            );
-                          })}
-                        </div>
+                                </button>
+                              );
+                            })}
+                          </div>
 
-                        <p className="text-[9px] text-muted/50 text-center font-bold uppercase tracking-widest italic pt-2">
-                          Selecting a method pre-fills its tab in Razorpay checkout
-                        </p>
-                      </>
-                    )}
+                          <p className="text-[9px] text-muted/50 text-center font-bold uppercase tracking-widest italic pt-2">
+                            Selecting a method pre-fills its tab in Razorpay checkout
+                          </p>
+                        </>
+                      )}
 
-                    <div className="pt-4 flex justify-between gap-2 sm:gap-3">
-                      <Button onClick={() => setActiveStep(3)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
-                      <Button
-                        onClick={() => {
-                          document.getElementById('order-summary-section')?.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
-                        disabled={subtotal < 300 ? false : !selectedPayMethod}
-                      >
-                        Order Summary
-                      </Button>
-                    </div>
+                      <div className="pt-4 flex justify-between gap-2 sm:gap-3">
+                        <Button onClick={() => setActiveStep(3)} className="btn-secondary flex-1 sm:flex-none px-4 sm:px-6 whitespace-nowrap">Back</Button>
+                        <Button
+                          onClick={() => {
+                            document.getElementById('order-summary-section')?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="btn-primary flex-[2] sm:flex-none px-4 sm:px-8 whitespace-nowrap text-sm"
+                          disabled={subtotal < 300 ? false : !selectedPayMethod}
+                        >
+                          Order Summary
+                        </Button>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -1910,7 +1911,7 @@ const Checkout = () => {
                             </>
                           );
                         })()}
-                        
+
                         {item.addons && item.addons.length > 0 && (
                           <div className="mt-2 p-3 bg-card-soft border border-border/40 rounded-xl">
                             <p className="text-xs sm:text-sm text-muted font-black uppercase tracking-widest mb-2">Add-ons included:</p>
@@ -1918,21 +1919,21 @@ const Checkout = () => {
                               {item.addons.map((addon, idx) => (
                                 <div key={idx} className="flex justify-between items-center text-xs sm:text-sm text-heading font-medium">
                                   <span className="flex items-center gap-2">
-                                    <Plus size={14} className="text-primary"/> {addon.name}
+                                    <Plus size={14} className="text-primary" /> {addon.name}
                                     <span className="text-xs text-muted/60 font-bold ml-1">x{addon.qty || 1}</span>
                                   </span>
                                   <div className="flex items-center gap-3">
                                     <span className="mr-1 text-muted/80 font-bold">{formatCurrency(addon.price * (addon.qty || 1))}</span>
                                     <div className="flex items-center gap-1 bg-muted/10 rounded-full px-3 py-1 select-none">
-                                      <button 
-                                        onClick={() => handleCheckoutAddonDecrement(item, addon)} 
+                                      <button
+                                        onClick={() => handleCheckoutAddonDecrement(item, addon)}
                                         className="hover:scale-110 font-black text-sm sm:text-base px-1.5 text-heading"
                                       >
                                         −
                                       </button>
                                       <span className="text-xs sm:text-sm font-black w-5 text-center">{addon.qty || 1}</span>
-                                      <button 
-                                        onClick={() => handleCheckoutAddonIncrement(item, addon)} 
+                                      <button
+                                        onClick={() => handleCheckoutAddonIncrement(item, addon)}
                                         className="hover:scale-110 font-black text-sm sm:text-base px-1.5 text-heading"
                                       >
                                         +
@@ -1961,7 +1962,7 @@ const Checkout = () => {
                               ))}
                           </div>
                         )}
-                        
+
                         <p className="text-xs sm:text-sm text-muted/60 font-black mt-2">QTY {item.qty}</p>
                       </div>
                       <div className="text-right shrink-0">

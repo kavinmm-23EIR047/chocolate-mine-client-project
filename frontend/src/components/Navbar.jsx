@@ -12,6 +12,7 @@ import SearchOverlay from './search/SearchOverlay';
 import ThemeToggle from './ui/ThemeToggle';
 import NotificationDropdown from './ui/NotificationDropdown';
 import MegaMenu from './ui/MegaMenu';
+import Logo from './Logo';
 
 const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.items);
@@ -50,32 +51,7 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const LogoMark = ({ containerClass = "w-[95px] sm:w-[110px] lg:w-[120px] tv:w-[150px]" }) => (
-    <div className={`flex flex-col items-center text-inherit font-sans py-1 my-auto ${containerClass}`}>
-      <div className="w-full flex justify-between text-[8px] sm:text-[8.5px] lg:text-[9.5px] font-black uppercase leading-none select-none text-inherit/90 tracking-normal mb-1 px-[0.5px]">
-        <span>T</span><span>H</span><span>E</span>
-        <span className="w-[8%]"></span>
-        <span>C</span><span>H</span><span>O</span><span>C</span><span>O</span><span>L</span><span>A</span><span>T</span><span>E</span>
-      </div>
-      <svg
-        viewBox="0 0 325 90"
-        className="w-full h-auto fill-current text-inherit transition-colors"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* M - Solid bold with sharp top peaks (steep slant, no shoulder) */}
-        <path d="M0 86V0L25.5 20L55 53L84.5 20L110 0v86H87V32L55 71 23 32v54H0z" />
-        
-        {/* I - Standard block */}
-        <path d="M131 0h24v86h-24V0z" />
-        
-        {/* N - Solid bold with sharp top-left peak and flat top-right */}
-        <path d="M176 86V0L200.5 20L238 56V0h24v86h-23.5L200 29v57h-24z" />
-        
-        {/* E - Standard block */}
-        <path d="M283 0h42v21h-18v12h14v20h-14v12h18v21h-42V0z" />
-      </svg>
-    </div>
-  );
+  // Using imported Logo component instead of inline LogoMark
 
   return (
     <>
@@ -93,13 +69,13 @@ const Navbar = () => {
           <div className="absolute bottom-4 right-10"><Cake size={22} strokeWidth={1.2} className="text-heading" /></div>
         </div>
 
-        <div className="responsive-container pb-5 lg:pb-0 relative z-10">
+        <div className="responsive-container pb-3 lg:pb-0 relative z-10">
 
           {/* DESKTOP LAYOUT ROW */}
           <div className="hidden lg:flex items-center justify-between gap-4 py-3 min-h-[65px] tv:min-h-[84px]">
             <div className="flex items-center gap-6 shrink-0">
               <Link to="/" className="shrink-0 block select-none group pr-1">
-                <LogoMark />
+                <Logo className="w-[120px] sm:w-[140px] lg:w-[160px] h-auto object-contain" />
               </Link>
 
               <div className="relative shrink-0" ref={locationDropdownRef}>
@@ -186,7 +162,7 @@ const Navbar = () => {
           </div>
 
           {/* MOBILE VIEW LAYOUT */}
-          <div className="lg:hidden flex flex-col gap-5 pt-5 pb-2">
+          <div className="lg:hidden flex flex-col gap-4 pt-3 pb-1">
 
             {/* Top Row: Menu + Logo + Actions */}
             <div className="flex items-center justify-between w-full px-1">
@@ -199,8 +175,8 @@ const Navbar = () => {
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                   </svg>
                 </button>
-                <Link to="/" className="block select-none group flex-shrink-0">
-                  <LogoMark containerClass="w-[95px] sm:w-[115px]" />
+                <Link to="/" className="shrink-0 block select-none group pr-0.5 pl-0">
+                  <Logo className="w-[110px] sm:w-[130px] h-auto object-contain" />
                 </Link>
               </div>
 
@@ -285,7 +261,7 @@ const Navbar = () => {
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 left-0 bottom-0 w-full sm:w-[82%] sm:max-w-[360px] bg-card z-[220] shadow-2xl flex flex-col">
               <div className="p-4 border-b border-border/15">
                 <div className="flex justify-between items-center mb-4">
-                  <LogoMark containerClass="w-[115px]" />
+                  <Logo className="w-[130px] h-auto object-contain" />
                   <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-xl text-heading hover:bg-heading/10 transition-all active:scale-95 flex items-center justify-center" aria-label="Close menu"><X size={22} /></button>
                 </div>
               </div>

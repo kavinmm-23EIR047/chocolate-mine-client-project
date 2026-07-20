@@ -13,8 +13,13 @@ const ProductPricing = ({
   applyingCoupon,
   handleApplyCoupon,
   handleRemoveCoupon,
-  addonSum = 0
+  addonSum = 0,
+  selectedFlavor = null
 }) => {
+  const BENTO_FLAVOR_PRICES = {'White Forest':380,'Butterscotch':390,'Rose Milk':410,'Honey & Almond':410,'Black Forest':380,'Choco Fudge':390,'Choco Truffle':410,'Choco Oreo':410,'Choco Caramel':420,'Death by Chocolate':450,'Red Velvet':470,'Lotus Biscoff':480,'Choco Pistachio':480};
+  const flavorPrice = Number(selectedFlavor?.price || (selectedFlavor?.name ? BENTO_FLAVOR_PRICES[selectedFlavor.name] || 0 : 0));
+  const productBaseOnly = (finalPrice - addonSum) - flavorPrice;
+  
   return (
     <>
       <div className="space-y-5 sm:space-y-6">
@@ -33,8 +38,14 @@ const ProductPricing = ({
         <div className="bg-muted/5 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-3 text-sm font-bold border border-border/20">
           <div className="flex justify-between text-muted/60 uppercase text-[11px] sm:text-xs tracking-widest gap-2">
             <span>Product Base Price</span>
-            <span className="text-right">{formatCurrency(finalPrice - addonSum)}</span>
+            <span className="text-right">{formatCurrency(productBaseOnly > 0 ? productBaseOnly : (finalPrice - addonSum))}</span>
           </div>
+          {flavorPrice > 0 && (
+            <div className="flex justify-between text-primary uppercase text-[11px] sm:text-xs tracking-widest gap-2">
+              <span>Flavor: {selectedFlavor?.name}</span>
+              <span className="text-right">+ {formatCurrency(flavorPrice)}</span>
+            </div>
+          )}
           {addonSum > 0 && (
             <div className="flex justify-between text-primary uppercase text-[11px] sm:text-xs tracking-widest gap-2">
               <span>Add-ons Total</span>

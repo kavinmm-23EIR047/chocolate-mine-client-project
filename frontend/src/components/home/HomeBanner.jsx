@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, ArrowRight } from 'lucide-react';
 import api from '../../utils/api';
+import Logo from '../Logo';
 
 const HomeBanner = () => {
   const [banners, setBanners] = useState([]);
@@ -61,7 +62,7 @@ const HomeBanner = () => {
       <div className="w-full rounded-[16px] sm:rounded-[24px] overflow-hidden relative border border-border/20"
         style={{ aspectRatio: '16/5' }}>
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-chocolate to-espresso flex items-center justify-center">
-          <img src="/logo.png" alt="Logo" className="w-32 object-contain" />
+          <Logo className="w-32 h-32" />
         </div>
       </div>
     );

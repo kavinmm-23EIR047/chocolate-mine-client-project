@@ -45,19 +45,28 @@ const ProductVariants = ({
 
           {!showCustomFlavorInput ? (
             <>
-              <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                {product.flavors?.map((flavor, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleFlavorChange(flavor)}
-                    className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wide transition-all ${selectedFlavor?.name === flavor.name
-                      ? 'bg-primary text-button-text shadow-lg scale-105'
-                      : 'bg-muted/10 text-heading border-2 border-border hover:border-primary/50'
-                      }`}
-                  >
-                    {flavor.name}
-                  </button>
-                ))}
+              <div className="relative">
+                <select
+                  value={selectedFlavor?.name || ''}
+                  onChange={(e) => {
+                    const flavor = product.flavors.find(f => f.name === e.target.value);
+                    if (flavor) handleFlavorChange(flavor);
+                  }}
+                  className="w-full appearance-none bg-card border-2 border-border text-heading px-4 py-3 pr-10 rounded-xl text-sm font-bold uppercase tracking-wide cursor-pointer outline-none focus:border-primary transition-colors"
+                  style={{ colorScheme: 'dark' }}
+                >
+                  <option value="" disabled>Choose a flavor</option>
+                  {product.flavors.map((flavor, idx) => (
+                    <option key={idx} value={flavor.name}>
+                      {flavor.name} (+₹{flavor.price || ({'White Forest':380,'Butterscotch':390,'Rose Milk':410,'Honey & Almond':410,'Black Forest':380,'Choco Fudge':390,'Choco Truffle':410,'Choco Oreo':410,'Choco Caramel':420,'Death by Chocolate':450,'Red Velvet':470,'Lotus Biscoff':480,'Choco Pistachio':480}[flavor.name] || 0)})
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
               {product.allowCustomFlavor && (
                 <button

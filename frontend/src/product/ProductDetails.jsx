@@ -29,6 +29,30 @@ import ProductReviews from './components/ProductReviews';
 import ProductRelated from './components/ProductRelated';
 import ProductSimilar from './components/ProductSimilar';
 
+// Flavor price lookup for bento cakes (used as fallback if DB data lacks prices)
+const BENTO_FLAVOR_PRICES = {
+  'White Forest': 380,
+  'Butterscotch': 390,
+  'Rose Milk': 410,
+  'Honey & Almond': 410,
+  'Black Forest': 380,
+  'Choco Fudge': 390,
+  'Choco Truffle': 410,
+  'Choco Oreo': 410,
+  'Choco Caramel': 420,
+  'Death by Chocolate': 450,
+  'Red Velvet': 470,
+  'Lotus Biscoff': 480,
+  'Choco Pistachio': 480,
+};
+
+// Helper: get flavor price (from DB or fallback)
+const getFlavorPrice = (flavor) => {
+  if (flavor?.price) return Number(flavor.price);
+  if (flavor?.name && BENTO_FLAVOR_PRICES[flavor.name]) return BENTO_FLAVOR_PRICES[flavor.name];
+  return 0;
+};
+
 const getWeightMultiplier = (weightStr) => {
   if (!weightStr) return 1;
   const w = String(weightStr).toLowerCase().replace(/\s+/g, '');
@@ -161,6 +185,10 @@ const ProductDetails = () => {
         if (product.flavors && product.flavors.length > 0) {
           const initialFlavor = product.flavors[0];
           setSelectedFlavor(initialFlavor);
+          
+          const flavorPrice = getFlavorPrice(initialFlavor);
+          setSelectedPrice(basePriceVal + flavorPrice);
+
           if (initialFlavor.images && initialFlavor.images.length > 0) {
             setDisplayImage(initialFlavor.images[0]);
           } else {
@@ -192,6 +220,13 @@ const ProductDetails = () => {
     setSelectedFlavor(flavor);
     setShowCustomFlavorInput(false);
     setCustomFlavor('');
+
+    const basePriceVal = Number(product.price || 0);
+    const flavorPrice = getFlavorPrice(flavor);
+    
+    // Only update selectedPrice if we are not relying on weight multiplier.
+    // For bento cakes (where weight is fixed or hidden), this correctly adds flavor price.
+    setSelectedPrice(basePriceVal + flavorPrice);
 
     if (flavor.images && flavor.images.length > 0) {
       setDisplayImage(flavor.images[0]);
@@ -582,6 +617,7 @@ const ProductDetails = () => {
                 handleApplyCoupon={handleApplyCoupon}
                 handleRemoveCoupon={handleRemoveCoupon}
                 addonSum={addonSum}
+                selectedFlavor={selectedFlavor}
               />
 
               <ProductActionButtons

@@ -55,6 +55,11 @@ const productSchema = new mongoose.Schema({
   hasVariants: { type: Boolean, default: false },
   weights: [weightSchema],
   variants: [variantSchema],
+  flavors: [{
+    name: { type: String, required: true },
+    price: { type: Number, default: 0 },
+    images: [String]
+  }],
   allowCustomFlavor: { type: Boolean, default: false },
   allowCustomWeight: { type: Boolean, default: false },
 

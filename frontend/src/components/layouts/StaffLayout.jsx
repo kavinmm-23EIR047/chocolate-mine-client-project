@@ -12,6 +12,8 @@ import {
   LogOut,
   ChevronRight,
   X,
+  ShoppingCart,
+  Store,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -26,6 +28,8 @@ const menuItems = [
   { path: '/staff/orders/new', label: 'New Orders', icon: ClipboardList },
   { path: '/staff/orders/active', label: 'Active Orders', icon: Flame },
   { path: '/staff/orders/history', label: 'Order History', icon: History },
+  { path: '/staff/orders/create-inshop', label: 'New In-Shop Order', icon: ShoppingCart },
+  { path: '/staff/orders/in-shop-history', label: 'In-Shop History', icon: Store },
 ];
 
 const StaffLayout = () => {

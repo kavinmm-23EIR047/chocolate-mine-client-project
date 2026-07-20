@@ -7,9 +7,21 @@ import adminService from '../../services/adminService';
 import Button from '../../components/ui/Button';
 import toast from 'react-hot-toast';
 
-// Default flavors for cakes
+// Default flavors for bento cakes with prices
 const DEFAULT_FLAVORS = [
-  'Vanilla', 'Chocolate', 'Butterscotch', 'Black Forest', 'Red Velvet', 'Strawberry', 'Pineapple'
+  { name: 'White Forest', price: 380 },
+  { name: 'Butterscotch', price: 390 },
+  { name: 'Rose Milk', price: 410 },
+  { name: 'Honey & Almond', price: 410 },
+  { name: 'Black Forest', price: 380 },
+  { name: 'Choco Fudge', price: 390 },
+  { name: 'Choco Truffle', price: 410 },
+  { name: 'Choco Oreo', price: 410 },
+  { name: 'Choco Caramel', price: 420 },
+  { name: 'Death by Chocolate', price: 450 },
+  { name: 'Red Velvet', price: 470 },
+  { name: 'Lotus Biscoff', price: 480 },
+  { name: 'Choco Pistachio', price: 480 },
 ];
 
 // Default weight options
@@ -118,8 +130,16 @@ const ProductForm = () => {
             }
           });
           setPreview(p.image);
-          if (Array.isArray(p.category) ? p.category.some(c => typeof c === 'string' && c.toLowerCase() === 'cakes') : (p.category || '').toLowerCase() === 'cakes') {
-            setFlavors(p.flavors || []);
+          if (Array.isArray(p.category) ? p.category.some(c => typeof c === 'string' && c.toLowerCase().includes('bento')) : (p.category || '').toLowerCase().includes('bento')) {
+            // Enrich loaded flavors with prices from DEFAULT_FLAVORS if missing
+            const enrichedFlavors = (p.flavors || []).map(flavor => {
+              if (!flavor.price) {
+                const defaultMatch = DEFAULT_FLAVORS.find(df => df.name === flavor.name);
+                return { ...flavor, price: defaultMatch ? defaultMatch.price : 0 };
+              }
+              return flavor;
+            });
+            setFlavors(enrichedFlavors);
             setWeights(p.weights || []);
             setVariants(p.variants || []);
             setWeightPrices(p.weightPrices || []);
@@ -184,7 +204,7 @@ const ProductForm = () => {
         subCategory = '';
       }
       
-      if (!updated.includes('cakes')) {
+      if (!updated.some(c => c.includes('bento'))) {
         setFlavors([]);
         setWeights([]);
         setVariants([]);
@@ -396,7 +416,7 @@ const ProductForm = () => {
       });
       
       // Add variant data for cake category
-      if (formData.category.includes('cakes')) {
+      if (formData.category.some(c => c.includes('bento'))) {
         // Prepare flavors with images array
         const flavorsForSubmit = flavors.map(flavor => ({
           name: flavor.name,
@@ -550,8 +570,7 @@ const ProductForm = () => {
                 />
               </div>
 
-              {/* Regular price fields (for non-cake or simple products) */}
-              {!formData.category.includes('cakes') && (
+              {/* Price fields for all products */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs font-black text-muted uppercase tracking-widest">Original Price (₹)</label>
@@ -575,7 +594,6 @@ const ProductForm = () => {
                     />
                   </div>
                 </div>
-              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -618,79 +636,31 @@ const ProductForm = () => {
             </div>
 
             {/* Cake-specific Variant Section with Multiple Images */}
-            {formData.category.includes('cakes') && (
+            {formData.category.some(c => c.includes('bento')) && (
               <div className="card-premium p-6 space-y-6">
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <h3 className="font-black text-heading uppercase tracking-widest text-sm">
-                    Cake Variants (Flavors & Weights)
+                    Bento Cake Flavors
                   </h3>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-xs font-black">
-                      <input
-                        type="checkbox"
-                        name="allowCustomFlavor"
-                        checked={formData.allowCustomFlavor}
-                        onChange={handleChange}
-                        className="rounded"
-                      />
-                      Allow Custom Flavor
-                    </label>
-                    <label className="flex items-center gap-2 text-xs font-black">
-                      <input
-                        type="checkbox"
-                        name="allowCustomWeight"
-                        checked={formData.allowCustomWeight}
-                        onChange={handleChange}
-                        className="rounded"
-                      />
-                      Allow Custom Weight
-                    </label>
-                  </div>
-                </div>
-
-                {/* Cake Type and Base Price */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-muted uppercase tracking-widest">Cake Type</label>
-                    <select
-                      name="cakeType"
-                      value={formData.cakeType}
-                      onChange={(e) => {
-                        const val = (e.target.value || '').toLowerCase();
-                        setFormData(prev => ({ ...prev, cakeType: val }));
-                      }}
-                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
-                    >
-                      <option value="">Select Type</option>
-                      <option value="bento-cakes">Bento Cakes</option>
-                      <option value="vanilla-cakes">Vanilla Cakes</option>
-                      <option value="chocolate-cakes">Chocolate Cakes</option>
-                      <option value="red-velvet-cakes">Red Velvet Cakes</option>
-                      <option value="tcm-special">TCM Special</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-muted uppercase tracking-widest">Base Price</label>
+                  <label className="flex items-center gap-2 text-xs font-black">
                     <input
-                      name="basePrice"
-                      type="number"
-                      value={basePrice}
-                      onChange={(e) => setBasePrice(e.target.value)}
-                      placeholder={(formData.cakeType || '').toLowerCase().includes('bento') ? 'Quarter KG Price (₹)' : 'Half KG Price (₹)'}
-                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
+                      type="checkbox"
+                      name="allowCustomFlavor"
+                      checked={formData.allowCustomFlavor}
+                      onChange={handleChange}
+                      className="rounded"
                     />
-                    <p className="text-[10px] text-muted">Enter base price for {(formData.cakeType || '').toLowerCase().includes('bento') ? '0.25 kg' : '0.5 kg'}. Other weights will be calculated automatically.</p>
-                  </div>
+                    Allow Custom Flavor
+                  </label>
                 </div>
-                
-                {/* Flavors Section with Multiple Images */}
+
+                {/* Flavors Section */}
                 <div className="border rounded-2xl p-4 space-y-4">
                   <h4 className="font-black text-sm">Flavors</h4>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {flavors.map((flavor, idx) => (
                       <span key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-xl text-xs font-bold">
-                        {flavor.name}
+                        {flavor.name} {flavor.price ? `(₹${flavor.price})` : ''}
                         <button type="button" onClick={() => removeFlavor(idx)} className="hover:text-error">
                           <X size={12} />
                         </button>
@@ -698,27 +668,61 @@ const ProductForm = () => {
                     ))}
                   </div>
                   
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsCustomFlavor(!isCustomFlavor)}
-                      className="text-xs font-black text-primary"
-                    >
-                      {isCustomFlavor ? 'Use Default' : '+ Custom Flavor'}
-                    </button>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomFlavor(!isCustomFlavor)}
+                        className="text-xs font-black text-primary"
+                      >
+                        {isCustomFlavor ? 'Use Default' : '+ Custom Flavor'}
+                      </button>
+                    </div>
+                    {!isCustomFlavor && (
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const existingNames = new Set(flavors.map(f => f.name));
+                            const missingFlavors = DEFAULT_FLAVORS
+                              .filter(f => !existingNames.has(f.name))
+                              .map(f => ({ name: f.name, price: f.price, images: [] }));
+                            setFlavors([...flavors, ...missingFlavors]);
+                          }}
+                          className="text-xs font-black text-success-text hover:underline"
+                        >
+                          Select All
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFlavors([])}
+                          className="text-xs font-black text-error hover:underline"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                    )}
                   </div>
                   
                   {!isCustomFlavor ? (
-                    <div className="flex gap-2">
-                      <select
-                        value={selectedDefaultFlavor}
-                        onChange={(e) => setSelectedDefaultFlavor(e.target.value)}
-                        className="flex-1 bg-input border border-input-border px-3 py-2 rounded-xl text-sm"
-                      >
-                        <option value="">Select flavor</option>
-                        {DEFAULT_FLAVORS.map(f => <option key={f} value={f}>{f}</option>)}
-                      </select>
-                      <Button type="button" onClick={addFlavor} icon={Plus} size="sm">Add</Button>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-border/5 rounded-xl border border-border/50 max-h-[200px] overflow-y-auto">
+                      {DEFAULT_FLAVORS.map(f => (
+                        <label key={f.name} className="flex items-center gap-2 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={flavors.some(flavor => flavor.name === f.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFlavors([...flavors, { name: f.name, price: f.price, images: [] }]);
+                              } else {
+                                removeFlavor(flavors.findIndex(flavor => flavor.name === f.name));
+                              }
+                            }}
+                            className="rounded border-input-border text-primary focus:ring-primary w-4 h-4"
+                          />
+                          <span className="text-xs font-bold text-muted group-hover:text-heading transition-colors">{f.name} <span className="text-primary">₹{f.price}</span></span>
+                        </label>
+                      ))}
                     </div>
                   ) : (
                     <div className="flex gap-2">
@@ -732,184 +736,7 @@ const ProductForm = () => {
                       <Button type="button" onClick={addFlavor} icon={Plus} size="sm">Add</Button>
                     </div>
                   )}
-                  
-                  {/* Flavor Images Section */}
-                  {flavors.map((flavor, flavorIdx) => (
-                    <div key={flavorIdx} className="mt-4 p-3 bg-border/10 rounded-xl">
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-xs font-black text-muted uppercase tracking-widest">
-                          {flavor.name} Images
-                        </label>
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {flavor.images && flavor.images.length > 0 ? (
-                          flavor.images.map((img, imgIdx) => (
-                            <div key={imgIdx} className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-border group/img">
-                              <img 
-                                src={img} 
-                                alt={`${flavor.name} ${imgIdx + 1}`} 
-                                className="w-full h-full object-cover" 
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeFlavorImage(flavorIdx, imgIdx)}
-                                className="absolute top-1 right-1 p-1 bg-error text-white rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity"
-                              >
-                                <X size={12} />
-                              </button>
-                            </div>
-                          ))
-                        ) : null}
-                        <label className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors">
-                          <Image size={20} className="text-muted" />
-                          <span className="text-[8px] text-muted mt-1">Upload</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={(e) => handleFlavorImageUpload(flavorIdx, e)}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  ))}
                 </div>
-                
-                {/* Weights Section */}
-                <div className="border rounded-2xl p-4 space-y-4">
-                  <h4 className="font-black text-sm">Weights</h4>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {weights.map((weight, idx) => (
-                      <span key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-xl text-xs font-bold">
-                        {weight.value}
-                        <button type="button" onClick={() => removeWeight(idx)} className="hover:text-error">
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsCustomWeight(!isCustomWeight)}
-                      className="text-xs font-black text-primary"
-                    >
-                      {isCustomWeight ? 'Use Default' : '+ Custom Weight'}
-                    </button>
-                  </div>
-                  
-                  {!isCustomWeight ? (
-                    <div className="flex gap-2">
-                      <select
-                        value={selectedDefaultWeight}
-                        onChange={(e) => setSelectedDefaultWeight(e.target.value)}
-                        className="flex-1 bg-input border border-input-border px-3 py-2 rounded-xl text-sm"
-                      >
-                        <option value="">Select weight</option>
-                        {DEFAULT_WEIGHTS.map(w => <option key={w} value={w}>{w}</option>)}
-                      </select>
-                      <Button type="button" onClick={addWeight} icon={Plus} size="sm">Add</Button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={customWeightValue}
-                        onChange={(e) => setCustomWeightValue(e.target.value)}
-                        placeholder="e.g., 2.5 kg"
-                        className="flex-1 bg-input border border-input-border px-3 py-2 rounded-xl text-sm"
-                      />
-                      <Button type="button" onClick={addWeight} icon={Plus} size="sm">Add</Button>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Variants Table */}
-                {(flavors.length > 0 || weights.length > 0) && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-black text-sm">Price Table (Flavor × Weight)</h4>
-                      <div className="flex gap-2">
-                        <Button type="button" onClick={generateVariantsFromCombinations} size="sm" variant="secondary">
-                          Generate All Combinations
-                        </Button>
-                        <Button type="button" onClick={addVariant} icon={Plus} size="sm">Add Row</Button>
-                      </div>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="bg-border/20">
-                            <th className="p-2 text-left text-xs font-black">Flavor</th>
-                            <th className="p-2 text-left text-xs font-black">Weight</th>
-                            <th className="p-2 text-left text-xs font-black">Price (₹)</th>
-                            <th className="p-2 text-left text-xs font-black">Stock</th>
-                            <th className="p-2 text-left text-xs font-black">Actions</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                          {variants.length > 0 ? (
-                            variants.map((variant, idx) => (
-                              <tr key={idx} className="border-b border-border">
-                                <td className="p-2">
-                                  <select
-                                    value={variant.flavor}
-                                    onChange={(e) => updateVariant(idx, 'flavor', e.target.value)}
-                                    className="w-full bg-input border border-input-border px-2 py-1 rounded-lg text-sm"
-                                  >
-                                    <option value="">Select</option>
-                                    {flavors.map(f => <option key={f.name} value={f.name}>{f.name}</option>)}
-                                  </select>
-                                 </td>
-                                <td className="p-2">
-                                  <select
-                                    value={variant.weight}
-                                    onChange={(e) => updateVariant(idx, 'weight', e.target.value)}
-                                    className="w-full bg-input border border-input-border px-2 py-1 rounded-lg text-sm"
-                                  >
-                                    <option value="">Select</option>
-                                    {weights.map(w => <option key={w.value} value={w.value}>{w.value}</option>)}
-                                  </select>
-                                 </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={variant.price}
-                                    onChange={(e) => updateVariant(idx, 'price', e.target.value)}
-                                    placeholder="Price"
-                                    className="w-28 bg-input border border-input-border px-2 py-1 rounded-lg text-sm"
-                                  />
-                                 </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={variant.stock}
-                                    onChange={(e) => updateVariant(idx, 'stock', parseInt(e.target.value) || 0)}
-                                    className="w-20 bg-input border border-input-border px-2 py-1 rounded-lg text-sm"
-                                  />
-                                 </td>
-                                <td className="p-2">
-                                  <button type="button" onClick={() => removeVariant(idx)} className="text-error">
-                                    <Trash2 size={16} />
-                                  </button>
-                                 </td>
-                               </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan="5" className="text-center py-8 text-muted text-sm">
-                                No variants defined. Add flavors and weights, then click "Generate All Combinations" or "Add Row" manually.
-                               </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 

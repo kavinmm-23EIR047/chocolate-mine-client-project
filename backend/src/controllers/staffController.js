@@ -1,5 +1,7 @@
 const PDFDocument = require('pdfkit');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
+const InShopOrder = require('../models/InShopOrder');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -124,10 +126,11 @@ const STATUS_TRANSITIONS = {
 // @desc    Staff Dashboard Stats
 // @route   GET /api/v1/staff/dashboard
 exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
-  const [confirmedCount, outForDeliveryOrders, deliveredOrders] = await Promise.all([
+  const [confirmedCount, outForDeliveryOrders, deliveredOrders, inShopOrdersCount] = await Promise.all([
     Order.countDocuments({ orderStatus: 'confirmed' }),
     Order.countDocuments({ orderStatus: 'out_for_delivery' }),
-    Order.countDocuments({ orderStatus: 'delivered' })
+    Order.countDocuments({ orderStatus: 'delivered' }),
+    InShopOrder.countDocuments()
   ]);
 
   res.status(200).json({
@@ -135,7 +138,8 @@ exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
     data: {
       confirmedOrders: confirmedCount,
       outForDeliveryOrders,
-      deliveredOrders
+      deliveredOrders,
+      inShopOrdersCount
     }
   });
 });
@@ -520,6 +524,111 @@ exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: responseData
+  });
+});
+
+// @desc    Create In-Shop Order (walk-in customer, cash payment at counter)
+// @route   POST /api/v1/staff/orders/in-shop
+exports.createInShopOrder = asyncHandler(async (req, res, next) => {
+  const { customerName, customerPhone, items, notes } = req.body;
+
+  // Validate required fields
+  if (!customerName || !customerName.trim()) {
+    return next(new AppError('Customer name is required', 400));
+  }
+  if (!customerPhone || !customerPhone.trim()) {
+    return next(new AppError('Customer phone is required', 400));
+  }
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return next(new AppError('At least one item is required', 400));
+  }
+
+  // Build order items from the provided data
+  const orderItems = [];
+  let subtotal = 0;
+
+  for (const item of items) {
+    if (!item.productId || !item.name || !item.qty || item.price === undefined || item.price === null) {
+      console.error('❌ Validation failed for item:', item);
+      return next(new AppError(`Validation failed for item: ${item.name || 'Unknown'}. Missing required fields.`, 400));
+    }
+
+    const itemTotal = Number(item.price) * Number(item.qty);
+    subtotal += itemTotal;
+
+    orderItems.push({
+      productId: item.productId,
+      name: item.name,
+      qty: Number(item.qty),
+      price: Number(item.price),
+      originalPrice: Number(item.price),
+      image: item.image || '',
+      selectedFlavor: item.selectedFlavor || null,
+      selectedWeight: item.selectedWeight || null,
+      category: item.category || 'General'
+    });
+  }
+
+  const gst = Math.round(subtotal * 0.18);
+  const total = subtotal + gst;
+
+  // Create the order
+  const order = await InShopOrder.create({
+    userId: req.user._id,
+    createdByStaff: req.user._id,
+    isInShopOrder: true,
+    items: orderItems,
+    subtotal,
+    discount: 0,
+    deliveryCharge: 0,
+    convenienceFee: 0,
+    gst,
+    total,
+    paymentMethod: 'IN_SHOP',
+    paymentStatus: 'paid',
+    orderStatus: 'delivered',
+    address: {
+      fullName: customerName.trim(),
+      phone: customerPhone.trim(),
+      houseNo: 'In-Shop',
+      street: 'The Chocolate Mine',
+      city: 'Coimbatore',
+      pincode: '641001'
+    },
+    notes: notes || '',
+    deliveryDate: new Date(),
+    deliverySlot: 'In-Shop Pickup'
+  });
+
+  // Emit socket update
+  emitOrderUpdate(order);
+
+  res.status(201).json({
+    status: 'success',
+    message: 'In-shop order created successfully',
+    data: order
+  });
+});
+
+// @desc    Get In-Shop Orders History
+// @route   GET /api/v1/staff/orders/in-shop
+exports.getInShopOrders = asyncHandler(async (req, res, next) => {
+  const orders = await InShopOrder.find()
+    .populate('userId', 'name email phone')
+    .populate('createdByStaff', 'name phone')
+    .sort('-createdAt');
+
+  const formattedOrders = orders.map(order => ({
+    ...order.toObject(),
+    formattedItems: formatOrderItems(order.items),
+    itemsCount: order.items.length,
+    totalItems: order.items.reduce((sum, item) => sum + item.qty, 0)
+  }));
+
+  res.status(200).json({
+    status: 'success',
+    count: orders.length,
+    data: formattedOrders
   });
 });
 

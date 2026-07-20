@@ -126,7 +126,7 @@ const Home = () => {
 
       {/* 2. Home Banner */}
       {!query && (
-        <div className="responsive-container pt-4 pb-6">
+        <div className="responsive-container pt-2 pb-4">
           <HomeBanner />
         </div>
       )}

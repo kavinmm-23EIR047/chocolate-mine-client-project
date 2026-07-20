@@ -37,6 +37,12 @@ const staffService = {
     window.open(url, '_blank');
   },
   markKOTPrinted: (id) => api.patch(`/staff/orders/${id}/print-kot`),
+
+  /* ----------------------------------------
+     In-Shop Orders (walk-in / counter sales)
+  ---------------------------------------- */
+  createInShopOrder: (data) => api.post('/staff/orders/in-shop', data),
+  getInShopOrders: () => api.get('/staff/orders/in-shop'),
 };
 
 export default staffService;

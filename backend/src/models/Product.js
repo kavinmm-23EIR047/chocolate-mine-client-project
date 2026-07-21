@@ -53,6 +53,7 @@ const productSchema = new mongoose.Schema({
   cakeType: { type: String, trim: true, lowercase: true },
   weightPrices: [{ weight: { type: String }, price: { type: Number, min: 0 } }],
   hasVariants: { type: Boolean, default: false },
+  hasWeights: { type: Boolean, default: false },
   weights: [weightSchema],
   variants: [variantSchema],
   flavors: [{

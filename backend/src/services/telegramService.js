@@ -162,8 +162,8 @@ const sendInternalOrderAlert = (phone, order) => {
     `   Subtotal: ₹${orderObj.subtotal}\n` +
     (orderObj.discount > 0 ? `   Discount: -₹${orderObj.discount}\n` : '') +
     `   Delivery Charge: ₹${orderObj.deliveryCharge}\n` +
-    `   GST (18%): ₹${orderObj.gst}\n` +
-    `   Convenience Fee (2%): ₹${orderObj.convenienceFee}\n` +
+    `   Convenience Fee (2.5%): ₹${orderObj.convenienceFee}\n` +
+    `   GST (18%): Inclusive\n` +
     `   *Grand Total:* ₹${orderObj.total}\n\n` +
     `📅 *Delivery Date:* ${orderObj.deliveryDate ? new Date(orderObj.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
     `⏰ *Delivery Slot:* ${orderObj.deliverySlot || 'N/A'}\n` +

@@ -48,17 +48,39 @@ const AdminProducts = () => {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
+  const [allProducts, setAllProducts] = useState([]);
+
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchMeta = async () => {
       try {
-        const res = await adminService.getCategories({ type: 'ordinary' });
-        setDbCategories(res.data?.data || []);
+        const [catRes, allProdRes] = await Promise.all([
+          adminService.getCategories(),
+          productService.getAll({ limit: 2000, admin: true })
+        ]);
+        setDbCategories(catRes.data?.data || []);
+        setAllProducts(allProdRes.data?.data || []);
       } catch (err) {
         // ignore
       }
     };
-    fetchCategories();
+    fetchMeta();
   }, []);
+
+  const getCategoryCount = useCallback((catName) => {
+    if (!catName) return allProducts.length;
+    const cleanCat = catName.toLowerCase().replace(/[\s_-]/g, '');
+    return allProducts.filter(p => {
+      let cats = [];
+      if (Array.isArray(p.category)) cats = p.category;
+      else if (typeof p.category === 'string') cats = [p.category];
+
+      return cats.some(c => {
+        if (typeof c !== 'string') return false;
+        const baseC = c.toLowerCase().replace(/[\s_-]/g, '');
+        return baseC.includes(cleanCat) || cleanCat.includes(baseC);
+      });
+    }).length;
+  }, [allProducts]);
 
   useEffect(() => { sessionStorage.setItem('adminProductsPage', page); }, [page]);
   useEffect(() => { sessionStorage.setItem('adminProductsCategory', category); }, [category]);
@@ -91,6 +113,32 @@ const AdminProducts = () => {
     return { flavourNames, totalWeights };
   };
 
+  const formatCategoryDisplay = (catInput) => {
+    let raw = [];
+    if (Array.isArray(catInput)) raw = catInput;
+    else if (typeof catInput === 'string') {
+      const trimmed = catInput.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) raw = parsed;
+          else raw = [trimmed];
+        } catch {
+          raw = [trimmed];
+        }
+      } else {
+        raw = [trimmed];
+      }
+    }
+
+    const formatted = raw
+      .map(c => typeof c === 'string' ? c.replace(/\\"/g, '').replace(/"/g, '').trim() : String(c))
+      .filter(Boolean)
+      .map(c => c.split(/[\s_-]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '));
+
+    return formatted.length > 0 ? formatted.join(', ') : '—';
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -101,17 +149,66 @@ const AdminProducts = () => {
         <Link to="/admin/products/create"><Button icon={Plus}>Add Product</Button></Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <SearchInput onSearch={handleSearch} placeholder="Search products..." className="flex-1 max-w-sm" />
-        <select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none capitalize">
-          <option value="">All Categories</option>
-          {dbCategories.map((c) => <option key={c._id} value={(c.name || '').toLowerCase()}>{c.label || c.name.replace(/-/g, ' ')}</option>)}
-        </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value)} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none">
-          <option value="-createdAt">Newest</option>
-          <option value="price-low">Price: Low → High</option>
-          <option value="price-high">Price: High → Low</option>
-        </select>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <SearchInput onSearch={handleSearch} placeholder="Search products..." className="flex-1 max-w-sm" />
+          <select value={category} onChange={(e) => { setCategory(e.target.value); setPage(1); }} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none capitalize font-bold">
+            <option value="">All Categories ({allProducts.length})</option>
+            {dbCategories.map((c) => {
+              const catVal = (c.name || '').toLowerCase();
+              const count = getCategoryCount(catVal);
+              return (
+                <option key={c._id} value={catVal}>
+                  {c.label || c.name.replace(/-/g, ' ')} ({count})
+                </option>
+              );
+            })}
+          </select>
+          <select value={sort} onChange={(e) => setSort(e.target.value)} className="bg-input border border-input-border text-body px-4 py-2.5 rounded-xl focus:outline-none">
+            <option value="-createdAt">Newest</option>
+            <option value="price-low">Price: Low → High</option>
+            <option value="price-high">Price: High → Low</option>
+          </select>
+        </div>
+
+        {/* Category Quick Filter Pills with Counts */}
+        <div className="flex flex-wrap gap-2 pt-1">
+          <button
+            onClick={() => { setCategory(''); setPage(1); }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border ${
+              !category 
+                ? 'bg-primary text-button-text border-primary shadow-sm' 
+                : 'bg-card border-border text-muted hover:text-heading hover:border-primary/40'
+            }`}
+          >
+            <span>All</span>
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${!category ? 'bg-black/20 text-button-text' : 'bg-border/60 text-heading'}`}>
+              {allProducts.length}
+            </span>
+          </button>
+
+          {dbCategories.map(c => {
+            const catVal = (c.name || '').toLowerCase();
+            const count = getCategoryCount(catVal);
+            const isActive = category === catVal;
+            return (
+              <button
+                key={c._id}
+                onClick={() => { setCategory(catVal); setPage(1); }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border capitalize ${
+                  isActive 
+                    ? 'bg-primary text-button-text border-primary shadow-sm' 
+                    : 'bg-card border-border text-muted hover:text-heading hover:border-primary/40'
+                }`}
+              >
+                <span>{c.label || c.name.replace(/-/g, ' ')}</span>
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${isActive ? 'bg-black/20 text-button-text' : 'bg-border/60 text-heading'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? <TableSkeleton rows={6} cols={7} /> : products.length === 0 ? (
@@ -146,7 +243,7 @@ const AdminProducts = () => {
                           <div><p className="font-bold text-heading text-sm">{p.name}</p><p className="text-xs text-muted">{p.slug}</p></div>
                         </div>
                        </td>
-                      <td className="px-4 py-3"><Badge>{p.category}</Badge></td>
+                      <td className="px-4 py-3"><Badge>{formatCategoryDisplay(p.category)}</Badge></td>
                       <td className="px-4 py-3">
                         {p.category === 'cakes' && flavourSummary ? (
                           <div className="flex flex-col gap-1">

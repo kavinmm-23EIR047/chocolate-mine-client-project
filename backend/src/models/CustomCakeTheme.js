@@ -16,6 +16,11 @@ const customCakeThemeSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  basePrice: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   displayOrder: {
     type: Number,
     default: 0

@@ -105,27 +105,30 @@ const ProductVariants = ({
         </div>
       )}
 
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Scale size={16} className="text-primary" />
-          <label className="text-xs font-black text-muted uppercase tracking-widest">Select Weight</label>
-        </div>
+      {/* Select Weight Section */}
+      {(product?.hasWeights === true || (Array.isArray(product?.weights) && product.weights.length > 0) || (Array.isArray(product?.weightPrices) && product.weightPrices.length > 0) || isCake) && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Scale size={16} className="text-primary" />
+            <label className="text-xs font-black text-muted uppercase tracking-widest">Select Weight</label>
+          </div>
 
-        <div className="flex flex-wrap gap-2.5 sm:gap-3">
-          {weights.map((weight, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleWeightChange(weight.value)}
-              className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wide transition-all ${selectedWeight === weight.value
-                ? 'bg-primary text-button-text shadow-lg scale-105'
-                : 'bg-muted/10 text-heading border-2 border-border hover:border-primary/50'
-                }`}
-            >
-              {weight.value}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-2.5 sm:gap-3">
+            {weights.map((weight, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleWeightChange(weight.value)}
+                className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wide transition-all ${selectedWeight === weight.value
+                  ? 'bg-primary text-button-text shadow-lg scale-105'
+                  : 'bg-muted/10 text-heading border-2 border-border hover:border-primary/50'
+                  }`}
+              >
+                {weight.value}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {!isInStock && (
         <div className="text-center py-3 bg-error-light text-error-text border border-error/10 rounded-xl text-xs font-black uppercase tracking-widest">

@@ -199,12 +199,12 @@ const emailService = {
                     <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.deliveryCharge || 0).toFixed(2)}</td>
                   </tr>
                   <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">GST (18%)</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.gst || 0).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">Convenience Fee (2.5%)</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.convenienceFee || 0).toFixed(2)}</td>
                   </tr>
                   <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">Convenience Fee (2%)</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.convenienceFee || 0).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">GST (18%)</td>
+                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #2E7D32; font-weight: 700;">Inclusive</td>
                   </tr>
                   <tr style="background-color: #3C1B13; color: #fff;">
                     <td colspan="2" style="padding: 10px 12px; text-align: right; font-weight: 700; font-size: 13px; color: #fff; border-radius: 0 0 0 8px;">Grand Total</td>

@@ -155,24 +155,6 @@ const FilterSidebar = ({
         : [occasionId]; 
         
       newFilters.occasions = updated;
-
-      // Coordinate anniversary-gift occasion with anniversary category name
-      if (occasionId === 'anniversary-gift') {
-        const currentCat = localFilters.categories || [];
-        const updatedCat = isAlreadyActive
-          ? currentCat.filter(c => c.toLowerCase() !== 'anniversary')
-          : [...currentCat.filter(c => c.toLowerCase() !== 'anniversary'), 'anniversary'];
-        newFilters.categories = updatedCat;
-      }
-
-      // Coordinate birthday-gifts occasion with birthday-cakes category name
-      if (occasionId === 'birthday-gifts') {
-        const currentCat = localFilters.categories || [];
-        const updatedCat = isAlreadyActive
-          ? currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday')
-          : [...currentCat.filter(c => c.toLowerCase() !== 'birthday-cakes' && c.toLowerCase() !== 'birthday'), 'birthday-cakes'];
-        newFilters.categories = updatedCat;
-      }
     }
 
     setLocalFilters(newFilters);
@@ -337,47 +319,57 @@ const FilterSidebar = ({
           </div>
         )}
 
-        {/* Sub Categories Section (Flavours) */}
-        {localFilters.categories?.some(c => c.toLowerCase().includes('birthday cake')) && (
-          <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
-            {renderAccordionHeader('subcategories', 'Flavours')}
-            <AnimatePresence>
-              {expanded.subcategories && (
-                <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
-                  <div className="flex flex-wrap gap-2.5">
-                    {['Vanilla', 'Chocolate', 'Red Velvet'].map((flavor) => {
-                      const isActive = localFilters.subCategory?.toLowerCase() === flavor.toLowerCase();
-                      return (
-                        <button
-                          key={flavor}
-                          onClick={(e) => {
-                            if (e) {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }
-                            const newFilters = { 
-                              ...localFilters, 
-                              subCategory: isActive ? '' : flavor 
-                            };
-                            setLocalFilters(newFilters);
-                            onApply(newFilters);
-                          }}
-                          className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                            isActive 
-                              ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
-                              : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
-                          }`}
-                        >
-                          {flavor}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
+        {/* Sub Categories Section */}
+        {(() => {
+          const selectedCatObjs = categories.filter(c => {
+            const name = typeof c === 'string' ? c : c.name;
+            return (localFilters.categories || []).some(lc => lc.toLowerCase() === (name || '').toLowerCase());
+          });
+          const availableSubCats = [...new Set(selectedCatObjs.flatMap(c => c.subCategories || []))].filter(Boolean);
+
+          if (availableSubCats.length === 0) return null;
+
+          return (
+            <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
+              {renderAccordionHeader('subcategories', 'Subcategories')}
+              <AnimatePresence>
+                {expanded.subcategories && (
+                  <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
+                    <div className="flex flex-wrap gap-2.5">
+                      {availableSubCats.map((subName) => {
+                        const isActive = localFilters.subCategory?.toLowerCase() === subName.toLowerCase();
+                        return (
+                          <button
+                            key={subName}
+                            onClick={(e) => {
+                              if (e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }
+                              const newFilters = { 
+                                ...localFilters, 
+                                subCategory: isActive ? '' : subName 
+                              };
+                              setLocalFilters(newFilters);
+                              onApply(newFilters);
+                            }}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all border capitalize ${
+                              isActive 
+                                ? 'bg-[#EBD1C6] text-[#2C1810] border-transparent' 
+                                : 'bg-[#2A1813] border-[#3A211B] text-white/70 hover:border-[#A18881]/50 hover:text-white'
+                            }`}
+                          >
+                            {subName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })()}
 
         {/* Occasions Section */}
         <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
@@ -456,50 +448,7 @@ const FilterSidebar = ({
           </AnimatePresence>
         </div>
 
-        {/* Price Section */}
-        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
-          <button 
-            onClick={() => toggleSection('price')}
-            className="flex items-center justify-between w-full py-4 px-4 text-left group"
-          >
-            <h3 className="text-sm font-bold uppercase tracking-wider text-[#A18881] group-hover:text-[#EBD1C6] transition-colors">
-              Price — ₹{priceRange.min} - ₹{priceRange.max === 10000 ? '10k+' : priceRange.max}
-            </h3>
-            {expanded.price ? <ChevronUp size={16} className="text-[#A18881]/55" /> : <ChevronDown size={16} className="text-[#A18881]/55" />}
-          </button>
-          
-          <AnimatePresence>
-            {expanded.price && (
-              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-black/30 border border-[#3A211B] rounded-xl p-3.5">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1 block">Min (₹)</label>
-                    <input
-                      type="number"
-                      value={priceRange.min}
-                      onChange={(e) => handlePriceRangeChange('min', e.target.value, e)}
-                      onBlur={handlePriceApply}
-                      onKeyDown={(e) => e.key === 'Enter' && handlePriceApply()}
-                      className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
-                    />
-                  </div>
-                  <span className="text-white/30 text-sm font-bold px-1">—</span>
-                  <div className="flex-1 bg-black/30 border border-[#3A211B] rounded-xl p-3.5">
-                    <label className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1 block">Max (₹)</label>
-                    <input
-                      type="number"
-                      value={priceRange.max}
-                      onChange={(e) => handlePriceRangeChange('max', e.target.value, e)}
-                      onBlur={handlePriceApply}
-                      onKeyDown={(e) => e.key === 'Enter' && handlePriceApply()}
-                      className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+
 
         {/* Sort By Section */}
         <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-2">

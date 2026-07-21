@@ -263,7 +263,44 @@ const ProductDetails = () => {
   const productPrice = Number(product?.price || 0);
   const productOfferPrice = Number(product?.offerPrice || 0);
   const productAvailable = product?.stock !== false;
-  const productCategory = Array.isArray(product?.category) ? product.category.join(' ') : product?.category;
+
+  const formatCatName = (str) => {
+    if (!str) return '';
+    return str.split(/[\s_-]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+  };
+
+  const getCleanCategoryDisplay = () => {
+    let cats = [];
+    if (Array.isArray(product?.category)) cats = product.category;
+    else if (typeof product?.category === 'string') {
+      const trimmed = product.category.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) cats = parsed;
+          else cats = [trimmed];
+        } catch { cats = [trimmed]; }
+      } else { cats = [trimmed]; }
+    }
+
+    const cleanCats = cats
+      .map(c => typeof c === 'string' ? c.replace(/\\"/g, '').replace(/"/g, '').trim() : '')
+      .filter(Boolean)
+      .map(c => formatCatName(c));
+
+    const mainCategoryStr = cleanCats.join(', ') || 'Cakes';
+
+    let subCategoryStr = '';
+    if (product?.subCategory && typeof product.subCategory === 'string' && product.subCategory.trim()) {
+      const cleanSub = product.subCategory.replace(/\\"/g, '').replace(/"/g, '').trim();
+      if (cleanSub) subCategoryStr = formatCatName(cleanSub);
+    }
+
+    return { main: mainCategoryStr, sub: subCategoryStr };
+  };
+
+  const displayCategoryObj = getCleanCategoryDisplay();
+  const productCategory = displayCategoryObj.main;
 
   const currentVariantFlavor = isCake
     ? (showCustomFlavorInput ? customFlavor : selectedFlavor?.name)
@@ -500,19 +537,25 @@ const ProductDetails = () => {
           <div className="w-full lg:sticky lg:top-24 space-y-4 px-1 lg:px-0">
             <div className="bg-card rounded-[2rem] sm:rounded-[2.5rem] border border-border/50 p-5 sm:p-10 shadow-card hover:shadow-premium transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] font-black text-primary uppercase bg-primary/5 px-4 py-1.5 rounded-full tracking-widest border border-primary/10">
-                  {productCategory}
+                <span className="text-[11px] font-black text-primary uppercase bg-primary/5 px-4 py-1.5 rounded-full tracking-widest border border-primary/10 flex items-center gap-1.5">
+                  {displayCategoryObj.main} {displayCategoryObj.sub ? `• ${displayCategoryObj.sub}` : ''}
                 </span>
                 <button className="p-2.5 text-muted hover:text-primary transition-colors bg-card-soft rounded-full border border-border/40 shadow-soft"><Share2 size={18} /></button>
               </div>
 
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{productName}</h1>
 
-              {String(productCategory || '').toLowerCase().includes('cake') && (
-                <div className="mb-4 flex flex-wrap items-center gap-2">
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                {String(productCategory || '').toLowerCase().includes('cake') && (
                   <PureVegBadge className="px-3 py-2 rounded-full" />
-                </div>
-              )}
+                )}
+                {displayCategoryObj.sub && (
+                  <span className="px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                    <Sparkles size={13} className="text-amber-500 animate-pulse" />
+                    Flavour: {displayCategoryObj.sub}
+                  </span>
+                )}
+              </div>
 
               <div className="flex items-center gap-4 mb-8">
                 <div className="flex items-center gap-1.5 bg-success text-button-text px-3 py-1 rounded-xl text-xs font-black shadow-sm">

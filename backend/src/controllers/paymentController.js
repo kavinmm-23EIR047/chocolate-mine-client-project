@@ -77,9 +77,9 @@ const computePricing = ({ cartItems, addressLat, addressLng, discount = 0, payme
     deliveryCharge = Math.round(distance * 10);
   }
   
-  const convenienceFee = Math.round(subtotal * 0.02);
-  const gst = Math.round(subtotal * 0.18);
-  const total = subtotal + deliveryCharge + convenienceFee + gst - (Number(discount) || 0);
+  const convenienceFee = Math.round(subtotal * 0.025);
+  const gst = 0; // Product prices are inclusive of 18% GST (no extra GST line item added)
+  const total = subtotal + deliveryCharge + convenienceFee - (Number(discount) || 0);
   
   return { subtotal, deliveryCharge, convenienceFee, gst, total };
 };

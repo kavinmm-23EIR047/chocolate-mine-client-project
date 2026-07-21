@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Upload, X, Star, Award, CheckCircle, Plus, Trash2, Image, Settings, Package } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Star, Award, CheckCircle, Plus, Trash2, Image, Settings, Package, Scale } from 'lucide-react';
 import productService from '../../services/productService';
 import adminService from '../../services/adminService';
 import Button from '../../components/ui/Button';
@@ -52,6 +52,7 @@ const ProductForm = () => {
     bestseller: false,
     isActive: true,
     hasVariants: false,
+    hasWeights: false,
     allowCustomFlavor: false,
     allowCustomWeight: false,
     coupon: {
@@ -81,12 +82,11 @@ const ProductForm = () => {
   
   const blobUrlsRef = useRef([]);
 
-  // Fetch categories and occasions on mount
   useEffect(() => {
     const fetchMeta = async () => {
       try {
         const [catRes, occRes] = await Promise.all([
-          adminService.getCategories({ type: 'ordinary' }),
+          adminService.getCategories(),
           adminService.getOccasions()
         ]);
         setCategories(catRes.data.data || []);
@@ -120,6 +120,7 @@ const ProductForm = () => {
             bestseller: p.bestseller || false,
             isActive: p.isActive !== false,
             hasVariants: p.hasVariants || false,
+            hasWeights: p.hasWeights || (Array.isArray(p.weights) && p.weights.length > 0) || (Array.isArray(p.weightPrices) && p.weightPrices.length > 0) || (Array.isArray(p.category) && p.category.some(c => typeof c === 'string' && (c.toLowerCase().includes('bento') || c.toLowerCase().includes('cake')))),
             allowCustomFlavor: p.allowCustomFlavor || false,
             allowCustomWeight: p.allowCustomWeight || false,
             coupon: {
@@ -580,7 +581,7 @@ const ProductForm = () => {
                       value={formData.price} 
                       onChange={handleChange} 
                       required 
-                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
+                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -590,7 +591,7 @@ const ProductForm = () => {
                       type="number" 
                       value={formData.offerPrice} 
                       onChange={handleChange} 
-                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold"
+                      className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-secondary outline-none font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
@@ -635,8 +636,42 @@ const ProductForm = () => {
               </div>
             </div>
 
+            {/* Enable / Disable Weight Options Card */}
+            <div className="card-premium p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-black text-heading uppercase tracking-widest text-sm flex items-center gap-2">
+                    <Scale size={18} className="text-primary" />
+                    Weight Options & Pricing
+                  </h3>
+                  <p className="text-xs text-muted">Enable weight selections (500g, 1kg, 2kg, etc.) for products like cakes or chocolates by weight.</p>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="hasWeights"
+                    checked={formData.hasWeights}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setFormData(prev => ({
+                        ...prev,
+                        hasWeights: checked,
+                        hasVariants: checked
+                      }));
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  <span className={`ml-3 text-xs font-black uppercase ${formData.hasWeights ? 'text-primary' : 'text-muted'}`}>
+                    {formData.hasWeights ? 'Enabled' : 'Disabled'}
+                  </span>
+                </label>
+              </div>
+            </div>
+
             {/* Cake-specific Variant Section with Multiple Images */}
-            {formData.category.some(c => c.includes('bento')) && (
+            {(formData.hasWeights || formData.category.some(c => c.includes('bento'))) && (
               <div className="card-premium p-6 space-y-6">
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <h3 className="font-black text-heading uppercase tracking-widest text-sm">

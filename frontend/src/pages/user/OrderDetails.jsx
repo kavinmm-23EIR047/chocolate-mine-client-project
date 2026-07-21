@@ -425,9 +425,11 @@ const OrderDetails = () => {
               <p className="font-black">{order.address?.fullName}</p>
               <p className="text-sm">{order.address?.phone}</p>
               <p className="text-sm text-muted mt-2">
-                {order.address?.houseNo}, {order.address?.street}
+                {order.address?.houseNo && `${order.address.houseNo}, `}
+                {order.address?.street}
+                {order.address?.landmark && <><br />Landmark: {order.address.landmark}</>}
                 <br />
-                {order.address?.city}, {order.address?.pincode}
+                <span className="font-bold text-heading">Pincode: {order.address?.pincode || '641001'}</span>
               </p>
               {order.deliverySlot && (
                 <p className="text-xs text-muted mt-2">
@@ -463,13 +465,13 @@ const OrderDetails = () => {
               </div>
 
               <div className="flex justify-between">
-                <span className="text-muted">GST (18%)</span>
-                <span>{formatCurrency(order.gst)}</span>
+                <span className="text-muted">Convenience Fee (2.5%)</span>
+                <span>{formatCurrency(order.convenienceFee)}</span>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-muted">Convenience Fee</span>
-                <span>{formatCurrency(order.convenienceFee)}</span>
+              <div className="flex justify-between text-xs text-muted/70">
+                <span>GST (18%)</span>
+                <span className="text-success-text font-bold">Included in Product Price</span>
               </div>
 
               <div className="border-t pt-3 mt-2 flex justify-between font-black text-lg">

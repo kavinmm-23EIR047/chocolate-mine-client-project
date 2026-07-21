@@ -46,14 +46,9 @@ const applyCoupon = (product) => {
   return { code, finalPrice, saved, discountText: type === 'percent' ? `${value}% OFF` : `Save ₹${saved}` };
 };
 function getBaseFilterPattern(term) {
-  const lower = term.toLowerCase();
-  if (lower.includes('anniversary')) {
-    return 'anniversary';
-  }
-  if (lower.includes('birthday')) {
-    return 'birthday';
-  }
-  return lower.replace(/-/g, '[\\s-]*');
+  if (!term) return '';
+  const lower = term.toLowerCase().trim();
+  return lower.replace(/[\s_-]+/g, '[\\s_-]*');
 }
 
 exports.getProducts = asyncHandler(async (req, res) => {
@@ -90,20 +85,20 @@ exports.getProducts = asyncHandler(async (req, res) => {
     });
   }
   if (category) {
-    const categoriesList = category.split(',').map(c => c.trim());
+    const categoriesList = category.split(',').map(c => c.trim()).filter(Boolean);
     const regexPattern = categoriesList.map(c => getBaseFilterPattern(c)).join('|');
     query.$and = query.$and || [];
     query.$and.push({
       $or: [
         { category: { $regex: regexPattern, $options: 'i' } },
+        { subCategory: { $regex: regexPattern, $options: 'i' } },
         { occasion: { $regex: regexPattern, $options: 'i' } }
       ]
     });
   }
   if (subCategory) {
     const subCatLower = subCategory.toLowerCase();
-    // Replace spaces or hyphens with a regex that matches either, to handle "red velvet" vs "red-velvet"
-    const regexPattern = subCatLower.split(/[\s-]+/).join('[\\s-]+');
+    const regexPattern = subCatLower.replace(/[\s_-]+/g, '[\\s_-]*');
     
     query.$and = query.$and || [];
     query.$and.push({
@@ -168,15 +163,47 @@ exports.getProducts = asyncHandler(async (req, res) => {
     .skip((page - 1) * limit)
     .limit(parseInt(limit));
 
+  const BENTO_FLAVOR_PRICES = {
+    'White Forest': 380,
+    'Butterscotch': 390,
+    'Rose Milk': 410,
+    'Honey & Almond': 410,
+    'Black Forest': 380,
+    'Choco Fudge': 390,
+    'Choco Truffle': 410,
+    'Choco Oreo': 410,
+    'Choco Caramel': 420,
+    'Death by Chocolate': 450,
+    'Red Velvet': 470,
+    'Lotus Biscoff': 480,
+    'Choco Pistachio': 480,
+  };
+
+  const getFlavorPriceHelper = (flavor) => {
+    if (!flavor) return 0;
+    if (flavor.price && Number(flavor.price) > 0) return Number(flavor.price);
+    if (flavor.name && BENTO_FLAVOR_PRICES[flavor.name]) return BENTO_FLAVOR_PRICES[flavor.name];
+    return 0;
+  };
+
   const products = rawProducts.map(p => {
     const couponData = applyCoupon(p);
     const productObj = p.toObject();
+    
+    const isBento = Array.isArray(p.category) ? p.category.some(c => typeof c === 'string' && c.toLowerCase().includes('bento')) : (p.category || '').toLowerCase().includes('bento');
+
+    let defaultFlavorPrice = 0;
+    if (p.flavors && Array.isArray(p.flavors) && p.flavors.length > 0) {
+      defaultFlavorPrice = getFlavorPriceHelper(p.flavors[0]);
+    } else if (isBento) {
+      defaultFlavorPrice = 380;
+    }
     
     let sellingPrice;
     if (p.hasVariants && p.variants && p.variants.length > 0) {
       sellingPrice = p.variants[0].price;
     } else {
-      sellingPrice = (p.offerPrice && p.offerPrice < p.price) ? p.offerPrice : p.price;
+      sellingPrice = ((p.offerPrice && p.offerPrice < p.price) ? p.offerPrice : p.price) + defaultFlavorPrice;
     }
 
     return {
@@ -343,17 +370,20 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   
   // FIX: Normalize boolean fields first (critical for CastError fix)
   body.hasVariants = normalizeBoolean(body.hasVariants);
+  body.hasWeights = normalizeBoolean(body.hasWeights);
   body.allowCustomFlavor = normalizeBoolean(body.allowCustomFlavor);
   body.allowCustomWeight = normalizeBoolean(body.allowCustomWeight);
   
-  // FIX: Normalize category to lowercase and trim (for dynamic category support)
+  // FIX: Normalize category to lowercase and trim (filter out empty strings)
   if (body.category) {
     if (Array.isArray(body.category)) {
-      body.category = body.category.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c);
+      body.category = body.category.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c).filter(c => typeof c === 'string' && c.length > 0);
     } else if (typeof body.category === 'string') {
       try {
         const parsed = JSON.parse(body.category);
-        body.category = Array.isArray(parsed) ? parsed.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c) : [parsed.trim().toLowerCase()];
+        body.category = Array.isArray(parsed) 
+          ? parsed.map(c => typeof c === 'string' ? c.trim().toLowerCase() : c).filter(c => typeof c === 'string' && c.length > 0) 
+          : (parsed && String(parsed).trim() ? [String(parsed).trim().toLowerCase()] : []);
       } catch (e) {
         body.category = body.category.split(',').map(c => c.trim().toLowerCase()).filter(Boolean);
       }
@@ -516,8 +546,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   
   // FIX: Normalize boolean fields first (critical for CastError fix)
   const hasVariants = normalizeBoolean(body.hasVariants);
+  const hasWeights = normalizeBoolean(body.hasWeights);
   const allowCustomFlavor = normalizeBoolean(body.allowCustomFlavor);
   const allowCustomWeight = normalizeBoolean(body.allowCustomWeight);
+  if (body.hasWeights !== undefined) body.hasWeights = hasWeights;
   
   // FIX: Normalize category to lowercase and trim (for dynamic category support)
   if (body.category !== undefined) {

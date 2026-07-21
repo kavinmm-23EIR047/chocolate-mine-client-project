@@ -45,6 +45,26 @@ exports.uploadImage = async (input, folder = 'general') => {
 };
 
 /**
+ * Upload image buffer directly to Cloudinary using streams
+ * @param {Buffer} buffer - The image buffer
+ * @param {string} folder - Folder name
+ * @returns {Promise<{secure_url: string, public_id: string}|null>}
+ */
+exports.uploadBuffer = async (buffer, folder = 'general', mimetype = 'image/png') => {
+  try {
+    if (!buffer) {
+      logger.error('No image buffer provided');
+      return null;
+    }
+    const dataUri = `data:${mimetype};base64,${buffer.toString('base64')}`;
+    return await exports.uploadImage(dataUri, folder);
+  } catch (err) {
+    logger.error('Cloudinary Buffer Upload Error:', err.message);
+    return null;
+  }
+};
+
+/**
  * Delete image from Cloudinary
  * @param {string} publicId - The public_id of the image to delete
  * @returns {Promise<boolean>}

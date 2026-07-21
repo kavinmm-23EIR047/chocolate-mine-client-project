@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const CustomCakeTheme = require('../models/CustomCakeTheme');
 const CustomCakeColor = require('../models/CustomCakeColor');
 const CustomCakeThemeColor = require('../models/CustomCakeThemeColor');
@@ -31,7 +32,6 @@ exports.updateFlavour = asyncHandler(async (req, res, next) => {
 
 exports.deleteFlavour = asyncHandler(async (req, res, next) => {
   const flavour = await CustomCakeFlavor.findByIdAndDelete(req.params.id);
-  if (!flavour) return next(new AppError('Flavour not found', 404));
   res.status(204).json({ status: 'success', data: null });
 });
 
@@ -78,14 +78,73 @@ exports.getThemes = asyncHandler(async (req, res) => {
   res.status(200).json({ status: 'success', data: formattedThemes });
 });
 
+const sanitizeThemeData = (data) => {
+  const themeData = { ...data };
+
+  if (themeData.basePrice !== undefined) {
+    themeData.basePrice = Math.max(0, parseFloat(themeData.basePrice) || 0);
+  }
+  if (themeData.displayOrder !== undefined) {
+    themeData.displayOrder = parseInt(themeData.displayOrder) || 0;
+  }
+
+  if (themeData.tiers) {
+    ['tier1', 'tier2', 'tier3'].forEach(tier => {
+      if (themeData.tiers[tier]) {
+        themeData.tiers[tier] = {
+          isActive: Boolean(themeData.tiers[tier].isActive),
+          price: Math.max(0, parseFloat(themeData.tiers[tier].price) || 0)
+        };
+      } else {
+        themeData.tiers[tier] = { isActive: tier === 'tier1', price: 0 };
+      }
+    });
+  }
+
+  if (Array.isArray(themeData.flavors)) {
+    themeData.flavors = themeData.flavors.map(f => ({
+      name: f.name || 'Default Flavor',
+      category: f.category || 'General',
+      isActive: f.isActive !== false,
+      weights: Array.isArray(f.weights) && f.weights.length > 0 
+        ? f.weights.map(w => ({ kg: parseFloat(w.kg) || 1, price: Math.max(0, parseFloat(w.price) || 0) }))
+        : [{ kg: 1, price: 0 }]
+    }));
+  }
+
+  if (Array.isArray(themeData.colors)) {
+    themeData.colors = themeData.colors.map(c => {
+      const { _id, ...rest } = c;
+      const cleanColor = {
+        ...rest,
+        name: c.name || 'Custom Color',
+        hexCode: c.hexCode || '',
+        price: Math.max(0, parseFloat(c.price) || 0),
+        isActive: c.isActive !== false,
+        images: {
+          tier1: c.images?.tier1 || null,
+          tier2: c.images?.tier2 || null,
+          tier3: c.images?.tier3 || null
+        }
+      };
+      if (_id && mongoose.Types.ObjectId.isValid(_id)) {
+        cleanColor._id = _id;
+      }
+      return cleanColor;
+    });
+  }
+
+  return themeData;
+};
+
 exports.createTheme = asyncHandler(async (req, res, next) => {
-  const themeData = { ...req.body };
+  const themeData = sanitizeThemeData(req.body);
   
   if (!themeData.flavors || themeData.flavors.length === 0) {
     const activeFlavors = await CustomCakeFlavor.find({ isActive: true });
     themeData.flavors = activeFlavors.map(f => ({
       name: f.name,
-      category: f.category,
+      category: f.category || 'General',
       weights: f.weights,
       isActive: f.isActive
     }));
@@ -107,14 +166,14 @@ exports.createTheme = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateTheme = asyncHandler(async (req, res, next) => {
-  const theme = await CustomCakeTheme.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const sanitized = sanitizeThemeData(req.body);
+  const theme = await CustomCakeTheme.findByIdAndUpdate(req.params.id, sanitized, { new: true, runValidators: true });
   if (!theme) return next(new AppError('Theme not found', 404));
   res.status(200).json({ status: 'success', data: theme });
 });
 
 exports.deleteTheme = asyncHandler(async (req, res, next) => {
   const theme = await CustomCakeTheme.findByIdAndDelete(req.params.id);
-  if (!theme) return next(new AppError('Theme not found', 404));
   await CustomCakeThemeColor.deleteMany({ themeId: req.params.id });
   res.status(204).json({ status: 'success', data: null });
 });
@@ -224,11 +283,9 @@ exports.updateThemeColorImages = asyncHandler(async (req, res, next) => {
     color.price = parseFloat(req.body.price) || 0;
   }
 
-  const uploadFile = async (fileBuffer, mimetype) => {
-    const b64 = Buffer.from(fileBuffer).toString('base64');
-    const dataUri = `data:${mimetype};base64,${b64}`;
-    const uploaded = await cloudinaryService.uploadImage(dataUri, 'custom-cakes');
-    if (!uploaded) throw new Error('Image upload failed');
+  const uploadFile = async (file) => {
+    const uploaded = await cloudinaryService.uploadBuffer(file.buffer, 'custom-cakes', file.mimetype);
+    if (!uploaded) throw new Error('Image upload failed via buffer');
     return uploaded.secure_url;
   };
 
@@ -241,7 +298,7 @@ exports.updateThemeColorImages = asyncHandler(async (req, res, next) => {
   const tryUploadTier = async (tierKey, fileField) => {
     const file = req.files?.[fileField]?.[0];
     if (file) {
-      color.images[tierKey] = await uploadFile(file.buffer, file.mimetype);
+      color.images[tierKey] = await uploadFile(file);
       return;
     }
 
@@ -259,9 +316,19 @@ exports.updateThemeColorImages = asyncHandler(async (req, res, next) => {
     return next(new AppError('Failed to upload images: ' + error.message, 500));
   }
 
-  theme.markModified('colors');
-  await theme.save();
-  res.status(200).json({ status: 'success', data: color });
+  const updatedTheme = await CustomCakeTheme.findOneAndUpdate(
+    { _id: req.params.id, 'colors._id': req.params.colorId },
+    {
+      $set: {
+        'colors.$.price': color.price,
+        'colors.$.images': color.images
+      }
+    },
+    { new: true, runValidators: true }
+  );
+
+  const updatedColor = updatedTheme.colors.id(req.params.colorId);
+  res.status(200).json({ status: 'success', data: updatedColor });
 });
 
 exports.applyThemeColorToAll = asyncHandler(async (req, res, next) => {
@@ -307,7 +374,6 @@ exports.updateColor = asyncHandler(async (req, res, next) => {
 
 exports.deleteColor = asyncHandler(async (req, res, next) => {
   const color = await CustomCakeColor.findByIdAndDelete(req.params.id);
-  if (!color) return next(new AppError('Color not found', 404));
   await CustomCakeThemeColor.deleteMany({ colorId: req.params.id });
   res.status(204).json({ status: 'success', data: null });
 });
@@ -384,23 +450,4 @@ exports.deleteThemeColor = asyncHandler(async (req, res, next) => {
   res.status(204).json({ status: 'success', data: null });
 });
 
-// --- SEED DEFAULTS ---
-exports.seedDefaults = asyncHandler(async (req, res) => {
-  // Seed Default Colors
-  const defaultColors = [
-    { name: 'Vanilla', hexCode: '#F3E5AB' },
-    { name: 'Chocolate', hexCode: '#7B3F00' },
-    { name: 'Rose Strawberry', hexCode: '#FFC0CB' },
-    { name: 'Pistachio', hexCode: '#93C572' },
-    { name: 'Blue', hexCode: '#0000FF' }
-  ];
-  
-  for (const color of defaultColors) {
-    const exists = await CustomCakeColor.findOne({ name: color.name });
-    if (!exists) {
-      await CustomCakeColor.create(color);
-    }
-  }
 
-  res.status(200).json({ status: 'success', message: 'Defaults seeded successfully' });
-});

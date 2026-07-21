@@ -191,24 +191,45 @@ export default function CustomCake() {
   // ── DERIVED ────────────────────────────────────────────────
   const filteredThemes = useMemo(() => {
     let result = dbThemes
-      .filter(t => !selectedTier || (t.tiers && t.tiers[`tier${selectedTier}`]?.isActive))
-      .filter(t => !themeSearchFilter || t.name.toLowerCase().includes(themeSearchFilter.toLowerCase()))
-      .filter(t => !categoryFilter || (t.category && t.category.some(c => c.toLowerCase().includes(categoryFilter.toLowerCase()))))
+      .filter(t => {
+        if (!selectedTier) return true;
+        const numTier = Number(selectedTier);
+        if (!t.tiers || Object.keys(t.tiers).length === 0) {
+          return numTier === 1;
+        }
+        return Boolean(t.tiers[`tier${numTier}`]?.isActive);
+      })
+      .filter(t => {
+        if (!themeSearchFilter) return true;
+        const q = themeSearchFilter.toLowerCase().trim();
+        return (t.name || '').toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q);
+      })
+      .filter(t => {
+        if (!categoryFilter) return true;
+        const targetCat = categoryFilter.toLowerCase().trim();
+        if (!t.category || t.category.length === 0) return false;
+        return t.category.some(c => c.toLowerCase().trim() === targetCat || c.toLowerCase().trim().includes(targetCat));
+      })
       .map(t => {
-        const mappedFlavors = (t.colors || []).filter(c => c.isActive).map(c => {
-          let imgUrl = c.images?.[`tier${selectedTier || 1}`] || c.images?.tier1;
-          if (!imgUrl) imgUrl = c.images?.tier2 || c.images?.tier3;
-          return {
-            id: c._id,
-            name: c.name,
-            hexCode: c.hexCode || '#fff',
-            image: imgUrl,
-            price: c.price || 0,
-            bg: c.hexCode || '#fff'
-          };
-        });
+        const activeTiers = [1, 2, 3].filter(num => !t.tiers || Object.keys(t.tiers).length === 0 ? num === 1 : t.tiers[`tier${num}`]?.isActive);
+        const effectiveTier = Number(selectedTier) || activeTiers[0] || 1;
 
-        const basePrice = Math.round((1120) + (mappedFlavors[0]?.price || 0) + (t.tiers?.tier1?.price || 0));
+        const mappedFlavors = (t.colors || [])
+          .filter(c => c.isActive && Boolean(c.images?.tier1 || c.images?.tier2 || c.images?.tier3))
+          .map(c => {
+            let imgUrl = c.images?.[`tier${effectiveTier}`] || c.images?.tier2 || c.images?.tier1 || c.images?.tier3;
+            return {
+              id: c._id,
+              name: c.name,
+              hexCode: c.hexCode || '#fff',
+              image: imgUrl,
+              price: c.price || 0,
+              bg: c.hexCode || '#fff'
+            };
+          });
+
+        const tierAdjustmentPrice = t.tiers?.[`tier${effectiveTier}`]?.price || 0;
+        const basePrice = Math.round((1120) + (mappedFlavors[0]?.price || 0) + tierAdjustmentPrice);
 
         return {
           id: t._id,
@@ -221,7 +242,8 @@ export default function CustomCake() {
           flavors: mappedFlavors,
           dbFlavors: (t.flavors || []).filter(f => f.isActive),
           bg: mappedFlavors[0]?.bg || '#fefefe',
-          tiers: selectedTier ? [selectedTier] : [1, 2, 3].filter(num => t.tiers && t.tiers[`tier${num}`]?.isActive),
+          tiers: activeTiers,
+          defaultTier: effectiveTier,
           emoji: '🎂',
           tierPricing: t.tiers,
           basePrice
@@ -245,7 +267,8 @@ export default function CustomCake() {
 
   const theme = themeIdx !== null ? filteredThemes[themeIdx] : null;
   const weight = WEIGHTS[weightIdx];
-  const currentTier = getTierById(selectedTier || 1);
+  const activeTierNumber = selectedTier || theme?.defaultTier || theme?.tiers?.[0] || 1;
+  const currentTier = getTierById(activeTierNumber);
 
   useEffect(() => {
     // Set Visual Color

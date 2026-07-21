@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { FreeMode } from 'swiper/modules';
+import { FreeMode, Navigation } from 'swiper/modules';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
   Star, Heart, ChevronDown, Settings2, Search, X
@@ -9,6 +9,7 @@ import {
 import PureVegIcon from '../assets/pure veg.webp';
 import 'swiper/css';
 import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
 
 const VegIcon = () => (
   <img src={PureVegIcon} alt="Pure Veg" className="inline-block flex-shrink-0 w-4 h-4" style={{ marginTop: '-1px' }} />
@@ -89,46 +90,34 @@ export default function CustomCakeDetail({
         <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">100% Pure Veg & Eggless</span>
       </div>
 
-      {/* ── TICK-BASED BENTO CAKE STYLE FLAVOUR SELECTION ── */}
+      {/* ── DROPDOWN FLAVOUR SELECTION ── */}
       <div className="space-y-2">
         <label className="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
           Inside Cake Flavour <span className="text-red-500">*</span>
         </label>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[280px] overflow-y-auto pr-1">
-          {theme && theme.dbFlavors && theme.dbFlavors.map(flavor => {
-            const isSelected = selectedDbFlavor?._id === flavor._id;
-            const weightVal = parseFloat(weight?.label || '1');
-            const wObj = flavor.weights?.find(x => x.kg === weightVal);
-            const priceVal = wObj ? wObj.price : (flavor.weights?.find(x => x.kg === 1)?.price || 1120);
+        <div className="relative">
+          <select
+            value={selectedDbFlavor?._id || ''}
+            onChange={(e) => {
+              const selected = theme?.dbFlavors?.find(f => f._id === e.target.value);
+              if (selected) setSelectedDbFlavor(selected);
+            }}
+            className="w-full appearance-none bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] cursor-pointer pr-8 font-bold"
+          >
+            {theme && theme.dbFlavors && theme.dbFlavors.map(flavor => {
+              const weightVal = parseFloat(weight?.label || '1');
+              const wObj = flavor.weights?.find(x => x.kg === weightVal);
+              const priceVal = wObj ? wObj.price : (flavor.weights?.find(x => x.kg === 1)?.price || 1120);
 
-            return (
-              <button
-                key={flavor._id}
-                type="button"
-                onClick={() => setSelectedDbFlavor(flavor)}
-                className={`p-3 rounded-xl border-2 text-left transition-all flex flex-col justify-between relative ${
-                  isSelected 
-                    ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-sm' 
-                    : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/40'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-1 mb-1">
-                  <span className={`text-xs font-black truncate leading-tight ${isSelected ? 'text-[var(--primary)]' : 'text-[var(--heading)]'}`}>
-                    {flavor.name}
-                  </span>
-                  {isSelected && (
-                    <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--background)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check size={10} strokeWidth={3} />
-                    </span>
-                  )}
-                </div>
-                <span className={`text-[10px] font-bold ${isSelected ? 'text-[var(--primary)] font-black' : 'text-[var(--muted)]'}`}>
-                  +₹{priceVal}
-                </span>
-              </button>
-            );
-          })}
+              return (
+                <option key={flavor._id} value={flavor._id}>
+                  {flavor.name} (+₹{priceVal})
+                </option>
+              );
+            })}
+          </select>
+          <ChevronDown size={13} className="absolute right-2.5 top-3 text-[var(--muted)] pointer-events-none" />
         </div>
       </div>
 
@@ -297,16 +286,18 @@ export default function CustomCakeDetail({
                   <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">{theme.flavors.length} Colors</span>
                 </div>
                 <Swiper
-                  modules={[FreeMode]}
+                  modules={[FreeMode, Navigation]}
                   freeMode
+                  navigation
+                  centeredSlides={false}
                   slidesPerView="auto"
                   spaceBetween={8}
-                  className="!overflow-visible"
+                  className="custom-cake-colors-swiper"
                 >
                   {theme.flavors.map(flavor => {
                     const isSel = selectedFlavor?.id === flavor.id;
                     return (
-                      <SwiperSlide key={flavor.id} style={{ width: 'auto' }}>
+                      <SwiperSlide key={flavor.id} className="!w-auto !flex-shrink-0">
                         <button
                           onClick={() => setSelectedFlavor(flavor)}
                           className={`relative w-[85px] lg:w-[90px] flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${isSel ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/20' : 'border-[var(--border)]'}`}

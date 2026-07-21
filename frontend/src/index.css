@@ -546,6 +546,49 @@ h6 {
   @apply bg-muted opacity-50 !important;
 }
 
+.custom-cake-colors-swiper {
+  overflow: hidden !important;
+  position: relative;
+  padding: 0 30px !important;
+}
+
+.custom-cake-colors-swiper .swiper-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+.custom-cake-colors-swiper .swiper-slide {
+  width: auto !important;
+  flex-shrink: 0 !important;
+  position: relative;
+}
+
+.custom-cake-colors-swiper .swiper-slide > button {
+  min-width: 85px;
+}
+
+.custom-cake-colors-swiper .swiper-button-next,
+.custom-cake-colors-swiper .swiper-button-prev {
+  width: 24px !important;
+  height: 24px !important;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  top: 40% !important;
+}
+
+.custom-cake-colors-swiper .swiper-button-next::after,
+.custom-cake-colors-swiper .swiper-button-prev::after {
+  font-size: 10px !important;
+  font-weight: 900;
+  color: var(--heading);
+}
+
+.custom-cake-colors-swiper .swiper-button-disabled {
+  opacity: 0.3 !important;
+}
+
 .swiper-pagination-bullet-active {
   width: 18px !important;
   height: 6px !important;

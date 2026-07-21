@@ -14,8 +14,8 @@ router.get('/theme-colors', customCakeController.getThemeColors);
 // Protected admin routes
 router.use(protect, restrictTo('admin'));
 
-// Seed defaults
-router.post('/seed-defaults', customCakeController.seedDefaults);
+
+
 
 // Flavours (Admin)
 router.post('/flavours', customCakeController.createFlavour);

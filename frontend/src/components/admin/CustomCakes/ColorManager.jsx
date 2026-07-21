@@ -75,27 +75,10 @@ const ColorManager = () => {
     try {
       await adminService.deleteCustomCakeColor(id);
       toast.success('Color deleted successfully');
+      setColors(prev => prev.filter(c => c._id !== id));
       fetchColors();
     } catch (err) {
       toast.error('Delete failed');
-    }
-  };
-
-  const handleSeedDefaults = async () => {
-    try {
-      setSaving(true);
-      const defaultColors = ['Vanilla', 'Chocolate', 'Rose Strawberry', 'Pistachio', 'Blue'];
-      for (let color of defaultColors) {
-        if (!colors.find(c => c.name === color)) {
-          await adminService.createCustomCakeColor({ name: color, isActive: true });
-        }
-      }
-      toast.success('Default colors seeded!');
-      fetchColors();
-    } catch (error) {
-      toast.error('Error seeding colors');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -106,9 +89,7 @@ const ColorManager = () => {
       <div className="flex justify-between items-center">
         <h3 className="font-black text-heading text-lg">Manage Colors</h3>
         <div className="flex gap-2">
-          <button onClick={handleSeedDefaults} disabled={saving} className="border border-primary text-primary px-4 py-2 rounded-xl font-black text-sm uppercase hover:bg-primary/5">
-            Seed Defaults
-          </button>
+
           <button onClick={() => { resetForm(); setShowForm(true); }} className="flex items-center gap-2 bg-primary text-button-text px-4 py-2 rounded-xl font-black text-sm uppercase hover:brightness-110">
             <Plus size={16} /> Add Color
           </button>

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Check, X, Image as ImageIcon, Plus, Edit2, Trash2, UploadCloud } from 'lucide-react';
 import adminService from '../../../services/adminService';
 import toast from 'react-hot-toast';
-import ThemeColorManager from './ThemeColorManager';
-import ThemeFlavourManager from './ThemeFlavourManager';
+
 
 const ThemeBuilder = ({ themeId, onBack }) => {
   const [theme, setTheme] = useState({
@@ -25,17 +24,17 @@ const ThemeBuilder = ({ themeId, onBack }) => {
   const [categories, setCategories] = useState([]);
 
   const [globalColors, setGlobalColors] = useState([]);
+  const [globalFlavours, setGlobalFlavours] = useState([]);
   const [themeColors, setThemeColors] = useState([]); // Kept for backwards-compatible loading of old colors if needed
 
   const [pendingColorMappings, setPendingColorMappings] = useState({});
-  const [editingMappingIndex, setEditingMappingIndex] = useState(null);
+  const [editingMappingName, setEditingMappingName] = useState(null);
+  const [editingFlavourName, setEditingFlavourName] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  // Modals for global management
-  const [showColorModal, setShowColorModal] = useState(false);
-  const [showFlavourModal, setShowFlavourModal] = useState(false);
+
 
   useEffect(() => {
     loadData();
@@ -44,15 +43,18 @@ const ThemeBuilder = ({ themeId, onBack }) => {
   const loadData = async () => {
     try {
       setLoading(true);
-      await adminService.seedCustomCakeDefaults(); // Ensure defaults exist
       
-      const [colorsRes, categoriesRes] = await Promise.all([
+      const [colorsRes, categoriesRes, flavoursRes] = await Promise.all([
         adminService.getCustomCakeColors(),
-        adminService.getCategories({ type: 'custom' })
+        adminService.getCategories({ type: 'custom' }),
+        adminService.getCustomCakeFlavours()
       ]);
 
+      const loadedColors = colorsRes.data?.data || [];
+      const loadedFlavours = flavoursRes.data?.data || [];
       setCategories(categoriesRes.data?.data || []);
-      setGlobalColors(colorsRes.data?.data || []);
+      setGlobalColors(loadedColors);
+      setGlobalFlavours(loadedFlavours);
 
       if (themeId) {
         const themesRes = await adminService.getCustomCakeThemes();
@@ -67,10 +69,10 @@ const ThemeBuilder = ({ themeId, onBack }) => {
           setThemeColors(existingTheme.colors || []);
         }
       } else {
-        // Clean initial state for new theme - colors and flavors added as configured by admin
+        // New theme: auto-select all flavours by default, colors start empty until selected/configured
         setTheme(prev => ({
           ...prev,
-          flavors: [],
+          flavors: loadedFlavours.map(f => ({ name: f.name, category: f.category, isActive: true, weights: f.weights })),
           colors: []
         }));
       }
@@ -146,19 +148,16 @@ const ThemeBuilder = ({ themeId, onBack }) => {
     }));
   };
 
-  const getColorIndexByName = (colorName) => theme.colors.findIndex(c => c.name === colorName);
-
-  const ensureEditingIndex = (colorName) => {
-    const index = getColorIndexByName(colorName);
-    if (index !== -1 && editingMappingIndex !== index) {
-      setEditingMappingIndex(index);
+  const ensureEditingName = (colorName) => {
+    if (editingMappingName !== colorName) {
+      setEditingMappingName(colorName);
     }
   };
 
   const handleFileInputChange = (colorName, field, file) => {
     if (!file) return;
     const prev = pendingColorMappings[colorName] || { files: {}, price: '', previewUrls: {} };
-    ensureEditingIndex(colorName);
+    ensureEditingName(colorName);
     handleSetPendingMapping(colorName, { [field]: file }, prev.price === 0 ? 0 : (prev.price || ''));
   };
 
@@ -189,7 +188,7 @@ const ThemeBuilder = ({ themeId, onBack }) => {
   };
 
   const handlePriceInputChange = (colorName, price) => {
-    ensureEditingIndex(colorName);
+    ensureEditingName(colorName);
     setPendingColorMappings(prev => ({
       ...prev,
       [colorName]: {
@@ -382,182 +381,211 @@ const ThemeBuilder = ({ themeId, onBack }) => {
         <div className="flex justify-between items-center mb-2">
           <div>
             <h4 className="font-black text-sm uppercase tracking-wider text-muted">3. Theme Colors & Images (Optional)</h4>
-            <p className="text-xs text-muted">Add colors and tier images if this theme has color options. If none added, default design is used.</p>
+            <p className="text-xs text-muted">Select colors and add tier images if this theme has color options. If none added, default design is used.</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowColorModal(true)} className="text-xs font-black bg-input border border-border px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-border/30 shadow-sm transition-all">
-              <Edit2 size={14} /> Add / Manage Colors
-            </button>
+            <button type="button" onClick={() => {
+              setTheme(prev => ({
+                ...prev,
+                colors: globalColors.map(c => {
+                  const existing = (prev.colors || []).find(tc => tc.name === c.name);
+                  if (existing) return existing;
+                  const { _id, __v, createdAt, updatedAt, ...rest } = c;
+                  return { ...rest, price: 0, images: { tier1: null, tier2: null, tier3: null } };
+                })
+              }));
+            }} className="text-[10px] font-black uppercase tracking-wider text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors">Select All</button>
+            <button type="button" onClick={() => {
+              if (window.confirm('Deselect all colors? This will remove any pending images.')) {
+                setTheme(prev => ({ ...prev, colors: [] }));
+                setPendingColorMappings({});
+              }
+            }} className="text-[10px] font-black uppercase tracking-wider text-muted border border-border px-3 py-1.5 rounded-lg hover:bg-border/20 transition-colors">Deselect All</button>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(theme.colors || []).map((color, index) => {
-            const hasImages = color.images?.tier1 || color.images?.tier2 || color.images?.tier3;
-            const pending = pendingColorMappings[color.name];
+          {globalColors.map((gColor) => {
+            const isSelected = (theme.colors || []).some(c => c.name === gColor.name);
+            const themeColor = (theme.colors || []).find(c => c.name === gColor.name) || gColor;
+            
+            const hasImages = isSelected && (themeColor.images?.tier1 || themeColor.images?.tier2 || themeColor.images?.tier3);
+            const pending = pendingColorMappings[gColor.name];
             
             return (
-              <div key={index} className="p-4 bg-card border border-border rounded-xl flex flex-col gap-3 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: color.hexCode }}></div>
+              <div key={gColor._id} className={`p-4 bg-card border rounded-xl flex flex-col gap-3 relative overflow-hidden transition-all ${isSelected ? 'border-primary ring-1 ring-primary/30' : 'border-border'}`}>
+                <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: gColor.hexCode }}></div>
                 <div className="flex justify-between items-center pl-2">
-                  <span className="font-black text-sm">{color.name}</span>
-                  {(hasImages || pending) && (
+                  <label className="flex items-center gap-2 cursor-pointer font-black text-sm w-full">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-primary rounded border-input-border bg-input cursor-pointer"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        if (checked) {
+                          setTheme(prev => {
+                            const { _id, __v, createdAt, updatedAt, ...rest } = gColor;
+                            return {
+                              ...prev,
+                              colors: [...(prev.colors || []), { ...rest, price: 0, images: { tier1: null, tier2: null, tier3: null } }]
+                            };
+                          });
+                        } else {
+                          if (hasImages || pending) {
+                            if (!window.confirm(`Remove ${gColor.name} and all its images/prices from this theme?`)) return;
+                          }
+                          setTheme(prev => ({
+                            ...prev,
+                            colors: (prev.colors || []).filter(c => c.name !== gColor.name)
+                          }));
+                          if (pending) handleRemovePendingMapping(gColor.name);
+                        }
+                      }}
+                    />
+                    {gColor.name}
+                  </label>
+                  
+                  {isSelected && (hasImages || pending) && (
                     <div className="flex items-center gap-1">
                       <button 
-                        onClick={() => setEditingMappingIndex(index)}
+                        onClick={() => setEditingMappingName(gColor.name)}
                         className="text-muted hover:text-heading hover:bg-border/30 p-1.5 rounded transition-colors"
                         title="Edit base price"
                       >
                         <Edit2 size={14} />
                       </button>
-                      <button 
-                        onClick={() => {
-                          if (hasImages) {
-                            if (window.confirm('Remove images and price mapping?')) {
-                              const updatedTheme = { ...theme };
-                              updatedTheme.colors[index].images = { tier1: null, tier2: null, tier3: null };
-                              updatedTheme.colors[index].price = 0;
-                              setTheme(updatedTheme);
-                            }
-                          }
-                          if (pending) {
-                            handleRemovePendingMapping(color.name);
-                          }
-                        }} 
-                        className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors"
-                        title="Remove image mapping"
-                      >
-                        <Trash2 size={14} />
-                      </button>
                     </div>
                   )}
                 </div>
                 
-                {(hasImages || pending) && editingMappingIndex !== index ? (
-                  <div className="flex flex-col gap-2 pl-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      {theme.tiers?.tier1?.isActive && (
-                        <div className="h-24 bg-border/20 rounded-lg overflow-hidden flex flex-col items-center justify-center relative">
-                          <span className="absolute top-1 left-1 text-[8px] font-black uppercase bg-black/50 text-white px-1 py-0.5 rounded z-10">T1</span>
-                          {(pending?.previewUrls?.tier1 || color.images?.tier1) ? <img src={pending?.previewUrls?.tier1 || color.images?.tier1} alt="T1" className={`h-full object-contain ${pending?.previewUrls?.tier1 ? 'opacity-80' : ''}`} /> : <span className="text-[10px] text-muted font-bold">{pending ? 'Pending' : 'No Img'}</span>}
-                        </div>
-                      )}
-                      {theme.tiers?.tier2?.isActive && (
-                        <div className="h-24 bg-border/20 rounded-lg overflow-hidden flex flex-col items-center justify-center relative">
-                          <span className="absolute top-1 left-1 text-[8px] font-black uppercase bg-black/50 text-white px-1 py-0.5 rounded z-10">T2</span>
-                          {(pending?.previewUrls?.tier2 || color.images?.tier2) ? <img src={pending?.previewUrls?.tier2 || color.images?.tier2} alt="T2" className={`h-full object-contain ${pending?.previewUrls?.tier2 ? 'opacity-80' : ''}`} /> : <span className="text-[10px] text-muted font-bold">{pending ? 'Pending' : 'No Img'}</span>}
-                        </div>
-                      )}
-                      {theme.tiers?.tier3?.isActive && (
-                        <div className="h-24 bg-border/20 rounded-lg overflow-hidden flex flex-col items-center justify-center relative">
-                          <span className="absolute top-1 left-1 text-[8px] font-black uppercase bg-black/50 text-white px-1 py-0.5 rounded z-10">T3</span>
-                          {(pending?.previewUrls?.tier3 || color.images?.tier3) ? <img src={pending?.previewUrls?.tier3 || color.images?.tier3} alt="T3" className={`h-full object-contain ${pending?.previewUrls?.tier3 ? 'opacity-80' : ''}`} /> : <span className="text-[10px] text-muted font-bold">{pending ? 'Pending' : 'No Img'}</span>}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center bg-input px-3 py-2 rounded-lg border border-input-border">
-                      <span className="text-xs font-black text-muted uppercase">Base Price</span>
-                      <span className="font-black text-primary">₹{pending?.price ?? color.price ?? 0}</span>
-                    </div>
-                    {color._id && hasImages && !pending && (
-                      <button 
-                        onClick={() => handleApplyToAll(color._id)}
-                        className="w-full mt-1 py-1.5 bg-secondary text-white rounded font-bold text-xs hover:bg-secondary/90 transition-colors"
-                      >
-                        Apply to All Colors
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="pl-2 flex flex-col gap-2">
-                    <form onSubmit={async e => {
-                      e.preventDefault();
-                      const price = e.target.price.value;
-                      const files = {};
-                      if (theme.tiers?.tier1?.isActive && e.target.tier1Image?.files[0]) files.tier1 = e.target.tier1Image.files[0];
-                      if (theme.tiers?.tier2?.isActive && e.target.tier2Image?.files[0]) files.tier2 = e.target.tier2Image.files[0];
-                      if (theme.tiers?.tier3?.isActive && e.target.tier3Image?.files[0]) files.tier3 = e.target.tier3Image.files[0];
-                      try {
-                        await saveThemeColorMapping(color.name, files, price);
-                        toast.success('Mapping saved');
-                        setEditingMappingIndex(null);
-                      } catch (error) {
-                        toast.error(error.message || error.response?.data?.message || 'Failed to save mapping');
-                      }
-                    }} className="flex flex-col gap-2">
+                {isSelected && (
+                  (hasImages || pending) && editingMappingName !== gColor.name ? (
+                    <div className="flex flex-col gap-2 pl-2">
                       <div className="grid grid-cols-3 gap-2">
                         {theme.tiers?.tier1?.isActive && (
-                          <label className="flex flex-col items-center justify-center gap-1 bg-input border border-input-border p-2 rounded-lg cursor-pointer hover:bg-border/30 transition-colors text-[10px] font-bold text-muted text-center h-20 relative overflow-hidden">
-                            {pending?.previewUrls?.tier1 || color.images?.tier1 ? (
-                              <>
-                                <img src={pending?.previewUrls?.tier1 || color.images?.tier1} className="absolute inset-0 w-full h-full object-contain opacity-80" />
-                                <button type="button" onClick={e => { e.stopPropagation(); handleRemoveTierFile(color.name, 'tier1'); }} className="absolute top-1 right-1 z-20 rounded-full bg-black/60 p-1 text-white">
-                                  <X size={14} />
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <ImageIcon size={14} className="z-10" />
-                                <span className="z-10">Tier 1</span>
-                              </>
-                            )}
-                            <input type="file" name="tier1Image" accept="image/*" className="hidden" onChange={e => handleFileInputChange(color.name, 'tier1', e.target.files?.[0])} />
-                          </label>
+                          <div className="h-24 bg-border/20 rounded-lg overflow-hidden flex flex-col items-center justify-center relative">
+                            <span className="absolute top-1 left-1 text-[8px] font-black uppercase bg-black/50 text-white px-1 py-0.5 rounded z-10">T1</span>
+                            {(pending?.previewUrls?.tier1 || themeColor.images?.tier1) ? <img src={pending?.previewUrls?.tier1 || themeColor.images?.tier1} alt="T1" className={`h-full object-contain ${pending?.previewUrls?.tier1 ? 'opacity-80' : ''}`} /> : <span className="text-[10px] text-muted font-bold">{pending ? 'Pending' : 'No Img'}</span>}
+                          </div>
                         )}
                         {theme.tiers?.tier2?.isActive && (
-                          <label className="flex flex-col items-center justify-center gap-1 bg-input border border-input-border p-2 rounded-lg cursor-pointer hover:bg-border/30 transition-colors text-[10px] font-bold text-muted text-center h-20 relative overflow-hidden">
-                            {pending?.previewUrls?.tier2 || color.images?.tier2 ? (
-                              <>
-                                <img src={pending?.previewUrls?.tier2 || color.images?.tier2} className="absolute inset-0 w-full h-full object-contain opacity-80" />
-                                <button type="button" onClick={e => { e.stopPropagation(); handleRemoveTierFile(color.name, 'tier2'); }} className="absolute top-1 right-1 z-20 rounded-full bg-black/60 p-1 text-white">
-                                  <X size={14} />
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <ImageIcon size={14} className="z-10" />
-                                <span className="z-10">Tier 2</span>
-                              </>
-                            )}
-                            <input type="file" name="tier2Image" accept="image/*" className="hidden" onChange={e => handleFileInputChange(color.name, 'tier2', e.target.files?.[0])} />
-                          </label>
+                          <div className="h-24 bg-border/20 rounded-lg overflow-hidden flex flex-col items-center justify-center relative">
+                            <span className="absolute top-1 left-1 text-[8px] font-black uppercase bg-black/50 text-white px-1 py-0.5 rounded z-10">T2</span>
+                            {(pending?.previewUrls?.tier2 || themeColor.images?.tier2) ? <img src={pending?.previewUrls?.tier2 || themeColor.images?.tier2} alt="T2" className={`h-full object-contain ${pending?.previewUrls?.tier2 ? 'opacity-80' : ''}`} /> : <span className="text-[10px] text-muted font-bold">{pending ? 'Pending' : 'No Img'}</span>}
+                          </div>
                         )}
                         {theme.tiers?.tier3?.isActive && (
-                          <label className="flex flex-col items-center justify-center gap-1 bg-input border border-input-border p-2 rounded-lg cursor-pointer hover:bg-border/30 transition-colors text-[10px] font-bold text-muted text-center h-20 relative overflow-hidden">
-                            {pending?.previewUrls?.tier3 || color.images?.tier3 ? (
-                              <>
-                                <img src={pending?.previewUrls?.tier3 || color.images?.tier3} className="absolute inset-0 w-full h-full object-contain opacity-80" />
-                                <button type="button" onClick={e => { e.stopPropagation(); handleRemoveTierFile(color.name, 'tier3'); }} className="absolute top-1 right-1 z-20 rounded-full bg-black/60 p-1 text-white">
-                                  <X size={14} />
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <ImageIcon size={14} className="z-10" />
-                                <span className="z-10">Tier 3</span>
-                              </>
-                            )}
-                            <input type="file" name="tier3Image" accept="image/*" className="hidden" onChange={e => handleFileInputChange(color.name, 'tier3', e.target.files?.[0])} />
-                          </label>
-                        )}
-                        {!theme.tiers?.tier1?.isActive && !theme.tiers?.tier2?.isActive && !theme.tiers?.tier3?.isActive && (
-                          <span className="col-span-3 text-xs text-muted text-center py-4">No tiers enabled for this theme.</span>
+                          <div className="h-24 bg-border/20 rounded-lg overflow-hidden flex flex-col items-center justify-center relative">
+                            <span className="absolute top-1 left-1 text-[8px] font-black uppercase bg-black/50 text-white px-1 py-0.5 rounded z-10">T3</span>
+                            {(pending?.previewUrls?.tier3 || themeColor.images?.tier3) ? <img src={pending?.previewUrls?.tier3 || themeColor.images?.tier3} alt="T3" className={`h-full object-contain ${pending?.previewUrls?.tier3 ? 'opacity-80' : ''}`} /> : <span className="text-[10px] text-muted font-bold">{pending ? 'Pending' : 'No Img'}</span>}
+                          </div>
                         )}
                       </div>
-                      <input type="number" name="price" value={pending?.price !== undefined ? pending.price : (color.price || '')} placeholder="Base Price (₹)" required onChange={e => handlePriceInputChange(color.name, e.target.value)} className="w-full text-sm font-bold bg-input border border-input-border px-3 py-2 rounded-lg outline-none focus:border-primary/50" />
-                      <div className="flex gap-2">
-                        <button type="submit" disabled={
-                          (!theme.tiers?.tier1?.isActive && !theme.tiers?.tier2?.isActive && !theme.tiers?.tier3?.isActive) ||
-                          !(parseFloat(pending?.price !== undefined ? pending.price : color.price) > 0)
-                        } className="flex-1 bg-primary text-button-text px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:brightness-110 disabled:opacity-50">
-                          {editingMappingIndex === index ? 'Update' : 'Add Mapping'}
+                      <div className="flex justify-between items-center bg-input px-3 py-2 rounded-lg border border-input-border">
+                        <span className="text-xs font-black text-muted uppercase">Base Price</span>
+                        <span className="font-black text-primary">₹{pending?.price ?? themeColor.price ?? 0}</span>
+                      </div>
+                      {themeColor._id && hasImages && !pending && (
+                        <button 
+                          onClick={() => handleApplyToAll(themeColor._id)}
+                          className="w-full mt-1 py-1.5 bg-secondary text-white rounded font-bold text-xs hover:bg-secondary/90 transition-colors"
+                        >
+                          Apply to All Colors
                         </button>
-                        {editingMappingIndex === index && (
-                          <button type="button" onClick={() => setEditingMappingIndex(null)} className="px-3 py-2 bg-input border border-input-border rounded-lg text-[10px] font-black uppercase hover:bg-border/30">Cancel</button>
-                        )}
-                      </div>
-                    </form>
-                  </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="pl-2 flex flex-col gap-2">
+                      <form onSubmit={async e => {
+                        e.preventDefault();
+                        const price = e.target.price.value;
+                        const files = {};
+                        if (theme.tiers?.tier1?.isActive && e.target.tier1Image?.files[0]) files.tier1 = e.target.tier1Image.files[0];
+                        if (theme.tiers?.tier2?.isActive && e.target.tier2Image?.files[0]) files.tier2 = e.target.tier2Image.files[0];
+                        if (theme.tiers?.tier3?.isActive && e.target.tier3Image?.files[0]) files.tier3 = e.target.tier3Image.files[0];
+                        try {
+                          await saveThemeColorMapping(gColor.name, files, price);
+                          toast.success('Mapping saved');
+                          setEditingMappingName(null);
+                        } catch (error) {
+                          toast.error(error.message || error.response?.data?.message || 'Failed to save mapping');
+                        }
+                      }} className="flex flex-col gap-2">
+                        <div className="grid grid-cols-3 gap-2">
+                          {theme.tiers?.tier1?.isActive && (
+                            <label className="flex flex-col items-center justify-center gap-1 bg-input border border-input-border p-2 rounded-lg cursor-pointer hover:bg-border/30 transition-colors text-[10px] font-bold text-muted text-center h-20 relative overflow-hidden">
+                              {pending?.previewUrls?.tier1 || themeColor.images?.tier1 ? (
+                                <>
+                                  <img src={pending?.previewUrls?.tier1 || themeColor.images?.tier1} className="absolute inset-0 w-full h-full object-contain opacity-80" />
+                                  <button type="button" onClick={e => { e.stopPropagation(); handleRemoveTierFile(gColor.name, 'tier1'); }} className="absolute top-1 right-1 z-20 rounded-full bg-black/60 p-1 text-white">
+                                    <X size={14} />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <ImageIcon size={14} className="z-10" />
+                                  <span className="z-10">Tier 1</span>
+                                </>
+                              )}
+                              <input type="file" name="tier1Image" accept="image/*" className="hidden" onChange={e => handleFileInputChange(gColor.name, 'tier1', e.target.files?.[0])} />
+                            </label>
+                          )}
+                          {theme.tiers?.tier2?.isActive && (
+                            <label className="flex flex-col items-center justify-center gap-1 bg-input border border-input-border p-2 rounded-lg cursor-pointer hover:bg-border/30 transition-colors text-[10px] font-bold text-muted text-center h-20 relative overflow-hidden">
+                              {pending?.previewUrls?.tier2 || themeColor.images?.tier2 ? (
+                                <>
+                                  <img src={pending?.previewUrls?.tier2 || themeColor.images?.tier2} className="absolute inset-0 w-full h-full object-contain opacity-80" />
+                                  <button type="button" onClick={e => { e.stopPropagation(); handleRemoveTierFile(gColor.name, 'tier2'); }} className="absolute top-1 right-1 z-20 rounded-full bg-black/60 p-1 text-white">
+                                    <X size={14} />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <ImageIcon size={14} className="z-10" />
+                                  <span className="z-10">Tier 2</span>
+                                </>
+                              )}
+                              <input type="file" name="tier2Image" accept="image/*" className="hidden" onChange={e => handleFileInputChange(gColor.name, 'tier2', e.target.files?.[0])} />
+                            </label>
+                          )}
+                          {theme.tiers?.tier3?.isActive && (
+                            <label className="flex flex-col items-center justify-center gap-1 bg-input border border-input-border p-2 rounded-lg cursor-pointer hover:bg-border/30 transition-colors text-[10px] font-bold text-muted text-center h-20 relative overflow-hidden">
+                              {pending?.previewUrls?.tier3 || themeColor.images?.tier3 ? (
+                                <>
+                                  <img src={pending?.previewUrls?.tier3 || themeColor.images?.tier3} className="absolute inset-0 w-full h-full object-contain opacity-80" />
+                                  <button type="button" onClick={e => { e.stopPropagation(); handleRemoveTierFile(gColor.name, 'tier3'); }} className="absolute top-1 right-1 z-20 rounded-full bg-black/60 p-1 text-white">
+                                    <X size={14} />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <ImageIcon size={14} className="z-10" />
+                                  <span className="z-10">Tier 3</span>
+                                </>
+                              )}
+                              <input type="file" name="tier3Image" accept="image/*" className="hidden" onChange={e => handleFileInputChange(gColor.name, 'tier3', e.target.files?.[0])} />
+                            </label>
+                          )}
+                          {!theme.tiers?.tier1?.isActive && !theme.tiers?.tier2?.isActive && !theme.tiers?.tier3?.isActive && (
+                            <span className="col-span-3 text-xs text-muted text-center py-4">No tiers enabled for this theme.</span>
+                          )}
+                        </div>
+                        <input type="number" name="price" value={pending?.price !== undefined ? pending.price : (themeColor.price || '')} placeholder="Base Price (₹)" required onChange={e => handlePriceInputChange(gColor.name, e.target.value)} className="w-full text-sm font-bold bg-input border border-input-border px-3 py-2 rounded-lg outline-none focus:border-primary/50" />
+                        <div className="flex gap-2">
+                          <button type="submit" disabled={
+                            (!theme.tiers?.tier1?.isActive && !theme.tiers?.tier2?.isActive && !theme.tiers?.tier3?.isActive) ||
+                            !(parseFloat(pending?.price !== undefined ? pending.price : themeColor.price) >= 0)
+                          } className="flex-1 bg-primary text-button-text px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:brightness-110 disabled:opacity-50">
+                            {editingMappingName === gColor.name ? 'Update' : 'Add Mapping'}
+                          </button>
+                          {editingMappingName === gColor.name && (
+                            <button type="button" onClick={() => setEditingMappingName(null)} className="px-3 py-2 bg-input border border-input-border rounded-lg text-[10px] font-black uppercase hover:bg-border/30">Cancel</button>
+                          )}
+                        </div>
+                      </form>
+                    </div>
+                  )
                 )}
               </div>
             );
@@ -570,82 +598,122 @@ const ThemeBuilder = ({ themeId, onBack }) => {
         <div className="flex justify-between items-center mb-2">
           <div>
             <h4 className="font-black text-sm uppercase tracking-wider text-muted">4. Theme-Specific Flavours & Weights</h4>
-            <p className="text-xs font-bold text-muted mt-1">Manage the flavours available exclusively for this theme.</p>
+            <p className="text-xs font-bold text-muted mt-1">Select and manage the flavours available exclusively for this theme.</p>
           </div>
-          <button onClick={() => setShowFlavourModal(true)} className="text-xs font-black bg-input border border-border px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-border/30 shadow-sm transition-all">
-            <Edit2 size={14} /> Manage Flavours
-          </button>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => {
+              setTheme(prev => ({
+                ...prev,
+                flavors: globalFlavours.map(f => {
+                  const existing = (prev.flavors || []).find(tf => tf.name === f.name);
+                  return existing || { name: f.name, category: f.category, isActive: true, weights: f.weights };
+                })
+              }));
+            }} className="text-[10px] font-black uppercase tracking-wider text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors">Select All</button>
+            <button type="button" onClick={() => {
+              if (window.confirm('Deselect all flavours from this theme?')) {
+                setTheme(prev => ({ ...prev, flavors: [] }));
+              }
+            }} className="text-[10px] font-black uppercase tracking-wider text-muted border border-border px-3 py-1.5 rounded-lg hover:bg-border/20 transition-colors">Deselect All</button>
+          </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar pr-2 mt-4">
-          {(theme.flavors || []).map((f, i) => (
-            <div key={i} className="flex justify-between items-center bg-card p-4 rounded-xl border border-border text-sm font-bold shadow-sm">
-              <span className="uppercase tracking-wider">{f.name}</span>
-              <div className="text-right flex items-center gap-4">
-                <div>
-                  <span className="text-primary font-black block">Base: ₹{f.weights?.find(w => w.kg === 1)?.price || 0}</span>
-                  <span className="text-muted text-[10px] uppercase">Up to ₹{f.weights?.find(w => w.kg === 3)?.price || 0} (3Kg)</span>
-                </div>
-                <div className="flex gap-1 border-l border-border pl-4">
-                  <button onClick={() => setShowFlavourModal(true)} className="p-1.5 bg-input border border-border rounded-lg text-muted hover:text-heading transition-colors" title="Edit Flavour">
-                    <Edit2 size={14} />
-                  </button>
-                  <button onClick={async () => {
-                    if (window.confirm(`Are you sure you want to remove ${f.name} from this theme?`)) {
-                      try {
-                        if (themeId && f._id) {
-                          await adminService.deleteCustomCakeThemeFlavour(themeId, f._id);
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto custom-scrollbar pr-2 mt-4">
+          {globalFlavours.map((gFlavour) => {
+            const isSelected = (theme.flavors || []).some(f => f.name === gFlavour.name);
+            const themeFlavour = (theme.flavors || []).find(f => f.name === gFlavour.name) || gFlavour;
+
+            return (
+              <div key={gFlavour._id} className={`p-4 bg-card border rounded-xl flex flex-col gap-3 relative overflow-hidden transition-all ${isSelected ? 'border-primary ring-1 ring-primary/30' : 'border-border'}`}>
+                <div className="flex justify-between items-center">
+                  <label className="flex items-center gap-2 cursor-pointer font-black text-sm w-full">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-primary rounded border-input-border bg-input cursor-pointer"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        if (checked) {
+                          setTheme(prev => ({
+                            ...prev,
+                            flavors: [...(prev.flavors || []), { name: gFlavour.name, category: gFlavour.category, isActive: true, weights: gFlavour.weights }]
+                          }));
+                        } else {
+                          if (!window.confirm(`Remove ${gFlavour.name} from this theme?`)) return;
+                          
+                          setTheme(prev => ({
+                            ...prev,
+                            flavors: (prev.flavors || []).filter(f => f.name !== gFlavour.name)
+                          }));
                         }
-                        const newFlavors = [...theme.flavors];
-                        newFlavors.splice(i, 1);
-                        setTheme({...theme, flavors: newFlavors});
-                        toast.success('Flavour removed');
-                      } catch (err) {
-                        toast.error('Failed to remove flavour');
-                      }
-                    }
-                  }} className="p-1.5 bg-input border border-border rounded-lg text-red-500 hover:bg-red-50 transition-colors" title="Remove Flavour">
-                    <Trash2 size={14} />
-                  </button>
+                      }}
+                    />
+                    <span className="uppercase tracking-wider">{gFlavour.name}</span>
+                  </label>
+                  {isSelected && (
+                    <button 
+                      onClick={() => setEditingFlavourName(editingFlavourName === gFlavour.name ? null : gFlavour.name)}
+                      className="p-1.5 hover:bg-border/30 rounded-lg text-muted hover:text-heading transition-colors"
+                      title="Edit Prices"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                  )}
                 </div>
+
+                {isSelected && (
+                  editingFlavourName === gFlavour.name ? (
+                    <div className="pt-3 border-t border-border mt-2">
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const basePrice = parseFloat(e.target.basePrice.value);
+                        if (isNaN(basePrice) || basePrice < 0) return toast.error('Invalid base price');
+                        
+                        const newWeights = [
+                          { kg: 1, price: basePrice },
+                          { kg: 1.5, price: basePrice * 1.5 },
+                          { kg: 2, price: basePrice * 2 },
+                          { kg: 2.5, price: basePrice * 2.5 },
+                          { kg: 3, price: basePrice * 3 },
+                        ];
+
+                        setTheme(prev => ({
+                          ...prev,
+                          flavors: prev.flavors.map(f => f.name === gFlavour.name ? { ...f, weights: newWeights } : f)
+                        }));
+                        setEditingFlavourName(null);
+                        toast.success('Prices updated');
+                      }}>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-primary uppercase">1 Kg Base Price (₹)</label>
+                          <input type="number" name="basePrice" defaultValue={themeFlavour.weights?.find(w => w.kg === 1)?.price || 0} required className="w-full bg-input border border-primary/30 px-3 py-2 rounded-lg focus:ring-1 focus:ring-primary outline-none font-bold text-sm" />
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <button type="submit" className="flex-1 bg-primary text-button-text px-3 py-2 rounded-lg text-[10px] font-black uppercase hover:brightness-110">
+                            Save Prices
+                          </button>
+                          <button type="button" onClick={() => setEditingFlavourName(null)} className="px-3 py-2 bg-input border border-input-border rounded-lg text-[10px] font-black uppercase hover:bg-border/30">
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="pt-2">
+                      <div className="flex items-center gap-4 text-xs">
+                        <div>
+                          <span className="text-primary font-black block">Base: ₹{themeFlavour.weights?.find(w => w.kg === 1)?.price || 0}</span>
+                          <span className="text-muted text-[10px] uppercase">Up to ₹{themeFlavour.weights?.find(w => w.kg === 3)?.price || 0} (3Kg)</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
               </div>
-            </div>
-          ))}
-          {(!theme.flavors || theme.flavors.length === 0) && (
-            <div className="col-span-1 md:col-span-2 text-center py-6 text-muted font-bold bg-card border border-border rounded-xl">
-              No theme-specific flavours. Click Manage Flavours to add some.
-            </div>
-          )}
+            );
+          })}
         </div>
       </div>
-
-      {/* Modals for Global Management */}
-      {showColorModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-xl border border-border p-6 relative">
-            <ThemeColorManager 
-              themeId={themeId}
-              colors={theme.colors || []} 
-              setColors={(updatedColors) => setTheme({ ...theme, colors: updatedColors })}
-              onClose={() => setShowColorModal(false)}
-            />
-            <button onClick={() => setShowColorModal(false)} className="absolute top-3 right-3 p-2 bg-card border border-border rounded-full shadow-md text-muted hover:text-heading z-[60]"><X size={20} /></button>
-          </div>
-        </div>
-      )}
-      {showFlavourModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-xl border border-border p-6 relative">
-            <ThemeFlavourManager 
-              themeId={themeId}
-              flavours={theme.flavors || []} 
-              setFlavours={(updatedFlavours) => setTheme({ ...theme, flavors: updatedFlavours })}
-              onClose={() => setShowFlavourModal(false)}
-            />
-            <button onClick={() => setShowFlavourModal(false)} className="absolute top-3 right-3 p-2 bg-card border border-border rounded-full shadow-md text-muted hover:text-heading z-[60]"><X size={20} /></button>
-          </div>
-        </div>
-      )}
 
     </div>
   );

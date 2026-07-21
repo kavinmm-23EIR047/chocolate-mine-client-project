@@ -92,12 +92,12 @@ const adminService = {
   ---------------------------------------- */
   createCustomCakeFlavour: (data) => api.post('/custom-cakes/flavours', data),
   updateCustomCakeFlavour: (id, data) => api.put(`/custom-cakes/flavours/${id}`, data),
-  seedCustomCakeFlavours: () => api.post('/custom-cakes/flavours/seed'),
+
   
   /* ----------------------------------------
      Custom Cake Themes
   ---------------------------------------- */
-  getCustomCakeThemes: () => api.get('/custom-cakes/themes'),
+  getCustomCakeThemes: () => api.get(`/custom-cakes/themes?t=${Date.now()}`),
   createCustomCakeTheme: (data) => api.post('/custom-cakes/themes', data),
   updateCustomCakeTheme: (id, data) => api.put(`/custom-cakes/themes/${id}`, data),
   deleteCustomCakeTheme: (id) => api.delete(`/custom-cakes/themes/${id}`),
@@ -116,7 +116,7 @@ const adminService = {
   /* ----------------------------------------
      Custom Cake Colors
   ---------------------------------------- */
-  getCustomCakeColors: () => api.get('/custom-cakes/colors'),
+  getCustomCakeColors: () => api.get(`/custom-cakes/colors?t=${Date.now()}`),
   createCustomCakeColor: (data) => api.post('/custom-cakes/colors', data),
   updateCustomCakeColor: (id, data) => api.put(`/custom-cakes/colors/${id}`, data),
   deleteCustomCakeColor: (id) => api.delete(`/custom-cakes/colors/${id}`),
@@ -131,15 +131,13 @@ const adminService = {
   /* ----------------------------------------
      Custom Cake Flavours
   ---------------------------------------- */
-  getCustomCakeFlavours: () => api.get('/custom-cakes/flavours'),
+  getCustomCakeFlavours: () => api.get(`/custom-cakes/flavours?t=${Date.now()}`),
   createCustomCakeFlavour: (data) => api.post('/custom-cakes/flavours', data),
   updateCustomCakeFlavour: (id, data) => api.put(`/custom-cakes/flavours/${id}`, data),
   deleteCustomCakeFlavour: (id) => api.delete(`/custom-cakes/flavours/${id}`),
 
-  /* ----------------------------------------
-     Seed Defaults
-  ---------------------------------------- */
-  seedCustomCakeDefaults: () => api.post('/custom-cakes/seed-defaults'),
+
+
 
   /* ----------------------------------------
      Review Management

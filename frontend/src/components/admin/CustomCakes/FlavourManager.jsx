@@ -98,6 +98,7 @@ const FlavourManager = () => {
     try {
       await adminService.deleteCustomCakeFlavour(id);
       toast.success('Flavour deleted successfully');
+      setFlavours(prev => prev.filter(f => f._id !== id));
       fetchFlavours();
     } catch (err) {
       toast.error('Delete failed');
@@ -113,20 +114,6 @@ const FlavourManager = () => {
       fetchFlavours();
     } catch (err) {
       toast.error('Update failed');
-    }
-  };
-
-  const handleSeedFlavours = async () => {
-    if (!window.confirm('This will replace all existing custom cake flavours with the default 36 flavours. Proceed?')) return;
-    try {
-      setSeeding(true);
-      const res = await adminService.seedCustomCakeFlavours();
-      toast.success(`Successfully seeded ${res.data.count} flavours!`);
-      fetchFlavours();
-    } catch (err) {
-      toast.error('Failed to seed flavours');
-    } finally {
-      setSeeding(false);
     }
   };
 
@@ -152,13 +139,6 @@ const FlavourManager = () => {
           <p className="text-muted text-sm mt-1">Manage flavours and 1 Kg prices for custom cakes</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={handleSeedFlavours}
-            disabled={seeding || loading}
-            className="flex items-center gap-2 border border-primary text-primary px-5 py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-primary/5 disabled:opacity-60 transition-all"
-          >
-            <RotateCcw size={16} /> {seeding ? 'Seeding...' : 'Seed Default Flavours'}
-          </button>
           <button
             onClick={() => { resetForm(); setShowForm(true); }}
             className="flex items-center gap-2 bg-primary text-button-text px-5 py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"

@@ -40,7 +40,10 @@ async function importProducts() {
     const cleanData = rawData.map(item => {
       const cleaned = JSON.parse(JSON.stringify(item));
       
-      // Convert MongoDB extended JSON to regular values
+      // Always remove any incoming _id so MongoDB can generate a unique ObjectId
+      if (cleaned._id) delete cleaned._id;
+
+      // Convert MongoDB extended JSON to regular values (if present)
       if (cleaned._id && cleaned._id.$oid) {
         delete cleaned._id;
       }

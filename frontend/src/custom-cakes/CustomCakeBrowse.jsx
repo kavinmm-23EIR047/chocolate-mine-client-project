@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, Eye, Check, Layers, Search, ChevronDown, ChevronUp, RotateCcw, Star, ChevronRight, ChevronLeft, Settings2, Heart, List, LayoutGrid, SlidersHorizontal, X } from 'lucide-react';
 import { TIERS } from './customCakeData';
+import ImageWithSkeleton from '../components/ui/ImageWithSkeleton';
 
 // Premium Bolded Veg Icon 
 const VegIcon = () => (
@@ -503,10 +504,16 @@ export default function CustomCakeBrowse({
 
                             <div className="relative shrink-0 w-[104px] sm:w-28 md:w-36 aspect-square rounded-xl self-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
                               <div className="w-full h-full overflow-hidden rounded-xl">
-                                {t.image || t.flavors?.[0]?.image
-                                  ? <img src={t.image || t.flavors[0].image} alt={t.name} className="w-full h-full object-cover" loading="lazy" />
-                                  : <span className="flex items-center justify-center h-full text-5xl">{t.emoji}</span>
-                                }
+                                {t.image || t.flavors?.[0]?.image ? (
+                                  <ImageWithSkeleton
+                                    src={t.image || t.flavors[0].image}
+                                    alt={t.name}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <span className="flex items-center justify-center h-full text-5xl">{t.emoji}</span>
+                                )}
                               </div>
 
                               <button
@@ -550,10 +557,16 @@ export default function CustomCakeBrowse({
                             <div>
                               <div className="relative aspect-square overflow-visible shrink-0 w-full mb-8" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
                                 <div className="w-full h-full overflow-hidden rounded-xl">
-                                  {t.image || t.flavors?.[0]?.image
-                                    ? <img src={t.image || t.flavors[0].image} alt={t.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                                    : <span className="flex items-center justify-center h-full text-6xl">{t.emoji}</span>
-                                  }
+                                  {t.image || t.flavors?.[0]?.image ? (
+                                    <ImageWithSkeleton
+                                      src={t.image || t.flavors[0].image}
+                                      alt={t.name}
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                      loading="lazy"
+                                    />
+                                  ) : (
+                                    <span className="flex items-center justify-center h-full text-6xl">{t.emoji}</span>
+                                  )}
                                 </div>
 
                                 <button

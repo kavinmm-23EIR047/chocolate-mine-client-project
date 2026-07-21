@@ -56,7 +56,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`sticky top-0 left-0 right-0 z-[200] transition-all duration-300 bg-navbar text-heading lg:rounded-none relative ${isScrolled ? 'shadow-md' : ''}`}>
+      <nav className={`relative w-full z-[200] transition-all duration-300 bg-navbar text-heading lg:rounded-none ${isScrolled ? 'shadow-md' : ''}`}>
 
         {/* MOBILE WATERMARK BACKGROUND PATTERN (Subtle themed watermarks) */}
         <div className="absolute inset-0 lg:hidden pointer-events-none overflow-hidden z-0 opacity-[0.05]">

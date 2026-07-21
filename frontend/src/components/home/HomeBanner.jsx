@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, ArrowRight } from 'lucide-react';
 import api from '../../utils/api';
 import Logo from '../Logo';
+import ImageWithSkeleton from '../ui/ImageWithSkeleton';
 
 const HomeBanner = () => {
   const [banners, setBanners] = useState([]);
@@ -110,11 +111,12 @@ const HomeBanner = () => {
           onClick={handleBannerClick}
           style={{ cursor: slide.link ? 'pointer' : 'default' }}
         >
-          {/* Background Image - Filters Removed */}
-          <img
+          {/* Background Image - With Sparkle Skeleton Loader */}
+          <ImageWithSkeleton
             src={slide.image}
             alt={slide.title || "Banner Image"}
             className="absolute inset-0 w-full h-full select-none object-cover"
+            containerClassName="absolute inset-0 w-full h-full"
             style={{ objectPosition: 'center center' }}
             draggable={false}
           />

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateCartQty, setCoupon } from "../redux/slices/cartSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import ImageWithSkeleton from "../components/ui/ImageWithSkeleton";
 import {
   Trash2,
   Plus,
@@ -225,10 +226,11 @@ const Cart = () => {
                       {(!item.image || item.image === 'none' || item.image.trim() === '') ? (
                         <ImagePlaceholder />
                       ) : (
-                        <img
+                        <ImageWithSkeleton
                           src={item.image}
                           alt={item.name}
                           className="w-full h-full object-cover"
+                          fallback={<ImagePlaceholder />}
                         />
                       )}
                     </div>

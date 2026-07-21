@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, RotateCcw, ShieldCheck, Cake, X, ZoomIn } from 'lucide-react';
+import ImageWithSkeleton from '../../components/ui/ImageWithSkeleton';
 
 const ImagePlaceholder = () => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-card-soft group-hover:bg-muted/10 transition-colors duration-500 rounded-[2rem] lg:rounded-[2.5rem]">
@@ -50,16 +51,21 @@ const ProductGallery = ({
               <ImagePlaceholder />
             </motion.div>
           ) : (
-            <motion.img
+            <motion.div
               key={displayImage}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.4 }}
-              src={displayImage || undefined}
-              onError={(e) => { e.target.src = product?.image && product.image !== 'none' ? product.image : ''; }}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+              className="w-full h-full"
+            >
+              <ImageWithSkeleton
+                src={displayImage}
+                alt={product?.name || 'Product Image'}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                fallback={<ImagePlaceholder />}
+              />
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -112,7 +118,7 @@ const ProductGallery = ({
                 displayImage === img ? 'border-primary shadow-md scale-95' : 'border-border hover:border-primary/50 opacity-80'
               }`}
             >
-              <img src={img} alt={`View Variant ${idx + 1}`} className="w-full h-full object-cover" />
+              <ImageWithSkeleton src={img} alt={`View Variant ${idx + 1}`} className="w-full h-full object-cover" showSparkles={false} />
             </button>
           ))}
         </div>

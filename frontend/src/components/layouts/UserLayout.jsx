@@ -20,9 +20,11 @@ const UserLayout = () => {
   const showBanner = user && (!hasPermission || !hasFcmToken);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-background ${showBanner ? 'has-notification-banner' : ''}`}>
-      <NotificationBanner />
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="sticky top-0 z-[200] w-full">
+        <NotificationBanner />
+        <Navbar />
+      </header>
 
       {/* ── RESPONSIVE INFO BANNER ── */}
       <div className="bg-[#4E2820] dark:bg-[#E8D3CB] py-2.5 px-4 overflow-hidden border-b border-border/10 transition-colors duration-300">

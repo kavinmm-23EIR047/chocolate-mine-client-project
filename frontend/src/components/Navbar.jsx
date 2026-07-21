@@ -73,16 +73,16 @@ const Navbar = () => {
         <div className="responsive-container pb-3 lg:pb-0 relative z-10">
 
           {/* DESKTOP LAYOUT ROW */}
-          <div className="hidden lg:flex items-center justify-between gap-3 py-2 min-h-[54px] tv:min-h-[72px]">
+          <div className="hidden lg:flex items-center justify-between gap-3 py-1 min-h-[44px] tv:min-h-[56px]">
             <div className="flex items-center gap-4 shrink-0">
               <Link to="/" className="shrink-0 block select-none group pr-1">
-                <Logo className="w-[110px] sm:w-[130px] lg:w-[145px] h-auto object-contain" />
+                <Logo className="w-[110px] sm:w-[130px] lg:w-[140px] h-auto object-contain" />
               </Link>
 
               <div className="relative shrink-0" ref={locationDropdownRef}>
                 <button
                   onClick={() => setIsLocationOpen(!isLocationOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[140px] tv:min-w-[180px]"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[140px] tv:min-w-[180px]"
                 >
                   <MapPin size={14} className="text-primary shrink-0" />
                   <div className="flex flex-col items-start">
@@ -102,7 +102,7 @@ const Navbar = () => {
                       {['coimbatore', 'pan india'].map((city) => (
                         <button
                           key={city} onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
-                          className="w-full text-left px-4 py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors"
+                          className="w-full text-left px-4 py-2 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors"
                         >
                           {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
                         </button>
@@ -119,7 +119,7 @@ const Navbar = () => {
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-heading/70" />
                 <input
                   type="text" readOnly placeholder="Search for cakes, desserts and more..."
-                  className="w-full bg-surface border border-border/60 text-foreground pl-12 pr-12 py-3.5 rounded-full outline-none text-sm cursor-pointer"
+                  className="w-full bg-surface border border-border/60 text-foreground pl-12 pr-12 py-2 rounded-full outline-none text-sm cursor-pointer"
                 />
                 <button className="absolute right-4 top-1/2 -translate-y-1/2 text-heading/60 hover:text-heading transition-colors">
                   <SlidersHorizontal size={16} />
@@ -245,14 +245,14 @@ const Navbar = () => {
         </div>
 
         {/* BOTTOM DESKTOP NAVIGATION LINKS */}
-        <div className="hidden lg:flex items-center justify-start gap-5 xl:gap-7 tv:gap-10 py-1 border-t border-border/10 bg-navbar responsive-container relative">
+        <div className="hidden lg:flex items-center justify-start gap-5 xl:gap-7 tv:gap-10 py-0.5 border-t border-border/10 bg-navbar responsive-container relative">
           <MegaMenu />
           <CustomCakeMenu />
-          <Link to="/shop?offers=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2.5 flex items-center gap-1">
+          <Link to="/shop?offers=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5 flex items-center gap-1">
             Offer Cakes <span className="text-xs">🔥</span>
           </Link>
-          <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2.5">Bestseller</Link>
-          <Link to="/shop?featured=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2.5">Features</Link>
+          <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5">Bestseller</Link>
+          <Link to="/shop?featured=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5">Features</Link>
         </div>
       </nav>
 

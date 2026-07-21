@@ -86,11 +86,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Initialize auth state - auto-login via Firebase & HttpOnly cookie
+  // Initialize auth state - auto-login via Firebase & Bearer token / HttpOnly cookie
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedUser = sessionStorage.getItem('user');
-      const token = sessionStorage.getItem('token');
+      const storedUser = sessionStorage.getItem('user') || localStorage.getItem('user');
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
       // Fast-path: If user is a guest (no token/stored session), skip network auth check
       if (!storedUser && !token) {
@@ -114,6 +114,7 @@ export const AuthProvider = ({ children }) => {
         const userData = response.data.user;
         setUser(userData);
         sessionStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('user', JSON.stringify(userData));
 
         // Sync FCM token in background
         syncFcmToken();
@@ -123,6 +124,8 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
           sessionStorage.removeItem('user');
           sessionStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
         }
       } finally {
         setLoading(false);
@@ -142,11 +145,17 @@ export const AuthProvider = ({ children }) => {
               name: firebaseUser.displayName,
               avatar: firebaseUser.photoURL
             });
-            const userData = response.data.user;
-            userData.isFirebase = true;
-            
-            setUser(userData);
-            sessionStorage.setItem('user', JSON.stringify(userData));
+            const { user: userData, token } = response.data;
+            if (userData) {
+              userData.isFirebase = true;
+              setUser(userData);
+              sessionStorage.setItem('user', JSON.stringify(userData));
+              localStorage.setItem('user', JSON.stringify(userData));
+            }
+            if (token) {
+              sessionStorage.setItem('token', token);
+              localStorage.setItem('token', token);
+            }
             
             // Sync FCM token in background
             syncFcmToken();
@@ -157,13 +166,16 @@ export const AuthProvider = ({ children }) => {
           }
         } else {
           // Only clear if standard user is also not present
-          const storedUser = sessionStorage.getItem('user');
+          const storedUser = sessionStorage.getItem('user') || localStorage.getItem('user');
           if (storedUser) {
              try {
                 const parsed = JSON.parse(storedUser);
                 if (parsed.isFirebase) {
                     setUser(null);
                     sessionStorage.removeItem('user');
+                    sessionStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('token');
                 }
              } catch(e) {}
           }
@@ -177,10 +189,16 @@ export const AuthProvider = ({ children }) => {
     console.log('🔐 Logging in:', email);
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { user: userData } = response.data;
+      const { user: userData, token } = response.data;
       
       setUser(userData);
       sessionStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      if (token) {
+        sessionStorage.setItem('token', token);
+        localStorage.setItem('token', token);
+      }
       
       // Sync FCM token after login
       syncFcmToken();
@@ -218,6 +236,9 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('user');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('auth_user');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('auth_user');
     
     if (window.location.pathname !== '/login') {
       window.location.href = '/login';

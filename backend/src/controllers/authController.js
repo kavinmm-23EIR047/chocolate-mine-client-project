@@ -11,7 +11,7 @@ const generateAccessToken = (userId) => {
     { userId: userId.toString() },
     process.env.JWT_SECRET,
     {
-      expiresIn: '15m'
+      expiresIn: '30d'
     }
   );
 };
@@ -30,14 +30,14 @@ const sendTokenResponse = (user, statusCode, res) => {
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
 
-  // Set HttpOnly access token cookie (Session cookie - deleted on browser close)
+  // Set HttpOnly access token cookie
   res.cookie('jwt', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   });
 
-  // Set HttpOnly refresh token cookie (Session cookie - deleted on browser close)
+  // Set HttpOnly refresh token cookie
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -46,6 +46,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     status: 'success',
+    token: accessToken,
     user: {
       id: user._id,
       name: user.name,

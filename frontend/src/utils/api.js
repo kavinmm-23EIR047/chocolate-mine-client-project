@@ -10,11 +10,11 @@ const api = axios.create({
 ---------------------------------------- */
 api.interceptors.request.use(
   (config) => {
-    let token = sessionStorage.getItem('token');
+    let token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
     // Fallback for OAuth sessions
     if (!token) {
-      const authUser = sessionStorage.getItem('auth_user');
+      const authUser = sessionStorage.getItem('auth_user') || localStorage.getItem('auth_user');
       if (authUser) {
         try {
           const parsed = JSON.parse(authUser);

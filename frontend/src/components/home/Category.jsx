@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../utils/api';
 import fallbackCakeImg from '../../assets/cake.png';
+import allCategoryImg from '../../assets/all.png';
 
 const FALLBACK_IMAGE = fallbackCakeImg;
 const IMAGE_BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v1', '') : (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
@@ -47,7 +48,8 @@ const HighlightCircle = ({ image, name, isActive, onClick, index }) => {
 
   const getImageUrl = (src) => {
     if (!src) return FALLBACK_IMAGE;
-    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
+    // Don't prefix backend URL for absolute URLs, data URIs, or local Vite assets (which contain /assets/ or /src/)
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') || src.includes('/assets/') || src.includes('/src/')) {
       return src;
     }
     const cleanSrc = src.startsWith('/') ? src : `/${src}`;
@@ -64,11 +66,11 @@ const HighlightCircle = ({ image, name, isActive, onClick, index }) => {
           {renderPremiumBackdrop(index)}
         </div>
 
-        <div className="absolute z-10 w-24 h-24 sm:w-28 sm:h-28 -top-6 -right-2 flex items-center justify-center filter drop-shadow-[0_14px_20px_rgba(0,0,0,0.35)] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-3">
+        <div className="absolute z-10 w-28 h-28 sm:w-32 sm:h-32 -top-8 -right-4 flex items-center justify-center filter drop-shadow-[0_14px_20px_rgba(0,0,0,0.35)] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-3">
           <img
             src={getImageUrl(image)}
             alt={name}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain scale-[1.3]"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = FALLBACK_IMAGE;
@@ -99,11 +101,32 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
         setLoading(true);
         const response = await api.get('/categories');
         const backend = response.data?.data || [];
-        const all = { name: 'All', image: FALLBACK_IMAGE };
-        const custom = { name: 'Custom Cakes', image: FALLBACK_IMAGE, isCustom: true };
-        setCategories([all, ...backend, custom]);
+        
+        // Find if 'All' exists in the backend
+        const allCategoryIndex = backend.findIndex(c => c.name.toLowerCase() === 'all');
+        let allCategory = { name: 'All', image: allCategoryImg };
+        
+        if (allCategoryIndex !== -1) {
+          // Use the uploaded image for the 'All' category
+          allCategory.image = allCategoryImg;
+          // Remove it from the backend array so it doesn't appear twice
+          backend.splice(allCategoryIndex, 1);
+        }
+
+        // Find if 'Custom Cakes' exists in the backend
+        const customCakeIndex = backend.findIndex(c => c.name.toLowerCase() === 'custom cakes' || c.name.toLowerCase() === 'custom cake');
+        
+        if (customCakeIndex !== -1) {
+          // If it exists, mark it so it routes to the custom cake page instead of filtering
+          backend[customCakeIndex].isCustom = true;
+          setCategories([allCategory, ...backend]);
+        } else {
+          // Fallback if not added in admin panel
+          const custom = { name: 'Custom Cakes', image: FALLBACK_IMAGE, isCustom: true };
+          setCategories([allCategory, ...backend, custom]);
+        }
       } catch (error) {
-        setCategories([{ name: 'All', image: FALLBACK_IMAGE }]);
+        setCategories([{ name: 'All', image: allCategoryImg }]);
       } finally {
         setLoading(false);
       }

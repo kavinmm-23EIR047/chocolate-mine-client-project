@@ -141,23 +141,20 @@ const ThemeBuilder = ({ themeId, onBack }) => {
       // Upload pending color images
       const currentColors = themeId ? theme.colors : (await adminService.getCustomCakeThemes()).data.data.find(t => t._id === savedThemeId)?.colors || [];
       
-      const uploadPromises = Object.entries(pendingColorMappings)
-        .filter(([, data]) => isMappingReadyToSave(data))
-        .map(async ([colorName, data]) => {
+      const uploadEntries = Object.entries(pendingColorMappings).filter(([, data]) => isMappingReadyToSave(data));
+      if (uploadEntries.length > 0) {
+        toast.loading('Uploading images...', { id: 'upload-toast' });
+        for (const [colorName, data] of uploadEntries) {
           const colorRecord = currentColors.find(c => c.name === colorName);
-          if (!colorRecord || !colorRecord._id) return;
+          if (!colorRecord || !colorRecord._id) continue;
 
           const formData = new FormData();
           formData.append('price', data.price);
           if (data.files.tier1) formData.append('tier1Image', data.files.tier1);
           if (data.files.tier2) formData.append('tier2Image', data.files.tier2);
           if (data.files.tier3) formData.append('tier3Image', data.files.tier3);
-          return adminService.uploadCustomCakeThemeColorImages(savedThemeId, colorRecord._id, formData);
-        });
-
-      if (uploadPromises.length > 0) {
-        toast.loading('Uploading images...', { id: 'upload-toast' });
-        await Promise.all(uploadPromises);
+          await adminService.uploadCustomCakeThemeColorImages(savedThemeId, colorRecord._id, formData);
+        }
         toast.success('Images uploaded successfully', { id: 'upload-toast' });
       }
 

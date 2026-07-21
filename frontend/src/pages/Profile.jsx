@@ -465,22 +465,20 @@ const AddressModal = ({ address, onClose, onSuccess }) => {
 
         <AnimatePresence>
           {showMap && (
-            <div className="fixed inset-0 z-[300] bg-background/90 backdrop-blur-xl p-4 flex items-center justify-center">
+            <div className="fixed inset-0 z-[9999] bg-background flex flex-col w-full h-full p-0 overflow-hidden">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-card rounded-2xl sm:rounded-[3rem] w-full max-w-5xl h-[85vh] overflow-hidden relative shadow-premium border border-border"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="w-full h-full flex flex-col"
               >
-                <MapSelector onSelect={(data) => {
-                  setFormData({ ...formData, lat: data.position.lat, lng: data.position.lng, street: data.address });
-                  setShowMap(false);
-                }} />
-                <button
-                  onClick={() => setShowMap(false)}
-                  className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-surface rounded-full shadow-premium flex items-center justify-center hover:bg-error hover:text-button-text transition-all border border-border/50"
-                >
-                  <X size={18} className="sm:w-6 sm:h-6" />
-                </button>
+                <MapSelector 
+                  onClose={() => setShowMap(false)}
+                  onSelect={(data) => {
+                    setFormData({ ...formData, lat: data.position.lat, lng: data.position.lng, street: data.address });
+                    setShowMap(false);
+                  }} 
+                />
               </motion.div>
             </div>
           )}

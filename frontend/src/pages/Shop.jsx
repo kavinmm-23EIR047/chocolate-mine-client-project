@@ -15,12 +15,12 @@ import FilterDrawer from '../components/filter/FilterDrawer';
 
 const getBaseFilterWord = (term) => {
   if (!term) return '';
-  return term.toLowerCase().replace(/[\s-]/g, '');
+  return term.toLowerCase().replace(/[\s_-]/g, '');
 };
 
 const formatLabel = (str) => {
   if (!str) return '';
-  return str.split(/[\s-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return str.split(/[\s_-]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
 const Shop = () => {
@@ -97,11 +97,20 @@ const Shop = () => {
     setActiveFilters(filters);
   }, [JSON.stringify(activeCategories), activeOccasion, activeRating, priceRange, sortBy]);
 
+  // Helper to check if a param value is default and should be omitted from URL
+  const isDefaultParamValue = (key, value) => {
+    if (!value || value === 'all' || value === 0 || value === false || value === '') return true;
+    if (key === 'minPrice' && Number(value) <= 10) return true;
+    if (key === 'maxPrice' && Number(value) >= 10000) return true;
+    if (key === 'sort' && String(value) === 'newest') return true;
+    return false;
+  };
+
   // CRITICAL FIX: Update search param with proper state management
   const updateSearchParam = useCallback((key, value) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (!value || value === 'all' || value === 0 || value === false || value === '') {
+      if (isDefaultParamValue(key, value)) {
         next.delete(key);
       } else {
         next.set(key, String(value));
@@ -114,7 +123,7 @@ const Shop = () => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       Object.entries(updates).forEach(([key, value]) => {
-        if (!value || value === 'all' || value === 0 || value === false || value === '') {
+        if (isDefaultParamValue(key, value)) {
           next.delete(key);
         } else {
           next.set(key, String(value));
@@ -128,25 +137,30 @@ const Shop = () => {
   const handleSearchChange = useCallback((e) => {
     const value = e.target.value;
     setLocalSearchTerm(value);
-    setSearchTerm(value);
-    
-    // Clear existing timeout
+
     if (window.searchTimeout) {
       clearTimeout(window.searchTimeout);
     }
-    
-    // Debounce search
+
     window.searchTimeout = setTimeout(() => {
+      setSearchTerm(value);
       updateSearchParam('search', value);
-    }, 400);
+    }, 300);
   }, [updateSearchParam]);
 
-  const handleSearchClear = useCallback(() => {
+  // Handle clear search
+  const handleClearSearch = useCallback(() => {
     setLocalSearchTerm('');
     setSearchTerm('');
     updateSearchParam('search', '');
-    if (window.searchTimeout) {
-      clearTimeout(window.searchTimeout);
+  }, [updateSearchParam]);
+
+  // Handle category tab change
+  const handleCategoryChange = useCallback((catName) => {
+    if (catName === 'all') {
+      updateSearchParam('category', '');
+    } else {
+      updateSearchParam('category', catName);
     }
   }, [updateSearchParam]);
 
@@ -167,7 +181,7 @@ const Shop = () => {
     if (filters.categories?.length) {
       updates.category = filters.categories.join(',');
     } else {
-      updates.category = 'all';
+      updates.category = '';
     }
     
     if (filters.subCategory) {
@@ -179,7 +193,7 @@ const Shop = () => {
     if (filters.occasions?.length) {
       updates.occasion = filters.occasions[0];
     } else {
-      updates.occasion = 'all';
+      updates.occasion = '';
     }
     
     if (filters.ratings?.length) {
@@ -189,17 +203,17 @@ const Shop = () => {
     }
     
     if (filters.priceRange) {
-      updates.minPrice = filters.priceRange.min;
-      updates.maxPrice = filters.priceRange.max;
+      updates.minPrice = filters.priceRange.min > 10 ? filters.priceRange.min : '';
+      updates.maxPrice = filters.priceRange.max < 10000 ? filters.priceRange.max : '';
     } else {
-      updates.minPrice = 10;
-      updates.maxPrice = 10000;
+      updates.minPrice = '';
+      updates.maxPrice = '';
     }
     
     if (filters.sort?.length) {
-      updates.sort = filters.sort[0];
+      updates.sort = filters.sort[0] !== 'newest' ? filters.sort[0] : '';
     } else {
-      updates.sort = 'newest';
+      updates.sort = '';
     }
     
     updateMultipleSearchParams(updates);
@@ -372,13 +386,55 @@ const Shop = () => {
       );
     }
 
-    // Category Filter - strict category matching only
+    // Category Filter - flexible & resilient category matching
     if (activeCategories.length > 0) {
       products = products.filter(p => {
-        const prodCats = Array.isArray(p.category) ? p.category : [p.category || ''];
+        let prodCats = [];
+        if (Array.isArray(p.category)) {
+          prodCats = [...p.category];
+        } else if (typeof p.category === 'string') {
+          const trimmed = p.category.trim();
+          if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+            try {
+              const parsed = JSON.parse(trimmed);
+              if (Array.isArray(parsed)) prodCats = parsed;
+              else prodCats = [trimmed];
+            } catch {
+              prodCats = [trimmed];
+            }
+          } else {
+            prodCats = [trimmed];
+          }
+        }
+        if (p.subCategory && typeof p.subCategory === 'string') {
+          prodCats.push(p.subCategory);
+        }
+
         return activeCategories.some(ac => {
           const baseAc = getBaseFilterWord(ac);
-          return prodCats.some(pc => typeof pc === 'string' && getBaseFilterWord(pc).includes(baseAc));
+          if (!baseAc) return false;
+          return prodCats.some(pc => {
+            if (typeof pc !== 'string') return false;
+            const basePc = getBaseFilterWord(pc);
+            if (!basePc) return false;
+
+            if (basePc === baseAc) return true;
+
+            const acStem = baseAc.endsWith('s') ? baseAc.slice(0, -1) : baseAc;
+            const pcStem = basePc.endsWith('s') ? basePc.slice(0, -1) : basePc;
+            if (pcStem === acStem) return true;
+
+            // Product category can be broader or contain filter (e.g. pc="chocolate-bouquet", ac="bouquet")
+            if (basePc.includes(baseAc) || pcStem.includes(acStem)) return true;
+
+            // Handle slight spelling/slug differences (e.g. "chocolatebouque" vs "chocolatebouquet")
+            if (baseAc.length >= 8 && basePc.length >= 8) {
+              const checkLen = Math.min(baseAc.length, basePc.length, 10);
+              if (baseAc.slice(0, checkLen) === basePc.slice(0, checkLen)) return true;
+            }
+
+            return false;
+          });
         });
       });
     }

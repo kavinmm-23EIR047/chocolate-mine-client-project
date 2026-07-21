@@ -41,7 +41,7 @@ const productSchema = Joi.object({
   shortDescription: Joi.string().required(),
   image: Joi.string().required(),
   location: Joi.string().valid('coimbatore', 'chennai', 'bangalore', 'hyderabad'),
-  occasion: Joi.array().items(Joi.string().valid('birthday', 'anniversary', 'him', 'her')),
+  occasion: Joi.array().items(Joi.string()),
   featured: Joi.boolean(),
   bestseller: Joi.boolean(),
   isActive: Joi.boolean(),

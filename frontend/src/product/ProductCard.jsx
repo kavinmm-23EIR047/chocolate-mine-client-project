@@ -10,6 +10,29 @@ import { addToCart, removeFromCart, updateCartQty } from '../redux/slices/cartSl
 import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
 
+const BENTO_FLAVOR_PRICES = {
+  'White Forest': 380,
+  'Butterscotch': 390,
+  'Rose Milk': 410,
+  'Honey & Almond': 410,
+  'Black Forest': 380,
+  'Choco Fudge': 390,
+  'Choco Truffle': 410,
+  'Choco Oreo': 410,
+  'Choco Caramel': 420,
+  'Death by Chocolate': 450,
+  'Red Velvet': 470,
+  'Lotus Biscoff': 480,
+  'Choco Pistachio': 480,
+};
+
+const getFlavorPrice = (flavor) => {
+  if (!flavor) return 0;
+  if (flavor.price && Number(flavor.price) > 0) return Number(flavor.price);
+  if (flavor.name && BENTO_FLAVOR_PRICES[flavor.name]) return BENTO_FLAVOR_PRICES[flavor.name];
+  return 0;
+};
+
 const ImagePlaceholder = () => (
   <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: 'var(--card-soft)' }}>
     <div className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
@@ -194,7 +217,14 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
   const isCake = Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('cake')) : (product?.category || '').toLowerCase().includes('cake');
   const isBento = (Array.isArray(product?.category) ? product.category.some(c => typeof c === 'string' && c.toLowerCase().includes('bento')) : (product?.category || '').toLowerCase().includes('bento')) || product?.cakeType?.toLowerCase().includes('bento');
-  const defaultOptions = isCake ? { flavor: 'Standard', weight: isBento ? '250g' : '500g' } : null;
+
+  const defaultFlavor = (product?.flavors && Array.isArray(product.flavors) && product.flavors.length > 0)
+    ? product.flavors[0]
+    : (isBento ? { name: 'White Forest', price: 380 } : null);
+  const defaultFlavorName = defaultFlavor ? defaultFlavor.name : 'Standard';
+  const defaultFlavorPrice = getFlavorPrice(defaultFlavor);
+
+  const defaultOptions = isCake ? { flavor: defaultFlavorName, weight: isBento ? '250g' : '500g' } : null;
 
   const hasVariants = product?.hasVariants || (product?.variants && product.variants.length > 0);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -226,8 +256,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
     'rounded-xl': 'rounded-xl',
   };
 
-  const baseMrp = activeVariant ? activeVariant.price : (product?.price || 0);
-  const baseOfferPrice = !activeVariant && product?.offerPrice ? product.offerPrice : null;
+  const baseMrp = (activeVariant ? activeVariant.price : Number(product?.price || 0)) + defaultFlavorPrice;
+  const baseOfferPrice = (!activeVariant && product?.offerPrice ? Number(product.offerPrice) + defaultFlavorPrice : null);
 
   const hasOffer = baseOfferPrice && baseOfferPrice < baseMrp;
   const displayPrice = hasOffer ? baseOfferPrice : baseMrp;
@@ -273,13 +303,13 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       setAddingToCart(true);
       
       const options = isCake
-        ? { flavor: 'Standard', weight: isBento ? '250g' : '500g' }
+        ? { flavor: defaultFlavorName, weight: isBento ? '250g' : '500g' }
         : activeVariant
           ? { flavor: activeVariant.flavor, weight: activeVariant.weight }
           : null;
           
       const variantPrice = isCake
-        ? Number(product.price || 0)
+        ? Number(product.price || 0) + defaultFlavorPrice
         : activeVariant
           ? activeVariant.price
           : null;
@@ -331,10 +361,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       .map(str => str.replace(/\\"/g, '').replace(/"/g, '').trim())
       .filter(Boolean);
 
-    const rawCat = cleanStrings[0] || '';
-    if (!rawCat) return '';
+    if (cleanStrings.length === 0) return '';
     
-    const formattedCat = rawCat.split(/[\s-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    const formattedCats = cleanStrings.map(cat => 
+      cat.split(/[\s_-]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')
+    ).join(', ');
     
     if (product?.subCategory && typeof product.subCategory === 'string' && product.subCategory.trim() !== '') {
       let rawSub = product.subCategory.trim();
@@ -348,12 +379,12 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       }
       const cleanSub = rawSub.replace(/\\"/g, '').replace(/"/g, '').trim();
       if (cleanSub) {
-        const formattedSub = cleanSub.split(/[\s-_]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
-        return `${formattedCat} (${formattedSub})`;
+        const formattedSub = cleanSub.split(/[\s_-]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        return `${formattedCats} (${formattedSub})`;
       }
     }
     
-    return formattedCat;
+    return formattedCats;
   };
 
   if (!product) return null;

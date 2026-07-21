@@ -777,9 +777,9 @@ const Checkout = () => {
   }, 0);
 
   const isAddressSelected = !!deliveryInfo.position;
-  const gst = Math.round(subtotal * 0.18);
-  const convenienceFee = Math.round(subtotal * 0.02);
-  const clientTotal = subtotal + (isAddressSelected ? deliveryFee : 0) + gst + convenienceFee;
+  const gst = 0; // Product prices are inclusive of 18% GST (no extra GST line item added)
+  const convenienceFee = Math.round(subtotal * 0.025);
+  const clientTotal = subtotal + (isAddressSelected ? deliveryFee : 0) + convenienceFee - couponDiscount;
   const displayTotal = backendTotal !== null ? backendTotal : clientTotal;
 
   const availableUnappliedCoupons = useMemo(() => {
@@ -1054,7 +1054,7 @@ const Checkout = () => {
             street: isWhatsAppOrder ? 'Shop Pickup' : (addressDetails.street || deliveryInfo.address),
             landmark: isWhatsAppOrder ? 'Shop Pickup' : addressDetails.landmark,
             city: 'Coimbatore',
-            pincode: '641001',
+            pincode: isWhatsAppOrder ? '641001' : (addressDetails.pincode || deliveryInfo.pincode || '641001'),
             lat: deliveryInfo.position?.lat,
             lng: deliveryInfo.position?.lng,
           },
@@ -1143,8 +1143,8 @@ const Checkout = () => {
           `   Subtotal: ₹${subtotal}\n` +
           (couponDiscount > 0 ? `   Coupon Discount: -₹${couponDiscount}\n` : '') +
           (isDelivery ? `   Delivery Fee: ₹${deliveryFee}\n` : '') +
-          `   GST (18%): ₹${gst}\n` +
-          `   Convenience Fee (2%): ₹${convenienceFee}\n` +
+          `   Convenience Fee (2.5%): ₹${convenienceFee}\n` +
+          `   GST (18%): Inclusive\n` +
           `   *Total Amount:* ₹${clientTotal}\n\n` +
           `📅 *${isDelivery ? 'Delivery' : 'Pickup'} Date:* ${new Date(deliveryDate).toLocaleDateString()}\n` +
           `⏰ *${isDelivery ? 'Delivery' : 'Pickup'} Slot:* ${deliverySlot || 'N/A'}\n\n` +
@@ -1523,7 +1523,7 @@ const Checkout = () => {
                                 type="text"
                               />
                             </div>
-                            <div className="space-y-1.5 sm:space-y-2 sm:col-span-2">
+                            <div className="space-y-1.5 sm:space-y-2">
                               <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
                                 <Tag size={12} className="text-muted" /> Landmark *
                               </label>
@@ -1533,6 +1533,19 @@ const Checkout = () => {
                                 value={addressDetails.landmark || ''}
                                 onChange={(e) => setAddressDetails({ ...addressDetails, landmark: e.target.value })}
                                 type="text"
+                              />
+                            </div>
+                            <div className="space-y-1.5 sm:space-y-2">
+                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <MapPin size={12} className="text-muted" /> Pincode *
+                              </label>
+                              <input
+                                className="input-field text-sm sm:text-base min-w-0 font-bold"
+                                placeholder="6-digit Pincode (e.g. 641012)"
+                                value={addressDetails.pincode || ''}
+                                onChange={(e) => setAddressDetails({ ...addressDetails, pincode: e.target.value.replace(/[^0-9]/g, '').slice(0, 6) })}
+                                type="text"
+                                maxLength={6}
                               />
                             </div>
                           </>
@@ -2016,12 +2029,12 @@ const Checkout = () => {
                     </div>
                   )}
                   <div className="flex justify-between text-sm sm:text-base">
-                    <span className="text-muted font-medium">GST (18%)</span>
-                    <span className="font-black text-heading">{formatCurrency(gst)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm sm:text-base">
-                    <span className="text-muted font-medium">Convenience Fee (2%)</span>
+                    <span className="text-muted font-medium">Convenience Fee (2.5%)</span>
                     <span className="font-black text-heading">{formatCurrency(convenienceFee)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted/70 pt-0.5">
+                    <span>GST (18%)</span>
+                    <span className="font-bold text-success-text">Included in Product Price</span>
                   </div>
 
                   {(offerDiscount + couponDiscount) > 0 && (
@@ -2127,17 +2140,27 @@ const Checkout = () => {
 
       <AnimatePresence>
         {showMap && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center p-0 sm:p-4">
+          <div className="fixed inset-0 z-[9999] bg-background flex flex-col w-full h-full p-0 overflow-hidden">
             <motion.div
-              initial={{ scale: 0.97, opacity: 0, y: 40 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.97, opacity: 0, y: 40 }}
-              className="bg-card rounded-t-3xl sm:rounded-3xl w-full sm:max-w-4xl h-[85vh] sm:h-[80vh] relative overflow-hidden shadow-premium border-2 border-border-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="w-full h-full flex flex-col"
             >
-              <button onClick={() => setShowMap(false)} className="absolute top-4 right-4 z-10 bg-surface p-2 sm:p-2.5 rounded-full shadow text-foreground hover:bg-muted/10 transition-colors">
-                <X size={18} />
-              </button>
-              <MapSelector onSelect={(data) => { setDeliveryInfo(data); setShowMap(false); }} />
+              <MapSelector 
+                onClose={() => setShowMap(false)}
+                onSelect={(data) => { 
+                  setDeliveryInfo(data); 
+                  if (data.address) {
+                    setAddressDetails(prev => ({
+                      ...prev,
+                      street: data.address,
+                      pincode: data.pincode || prev.pincode || ''
+                    }));
+                  }
+                  setShowMap(false); 
+                }} 
+              />
             </motion.div>
           </div>
         )}

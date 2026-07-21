@@ -75,7 +75,9 @@ const OrderDetailsModal = ({ order, onClose }) => {
             {order.address?.landmark && (
               <p className="text-sm text-muted font-bold">Landmark: {order.address.landmark}</p>
             )}
-            <p className="text-sm text-muted">{order.address?.city}, {order.address?.pincode}</p>
+            <p className="text-sm text-heading font-black mt-1">
+              Pincode: <span className="text-primary">{order.address?.pincode || '641001'}</span>
+            </p>
             
             {order.address?.lat && order.address?.lng && (
               <p className="text-sm mt-3">
@@ -177,12 +179,12 @@ const OrderDetailsModal = ({ order, onClose }) => {
                 <span className="font-semibold text-heading">{formatCurrency(order.deliveryCharge)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">Convenience Fee</span>
+                <span className="text-muted">Convenience Fee (2.5%)</span>
                 <span className="font-semibold text-heading">{formatCurrency(order.convenienceFee)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted">GST</span>
-                <span className="font-semibold text-heading">{formatCurrency(order.gst)}</span>
+              <div className="flex justify-between text-xs text-muted/70">
+                <span>GST (18%)</span>
+                <span className="font-bold text-success-text">Included in Product Price</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t border-border/40">
                 <span className="text-heading">Total</span>

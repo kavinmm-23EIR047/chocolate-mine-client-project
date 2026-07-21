@@ -78,7 +78,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-footer/80 backdrop-blur-xl z-[200]"
+            className="fixed inset-0 bg-footer/80 backdrop-blur-xl z-[9999]"
           />
 
           {/* Search Container */}
@@ -86,7 +86,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
-            className="fixed top-0 left-0 right-0 bg-navbar z-[210] shadow-2xl border-b border-border/10 overflow-y-auto max-h-[90vh]"
+            className="fixed top-0 left-0 right-0 bg-navbar z-[10000] shadow-2xl border-b border-border/10 overflow-y-auto max-h-[90vh]"
           >
             <div className="max-w-[1800px] mx-auto px-4 sm:px-12 py-6 sm:py-10">
               

@@ -10,6 +10,7 @@ const ThemeBuilder = ({ themeId, onBack }) => {
     name: '',
     description: '',
     isActive: true,
+    basePrice: 0,
     displayOrder: 0,
     category: [],
     tiers: {
@@ -45,73 +46,36 @@ const ThemeBuilder = ({ themeId, onBack }) => {
       setLoading(true);
       await adminService.seedCustomCakeDefaults(); // Ensure defaults exist
       
-      const [colorsRes, flavoursRes, categoriesRes] = await Promise.all([
+      const [colorsRes, categoriesRes] = await Promise.all([
         adminService.getCustomCakeColors(),
-        adminService.getCustomCakeFlavours(),
         adminService.getCategories({ type: 'custom' })
       ]);
 
       setCategories(categoriesRes.data?.data || []);
-
-      const colorsData = colorsRes.data.data || [];
-      const flavoursData = flavoursRes.data.data || [];
-
-      setGlobalColors(colorsData);
+      setGlobalColors(colorsRes.data?.data || []);
 
       if (themeId) {
         const themesRes = await adminService.getCustomCakeThemes();
         const existingTheme = themesRes.data.data.find(t => t._id === themeId);
         if (existingTheme) {
-          // If the existing theme is somehow empty of flavors or colors, automatically pull from the master lists
-          let finalFlavors = existingTheme.flavors || [];
-          if (finalFlavors.length === 0) {
-            finalFlavors = flavoursData.filter(f => f.isActive).map(f => ({
-              name: f.name,
-              category: f.category,
-              weights: f.weights,
-              isActive: f.isActive
-            }));
-          }
-
-          let finalColors = existingTheme.colors || [];
-          if (finalColors.length === 0) {
-            finalColors = colorsData.filter(c => c.isActive).map(c => ({
-              name: c.name,
-              hexCode: c.hexCode,
-              isActive: c.isActive,
-              price: 0,
-              images: { tier1: null, tier2: null, tier3: null }
-            }));
-          }
-
           setTheme({
             ...existingTheme,
             category: existingTheme.category || [],
-            flavors: finalFlavors,
-            colors: finalColors
+            flavors: existingTheme.flavors || [],
+            colors: existingTheme.colors || []
           });
-          setThemeColors(finalColors);
+          setThemeColors(existingTheme.colors || []);
         }
       } else {
-        // Pre-populate defaults for a NEW theme
+        // Clean initial state for new theme - colors and flavors added as configured by admin
         setTheme(prev => ({
           ...prev,
-          flavors: flavoursData.filter(f => f.isActive).map(f => ({
-            name: f.name,
-            category: f.category,
-            weights: f.weights,
-            isActive: f.isActive
-          })),
-          colors: colorsData.filter(c => c.isActive).map(c => ({
-            name: c.name,
-            hexCode: c.hexCode,
-            isActive: c.isActive,
-            price: 0,
-            images: { tier1: null, tier2: null, tier3: null }
-          }))
+          flavors: [],
+          colors: []
         }));
       }
     } catch (error) {
+      console.error('Error loading theme builder data:', error);
       toast.error('Failed to load theme data');
     } finally {
       setLoading(false);
@@ -334,14 +298,18 @@ const ThemeBuilder = ({ themeId, onBack }) => {
       {/* SECTION 1: THEME INFO */}
       <div className="space-y-4 bg-border/5 p-5 rounded-xl border border-border/50">
         <h4 className="font-black text-sm uppercase tracking-wider text-muted mb-2">1. Theme Information</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-black text-muted uppercase">Theme Name</label>
             <input type="text" value={theme.name} onChange={e => setTheme({...theme, name: e.target.value})} className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold" placeholder="e.g. Teddy Theme" />
           </div>
           <div className="space-y-1.5">
+            <label className="text-xs font-black text-muted uppercase">Theme Base Price (₹)</label>
+            <input type="number" value={theme.basePrice || 0} onChange={e => setTheme({...theme, basePrice: parseFloat(e.target.value) || 0})} className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="e.g. 500" />
+          </div>
+          <div className="space-y-1.5">
             <label className="text-xs font-black text-muted uppercase">Display Order</label>
-            <input type="number" value={theme.displayOrder} onChange={e => setTheme({...theme, displayOrder: parseInt(e.target.value) || 0})} className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold" />
+            <input type="number" value={theme.displayOrder} onChange={e => setTheme({...theme, displayOrder: parseInt(e.target.value) || 0})} className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
           </div>
         </div>
         <div className="space-y-1.5">
@@ -412,13 +380,16 @@ const ThemeBuilder = ({ themeId, onBack }) => {
         </div>
       </div>
 
-      {/* SECTION 3: COLORS & PRICING */}
+      {/* SECTION 3: COLORS & IMAGES (OPTIONAL) */}
       <div className="space-y-4 bg-border/5 p-5 rounded-xl border border-border/50">
         <div className="flex justify-between items-center mb-2">
-          <h4 className="font-black text-sm uppercase tracking-wider text-muted">3. Theme Colors & Base Price</h4>
+          <div>
+            <h4 className="font-black text-sm uppercase tracking-wider text-muted">3. Theme Colors & Images (Optional)</h4>
+            <p className="text-xs text-muted">Add colors and tier images if this theme has color options. If none added, default design is used.</p>
+          </div>
           <div className="flex gap-2">
             <button onClick={() => setShowColorModal(true)} className="text-xs font-black bg-input border border-border px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-border/30 shadow-sm transition-all">
-              <Edit2 size={14} /> Manage Colors
+              <Edit2 size={14} /> Add / Manage Colors
             </button>
           </div>
         </div>

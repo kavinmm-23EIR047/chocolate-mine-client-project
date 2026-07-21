@@ -89,127 +89,47 @@ export default function CustomCakeDetail({
         <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">100% Pure Veg & Eggless</span>
       </div>
 
-      {/* ── DOMINO'S STYLE SEARCHABLE FLAVOUR DROPDOWN ── */}
-      <div className="relative z-40">
-        <label className="block text-xs font-bold text-[var(--muted)] mb-1.5 uppercase tracking-wider">
+      {/* ── TICK-BASED BENTO CAKE STYLE FLAVOUR SELECTION ── */}
+      <div className="space-y-2">
+        <label className="block text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
           Inside Cake Flavour <span className="text-red-500">*</span>
         </label>
 
-        <button
-          type="button"
-          onClick={() => setFlavorDropdownOpen(!flavorDropdownOpen)}
-          className={`w-full bg-[var(--card)] border-2 ${flavorDropdownOpen ? 'border-[var(--primary)]' : 'border-[var(--border)]'} text-[var(--foreground)] rounded-xl px-4 py-3.5 text-sm focus:outline-none flex items-center justify-between transition-all font-black shadow-sm`}
-        >
-          {selectedDbFlavor ? (
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wide leading-none mb-1">Selected</span>
-              <span className="leading-none">{selectedDbFlavor.name}</span>
-            </div>
-          ) : (
-            <span className="text-[var(--muted)] font-bold">Select a flavour...</span>
-          )}
-          <ChevronDown size={18} className={`transition-transform duration-200 text-[var(--primary)] ${flavorDropdownOpen ? 'rotate-180' : ''}`} />
-        </button>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[280px] overflow-y-auto pr-1">
+          {theme && theme.dbFlavors && theme.dbFlavors.map(flavor => {
+            const isSelected = selectedDbFlavor?._id === flavor._id;
+            const weightVal = parseFloat(weight?.label || '1');
+            const wObj = flavor.weights?.find(x => x.kg === weightVal);
+            const priceVal = wObj ? wObj.price : (flavor.weights?.find(x => x.kg === 1)?.price || 1120);
 
-        <AnimatePresence>
-          {flavorDropdownOpen && (
-            <>
-              {/* Mobile Overlay covering the modal */}
-              <div className="md:hidden fixed inset-0 z-[200] bg-[var(--background)]" />
-
-              {/* Desktop Overlay */}
-              <div className="hidden md:block fixed inset-0 z-40 bg-black/0" onClick={() => setFlavorDropdownOpen(false)} />
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2 }}
-                className="
-                  fixed inset-0 z-[201] flex flex-col bg-[var(--background)] rounded-t-3xl
-                  md:absolute md:inset-auto md:left-0 md:right-0 md:mt-2 md:max-h-[320px] md:bg-[var(--card)] md:border md:border-[var(--border)] md:rounded-2xl md:shadow-2xl md:z-50
-                "
+            return (
+              <button
+                key={flavor._id}
+                type="button"
+                onClick={() => setSelectedDbFlavor(flavor)}
+                className={`p-3 rounded-xl border-2 text-left transition-all flex flex-col justify-between relative ${
+                  isSelected 
+                    ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-sm' 
+                    : 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--primary)]/40'
+                }`}
               >
-                {/* Mobile Header */}
-                <div className="md:hidden flex flex-col p-4 pt-3 border-b border-[var(--border)] shrink-0 bg-[var(--card)] rounded-t-3xl">
-                  {/* Drag Handle Pill */}
-                  <div className="w-12 h-1.5 bg-[var(--border)] rounded-full mx-auto mb-4" />
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-black text-[var(--heading)] text-lg">Select Flavour</h3>
-                    <button onClick={(e) => { e.stopPropagation(); setFlavorDropdownOpen(false); }} className="w-8 h-8 flex items-center justify-center bg-[var(--background)] border border-[var(--border)] rounded-full text-[var(--muted)] hover:text-[var(--heading)]">
-                      <X size={16} />
-                    </button>
-                  </div>
+                <div className="flex items-start justify-between gap-1 mb-1">
+                  <span className={`text-xs font-black truncate leading-tight ${isSelected ? 'text-[var(--primary)]' : 'text-[var(--heading)]'}`}>
+                    {flavor.name}
+                  </span>
+                  {isSelected && (
+                    <span className="w-4 h-4 rounded-full bg-[var(--primary)] text-[var(--background)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check size={10} strokeWidth={3} />
+                    </span>
+                  )}
                 </div>
-
-                <div className="p-3 border-b border-[var(--border)] bg-[var(--background)] shrink-0 relative z-10">
-                  <div className="relative">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-                    <input
-                      type="text"
-                      placeholder="Search flavours..."
-                      value={flavorSearch}
-                      onChange={(e) => setFlavorSearch(e.target.value)}
-                      className="w-full bg-[var(--input)] border border-[var(--input-border)] pl-9 pr-3 py-3 md:py-2.5 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[var(--primary)] font-bold text-[var(--foreground)] transition-all"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto relative z-10 pb-safe">
-                  {theme && Array.from(new Set(theme.dbFlavors.map(f => f.category))).map(category => {
-                    const categoryFlavors = theme.dbFlavors.filter(
-                      f => f.category === category && f.name.toLowerCase().includes(flavorSearch.toLowerCase())
-                    );
-                    if (categoryFlavors.length === 0) return null;
-
-                    return (
-                      <div key={category} className="mt-2">
-                        <div className="text-[10px] font-black text-[var(--muted)] uppercase tracking-wider px-4 py-1.5 select-none bg-[var(--card-soft)]">
-                          {category}
-                        </div>
-                        <div className="px-2 pt-1 space-y-1">
-                          {categoryFlavors.map(flavor => {
-                            const isSelected = selectedDbFlavor?._id === flavor._id;
-                            return (
-                              <button
-                                key={flavor._id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedDbFlavor(flavor);
-                                  setFlavorDropdownOpen(false);
-                                  setFlavorSearch('');
-                                }}
-                                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm flex items-center justify-between font-bold transition-all ${isSelected
-                                  ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20'
-                                  : 'hover:bg-[var(--input-hover)] text-[var(--foreground)] border border-transparent'
-                                  }`}
-                              >
-                                <span>{flavor.name}</span>
-                                <span className="flex items-center gap-2">
-                                  <span className={`text-[11px] font-bold ${isSelected ? 'text-[var(--primary)]' : 'text-[var(--muted)]'}`}>
-                                    +₹{(() => {
-                                      const weightVal = parseFloat(weight.label);
-                                      const wObj = flavor.weights?.find(x => x.kg === weightVal);
-                                      if (wObj) return wObj.price;
-                                      const base = flavor.weights?.find(x => x.kg === 1);
-                                      return base ? base.price : 1120;
-                                    })()}
-                                  </span>
-                                  {isSelected && <Check size={16} className="text-[var(--primary)]" />}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+                <span className={`text-[10px] font-bold ${isSelected ? 'text-[var(--primary)] font-black' : 'text-[var(--muted)]'}`}>
+                  +₹{priceVal}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── CUSTOM CONFIGURATION INPUTS ── */}

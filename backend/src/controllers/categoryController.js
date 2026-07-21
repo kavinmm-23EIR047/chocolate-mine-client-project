@@ -1,4 +1,5 @@
 const Category = require('../models/Category');
+const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const cloudinaryService = require('../services/cloudinaryService');
@@ -112,16 +113,24 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
   }
 
   const { name, label, active, subCategories, categoryType } = req.body;
+  const oldName = category.name;
   
-  if (name) {
+  if (name && name.trim().toLowerCase() !== oldName) {
+    const newName = name.trim().toLowerCase();
     const existingCategory = await Category.findOne({ 
-      name: name.trim().toLowerCase(),
+      name: newName,
       _id: { $ne: req.params.id }
     });
     if (existingCategory) {
       return next(new AppError('Category name already exists', 400));
     }
-    category.name = name.trim().toLowerCase();
+    category.name = newName;
+
+    // Synchronize all product documents to the new category name
+    await Product.updateMany(
+      { category: oldName },
+      { $set: { "category.$": newName } }
+    );
   }
   
   if (label !== undefined) category.label = label;

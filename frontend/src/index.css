@@ -679,16 +679,7 @@ td {
   }
 }
 
-/* Push down sticky navbar when notification banner is visible */
-.has-notification-banner nav.sticky {
-  top: 46px !important;
-}
 
-@media (max-width: 639px) {
-  .has-notification-banner nav.sticky {
-    top: 50px !important;
-  }
-}
 
 /* Gentle bounce animation for rider marker */
 @keyframes gentle-bounce {

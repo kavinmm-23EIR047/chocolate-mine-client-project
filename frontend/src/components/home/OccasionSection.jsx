@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDeliveryLocation } from '../../context/LocationContext';
 import api from '../../utils/api';
 import { Gift, Heart, Sparkles, Star, ArrowRight, PartyPopper } from 'lucide-react';
+import ImageWithSkeleton from '../ui/ImageWithSkeleton';
 
 // Array of dynamic icons to give each card a unique feel
 const CARD_ICONS = [Gift, Heart, PartyPopper, Star, Sparkles];
@@ -100,10 +101,11 @@ const OccasionSection = () => {
                   }}
                 >
                   {/* Background Image */}
-                  <img
+                  <ImageWithSkeleton
                     src={occ.image}
                     alt={occ.label || occ.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    containerClassName="absolute inset-0 w-full h-full"
                   />
 
                   {/* Rich Gradient Overlay */}

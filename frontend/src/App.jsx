@@ -178,6 +178,14 @@ const GlobalNotificationHandler = () => {
 };
 
 function App() {
+  useEffect(() => {
+    // 🚀 Background health ping to wake up Render free tier backend instantly on page load
+    const healthUrl = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace('/api/v1', '/health')
+      : '/health';
+    fetch(healthUrl, { method: 'GET' }).catch(() => {});
+  }, []);
+
   return (
     <AuthProvider>
       <LocationProvider>

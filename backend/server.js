@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
+const compression = require('compression');
 require('dotenv').config();
 
 const connectDB = require('./src/config/db');
@@ -60,6 +61,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(compression());
 
 /* ==================================
    SECURITY HEADERS
@@ -225,6 +227,19 @@ server.listen(PORT, () => {
 
   // Initialize scheduled jobs for Google Reviews
   require('./src/jobs/googleReviewsSyncJob').initScheduledJobs();
+
+  // 🚀 Render Free-Tier Keep-Alive Self-Ping (pings every 10 minutes to prevent sleep)
+  const selfUrl = process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_URL;
+  if (selfUrl) {
+    const httpLib = selfUrl.startsWith('https') ? require('https') : require('http');
+    setInterval(() => {
+      httpLib.get(`${selfUrl.replace(/\/$/, '')}/health`, (res) => {
+        logger.info(`[Keep-Alive Ping] Status: ${res.statusCode}`);
+      }).on('error', (err) => {
+        logger.warn(`[Keep-Alive Ping Error]: ${err.message}`);
+      });
+    }, 10 * 60 * 1000); // 10 minutes interval
+  }
 });
 
 /* ==================================

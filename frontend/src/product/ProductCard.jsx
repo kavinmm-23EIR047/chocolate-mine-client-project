@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, removeFromCart, updateCartQty } from '../redux/slices/cartSlice';
 import { useWishlist } from '../context/WishlistContext';
 import toast from 'react-hot-toast';
+import ImageWithSkeleton from '../components/ui/ImageWithSkeleton';
 
 const BENTO_FLAVOR_PRICES = {
   'White Forest': 380,
@@ -470,7 +471,15 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
         <div className="relative shrink-0 w-[104px] sm:w-28 md:w-36 aspect-square rounded-xl self-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
           <div className="w-full h-full overflow-hidden rounded-xl">
-            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover" loading="lazy" /> : <ImagePlaceholder />}
+            {hasValidImage ? (
+              <ImageWithSkeleton
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                fallback={<ImagePlaceholder />}
+              />
+            ) : <ImagePlaceholder />}
           </div>
 
           <button
@@ -513,7 +522,15 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
       <div>
         <div className="relative aspect-square overflow-visible shrink-0 w-full mb-8" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
           <div className="w-full h-full overflow-hidden rounded-xl">
-            {hasValidImage ? <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" loading="lazy" /> : <ImagePlaceholder />}
+            {hasValidImage ? (
+              <ImageWithSkeleton
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+                fallback={<ImagePlaceholder />}
+              />
+            ) : <ImagePlaceholder />}
           </div>
 
           <button

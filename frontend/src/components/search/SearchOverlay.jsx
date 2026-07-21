@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, TrendingUp, Clock, ArrowRight, Sparkles, History, ShoppingBag, ChevronRight } from 'lucide-react';
+import ImageWithSkeleton from '../ui/ImageWithSkeleton';
 import { useNavigate, Link } from 'react-router-dom';
 import productService from '../../services/productService';
 import LottieImport from 'lottie-react';
@@ -211,7 +212,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                               className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/40 hover:border-primary/30 cursor-pointer transition-all group shadow-sm hover:shadow-lg relative overflow-hidden"
                             >
                               <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden shadow-inner">
-                                <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <ImageWithSkeleton src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" showSparkles={false} />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-bold text-heading text-base leading-tight truncate group-hover:text-primary transition-colors uppercase tracking-tight">{p.name}</p>
@@ -256,7 +257,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
                               className="group cursor-pointer"
                             >
                               <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-xl mb-4 border border-border/20">
-                                <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                                <ImageWithSkeleton src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" containerClassName="w-full h-full" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-footer/90 via-footer/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
                                 <div className="absolute bottom-4 left-4 right-4">
                                   <span className="px-2 py-0.5 bg-primary text-button-text text-[8px] font-black uppercase tracking-widest rounded-md mb-2 inline-block">Best Seller</span>

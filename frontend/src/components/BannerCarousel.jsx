@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
 import { motion } from 'framer-motion';
 import Button from './ui/Button';
+import ImageWithSkeleton from './ui/ImageWithSkeleton';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -54,10 +55,11 @@ const BannerCarousel = () => {
         {banners.map((banner) => (
           <SwiperSlide key={banner.id}>
             <div className="relative w-full h-full">
-              <img
+              <ImageWithSkeleton
                 src={banner.image}
                 alt={banner.title}
                 className="w-full h-full object-cover"
+                containerClassName="w-full h-full"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-footer/70 via-footer/30 to-transparent flex flex-col justify-center px-6 sm:px-16 lg:px-24">
                 <motion.div

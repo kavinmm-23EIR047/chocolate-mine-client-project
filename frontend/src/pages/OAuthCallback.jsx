@@ -11,8 +11,9 @@ const OAuthCallback = () => {
     console.log('🍭 OAuthCallback: Received token?', !!token);
     
     if (token) {
-      console.log('🍭 OAuthCallback: Google login successful, redirecting to home...');
-      // We trigger a reload to let AuthContext fetch the user cleanly via cookie auto-login
+      console.log('🍭 OAuthCallback: Google login successful, storing token...');
+      sessionStorage.setItem('token', token);
+      localStorage.setItem('token', token);
       window.location.href = '/'; 
     } else {
       const error = searchParams.get('error');

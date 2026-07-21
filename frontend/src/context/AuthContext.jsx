@@ -89,8 +89,16 @@ export const AuthProvider = ({ children }) => {
   // Initialize auth state - auto-login via Firebase & HttpOnly cookie
   useEffect(() => {
     const initializeAuth = async () => {
-      // First, check sessionStorage for fast restore
       const storedUser = sessionStorage.getItem('user');
+      const token = sessionStorage.getItem('token');
+
+      // Fast-path: If user is a guest (no token/stored session), skip network auth check
+      if (!storedUser && !token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       if (storedUser) {
         try {
           const parsed = JSON.parse(storedUser);
@@ -100,22 +108,17 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // Verify session with server (cookie sent automatically)
+      // Verify session with server if token or stored user existed
       try {
-        console.log('🔐 Auto-login: verifying session...');
         const response = await api.get('/auth/me');
         const userData = response.data.user;
-        console.log('🔐 Auto-login: session valid for', userData.email);
         setUser(userData);
         sessionStorage.setItem('user', JSON.stringify(userData));
 
         // Sync FCM token in background
         syncFcmToken();
       } catch (err) {
-        const status = err.response?.status || err.status;
-        console.log('🔐 Auto-login: no valid session', status);
-        
-        // Clear stale session data
+        // Quietly clear stale session data if token expired/invalid
         if (!auth?.currentUser) {
           setUser(null);
           sessionStorage.removeItem('user');
@@ -132,8 +135,6 @@ export const AuthProvider = ({ children }) => {
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
-          console.log("🔥 Firebase User logged in:", firebaseUser.email);
-          
           try {
             // Get a standard backend session via Firebase Login route
             const response = await api.post('/auth/firebase-login', {
@@ -155,7 +156,6 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
           }
         } else {
-          console.log("🔥 Firebase User logged out");
           // Only clear if standard user is also not present
           const storedUser = sessionStorage.getItem('user');
           if (storedUser) {

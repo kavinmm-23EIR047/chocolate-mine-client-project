@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, FreeMode, Pagination } from 'swiper/modules';
 import {
   ArrowLeft, ArrowRight, Check, ShoppingCart, ChevronLeft, ChevronRight,
-  Heart, ChevronDown, Settings2, Sparkles, RotateCcw, ShieldCheck, X
+  Heart, ChevronDown, Settings2, RotateCcw, ShieldCheck, X
 } from 'lucide-react';
 import PureVegIcon from '../assets/pure veg.webp';
 import 'swiper/css';
@@ -174,13 +174,13 @@ export default function CustomCakeDetail({
         <div className="relative">
           <input
             type="text" maxLength={60}
-              placeholder="e.g. Less sugar, less cream — important notes"
+            placeholder="e.g. Less sugar, less cream — important notes"
             value={message}
             onChange={e => setMessage(e.target.value)}
             className="w-full bg-[var(--input)] border border-[var(--input-border)] text-[var(--foreground)] placeholder:text-[var(--muted)] rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary)] pr-16 transition-all font-bold"
           />
           <span className="absolute right-3.5 top-3.5 text-xs text-[var(--muted)] font-bold">{message.length}/60</span>
-            <p className="mt-2 text-xs text-[var(--muted)]">Add special requests or important notes (e.g., less sugar, less cream, allergy info, delivery instructions).</p>
+          <p className="mt-2 text-xs text-[var(--muted)]">Add special requests or important notes (e.g., less sugar, less cream, allergy info, delivery instructions).</p>
         </div>
       </div>
     </div>
@@ -196,7 +196,7 @@ export default function CustomCakeDetail({
             <span className="text-xs sm:text-sm text-[var(--muted)] font-bold">Serves {weight.serves} people</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-                {WEIGHTS.map((w, i) => {
+            {WEIGHTS.map((w, i) => {
               const isSel = i === weightIdx;
               return (
                 <button
@@ -253,7 +253,7 @@ export default function CustomCakeDetail({
         onClick={() => setSelectedFlavor(flavor)}
         className={`group relative w-full overflow-hidden rounded-2xl border-2 transition-all duration-300 flex flex-col text-left ${
           isSel
-            ? 'border-[var(--primary)] bg-[var(--card)] shadow-lg ring-2 ring-[var(--primary)]/20 scale-[1.02]'
+            ? 'border-[var(--primary)] bg-[var(--card)] shadow-lg ring-2 ring-[var(--primary)]/20 scale-[1.01]'
             : 'border-[var(--border)] bg-[var(--card)]/60 hover:bg-[var(--card)] hover:border-[var(--primary)]/40 opacity-90 hover:opacity-100'
         }`}
       >
@@ -267,12 +267,12 @@ export default function CustomCakeDetail({
             className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
           />
           {isSel && (
-            <span className="absolute top-3.5 right-3.5 bg-[var(--primary)] text-[var(--background)] rounded-full p-1 shadow-md flex items-center justify-center z-10">
+            <span className="absolute top-3 right-3 bg-[var(--primary)] text-[var(--background)] rounded-full p-1 shadow-md flex items-center justify-center z-10">
               <Check size={14} strokeWidth={3} />
             </span>
           )}
         </div>
-        <div className="p-3 bg-[var(--card)] flex flex-col items-center text-center justify-between gap-0.5 border-t border-[var(--border)]/50">
+        <div className="p-2.5 sm:p-3 bg-[var(--card)] flex flex-col items-center text-center justify-between gap-0.5 border-t border-[var(--border)]/50">
           <p className="text-xs sm:text-sm font-black text-[var(--heading)] truncate w-full">{flavor.name}</p>
           <p className={`text-xs font-bold ${isSel ? 'text-[var(--primary)]' : 'text-[var(--muted)]'}`}>
             +₹{flavor.price || 0}
@@ -295,9 +295,11 @@ export default function CustomCakeDetail({
 
         {/* ── LEFT COLUMN ── */}
         <div className="w-full lg:col-span-5">
-          <div className="w-full space-y-5">
+          <div className="w-full space-y-6">
+            
+            {/* ── Main Cake Image (Increased Height on Mobile) ── */}
             <div
-              className="relative aspect-[4/3] sm:aspect-square w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border)]/50 shadow-premium group"
+              className="relative aspect-[3/3.5] sm:aspect-square w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border)]/50 shadow-premium group"
               style={{ background: theme.enabled ? (selectedFlavor?.bg || theme.bg) : theme.bg }}
             >
               {!theme.enabled && theme.image && <img src={theme.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" />}
@@ -362,17 +364,17 @@ export default function CustomCakeDetail({
                   <span className="text-xs sm:text-sm font-bold text-[var(--muted)] uppercase tracking-wider">{theme.flavors.length} Colors</span>
                 </div>
 
-                {/* Mobile Swiper (< md) */}
-                <div className="block md:hidden">
+                {/* Mobile Swiper (< md) with proper margins so borders aren't cut */}
+                <div className="block md:hidden -mx-4 px-4 overflow-hidden">
                   <Swiper
                     modules={[FreeMode]}
                     freeMode
                     slidesPerView="auto"
                     spaceBetween={12}
-                    className="w-full !py-1"
+                    className="w-full !py-2.5 !px-1"
                   >
                     {theme.flavors.map((flavor) => (
-                      <SwiperSlide key={flavor.id} className="!w-[135px] !flex-shrink-0">
+                      <SwiperSlide key={flavor.id} className="!w-[145px] !flex-shrink-0">
                         {renderColorCard(flavor)}
                       </SwiperSlide>
                     ))}
@@ -380,26 +382,11 @@ export default function CustomCakeDetail({
                 </div>
 
                 {/* PC & Laptop Grid (>= md) */}
-                <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                <div className="hidden md:grid grid-cols-2 md:grid-cols-3 gap-4">
                   {theme.flavors.map((flavor) => renderColorCard(flavor))}
                 </div>
               </div>
             )}
-
-            {/* ── 3 BOTTOM FEATURE CARDS ── */}
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5 mt-5 sm:mt-6">
-              {[
-                { icon: Sparkles, label: 'Handcrafted', sub: 'Theme detail' },
-                { icon: RotateCcw, label: 'Fresh Daily', sub: 'Made to order' },
-                { icon: ShieldCheck, label: 'Secure Pay', sub: '100% safe' },
-              ].map(({ icon: Icon, label, sub }) => (
-                <div key={label} className="bg-[var(--card)] rounded-xl sm:rounded-2xl border border-[var(--border)]/60 px-2 py-2.5 sm:p-3 flex flex-col items-center text-center gap-1 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-                  <Icon size={20} className="text-[var(--primary)] shrink-0" />
-                  <p className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-[var(--heading)] leading-tight mt-0.5">{label}</p>
-                  <p className="text-[10px] sm:text-[11px] text-[var(--muted)] font-medium leading-none">{sub}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 

@@ -69,7 +69,6 @@ const productSchema = Joi.object({
 }).unknown(true);
 
 const customCakeSchema = Joi.object({
-  shape: Joi.string().valid('circle', 'square').required(),
   tiers: Joi.number().min(1).max(5).required(),
   weight: Joi.string().required(),
   flavour: Joi.string().required(),

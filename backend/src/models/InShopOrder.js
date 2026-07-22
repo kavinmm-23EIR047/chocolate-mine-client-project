@@ -126,7 +126,6 @@ const inShopOrderSchema = new mongoose.Schema(
         isCustomCake: { type: Boolean, default: false },
 
         customDetails: {
-          shape: { type: String },
           tiers: { type: Number },
           weight: { type: String },
           flavour: { type: String },
@@ -134,7 +133,6 @@ const inShopOrderSchema = new mongoose.Schema(
           creamColor: { type: String },
           frostingColor: { type: String },
           designTheme: { type: String },
-          toppings: [String],
           messageOnCake: { type: String },
           candleRequired: { type: Boolean },
           knifeIncluded: { type: Boolean },

@@ -80,7 +80,7 @@ const generateStaffSheet = async (order, item) => {
 
   doc.fontSize(14).text('SPECIFICATIONS', 50, 110, { underline: true });
   doc.fontSize(12);
-  doc.text(`Shape: ${customDetails.shape?.toUpperCase()}`, 50, 140);
+  // shape removed from specs
   doc.text(`Tiers: ${customDetails.tiers} Tier`, 200, 140);
   doc.text(`Weight: ${customDetails.weight}`, 350, 140);
   doc.text(`Flavour: ${customDetails.flavour}`, 50, 165);
@@ -112,7 +112,7 @@ const generateStaffSheet = async (order, item) => {
 const sendStaffWhatsApp = async (order, item) => {
   const { customDetails, designImages } = item;
   const { getFrontendUrl } = require('../utils/urlUtils');
-  const message = `🎂 New Custom Cake Order #${order.orderNumber}\n\n${customDetails.shape?.toUpperCase()} | ${customDetails.tiers} Tier | ${customDetails.weight}\nFlavour: ${customDetails.flavour}\nTheme: ${customDetails.designTheme}\nMsg: ${customDetails.messageOnCake || 'N/A'}\n\nOpen Dashboard: ${getFrontendUrl()}/staff/orders`;
+  const message = `🎂 New Custom Cake Order #${order.orderNumber}\n\n${customDetails.tiers} Tier | ${customDetails.weight}\nFlavour: ${customDetails.flavour}\nTheme: ${customDetails.designTheme}\nMsg: ${customDetails.messageOnCake || 'N/A'}\n\nOpen Dashboard: ${getFrontendUrl()}/staff/orders`;
   
   await telegramService.sendStaffAlert(message, designImages?.preview);
   order.customCakeWhatsAppSent = true;

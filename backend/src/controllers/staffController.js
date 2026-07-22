@@ -97,14 +97,12 @@ const formatOrderItems = (items) => {
     discountAmount: item.discountAmount || 0,
     customDetails: item.customDetails ? {
       flavour: item.customDetails.flavour,
-      shape: item.customDetails.shape,
       tiers: item.customDetails.tiers,
       weight: item.customDetails.weight,
       spongeType: item.customDetails.spongeType,
       creamColor: item.customDetails.creamColor,
       frostingColor: item.customDetails.frostingColor,
       designTheme: item.customDetails.designTheme,
-      toppings: item.customDetails.toppings,
       messageOnCake: item.customDetails.messageOnCake,
       candleRequired: item.customDetails.candleRequired,
       knifeIncluded: item.customDetails.knifeIncluded,
@@ -326,7 +324,7 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
     
     if (item.isCustomCake && item.customDetails) {
       estimatedHeight += 20; // details divider
-      if (item.customDetails.shape) estimatedHeight += 11;
+      // shape removed
       if (item.customDetails.tiers) estimatedHeight += 11;
       if (item.customDetails.spongeType) estimatedHeight += 11;
       if (item.customDetails.creamColor) estimatedHeight += 11;
@@ -334,7 +332,7 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
       if (item.customDetails.designTheme) estimatedHeight += 11;
       if (item.customDetails.eggless) estimatedHeight += 11;
       if (item.customDetails.lessSugar) estimatedHeight += 11;
-      if (item.customDetails.toppings && item.customDetails.toppings.length > 0) estimatedHeight += 11;
+      // toppings removed
       if (item.customDetails.photoReferenceUrl) estimatedHeight += 11;
       if (item.customDetails.notes) {
         const lineCount = Math.ceil(item.customDetails.notes.length / 32) || 1;
@@ -409,7 +407,7 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
     if (item.isCustomCake && item.customDetails) {
       doc.font('Courier-Oblique').fontSize(7);
       doc.text('  -- CUSTOM CAKE DETAILS --');
-      if (item.customDetails.shape) doc.text(`  Shape: ${item.customDetails.shape}`);
+      // shape removed
       if (item.customDetails.tiers) doc.text(`  Tiers: ${item.customDetails.tiers}`);
       if (item.customDetails.spongeType) doc.text(`  Sponge: ${item.customDetails.spongeType}`);
       if (item.customDetails.creamColor) doc.text(`  Cream Color: ${item.customDetails.creamColor}`);
@@ -417,7 +415,7 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
       if (item.customDetails.designTheme) doc.text(`  Theme: ${item.customDetails.designTheme}`);
       if (item.customDetails.eggless) doc.text('  Eggless: Yes');
       if (item.customDetails.lessSugar) doc.text('  Less Sugar: Yes');
-      if (item.customDetails.toppings && item.customDetails.toppings.length > 0) doc.text(`  Toppings: ${item.customDetails.toppings.join(', ')}`);
+      // toppings removed
       if (item.customDetails.photoReferenceUrl) doc.text(`  Ref Photo: ${item.customDetails.photoReferenceUrl}`);
       if (item.customDetails.notes) doc.text(`  Notes: ${item.customDetails.notes}`);
     }

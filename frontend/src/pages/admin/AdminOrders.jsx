@@ -146,7 +146,6 @@ const OrderDetailsModal = ({ order, onClose }) => {
                   {expandedItems[idx] && item.customDetails && (
                     <div className="mt-3 p-3 bg-card-soft border border-border/40 rounded-lg text-xs space-y-1">
                       {item.customDetails.flavour && <p><span className="font-bold text-heading">Color:</span> {item.customDetails.flavour}</p>}
-                      {item.customDetails.shape && <p><span className="font-bold text-heading">Shape:</span> {item.customDetails.shape}</p>}
                       {item.customDetails.tiers && <p><span className="font-bold text-heading">Tiers:</span> {item.customDetails.tiers}</p>}
                       {item.customDetails.weight && <p><span className="font-bold text-heading">Weight:</span> {item.customDetails.weight}</p>}
                       {item.customDetails.eggless && <p><span className="font-bold text-heading">Eggless:</span> Yes</p>}

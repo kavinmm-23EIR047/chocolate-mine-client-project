@@ -180,7 +180,6 @@ const getCustomCakePrice = async (item) => {
 const buildCustomCakeDetails = (options = {}) => {
   const tierNum = options.tier ? parseInt(String(options.tier).replace(/\D/g, ''), 10) || 1 : 1;
   return {
-    shape: 'round',
     tiers: tierNum,
     weight: options.weight || '1 kg',
     flavour: `${options.color || ''} (Flavour: ${options.flavor || ''})`,

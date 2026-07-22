@@ -30,9 +30,7 @@ export function formatCustomCakeNotes(data) {
     data.flavour && `Flavour: ${data.flavour}`,
     data.customFlavour && `Custom flavour note: ${data.customFlavour}`,
     data.eggless != null && `Eggless: ${data.eggless ? 'Yes' : 'No'}`,
-    Array.isArray(data.toppings) &&
-      data.toppings.length > 0 &&
-      `Toppings: ${data.toppings.join(', ')}`,
+    // toppings removed from custom cake builder
     Array.isArray(data.extras) &&
       data.extras.length > 0 &&
       `Extras: ${data.extras.join(', ')}`,

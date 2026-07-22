@@ -33,7 +33,8 @@ export default function CustomCakeBrowse({
   const [mobileLayout, setMobileLayout] = useState('grid');
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 8;
+  // Show all themes on a single page by default so numbered pagination isn't needed
+  const ITEMS_PER_PAGE = filteredThemes && filteredThemes.length ? filteredThemes.length : 8;
 
   useEffect(() => {
     setCurrentPage(1);

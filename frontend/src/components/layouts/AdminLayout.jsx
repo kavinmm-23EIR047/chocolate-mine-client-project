@@ -38,7 +38,6 @@ const menuItems = [
   { path: '/admin/addons', label: 'Add-ons', icon: PlusSquare },
   { path: '/admin/banners', label: 'Banners', icon: ImageIcon },
   { path: '/admin/custom-cakes', label: 'Custom Cakes', icon: Cake },
-  { path: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
   { path: '/admin/google-reviews', label: 'Google Reviews', icon: Star },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];

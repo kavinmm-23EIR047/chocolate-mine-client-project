@@ -78,19 +78,7 @@ const Orders = () => {
       );
       setOrders(sortedOrders);
       
-      // Check review status for delivered orders
-      const reviewStatus = {};
-      for (const order of sortedOrders) {
-        if (order.orderStatus === 'delivered') {
-          try {
-            const checkRes = await reviewService.checkOrderReviewable(order._id);
-            reviewStatus[order._id] = checkRes.data.data.canReview;
-          } catch (err) {
-            reviewStatus[order._id] = false;
-          }
-        }
-      }
-      setReviewableOrders(reviewStatus);
+
     } catch (err) {
       console.error('Failed to fetch orders:', err);
       toast.error('Failed to fetch your orders');
@@ -339,37 +327,7 @@ const OrderCard = ({ order, index, canReview = false }) => {
               </button>
             </Link>
             
-            {showReviewButton ? (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/review/${order._id}`);
-                }}
-                className="flex-1 h-12 bg-primary text-button-text rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-premium"
-              >
-                <Star size={14} />
-                Write Review
-              </button>
-            ) : order.orderStatus === 'delivered' && !canReview ? (
-              <button 
-                className="flex-1 h-12 bg-muted/10 text-muted/40 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] cursor-not-allowed flex items-center justify-center gap-2"
-                disabled
-              >
-                <Star size={14} />
-                Reviewed
-              </button>
-            ) : (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/review/${order._id}`);
-                }}
-                className="flex-1 h-12 bg-surface text-heading border border-border rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary hover:text-button-text transition-all flex items-center justify-center gap-2"
-              >
-                <Star size={14} />
-                Rate Order
-              </button>
-            )}
+
           </div>
         </div>
       </div>

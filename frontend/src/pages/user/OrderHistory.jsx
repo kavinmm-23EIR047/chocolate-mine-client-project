@@ -34,19 +34,7 @@ const OrderHistory = () => {
       const ordersData = response.data.data;
       setOrders(ordersData);
       
-      // Check review status for delivered orders
-      const reviewStatus = {};
-      for (const order of ordersData) {
-        if (order.orderStatus === 'delivered') {
-          try {
-            const checkRes = await reviewService.checkOrderReviewable(order._id);
-            reviewStatus[order._id] = checkRes.data.data.canReview;
-          } catch (err) {
-            reviewStatus[order._id] = false;
-          }
-        }
-      }
-      setReviewableOrders(reviewStatus);
+
     } catch (err) {
       console.error('Failed to fetch orders:', err);
       toast.error('Failed to fetch your orders');
@@ -218,29 +206,7 @@ const OrderCard = ({ order, index, canReview = false }) => {
 
                   DETAILS
                 </Button>
-                {showReviewButton && (
-                  <Button 
-                    size="sm" 
-                    className="bg-primary text-white hover:bg-primary/90"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/review/${order._id}`);
-                    }}
-                    icon={Star}
-                  >
-                    REVIEW
-                  </Button>
-                )}
-                {order.orderStatus === 'delivered' && !canReview && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="text-gray-400 border-gray-200 cursor-not-allowed"
-                    disabled
-                  >
-                    REVIEWED
-                  </Button>
-                )}
+
               </div>
             </div>
           </div>

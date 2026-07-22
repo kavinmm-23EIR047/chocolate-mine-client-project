@@ -618,7 +618,7 @@ export default function CustomCake() {
       {/* ── BREADCRUMB ── */}
       {themeIdx !== null && (
         <div className="bg-[var(--card)] border-b border-[var(--border)] py-3">
-          <div className="responsive-container flex items-center gap-1.5 text-xs text-[var(--muted)] overflow-x-auto no-scrollbar">
+          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-10 flex items-center gap-1.5 text-xs text-[var(--muted)] overflow-x-auto no-scrollbar">
             <button onClick={() => navigate('/')} className="hover:text-[var(--primary)] font-medium flex items-center gap-1">
               <ArrowLeft size={12} /> Home
             </button>

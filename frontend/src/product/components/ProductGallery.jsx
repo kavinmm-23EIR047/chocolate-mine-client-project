@@ -36,7 +36,7 @@ const ProductGallery = ({
       
       {/* ── MAIN IMAGE WRAPPER ── */}
       <div 
-        className="relative aspect-[4/5] sm:aspect-square w-full bg-[#e3cbb3] lg:rounded-[2.5rem] overflow-hidden border-b lg:border border-border/50 cursor-zoom-in group shadow-premium transition-all duration-500" 
+        className="relative aspect-[4/5] sm:aspect-square w-full bg-[#e3cbb3] rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] overflow-hidden border border-border/50 cursor-zoom-in group shadow-premium transition-all duration-500" 
         onClick={() => setIsLightboxOpen(true)}
       >
         <AnimatePresence mode="wait">

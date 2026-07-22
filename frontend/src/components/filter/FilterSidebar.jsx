@@ -79,7 +79,7 @@ const FilterSidebar = ({
     if (localFilters.occasions?.length && !localFilters.occasions.includes('all')) {
       count += localFilters.occasions.length;
     }
-    if (localFilters.ratings?.length) count += localFilters.ratings.length;
+
     if (localFilters.priceRange && (localFilters.priceRange.min > 10 || localFilters.priceRange.max < 10000)) {
       count += 1;
     }
@@ -410,43 +410,7 @@ const FilterSidebar = ({
           </AnimatePresence>
         </div>
 
-        {/* Min Rating Section */}
-        <div className="border border-[#3A211B] rounded-xl overflow-hidden bg-white/[0.01] mb-4">
-          {renderAccordionHeader('rating', 'Min. Rating')}
-          <AnimatePresence>
-            {expanded.rating && (
-              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="px-4 pb-4 overflow-hidden">
-                <div className="space-y-2.5">
-                  {[4, 3, 2].map((rating) => {
-                    const isActive = isRatingActive(rating);
-                    return (
-                      <div 
-                        key={rating}
-                        onClick={(e) => handleRatingToggle(rating, e)}
-                        className={`flex items-center gap-3 cursor-pointer p-3 rounded-xl transition-all border ${
-                          isActive 
-                            ? 'bg-white/[0.05] border-[#E6B25A]' 
-                            : 'border-[#3A211B]/40 bg-transparent hover:bg-white/[0.02]'
-                        }`}
-                      >
-                        <div className="flex gap-1.5">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              size={16} 
-                              className={i < rating ? "fill-[#E6B25A] text-[#E6B25A]" : "text-white/10"} 
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs font-bold text-white/70">& up</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+
 
 
 

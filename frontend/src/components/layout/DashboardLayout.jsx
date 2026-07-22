@@ -39,7 +39,6 @@ const DashboardLayout = () => {
     { id: 'orders', path: '/account/orders', label: 'My Orders', icon: ShoppingBag },
     { id: 'notifications', path: '/account/notifications', label: 'Notifications', icon: Bell },
     { id: 'wishlist', path: '/account/wishlist', label: 'My Wishlist', icon: Heart },
-    { id: 'reviews', path: '/account/reviews', label: 'My Reviews', icon: Star },
     { id: 'profile', path: '/account/profile', label: 'Profile Details', icon: User },
     { id: 'addresses', path: '/account/addresses', label: 'Saved Addresses', icon: MapPin },
     { id: 'settings', path: '/account/settings', label: 'Account Settings', icon: Settings },

@@ -476,6 +476,31 @@ const ProductDetails = () => {
     );
   }
 
+  const handleShare = async () => {
+    const shareData = {
+      title: product?.name || 'Artisan Treat',
+      text: `Check out ${product?.name || 'this delicious treat'} on The Chocolate Mine!`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      } catch (err) {
+        toast.error('Failed to copy link');
+      }
+    }
+  };
+
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -531,38 +556,44 @@ const ProductDetails = () => {
               selectedFlavor={selectedFlavor}
               getFlavorImages={getFlavorImages}
             />
+
+            {/* Desktop Description & Highlights directly under gallery/trust icons */}
+            <div className="hidden lg:block">
+              <ProductDescription product={product} />
+            </div>
           </div>
 
           {/* ── RIGHT — DETAILS ── */}
           <div className="w-full lg:sticky lg:top-24 space-y-4 px-1 lg:px-0">
             <div className="bg-card rounded-[2rem] sm:rounded-[2.5rem] border border-border/50 p-5 sm:p-10 shadow-card hover:shadow-premium transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] font-black text-primary uppercase bg-primary/5 px-4 py-1.5 rounded-full tracking-widest border border-primary/10 flex items-center gap-1.5">
+                <span className="text-[10px] sm:text-xs font-black text-primary uppercase bg-primary/5 px-3.5 py-1.5 rounded-full tracking-widest border border-primary/10 flex items-center gap-1.5">
                   {displayCategoryObj.main} {displayCategoryObj.sub ? `• ${displayCategoryObj.sub}` : ''}
                 </span>
-                <button className="p-2.5 text-muted hover:text-primary transition-colors bg-card-soft rounded-full border border-border/40 shadow-soft"><Share2 size={18} /></button>
+                <button 
+                  onClick={handleShare}
+                  title="Share Product"
+                  className="p-2.5 sm:p-3 text-muted hover:text-primary active:scale-95 transition-all bg-card-soft rounded-full border border-border/40 shadow-soft cursor-pointer"
+                >
+                  <Share2 size={18} className="sm:w-5 sm:h-5" />
+                </button>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-4 capitalize tracking-tight">{productName}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-heading leading-[1.1] mb-3 sm:mb-4 capitalize tracking-tight">{productName}</h1>
 
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                {String(productCategory || '').toLowerCase().includes('cake') && (
-                  <PureVegBadge className="px-3 py-2 rounded-full" />
+                {(product?.isVeg !== false) && (
+                  <PureVegBadge size={14} className="px-3 py-1.5 rounded-lg border border-[#008539]/30 shadow-sm" />
                 )}
                 {displayCategoryObj.sub && (
-                  <span className="px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                  <span className="px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                     <Sparkles size={13} className="text-amber-500 animate-pulse" />
                     Flavour: {displayCategoryObj.sub}
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-4 mb-8">
-                <div className="flex items-center gap-1.5 bg-success text-button-text px-3 py-1 rounded-xl text-xs font-black shadow-sm">
-                  {product?.ratingsAverage || 0} <Star size={12} fill="currentColor" />
-                </div>
-                <span className="text-xs text-muted font-black uppercase tracking-widest">{product?.ratingsCount || 0} verified ratings</span>
-              </div>
+
 
               <ProductVariants
                 product={product}
@@ -676,30 +707,19 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* ── BOTTOM SECTION: 8/4 Grid Layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
-          {/* Left: Description + Reviews */}
-          <div className="lg:col-span-8 space-y-12">
-            <ProductDescription product={product} />
-            <ProductReviews product={product} productReviews={productReviews} />
-          </div>
+        {/* ── MOBILE DESCRIPTION & HIGHLIGHTS ── */}
+        <div className="block lg:hidden mt-6">
+          <ProductDescription product={product} isMobile={true} />
+        </div>
 
-          {/* Right: Related Products (Sticky Side Panel) - Desktop only */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24 hidden lg:block h-full">
-            <div className="bg-card p-6 rounded-3xl border border-border/50 shadow-sm h-full">
-              <ProductRelated relatedProducts={relatedProducts} />
-            </div>
-          </div>
+        {/* ── PROMO BANNER: Custom Cakes Promo ── */}
+        <div className="mt-6 lg:mt-12">
+          <ProductRelated isHorizontal={true} />
         </div>
 
         {/* FULL WIDTH SIMILAR PRODUCTS SECTION (Desktop + Mobile) */}
-        <div className="mt-16 px-4 lg:px-0">
+        <div className="mt-12 sm:mt-16 px-0">
           <ProductSimilar relatedProducts={relatedProducts} />
-        </div>
-
-        {/* MOBILE RELATED PRODUCTS (Fallback for mobile screens) */}
-        <div className="block lg:hidden px-4 mb-8">
-          <ProductRelated relatedProducts={relatedProducts} />
         </div>
 
         {/* MOBILE BOTTOM ACTION BAR */}

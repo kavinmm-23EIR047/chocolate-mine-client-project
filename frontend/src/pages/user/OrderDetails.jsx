@@ -108,16 +108,6 @@ const OrderDetails = () => {
       if (orderData) {
         setOrder(orderData);
         
-        // Check if order can be reviewed (delivered and not yet reviewed)
-        if (orderData.orderStatus === 'delivered') {
-          try {
-            const checkRes = await reviewService.checkOrderReviewable(id);
-            setCanReview(checkRes.data.data.canReview);
-          } catch (err) {
-            console.error('Failed to check review status:', err);
-            setCanReview(false);
-          }
-        }
         setReviewCheckLoading(false);
       } else if (!silent) {
         toast.error("Order not found");
@@ -261,16 +251,7 @@ const OrderDetails = () => {
             INVOICE
           </Button>
 
-          {/* ✅ Write Review Button - Only show if order is delivered and not yet reviewed */}
-          {order.orderStatus === 'delivered' && canReview && !reviewCheckLoading && (
-            <Button
-              icon={Star}
-              onClick={handleWriteReview}
-              className="bg-primary hover:bg-primary/90"
-            >
-              WRITE REVIEW
-            </Button>
-          )}
+
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Heart, Star, ShoppingBag, Plus, Minus, Ticket, MapPin,
-  Flame, Sparkles, Percent, Zap, AlertCircle, Scale, Trash2
+  Flame, Sparkles, Percent, Zap, AlertCircle, Scale, Trash2, CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -47,6 +47,10 @@ const AnimatedProductBadge = ({ type, value = "" }) => {
   const badgeStyles = {
     veg: {
       className: "inline-flex items-center justify-center shrink-0 p-0.5 md:p-1 rounded border border-green-600 bg-white shadow-sm"
+    },
+    available: {
+      style: { background: 'var(--badge-discount-bg)', color: 'var(--badge-discount-text)', borderColor: 'var(--badge-discount-border)' },
+      text: "Available"
     },
     bestseller: {
       style: { background: 'var(--badge-bestseller-bg)', color: 'var(--badge-bestseller-text)', borderColor: 'var(--badge-bestseller-border)' },
@@ -401,7 +405,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
         <div className="flex flex-col flex-1 min-w-0 justify-between overflow-hidden">
           <div>
             <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-              {isCakeCategory && <AnimatedProductBadge type="veg" />}
+              {(product?.isVeg !== false) && <AnimatedProductBadge type="veg" />}
+              {!isOutOfStock && <AnimatedProductBadge type="available" />}
               {product.bestseller && <AnimatedProductBadge type="bestseller" />}
               {!product.bestseller && product.featured && <AnimatedProductBadge type="featured" />}
               {discountPct > 0 && <AnimatedProductBadge type="discount" value={discountPct} />}
@@ -429,13 +434,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
               )}
             </div>
 
-            <div className="flex items-center gap-0.5 mt-1 text-[11px] font-bold text-green-500">
-              <Star size={12} fill={rating > 0 ? "currentColor" : "none"} strokeWidth={2.5} />
-              <span>{rating > 0 ? rating.toFixed(1) : '0'}</span>
-              <span className="font-medium text-[10px] ml-1" style={{ color: 'var(--muted)' }}>
-                ({reviewCount === 1 ? '1 review' : `${reviewCount} reviews`})
-              </span>
-            </div>
+
           </div>
 
           <div className="flex flex-col gap-1.5 mt-2 pr-2">
@@ -562,7 +561,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
 
         <div className="flex flex-col text-left mt-1">
           <div className="flex items-center gap-1.5 flex-wrap mb-2">
-            {isCakeCategory && <AnimatedProductBadge type="veg" />}
+            {(product?.isVeg !== false) && <AnimatedProductBadge type="veg" />}
+            {!isOutOfStock && <AnimatedProductBadge type="available" />}
             {product.bestseller && <AnimatedProductBadge type="bestseller" />}
             {!product.bestseller && product.featured && <AnimatedProductBadge type="featured" />}
             {discountPct > 0 && <AnimatedProductBadge type="discount" value={discountPct} />}
@@ -578,14 +578,7 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg' })
           </h3>
 
           <div className="flex items-center gap-1 text-[12px] font-medium mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
-            <div className="flex items-center gap-0.5 font-bold text-green-500">
-              <Star size={13} fill={rating > 0 ? "currentColor" : "none"} strokeWidth={2.5} />
-              <span>{rating > 0 ? rating.toFixed(1) : '0'}</span>
-              <span className="font-normal text-[11px] ml-0.5" style={{ color: 'var(--muted)' }}>
-                ({reviewCount === 1 ? '1 review' : `${reviewCount} reviews`})
-              </span>
-            </div>
-            <span>•</span>
+
             <div className="flex items-center gap-0.5">
               <MapPin size={11} strokeWidth={2.5} />
               <span className="capitalize break-all">{locationDisplay}</span>

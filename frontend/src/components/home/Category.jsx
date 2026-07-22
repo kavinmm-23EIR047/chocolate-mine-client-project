@@ -1,93 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import api from '../../utils/api';
 import fallbackCakeImg from '../../assets/cake.png';
 import allCategoryImg from '../../assets/all.png';
 
 const FALLBACK_IMAGE = fallbackCakeImg;
-const IMAGE_BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v1', '') : (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
-
-const HighlightCircle = ({ image, name, isActive, onClick, index }) => {
-  // Premium designer backdrops matching the reference UI perfectly
-  const renderPremiumBackdrop = (idx) => {
-    const type = idx % 4;
-    if (type === 0) {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center scale-110">
-          <div className="absolute w-full h-full bg-[#FF007F]/20 animate-[spin_40s_linear_infinite]" style={{ clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
-          <div className="absolute w-[75%] h-[75%] bg-[#FF007F]/10 rounded-full blur-sm" />
-        </div>
-      );
-    } else if (type === 1) {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-full h-full bg-[#2AD1B5]/20 rounded-full" />
-          <div className="absolute w-full h-[40%] bg-[#2AD1B5]/20 rounded-full rotate-45" />
-          <div className="absolute w-full h-[40%] bg-[#2AD1B5]/20 rounded-full -rotate-45" />
-          <div className="absolute w-[40%] h-full bg-[#2AD1B5]/20 rounded-full rotate-45" />
-          <div className="absolute w-[40%] h-full bg-[#2AD1B5]/20 rounded-full -rotate-45" />
-        </div>
-      );
-    } else if (type === 2) {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-[115%] h-[65%] bg-[#EAB308]/20 rounded-[30px_50px_30px_50px] transform -rotate-3" />
-          <div className="absolute w-[95%] h-[50%] bg-[#EAB308]/10 rounded-[50px_30px_50px_30px] transform rotate-6" />
-        </div>
-      );
-    } else {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute w-[105%] h-[105%] bg-[#D946EF]/20 rounded-[40%_60%_60%_40%/_60%_50%_50%_40%]" />
-          <div className="absolute w-[85%] h-[85%] bg-[#D946EF]/10 rounded-[50%_40%_45%_55%/_40%_45%_55%_60%] rotate-12" />
-        </div>
-      );
-    }
-  };
-
-  const getImageUrl = (src) => {
-    if (!src) return FALLBACK_IMAGE;
-    // Don't prefix backend URL for absolute URLs, data URIs, or local Vite assets (which contain /assets/ or /src/)
-    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') || src.includes('/assets/') || src.includes('/src/')) {
-      return src;
-    }
-    const cleanSrc = src.startsWith('/') ? src : `/${src}`;
-    return `${IMAGE_BASE_URL}${cleanSrc}`;
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center group outline-none shrink-0 transition-transform active:scale-95 min-w-[120px] sm:min-w-[140px] pt-10 pb-2 relative z-20"
-    >
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-        <div className="absolute inset-0 w-full h-full z-0 transition-transform duration-500 group-hover:scale-115 group-hover:rotate-12">
-          {renderPremiumBackdrop(index)}
-        </div>
-
-        <div className="absolute z-10 w-28 h-28 sm:w-32 sm:h-32 -top-8 -right-4 flex items-center justify-center filter drop-shadow-[0_14px_20px_rgba(0,0,0,0.35)] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-3">
-          <img
-            src={getImageUrl(image)}
-            alt={name}
-            className="w-full h-full object-contain scale-[1.3]"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = FALLBACK_IMAGE;
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center gap-1 mt-3 sm:mt-4">
-        <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.15em] text-center px-1 text-heading group-hover:text-primary transition-colors duration-300">
-          {name}
-        </span>
-        <div className={`h-[2px] rounded-full bg-primary transition-all duration-300 ${isActive ? 'w-10' : 'w-0 group-hover:w-10'}`} />
-      </div>
-    </button>
-  );
-};
+const IMAGE_BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace('/api/v1', '')
+  : (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
 
 export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
   const navigate = useNavigate();
@@ -101,27 +22,25 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
         setLoading(true);
         const response = await api.get('/categories');
         const backend = response.data?.data || [];
-        
-        // Find if 'All' exists in the backend
+
+        // Find if 'All' exists in backend
         const allCategoryIndex = backend.findIndex(c => c.name.toLowerCase() === 'all');
         let allCategory = { name: 'All', image: allCategoryImg };
-        
+
         if (allCategoryIndex !== -1) {
-          // Use the uploaded image for the 'All' category
           allCategory.image = allCategoryImg;
-          // Remove it from the backend array so it doesn't appear twice
           backend.splice(allCategoryIndex, 1);
         }
 
-        // Find if 'Custom Cakes' exists in the backend
-        const customCakeIndex = backend.findIndex(c => c.name.toLowerCase() === 'custom cakes' || c.name.toLowerCase() === 'custom cake');
-        
+        // Find if 'Custom Cakes' exists in backend
+        const customCakeIndex = backend.findIndex(
+          c => c.name.toLowerCase() === 'custom cakes' || c.name.toLowerCase() === 'custom cake'
+        );
+
         if (customCakeIndex !== -1) {
-          // If it exists, mark it so it routes to the custom cake page instead of filtering
           backend[customCakeIndex].isCustom = true;
           setCategories([allCategory, ...backend]);
         } else {
-          // Fallback if not added in admin panel
           const custom = { name: 'Custom Cakes', image: FALLBACK_IMAGE, isCustom: true };
           setCategories([allCategory, ...backend, custom]);
         }
@@ -134,13 +53,14 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
     fetchCategories();
   }, []);
 
+  // Auto-scroll effect
   useEffect(() => {
     if (categories.length <= 1 || !scrollRef.current) return;
     const container = scrollRef.current;
 
     let isHovered = false;
-    const handlePause = () => isHovered = true;
-    const handleResume = () => isHovered = false;
+    const handlePause = () => (isHovered = true);
+    const handleResume = () => (isHovered = false);
 
     container.addEventListener('mouseenter', handlePause);
     container.addEventListener('mouseleave', handleResume);
@@ -150,17 +70,15 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
     const interval = setInterval(() => {
       if (isHovered) return;
       const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
-      
-      // If we are at the end (or very close to it), scroll back to start
+
       if (container.scrollLeft >= maxScroll - 20) {
         container.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
-        // Scroll exactly one card width + gap
-        const itemWidth = container.firstElementChild?.offsetWidth || 140;
-        const gap = 32; // gap-8
+        const itemWidth = container.firstElementChild?.offsetWidth || 180;
+        const gap = 16;
         container.scrollBy({ left: itemWidth + gap, behavior: 'smooth' });
       }
-    }, 3000);
+    }, 3500);
 
     return () => {
       clearInterval(interval);
@@ -171,77 +89,171 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
     };
   }, [categories.length]);
 
+  const getImageUrl = (src) => {
+    if (!src) return FALLBACK_IMAGE;
+    if (
+      src.startsWith('http://') ||
+      src.startsWith('https://') ||
+      src.startsWith('data:') ||
+      src.includes('/assets/') ||
+      src.includes('/src/')
+    ) {
+      return src;
+    }
+    const cleanSrc = src.startsWith('/') ? src : `/${src}`;
+    return `${IMAGE_BASE_URL}${cleanSrc}`;
+  };
+
+  const scroll = (direction) => {
+    if (!scrollRef.current) return;
+    const amount = direction === 'left' ? -260 : 260;
+    scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
   if (loading) return null;
 
   return (
-    /* The main section container has no background now, matches page background */
-    <section className="pt-2 pb-12 md:pb-20 lg:pb-24 relative w-full mx-auto overflow-hidden transition-colors duration-300">
+    <section className="pt-12 sm:pt-16 lg:pt-20 pb-8 sm:pb-10 lg:pb-14 relative z-10 w-full overflow-hidden bg-[var(--background)] border-b border-[var(--border)]/20">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* ── HEADER SECTION ── */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] sm:text-xs font-black uppercase tracking-[0.18em] border border-[var(--primary)]/20 flex items-center gap-1.5 shadow-xs">
+                <Sparkles size={12} className="text-amber-500 animate-pulse" />
+                Curated Range
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase text-[var(--heading)]">
+              Shop By Category
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--muted)] font-medium max-w-lg">
+              Explore our artisan handcrafted cakes, desserts, bento treats & custom delights.
+            </p>
+          </div>
 
-      <div className="flex flex-col items-center justify-center px-4 mb-4 mt-2 relative z-20">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="w-6 sm:w-12 h-[2px] bg-primary/40 rounded-full" />
-          <h2 className="text-base sm:text-lg lg:text-xl font-black tracking-[0.15em] uppercase text-heading text-center font-serif transition-colors duration-300">
-            Shop by Category
-          </h2>
-          <div className="w-8 sm:w-16 h-[2px] bg-primary/40 rounded-full" />
+          {/* Desktop Navigation Controls */}
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => scroll('left')}
+              aria-label="Previous categories"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--border)]/50 bg-[var(--card)] hover:bg-[var(--primary)] hover:text-[var(--button-text)] text-[var(--heading)] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+            >
+              <ChevronLeft size={18} strokeWidth={2.5} />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              aria-label="Next categories"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--border)]/50 bg-[var(--card)] hover:bg-[var(--primary)] hover:text-[var(--button-text)] text-[var(--heading)] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+            >
+              <ChevronRight size={18} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto justify-start 2xl:justify-between gap-6 sm:gap-8 lg:gap-12 2xl:gap-0 px-6 md:px-16 pb-2 pt-0 scroll-smooth [&::-webkit-scrollbar]:hidden items-start relative z-20 w-full max-w-[1800px] mx-auto"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {categories.map((cat, index) => (
-          <HighlightCircle
-            key={cat.name}
-            index={index}
-            image={cat.image}
-            name={cat.label || (cat.name ? cat.name.replace(/-/g, ' ') : '')}
-            isActive={activeCategory === cat.name}
-            onClick={() => {
-              if (cat.isCustom) {
-                navigate('/custom-cake');
-              } else {
-                setActiveCategory(cat.name);
-                // Also scroll to the collections section
-                const el = document.getElementById('main-catalog');
-                if (el) {
-                  const offset = el.getBoundingClientRect().top + window.pageYOffset - 100;
-                  window.scrollTo({ top: offset, behavior: 'smooth' });
-                }
-              }
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Swipe Indicator & Controls */}
-      <div className="flex items-center justify-center gap-3 relative z-20 pb-4 text-muted opacity-80">
-        <button
-          onClick={() => scrollRef.current?.scrollBy({ left: -250, behavior: 'smooth' })}
-          className="p-1 hover:text-primary transition-colors cursor-pointer outline-none"
+        {/* ── CATEGORY CARDS CAROUSEL ── */}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto gap-3 sm:gap-4 lg:gap-6 pb-4 pt-1 scroll-smooth [&::-webkit-scrollbar]:hidden snap-x snap-mandatory items-stretch"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <ChevronLeft size={16} className="animate-pulse" />
-        </button>
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] cursor-default">Swipe</span>
-        <button
-          onClick={() => scrollRef.current?.scrollBy({ left: 250, behavior: 'smooth' })}
-          className="p-1 hover:text-primary transition-colors cursor-pointer outline-none"
-        >
-          <ChevronRight size={16} className="animate-pulse" />
-        </button>
-      </div>
+          {categories.map((cat, index) => {
+            const isActive = activeCategory === cat.name;
+            const displayName = cat.label || (cat.name ? cat.name.replace(/-/g, ' ') : '');
+            const categoryImageUrl = getImageUrl(cat.image);
 
-      {/* 🍫 BOTTOM: Realistic Chocolate Melting Drip SVG Frame */}
-      <div 
-        className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-10 pointer-events-none"
-        style={{ filter: 'drop-shadow(0px 8px 4px rgba(25, 10, 5, 0.4))' }}
-      >
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-[140%] md:w-full h-16 md:h-24 text-[#351810] dark:text-[#E8D3CB] fill-current">
-          <path d="M1200,0H0V28.05c31.13,0,51.84,54.49,85.64,54.49,38.8,0,49.27-37.49,84.71-37.49,37,0,52.33,78.36,92.51,78.36,36.56,0,52.34-45.72,86.6-45.72,31.7,0,49.09,19.34,79.52,19.34,35,0,52.48-51.52,87.89-51.52,38.65,0,50.15,92.4,89.5,92.4,36.93,0,52-65.73,88.16-65.73,34.13,0,50,33.56,83.18,33.56,38.16,0,50.93-70.36,89-70.36,36.08,0,51.5,41,86.35,41,32.22,0,50.05-18.79,81.42-18.79,37,0,50.7,60.67,88.75,60.67,36.19,0,51-51.49,85.62-51.49,32.41,0,49.33,26.78,81.15,26.78Z"></path>
-        </svg>
+            return (
+              <div
+                key={cat.name || index}
+                onClick={() => {
+                  if (cat.isCustom) {
+                    navigate('/custom-cake');
+                  } else {
+                    setActiveCategory(cat.name);
+                    const el = document.getElementById('main-catalog');
+                    if (el) {
+                      const offset = el.getBoundingClientRect().top + window.pageYOffset - 100;
+                      window.scrollTo({ top: offset, behavior: 'smooth' });
+                    }
+                  }
+                }}
+                className="snap-start shrink-0 w-[130px] sm:w-[160px] md:w-[180px] lg:w-[200px] group cursor-pointer select-none"
+              >
+                <div
+                  className={`h-full flex flex-col items-center justify-between p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all duration-300 relative overflow-hidden text-center ${
+                    isActive
+                      ? 'bg-[var(--card)] border-[var(--primary)] ring-2 ring-[var(--primary)]/30 shadow-lg -translate-y-1'
+                      : 'bg-[var(--card)] border-[var(--border)]/40 hover:border-[var(--primary)]/40 hover:shadow-xl hover:-translate-y-1.5'
+                  }`}
+                >
+                  {/* ── OPACITY-BASED BACKGROUND IMAGE ── */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-all duration-500 opacity-15 group-hover:opacity-25 group-hover:scale-110 pointer-events-none"
+                    style={{ backgroundImage: `url(${categoryImageUrl})` }}
+                  />
+                  
+                  {/* Dark/Theme Tint Overlay for Contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-[var(--card)]/80 via-[var(--card)]/90 to-[var(--card)] transition-opacity duration-300 pointer-events-none" />
+
+                  {/* Circular Image Container with Ambient Glow */}
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center mb-3 mt-1 shrink-0 z-10">
+                    <div className="absolute inset-0 rounded-full bg-[var(--primary)]/10 group-hover:bg-[var(--primary)]/20 transition-colors duration-300" />
+                    <div className="absolute inset-1 rounded-full border border-[var(--primary)]/20 group-hover:border-[var(--primary)]/50 transition-colors duration-300" />
+                    
+                    <img
+                      src={categoryImageUrl}
+                      alt={displayName}
+                      className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10 transition-transform duration-500 ease-out group-hover:scale-110 drop-shadow-md"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = FALLBACK_IMAGE;
+                      }}
+                    />
+                  </div>
+
+                  {/* Title & Active Pill Indicator */}
+                  <div className="flex flex-col items-center gap-1.5 w-full relative z-10 min-h-[40px] justify-center">
+                    <span className="text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider text-[var(--heading)] group-hover:text-[var(--primary)] transition-colors text-center break-words leading-tight w-full px-1">
+                      {displayName}
+                    </span>
+
+                    <div className="flex items-center gap-1 mt-auto">
+                      <div
+                        className={`h-1 rounded-full bg-[var(--primary)] transition-all duration-300 ${
+                          isActive ? 'w-8' : 'w-0 group-hover:w-6 opacity-60'
+                        }`}
+                      />
+                      {isActive && (
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--primary)] hidden sm:inline-block">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hover Arrow Icon Pill */}
+                  <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 translate-x-1 z-10">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center">
+                      <ArrowRight size={10} className="sm:w-3 sm:h-3" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── MOBILE SCROLL INDICATOR ── */}
+        <div className="flex sm:hidden items-center justify-center gap-2 mt-3 text-[var(--muted)]">
+          <ChevronLeft size={14} className="animate-pulse text-[var(--primary)]/70" />
+          <span className="text-[9px] font-black uppercase tracking-[0.2em]">Swipe to Explore</span>
+          <ChevronRight size={14} className="animate-pulse text-[var(--primary)]/70" />
+        </div>
+
       </div>
     </section>
   );
 };
+
+export default CategoryCircles;

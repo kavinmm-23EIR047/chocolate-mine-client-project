@@ -460,10 +460,7 @@ const Shop = () => {
       });
     }
     
-    // Rating Filter
-    if (activeRating > 0) {
-      products = products.filter(p => (p.ratingsAverage || 0) >= activeRating);
-    }
+
     
     // Price Filter
     products = products.filter(p => {
@@ -848,17 +845,7 @@ const Shop = () => {
               </span>
             )}
             
-            {activeRating > 0 && (
-              <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">
-                {activeRating} ★ & Up
-                <button 
-                  onClick={(e) => handleRatingClick(e, activeRating)}
-                  className="text-white/40 hover:text-[#ff8f8f] transition-colors font-bold ml-1 text-sm leading-none flex items-center justify-center"
-                >
-                  ×
-                </button>
-              </span>
-            )}
+
             
             {(priceRange[0] > 10 || priceRange[1] < 10000) && (
               <span className="h-8 px-3.5 bg-[#2A1813] border border-[#3A211B] text-white rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all hover:border-[#EBD1C6]/30">

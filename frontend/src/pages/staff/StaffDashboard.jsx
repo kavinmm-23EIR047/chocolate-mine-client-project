@@ -117,100 +117,237 @@ const getDisplayFlavor = (item) => {
   return flavor;
 };
 
-// Order Details Modal – theme-aware
+// Order Details Modal – High Contrast, Readable Typography, Full Product & Location Details
 const OrderDetailsModal = ({ order, onClose }) => {
   const [expandedItems, setExpandedItems] = useState({});
   if (!order) return null;
 
   const toggleItemExpand = (index) => setExpandedItems(prev => ({ ...prev, [index]: !prev[index] }));
 
+  // Build Google Maps directions link
+  const mapsUrl = (order.address?.lat && order.address?.lng)
+    ? `https://www.google.com/maps/search/?api=1&query=${order.address.lat},${order.address.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([order.address?.houseNo, order.address?.street, order.address?.city, order.address?.pincode].filter(Boolean).join(', '))}`;
+
+  const formattedOrderTime = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }) : null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto p-4 cursor-pointer" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md overflow-y-auto p-3 sm:p-4 cursor-pointer" onClick={onClose}>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-card text-foreground border border-border rounded-2xl shadow-2xl max-w-2xl w-full mx-auto overflow-hidden max-h-[90vh] flex flex-col cursor-default"
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        className="bg-card text-foreground border border-border/80 rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full mx-auto overflow-hidden max-h-[92vh] flex flex-col cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-border sticky top-0 bg-card z-10">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="font-black text-heading text-xl">Order Details</h3>
-              <p className="text-xs text-muted">#{order.orderNumber} | {order.trackingCode}</p>
+        {/* MODAL HEADER */}
+        <div className="p-5 sm:p-6 border-b border-border/60 sticky top-0 bg-card/95 backdrop-blur-md z-10 flex justify-between items-center">
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="font-extrabold text-heading text-xl sm:text-2xl tracking-tight">Order Details</h3>
+              <OrderStatusBadge status={order.orderStatus} />
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-border/20 rounded-full transition-colors">
-              <X size={20} className="text-heading" />
-            </button>
+            <p className="text-xs font-bold text-muted mt-1 flex items-center gap-2">
+              <span>#{order.orderNumber || order._id}</span>
+              {order.trackingCode && <span className="px-2 py-0.5 rounded-full bg-border/40 text-heading text-[11px] font-mono font-bold">Track: {order.trackingCode}</span>}
+            </p>
           </div>
+          <button 
+            onClick={onClose} 
+            className="w-9 h-9 rounded-full bg-border/20 hover:bg-border/40 text-heading flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+            aria-label="Close modal"
+          >
+            <X size={20} />
+          </button>
         </div>
-        <div className="p-6 overflow-y-auto flex-1">
-          {/* Customer Info */}
-          <div className="mb-6 p-4 bg-card-soft border border-border/40 rounded-xl">
-            <h4 className="font-bold text-sm mb-2 text-heading">Customer & Delivery</h4>
-            <p className="text-sm font-semibold text-heading">{order.address?.fullName}</p>
-            <p className="text-sm text-muted">{order.address?.phone}</p>
-            <div className="flex items-start gap-2 mt-2">
-              <MapPin size={14} className="text-muted mt-0.5 shrink-0" />
-              <p className="text-xs text-muted">{order.address?.houseNo}, {order.address?.street}, {order.address?.city} - {order.address?.pincode}</p>
+
+        {/* MODAL BODY */}
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-6 custom-scrollbar">
+          
+          {/* SECTION 1: CUSTOMER & DELIVERY ADDRESS */}
+          <div className="p-4 sm:p-5 bg-card-soft border border-border/60 rounded-2xl space-y-3 shadow-xs">
+            <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-border/40">
+              <h4 className="font-extrabold text-sm uppercase tracking-wider text-primary flex items-center gap-2">
+                <User size={16} /> Customer & Delivery Details
+              </h4>
+              
+              {/* Call Customer Button */}
+              {order.address?.phone && (
+                <a
+                  href={`tel:${order.address.phone}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95"
+                >
+                  <Phone size={13} /> Call Customer
+                </a>
+              )}
             </div>
-            <div className="flex items-center gap-3 mt-3 text-xs">
-              <div className="flex items-center gap-1 text-muted">
-                <Calendar size={12} />
-                <span>{new Date(order.deliveryDate).toLocaleDateString()}</span>
+
+            <div className="space-y-1">
+              <p className="text-base font-extrabold text-heading">{order.address?.fullName || 'N/A'}</p>
+              <p className="text-sm font-semibold text-muted font-mono">{order.address?.phone || 'No phone provided'}</p>
+            </div>
+
+            {/* Address & Google Maps Link */}
+            <div className="pt-2 border-t border-border/30 space-y-2.5">
+              <div className="flex items-start gap-2 text-xs font-medium text-heading/90 leading-relaxed">
+                <MapPin size={16} className="text-primary mt-0.5 shrink-0" />
+                <span>
+                  {[order.address?.houseNo, order.address?.street, order.address?.landmark && `Landmark: ${order.address.landmark}`, order.address?.city, order.address?.pincode].filter(Boolean).join(', ')}
+                </span>
               </div>
-              <div className="flex items-center gap-1 text-muted">
-                <Clock size={12} />
-                <span>{order.deliverySlot}</span>
+
+              {/* Google Maps Location Button */}
+              <div className="pt-1">
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <MapPin size={14} className="animate-bounce" /> Open Location in Google Maps 🗺️
+                </a>
               </div>
+            </div>
+
+            {/* Delivery Schedule & Order Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-border/40 text-xs">
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-card border border-border/40">
+                <Calendar size={15} className="text-primary shrink-0" />
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted block">Delivery Date</span>
+                  <span className="font-extrabold text-heading">{order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN') : 'N/A'}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-card border border-border/40">
+                <Clock size={15} className="text-primary shrink-0" />
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted block">Time Slot</span>
+                  <span className="font-extrabold text-heading">{order.deliverySlot || 'Standard'}</span>
+                </div>
+              </div>
+
+              {formattedOrderTime && (
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-card border border-border/40">
+                  <Hash size={15} className="text-primary shrink-0" />
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted block">Order Placed</span>
+                    <span className="font-extrabold text-heading text-[11px]">{formattedOrderTime}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          {/* Items List */}
-          <div className="mb-6">
-            <h4 className="font-bold text-sm mb-3 text-heading">Order Items</h4>
+
+          {/* SECTION 2: ORDERED ITEMS */}
+          <div>
+            <h4 className="font-extrabold text-sm uppercase tracking-wider text-primary mb-3 flex items-center gap-2">
+              <ShoppingBag size={16} /> Order Items ({order.items?.length || 0})
+            </h4>
             <div className="space-y-3">
               {order.items?.map((item, idx) => {
-                const itemPrice = item.price || item.originalPrice;
-                const total = itemPrice * item.qty;
+                const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
+                const origUnitPrice = Number(item.price || 0);
+                const total = finalUnitPrice * item.qty;
+                const resolvedFlavor = getDisplayFlavor(item);
+                const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+
                 return (
-                  <div key={idx} className="border border-border/50 rounded-xl p-3 bg-card-soft/30">
-                    <div className="flex gap-3">
-                      {item.image && <img src={item.image} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-border/20" />}
-                      <div className="flex-1">
+                  <div key={idx} className="border border-border/60 rounded-2xl p-4 bg-card-soft/40 shadow-xs space-y-3">
+                    <div className="flex gap-3 sm:gap-4 items-start">
+                      {item.image && item.image !== 'none' ? (
+                        <img src={item.image} alt={item.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-border/40 shrink-0 bg-surface" />
+                      ) : (
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-surface border border-border/40 shrink-0 flex items-center justify-center">
+                          <Cake size={24} className="text-muted" />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start gap-2">
                           <div className="min-w-0">
-                            <p className="font-bold text-heading break-words">{item.name}</p>
-                            <p className="text-[10px] sm:text-xs text-muted font-mono break-all">{item.sku}</p>
+                            <h5 className="font-extrabold text-heading text-base break-words">{item.name}</h5>
+                            {item.sku && <span className="inline-block px-2 py-0.5 rounded bg-border/40 text-[10px] font-mono font-bold text-muted mt-1">{item.sku}</span>}
                           </div>
-                          <p className="font-bold text-heading shrink-0">{formatCurrency(total)}</p>
+                          <div className="text-right shrink-0">
+                            <p className="font-extrabold text-heading text-base">{formatCurrency(total)}</p>
+                            <p className="text-xs text-muted font-medium">{formatCurrency(finalUnitPrice)} each</p>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-sm mt-1">
-                          <span className="text-muted">Qty: {item.qty}</span>
-                          <span className="text-muted">{formatCurrency(itemPrice)} each</span>
+
+                        {/* Variant Badges (Qty, Flavor, Weight) */}
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <span className="px-2.5 py-1 rounded-lg bg-card border border-border/50 text-xs font-extrabold text-heading">
+                            Qty: {item.qty}
+                          </span>
+
+                          {showFlavor && (
+                            <span className="px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-xs font-extrabold text-primary">
+                              Flavor: {item.isCustomCake ? (item.customDetails?.flavour || resolvedFlavor) : resolvedFlavor}
+                            </span>
+                          )}
+
+                          {item.selectedWeight && (
+                            <span className="px-2.5 py-1 rounded-lg bg-card border border-border/50 text-xs font-extrabold text-heading">
+                              Weight: {item.selectedWeight}
+                            </span>
+                          )}
                         </div>
-                        {(item.selectedFlavor || item.selectedWeight || getDisplayFlavor(item) !== 'Standard') && (
-                          <div className="text-xs text-muted mt-1">
-                            {(item.selectedFlavor || getDisplayFlavor(item) !== 'Standard') && (
-                              <span>{item.isCustomCake ? 'Color' : 'Flavor'}: {getDisplayFlavor(item)}</span>
-                            )}
-                            {item.selectedWeight && <span className="ml-2">Weight: {item.selectedWeight}</span>}
+
+                        {/* Add-ons List */}
+                        {item.addons && Array.isArray(item.addons) && item.addons.length > 0 && (
+                          <div className="mt-3 p-2.5 bg-card border border-border/50 rounded-xl space-y-1 text-xs">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary block">Included Add-ons:</span>
+                            {item.addons.map((addon, aIdx) => (
+                              <div key={aIdx} className="flex justify-between items-center text-heading font-medium">
+                                <span>+ {addon.name} (x{addon.qty || 1})</span>
+                                <span className="font-bold">{formatCurrency(Number(addon.price || 0) * (addon.qty || 1))}</span>
+                              </div>
+                            ))}
                           </div>
                         )}
+
+                        {/* Custom Details Toggle */}
                         {item.customDetails && (
-                          <button onClick={() => toggleItemExpand(idx)} className="text-xs text-secondary flex items-center gap-1 mt-2 font-bold">
+                          <button 
+                            onClick={() => toggleItemExpand(idx)} 
+                            className="text-xs text-primary flex items-center gap-1.5 mt-3 font-extrabold hover:underline cursor-pointer"
+                          >
                             {expandedItems[idx] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                            Custom Details
+                            {expandedItems[idx] ? 'Hide Custom Cake Details' : 'View Custom Cake Details ✨'}
                           </button>
                         )}
                       </div>
                     </div>
+
+                    {/* Expandable Custom Details Box */}
                     {expandedItems[idx] && item.customDetails && (
-                      <div className="mt-3 p-3 bg-card-soft border border-border/40 rounded-lg text-xs space-y-1">
-                        {item.customDetails.flavour && <p><span className="font-bold text-heading">Color:</span> {item.customDetails.flavour}</p>}
-                        {item.customDetails.tiers && <p><span className="font-bold text-heading">Tiers:</span> {item.customDetails.tiers}</p>}
-                        {item.customDetails.eggless && <p><span className="font-bold text-heading">Eggless:</span> Yes</p>}
-                        {item.customDetails.lessSugar && <p><span className="font-bold text-heading">Less Sugar:</span> Yes</p>}
-                        {item.customDetails.messageOnCake && <p><span className="font-bold text-heading">Message:</span> {item.customDetails.messageOnCake}</p>}
+                      <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl text-xs space-y-2 text-heading">
+                        <div className="grid grid-cols-2 gap-2">
+                          {item.customDetails.designTheme && <p><span className="font-bold text-muted">Theme:</span> <span className="font-extrabold">{item.customDetails.designTheme}</span></p>}
+                          {item.customDetails.flavour && <p><span className="font-bold text-muted">Flavor:</span> <span className="font-extrabold">{item.customDetails.flavour}</span></p>}
+                          {item.customDetails.weight && <p><span className="font-bold text-muted">Weight:</span> <span className="font-extrabold">{item.customDetails.weight}</span></p>}
+                          {item.customDetails.tiers && <p><span className="font-bold text-muted">Tiers:</span> <span className="font-extrabold">{item.customDetails.tiers}</span></p>}
+                          {item.customDetails.eggless && <p><span className="font-bold text-muted">Eggless:</span> <span className="font-extrabold text-emerald-600 dark:text-emerald-400">Yes 🌿</span></p>}
+                          {item.customDetails.lessSugar && <p><span className="font-bold text-muted">Less Sugar:</span> <span className="font-extrabold">Yes</span></p>}
+                        </div>
+
+                        {item.customDetails.messageOnCake && (
+                          <div className="pt-2 border-t border-primary/15">
+                            <span className="font-bold text-muted block mb-0.5">🎂 Message on Cake:</span>
+                            <span className="font-black text-sm text-primary bg-card px-3 py-1.5 rounded-lg border border-primary/20 inline-block">
+                              "{item.customDetails.messageOnCake}"
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -218,21 +355,71 @@ const OrderDetailsModal = ({ order, onClose }) => {
               })}
             </div>
           </div>
-          {/* Payment Summary */}
-          <div className="p-4 bg-card-soft border border-border/40 rounded-xl">
-            <h4 className="font-bold text-sm mb-2 text-heading">Payment Summary</h4>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between"><span className="text-muted">Subtotal</span><span className="font-semibold text-heading">{formatCurrency(order.subtotal)}</span></div>
-              {order.discount > 0 && <div className="flex justify-between text-success-text"><span>Discount</span><span className="font-semibold">-{formatCurrency(order.discount)}</span></div>}
-              <div className="flex justify-between"><span className="text-muted">Delivery Charge</span><span className="font-semibold text-heading">{formatCurrency(order.deliveryCharge)}</span></div>
-              <div className="flex justify-between"><span className="text-muted">GST</span><span className="font-semibold text-heading">{formatCurrency(order.gst)}</span></div>
-              <div className="flex justify-between font-bold pt-2 border-t border-border/40"><span className="text-heading">Total</span><span className="text-primary">{formatCurrency(order.total)}</span></div>
+
+          {/* SECTION 3: PAYMENT SUMMARY */}
+          <div className="p-4 sm:p-5 bg-card-soft border border-border/60 rounded-2xl space-y-3">
+            <h4 className="font-extrabold text-sm uppercase tracking-wider text-primary flex items-center gap-2">
+              <CreditCard size={16} /> Payment & Billing Summary
+            </h4>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between font-medium">
+                <span className="text-muted">Subtotal</span>
+                <span className="font-extrabold text-heading">{formatCurrency(order.subtotal)}</span>
+              </div>
+
+              {order.discount > 0 && (
+                <div className="flex justify-between font-medium text-emerald-600 dark:text-emerald-400">
+                  <span>Discount</span>
+                  <span className="font-extrabold">-{formatCurrency(order.discount)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between font-medium">
+                <span className="text-muted">Delivery Charge</span>
+                <span className="font-extrabold text-heading">{formatCurrency(order.deliveryCharge)}</span>
+              </div>
+
+              {order.convenienceFee > 0 && (
+                <div className="flex justify-between font-medium">
+                  <span className="text-muted">Convenience Fee (2.5%)</span>
+                  <span className="font-extrabold text-heading">{formatCurrency(order.convenienceFee)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between font-medium text-xs text-muted">
+                <span>GST (18%)</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">Inclusive</span>
+              </div>
+
+              <div className="flex justify-between font-black text-lg pt-3 border-t border-border/50">
+                <span className="text-heading">Grand Total</span>
+                <span className="text-primary">{formatCurrency(order.total)}</span>
+              </div>
             </div>
-            <div className="mt-3 pt-2 border-t border-border/40">
-              <p className="text-xs text-muted">Payment: <span className="font-semibold text-heading">{order.paymentMethod}</span></p>
-              <p className="text-xs text-muted">Status: <span className={`font-bold ${order.paymentStatus === 'paid' ? 'text-success' : 'text-warning'}`}>{order.paymentStatus?.toUpperCase()}</span></p>
+
+            {/* Payment Method & Status Badges */}
+            <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between flex-wrap gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-muted font-bold">Payment Method:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-card border border-border/50 font-black uppercase text-heading">
+                  {order.paymentMethod || 'ONLINE'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-muted font-bold">Payment Status:</span>
+                <span className={`px-2.5 py-1 rounded-lg font-black uppercase tracking-wider ${
+                  order.paymentStatus === 'paid' 
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' 
+                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                }`}>
+                  {order.paymentStatus?.toUpperCase() || 'PENDING'}
+                </span>
+              </div>
             </div>
           </div>
+
         </div>
       </motion.div>
     </div>

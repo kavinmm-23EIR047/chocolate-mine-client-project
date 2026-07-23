@@ -389,9 +389,7 @@ const emailService = {
   },
 
   sendDelivered: async (email, order, pdfBuffer = null) => {
-    const { getFrontendUrl } = require('../utils/urlUtils');
-    const frontendUrl = getFrontendUrl();
-    const feedbackLink = `${frontendUrl}/review/${order._id}`;
+    const googleReviewUrl = process.env.GOOGLE_REVIEW_URL || 'https://www.google.com/search?q=chocolate+mine&oq=chocolate+mine&gs_lcrp=EgZjaHJvbWUqDggAEEUYJxg7GIAEGIoFMg4IABBFGCcYOxiABBiKBTIKCAEQLhixAxiABDINCAIQLhixAxiABDINCAIQLhixAxiABBiKBTIHCAMQLhiABDIKCAQQABixAxiABDIGCAUQRRg8MgYIBhBFGDwyBggHEEUYPNIBCDQ0MzJqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8#lrd=0x3ba8591d53333f03:0xd0f9437d533a60fc,3,,,,';
 
     return await sendMail({
       to: email,
@@ -411,8 +409,8 @@ const emailService = {
               
               <div class="card" style="padding: 24px; border-radius: 8px; text-align: center; margin: 32px 0; background-color: #F8F5F2; border-left: 4px solid #3C1B13; color: #2C1A16;">
                 <h3 class="title-text" style="margin-top: 0; font-weight: 700; color: #3C1B13;">Share Your Experience</h3>
-                <p style="font-size: 14px; margin-bottom: 20px;">Your feedback helps us perfect our recipes.</p>
-                <a href="${feedbackLink}" class="action-button" style="display: inline-block; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; background-color: #3C1B13; color: #FFFFFF;">Write a Review</a>
+                <p style="font-size: 14px; margin-bottom: 20px;">Your feedback helps us perfect our recipes. Please leave us a review on Google!</p>
+                <a href="${googleReviewUrl}" target="_blank" class="action-button" style="display: inline-block; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; background-color: #3C1B13; color: #FFFFFF;">Write a Google Review</a>
               </div>
               <br/>
               <p style="font-size: 14px; opacity: 0.9;">Warm regards,<br/><b class="title-text" style="color: #3C1B13;">Team The Chocolate Mine</b></p>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChefHat, ShoppingBag, Clock, CheckCircle, Printer, RefreshCw, Eye, Flame, Truck, Package, X, KeyRound, Phone, ChevronDown, ChevronUp, ChevronRight, LayoutDashboard, History, ClipboardList, MapPin, CreditCard, Calendar, Hash, Search, Plus, Minus, Trash2, Store, ShoppingCart, User, Cake } from 'lucide-react';
+import { ChefHat, ShoppingBag, Clock, CheckCircle, Printer, RefreshCw, Eye, Flame, Truck, Package, X, KeyRound, Phone, ChevronDown, ChevronUp, ChevronRight, LayoutDashboard, History, ClipboardList, MapPin, CreditCard, Calendar, Hash, Search, Plus, Minus, Trash2, Store, ShoppingCart, User, Cake, Filter } from 'lucide-react';
 import staffService from '../../services/staffService';
 import productService from '../../services/productService';
 import { OrderStatusBadge } from '../../components/ui/StatusBadge';
@@ -13,6 +13,7 @@ import { formatCurrency } from '../../utils/helpers';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import io from 'socket.io-client';
 import orderService from '../../services/orderService';
+import api from '../../utils/api';
 
 const BENTO_FLAVOR_PRICES = {
   'White Forest': 380,
@@ -430,6 +431,8 @@ const OrderDetailsModal = ({ order, onClose }) => {
 const CreateInShopOrderView = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [categoriesList, setCategoriesList] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [cart, setCart] = useState([]);
@@ -440,25 +443,75 @@ const CreateInShopOrderView = () => {
   const [selectedProductForVariant, setSelectedProductForVariant] = useState(null);
 
   useEffect(() => {
-    const fetchAllProducts = async () => {
+    const fetchInitialData = async () => {
       try {
         setSearchLoading(true);
-        const res = await productService.getAll({ limit: 1000 });
-        const data = res.data?.data?.products || res.data?.data || res.data?.products || [];
-        setAllProducts(Array.isArray(data) ? data : []);
+        const [prodRes, catRes] = await Promise.allSettled([
+          productService.getAll({ limit: 1000 }),
+          api.get('/categories')
+        ]);
+
+        let prods = [];
+        if (prodRes.status === 'fulfilled') {
+          prods = prodRes.value.data?.data?.products || prodRes.value.data?.data || prodRes.value.data?.products || [];
+        }
+        setAllProducts(Array.isArray(prods) ? prods : []);
+
+        let cats = [];
+        if (catRes.status === 'fulfilled') {
+          cats = catRes.value.data?.data?.categories || catRes.value.data?.data || catRes.value.data?.categories || catRes.value.data || [];
+        }
+
+        // Collect all category names from backend API + extract from product models
+        const catNamesSet = new Set();
+        if (Array.isArray(cats)) {
+          cats.forEach(c => {
+            const name = c.name || c.title;
+            if (name) catNamesSet.add(name);
+          });
+        }
+
+        prods.forEach(p => {
+          if (Array.isArray(p.category)) {
+            p.category.forEach(c => typeof c === 'string' && catNamesSet.add(c));
+          } else if (typeof p.category === 'string' && p.category) {
+            catNamesSet.add(p.category);
+          }
+        });
+
+        setCategoriesList(Array.from(catNamesSet));
       } catch (err) {
-        console.error('Failed to load products:', err);
+        console.error('Failed to load products/categories:', err);
         toast.error('Failed to load products');
       } finally {
         setSearchLoading(false);
       }
     };
-    fetchAllProducts();
+    fetchInitialData();
   }, []);
 
-  const displayedProducts = searchQuery.trim()
-    ? allProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : allProducts;
+  const displayedProducts = allProducts.filter(p => {
+    // 1. Category Filter
+    let matchesCategory = true;
+    if (selectedCategory !== 'ALL') {
+      const targetCat = selectedCategory.toLowerCase().trim();
+      if (Array.isArray(p.category)) {
+        matchesCategory = p.category.some(c => typeof c === 'string' && c.toLowerCase().trim() === targetCat);
+      } else if (typeof p.category === 'string') {
+        matchesCategory = p.category.toLowerCase().trim() === targetCat;
+      } else {
+        matchesCategory = false;
+      }
+    }
+
+    // 2. Search Query Filter
+    let matchesSearch = true;
+    if (searchQuery.trim()) {
+      matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
+    }
+
+    return matchesCategory && matchesSearch;
+  });
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -567,28 +620,131 @@ const CreateInShopOrderView = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left Column: Product Search & Cart */}
         <div className="lg:col-span-3 space-y-5">
-          {/* Product Search */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-black text-sm text-heading uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Search size={16} className="text-secondary" /> Search Products
-            </h3>
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search products..."
-                className="w-full px-4 py-3 bg-input border border-input-border rounded-xl text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-secondary/40 transition-all text-sm"
-              />
-              {searchLoading && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <div className="w-5 h-5 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin" />
-                </div>
-              )}
+          {/* Product Search & Category Filter */}
+          <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-heading uppercase tracking-wider flex items-center gap-2">
+                <Search size={16} className="text-primary" /> Search & Select Products
+              </h3>
+              <span className="text-xs font-bold text-muted">Showing {displayedProducts.length} items</span>
+            </div>
+
+            {/* Top Search & Category Filter Control Row */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* Text Search Bar */}
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  placeholder="Search products by name..."
+                  className="w-full pl-10 pr-9 py-3 bg-input border border-input-border rounded-xl text-heading placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-sm font-medium"
+                />
+                <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary" />
+                {searchQuery ? (
+                  <button 
+                    onClick={() => setSearchQuery('')} 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading cursor-pointer p-1"
+                  >
+                    <X size={16} />
+                  </button>
+                ) : searchLoading ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Category Dropdown Select Button */}
+              <div className="relative shrink-0">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full sm:w-auto pl-10 pr-9 py-3 bg-input border border-input-border rounded-xl text-heading font-extrabold text-xs uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/40 appearance-none cursor-pointer shadow-xs"
+                >
+                  <option value="ALL">All Categories ({allProducts.length})</option>
+                  {categoriesList.map((cat, idx) => {
+                    const count = allProducts.filter(p => {
+                      if (Array.isArray(p.category)) return p.category.some(c => typeof c === 'string' && c.toLowerCase().trim() === cat.toLowerCase().trim());
+                      if (typeof p.category === 'string') return p.category.toLowerCase().trim() === cat.toLowerCase().trim();
+                      return false;
+                    }).length;
+                    return (
+                      <option key={idx} value={cat}>
+                        {cat} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+                <Filter size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary pointer-events-none" />
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Backend Category Filter Quick Pills */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-black text-muted uppercase tracking-widest block">Quick Categories</span>
+                {selectedCategory !== 'ALL' && (
+                  <button 
+                    onClick={() => setSelectedCategory('ALL')} 
+                    className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('ALL')}
+                  className={`px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                    selectedCategory === 'ALL'
+                      ? 'bg-amber-900 text-white dark:bg-amber-500 dark:text-slate-950 shadow-sm font-black'
+                      : 'bg-card-soft text-heading/90 hover:bg-stone-200 dark:hover:bg-stone-800 border border-border/50 font-bold'
+                  }`}
+                >
+                  <span>All Products</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                    selectedCategory === 'ALL' ? 'bg-white/20 text-white dark:bg-black/20 dark:text-slate-950 font-bold' : 'bg-border/40 text-muted'
+                  }`}>
+                    {allProducts.length}
+                  </span>
+                </button>
+
+                {categoriesList.map((cat, idx) => {
+                  const isSelected = selectedCategory.toLowerCase().trim() === cat.toLowerCase().trim();
+                  const count = allProducts.filter(p => {
+                    if (Array.isArray(p.category)) return p.category.some(c => typeof c === 'string' && c.toLowerCase().trim() === cat.toLowerCase().trim());
+                    if (typeof p.category === 'string') return p.category.toLowerCase().trim() === cat.toLowerCase().trim();
+                    return false;
+                  }).length;
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                        isSelected
+                          ? 'bg-amber-900 text-white dark:bg-amber-500 dark:text-slate-950 shadow-sm font-black'
+                          : 'bg-card-soft text-heading/90 hover:bg-stone-200 dark:hover:bg-stone-800 border border-border/50 font-bold'
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                        isSelected ? 'bg-white/20 text-white dark:bg-black/20 dark:text-slate-950 font-bold' : 'bg-border/40 text-muted'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             
             {/* Product List Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-2 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto custom-scrollbar pr-2 mt-4">
               {displayedProducts.map(product => {
                 const price = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
                 return (

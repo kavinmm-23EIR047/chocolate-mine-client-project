@@ -34,57 +34,45 @@ transporter.verify((error, success) => {
   }
 });
 
-// Helper for conflict-free dynamic styling using your brand token variables
+// Helper for conflict-free dynamic styling (Receipt-Style Voucher Design - Single Brand Theme for Light & Dark)
 const getThemeStyles = () => `
   <style>
-    /* Default Layout Tokens */
-    body { background-color: #F9F6F4; color: #2C1A16; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 20px; }
-    .email-container { background-color: #FFFFFF; color: #2C1A16; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03); max-width: 580px; margin: auto; border-radius: 16px; padding: 32px; }
-    .card { background-color: #F8F5F2; border-left: 4px solid #3C1B13; color: #2C1A16; padding: 20px; border-radius: 8px; margin: 24px 0; }
-    .title-text { color: #3C1B13; }
-    .badge-icon { background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 6px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px; }
-    .action-button { background-color: #3C1B13; color: #FFFFFF !important; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; text-align: center; }
-    .error-alert { background-color: #FFF5F5; border-left: 4px solid #E53E3E; color: #C53030; padding: 16px; border-radius: 8px; margin: 24px 0; font-size: 14px; }
-    .error-title { color: #E53E3E; }
-    .otp-display { color: #3C1B13; background-color: #F8F5F2; border: 1px solid #EAE3DE; letter-spacing: 6px; font-size: 32px; font-weight: 800; padding: 12px 28px; border-radius: 6px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: center; }
-    
-    /* Pure Text Logo Token Mapping */
-    .logo-top { color: #3C1B13; }
-    .logo-bottom { color: #3C1B13; }
-    
-    @media (prefers-color-scheme: dark) {
-      body { background-color: #120806 !important; color: #EAE3DE !important; }
-      .email-container { background-color: #1C0D0A !important; color: #EAE3DE !important; border: 1px solid #2B120E !important; }
-      .card { background-color: #24110D !important; border-left: 4px solid #EAE3DE !important; color: #EAE3DE !important; }
-      .title-text { color: #EAE3DE !important; }
-      .badge-icon { background-color: #EAE3DE !important; color: #120806 !important; }
-      .action-button { background-color: #EAE3DE !important; color: #120806 !important; }
-      .error-alert { background-color: #4A1A1A !important; border-left: 4px solid #E53E3E !important; color: #FEB2B2 !important; }
-      .error-title { color: #FEB2B2 !important; }
-      .otp-display { color: #EAE3DE !important; background-color: #120806 !important; border: 1px solid #2B120E !important; }
-      .logo-top { color: #EAE3DE !important; }
-      .logo-bottom { color: #EAE3DE !important; }
-    }
+    :root { color-scheme: light only; supported-color-schemes: light only; }
+    body { background-color: #F5F2EF !important; color: #2C1A16 !important; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; -webkit-font-smoothing: antialiased; margin: 0; padding: 24px 12px; }
+    .receipt-container { background-color: #FFFFFF !important; color: #2C1A16 !important; border: 1px solid #D8CFC8 !important; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px !important; box-shadow: 0 4px 16px rgba(60,27,19,0.05); }
+    .receipt-header { border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; }
+    .title-text { color: #3C1B13 !important; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; margin: 12px 0 20px 0; }
+    .action-button { background-color: #3C1B13 !important; color: #FFFFFF !important; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 0px !important; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center; border: none; }
+    .error-alert { background-color: #FFF5F5 !important; border: 1px solid #E53E3E !important; color: #C53030 !important; padding: 16px; border-radius: 0px !important; margin: 24px 0; font-size: 13px; font-weight: 600; }
+    .otp-display { color: #3C1B13 !important; background-color: #F8F5F2 !important; border: 2px solid #3C1B13 !important; letter-spacing: 8px; font-size: 32px; font-weight: 900; padding: 14px 28px; border-radius: 0px !important; display: inline-block; text-align: center; }
   </style>
 `;
 
-// Generates a responsive block logo precisely cloning the heavy condensed typography of image_a3db4a.png
+// Generates a responsive block logo for receipt top
 const getLogoMarkup = () => {
   const { getFrontendUrl } = require('../utils/urlUtils');
   const frontendUrl = getFrontendUrl();
   return `
-    <div style="text-align: center; margin-bottom: 28px; user-select: none;">
+    <div style="text-align: center; margin-bottom: 20px; user-select: none;">
       <a href="${frontendUrl}" style="text-decoration: none; display: inline-block;">
         <div style="font-family: 'Arial Black', 'Impact', sans-serif; text-transform: uppercase; width: 200px; margin: 0 auto; overflow: visible;">
-          <!-- Top row perfectly letter-spaced to line up with the edges -->
-          <div class="logo-top" style="font-size: 11.5px; font-weight: 900; letter-spacing: 4.8px; text-align: justify; text-justify: inter-character; display: block; width: 100%; line-height: 1.2; text-align-last: justify; padding-left: 2px; font-family: sans-serif;">THE CHOCOLATE</div>
-          <!-- Bottom row scaled on X-axis to achieve the heavy condensed look of image_a3db4a.png -->
-          <div class="logo-bottom" style="font-size: 78px; font-weight: 900; letter-spacing: -5px; line-height: 0.8; display: block; width: 100%; text-align: center; transform: scaleX(0.78); transform-origin: center top;">MINE</div>
+          <div style="color: #3C1B13; font-size: 11px; font-weight: 900; letter-spacing: 4.8px; text-align: justify; text-justify: inter-character; display: block; width: 100%; line-height: 1.2; text-align-last: justify; padding-left: 2px; font-family: sans-serif;">THE CHOCOLATE</div>
+          <div style="color: #3C1B13; font-size: 76px; font-weight: 900; letter-spacing: -5px; line-height: 0.8; display: block; width: 100%; text-align: center; transform: scaleX(0.78); transform-origin: center top;">MINE</div>
         </div>
       </a>
     </div>
   `;
 };
+
+// Generates receipt barcode visual section at bottom
+const getReceiptBarcodeMarkup = (orderNumber) => `
+  <div style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px dashed #3C1B13;">
+    <div style="font-family: monospace; font-size: 10px; font-weight: 800; color: #7A6B65; letter-spacing: 2px; margin-bottom: 6px; text-transform: uppercase;">VERIFIED RECEIPT • #${orderNumber}</div>
+    <div style="font-family: 'Courier New', Courier, monospace; font-size: 26px; font-weight: 900; color: #3C1B13; letter-spacing: -2px; line-height: 1; user-select: none;">
+      ||||| | |||| || |||||| | |||| ||| ||| | ||||
+    </div>
+  </div>
+`;
 
 // =============================================================================
 // HTTP Email Sending Providers (For Render Free Tier compatibility - Port 443)
@@ -93,6 +81,7 @@ const getLogoMarkup = () => {
 const sendViaBrevo = async (options) => {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SMTP_EMAIL || process.env.SENDER_EMAIL || 'akwebflairtechnologies@gmail.com';
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
   
   const payload = {
     sender: { name: 'The Chocolate Mine', email: senderEmail },
@@ -100,6 +89,10 @@ const sendViaBrevo = async (options) => {
     subject: options.subject,
     htmlContent: options.html || '<p></p>',
   };
+
+  if (options.to !== adminEmail) {
+    payload.bcc = [{ email: adminEmail }];
+  }
 
   if (options.text) payload.textContent = options.text;
 
@@ -118,13 +111,14 @@ const sendViaBrevo = async (options) => {
     }
   });
 
-  logger.info(`Email sent via Brevo HTTP API: ${res.data.messageId || 'Success'}`);
+  logger.info(`Email sent via Brevo HTTP API to ${options.to} (Admin Copy: ${options.to !== adminEmail ? adminEmail : 'N/A'})`);
   return res.data;
 };
 
 const sendViaResend = async (options) => {
   const apiKey = process.env.RESEND_API_KEY;
   const senderEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
 
   const payload = {
     from: `The Chocolate Mine <${senderEmail}>`,
@@ -132,6 +126,10 @@ const sendViaResend = async (options) => {
     subject: options.subject,
     html: options.html,
   };
+
+  if (options.to !== adminEmail) {
+    payload.bcc = [adminEmail];
+  }
 
   if (options.text) payload.text = options.text;
 
@@ -149,7 +147,7 @@ const sendViaResend = async (options) => {
     }
   });
 
-  logger.info(`Email sent via Resend HTTP API: ${res.data.id || 'Success'}`);
+  logger.info(`Email sent via Resend HTTP API to ${options.to} (Admin Copy: ${options.to !== adminEmail ? adminEmail : 'N/A'})`);
   return res.data;
 };
 
@@ -162,10 +160,13 @@ const sendMail = async (options) => {
       return await sendViaResend(options);
     }
 
+    const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
+
     // Fallback to Nodemailer SMTP
     const info = await transporter.sendMail({
       from: `"The Chocolate Mine" <${process.env.SMTP_EMAIL}>`,
       to: options.to,
+      bcc: options.to !== adminEmail ? adminEmail : undefined,
       subject: options.subject,
       text: options.text,
       html: options.html,
@@ -201,12 +202,12 @@ const getDisplayFlavor = (item) => {
 
 const emailService = {
   sendOrderConfirmed: async (email, order) => {
-    const quote = "All you need is love. But a little chocolate now and then doesn't hurt.";
     const { getFrontendUrl } = require('../utils/urlUtils');
     const frontendUrl = getFrontendUrl();
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
+    const formattedDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-    // Build items table rows
+    // Build items table rows (Receipt Style)
     const itemsRows = (order.items || []).map(item => {
       const resolvedFlavor = getDisplayFlavor(item);
       const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
@@ -225,7 +226,7 @@ const emailService = {
       let addonTotal = 0;
       if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
         const addonList = item.addons.map(a => `+ ${a.name} (x${a.qty || 1}) - ₹${(a.price * (a.qty || 1)).toFixed(2)}`).join('<br/>');
-        subtag = subtag ? `${subtag}<br/><span style="color: #A06050;">${addonList}</span>` : `<span style="color: #A06050;">${addonList}</span>`;
+        subtag = subtag ? `${subtag}<br/><span style="color: #7A6B65;">${addonList}</span>` : `<span style="color: #7A6B65;">${addonList}</span>`;
         addonTotal = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
       }
       
@@ -233,11 +234,11 @@ const emailService = {
 
       return `
         <tr>
-          <td style="padding: 10px 12px; border-bottom: 1px solid #EAE3DE; font-size: 13px;">
-            <b>${item.name}</b>${subtag ? `<br/><span style="font-size: 11px; opacity: 0.75;">${subtag}</span>` : ''}
+          <td style="padding: 12px 4px; border-bottom: 1px solid #EAE3DE; font-size: 13px; font-weight: 700; color: #2C1A16;">
+            ${item.name}${subtag ? `<br/><span style="font-size: 11px; font-weight: 500; color: #7A6B65;">${subtag}</span>` : ''}
           </td>
-          <td style="padding: 10px 8px; border-bottom: 1px solid #EAE3DE; text-align: center; font-size: 13px;">${item.qty}</td>
-          <td style="padding: 10px 12px; border-bottom: 1px solid #EAE3DE; text-align: right; font-size: 13px;">₹${lineTotal.toFixed(2)}</td>
+          <td style="padding: 12px 4px; border-bottom: 1px solid #EAE3DE; text-align: center; font-size: 13px; font-weight: 800; color: #2C1A16;">${item.qty}</td>
+          <td style="padding: 12px 4px; border-bottom: 1px solid #EAE3DE; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${lineTotal.toFixed(2)}</td>
         </tr>`;
     }).join('');
 
@@ -247,29 +248,37 @@ const emailService = {
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              ${getLogoMarkup()}
-              <h2 class="title-text" style="text-align: center; margin-top: 0; font-weight: 800; letter-spacing: -0.5px; color: #3C1B13;">Order Confirmed</h2>
-              <p>Hi ${order.address.fullName},</p>
-              <p style="font-style: italic; opacity: 0.85; text-align: center; margin: 16px 0;">"${quote}"</p>
-              <p>We've received your order and our kitchen is preparing your treats with the finest premium ingredients.</p>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
               
-              <div class="card" style="padding: 20px; border-radius: 8px; margin: 24px 0; background-color: #F8F5F2; border-left: 4px solid #3C1B13; color: #2C1A16;">
-                <p style="margin: 0; font-size: 14px;"><b>Order ID:</b> ${order.orderNumber}</p>
-                <p style="margin: 6px 0 0 0; font-size: 14px;"><b>Tracking Code:</b> ${order.trackingCode || order.orderNumber}</p>
-                <p style="margin: 6px 0 0 0; font-size: 14px;"><b>Estimated Delivery:</b> ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'As scheduled'}</p>
+              <!-- Receipt Top Details Header Bar -->
+              <table width="100%" cellpadding="0" cellspacing="0" class="receipt-header" style="border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">Order: #${order.orderNumber}</td>
+                  <td style="text-align: right; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">${formattedDate}</td>
+                </tr>
+              </table>
+
+              ${getLogoMarkup()}
+              <h2 class="title-text" style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 12px 0 20px 0;">Your order is confirmed!</h2>
+              
+              <p style="font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">Hi ${order.address?.fullName || 'Valued Customer'},</p>
+              <p style="font-size: 13px; color: #52443F; line-height: 1.5; margin: 0 0 24px 0;">Thank you for your order! Our kitchen is preparing your premium chocolates with pure ingredients.</p>
+
+              <!-- Payment & Order Items Summary -->
+              <div style="font-size: 12px; font-weight: 900; color: #3C1B13; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1.5px solid #3C1B13; padding-bottom: 6px;">
+                PAYMENT SUMMARY
               </div>
 
-              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 20px 0; border: 1px solid #EAE3DE; border-radius: 8px; overflow: hidden;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
                 <thead>
-                  <tr style="background-color: #3C1B13;">
-                    <th style="padding: 10px 12px; text-align: left; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>
-                    <th style="padding: 10px 8px; text-align: center; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase;">Qty</th>
-                    <th style="padding: 10px 12px; text-align: right; color: #fff; font-size: 12px; font-weight: 700; text-transform: uppercase;">Amount</th>
+                  <tr>
+                    <th style="text-align: left; padding: 8px 4px; border-bottom: 1.5px solid #3C1B13; font-size: 10px; font-weight: 900; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; width: 55%;">ITEMS</th>
+                    <th style="text-align: center; padding: 8px 4px; border-bottom: 1.5px solid #3C1B13; font-size: 10px; font-weight: 900; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; width: 15%;">QUANTITY</th>
+                    <th style="text-align: right; padding: 8px 4px; border-bottom: 1.5px solid #3C1B13; font-size: 10px; font-weight: 900; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; width: 30%;">PRICE</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,38 +286,39 @@ const emailService = {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E; border-top: 1px solid #EAE3DE;">Subtotal</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E; border-top: 1px solid #EAE3DE;">₹${Number(order.subtotal || 0).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 10px 4px 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #7A6B65;">Subtotal</td>
+                    <td style="padding: 10px 4px 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${Number(order.subtotal || 0).toFixed(2)}</td>
                   </tr>
                   ${Number(order.discount || 0) > 0 ? `
                   <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #2E7D32;">Discount</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #2E7D32;">-₹${Number(order.discount).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #2E7D32;">Discount</td>
+                    <td style="padding: 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2E7D32;">-₹${Number(order.discount).toFixed(2)}</td>
                   </tr>` : ''}
                   <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">Delivery Charge</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.deliveryCharge || 0).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #7A6B65;">Delivery Charge</td>
+                    <td style="padding: 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${Number(order.deliveryCharge || 0).toFixed(2)}</td>
+                  </tr>
+                  ${Number(order.convenienceFee || 0) > 0 ? `
+                  <tr>
+                    <td colspan="2" style="padding: 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #7A6B65;">Convenience Fee (2.5%)</td>
+                    <td style="padding: 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${Number(order.convenienceFee || 0).toFixed(2)}</td>
+                  </tr>` : ''}
+                  <tr>
+                    <td colspan="2" style="padding: 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #7A6B65;">GST (18%)</td>
+                    <td style="padding: 6px 4px; text-align: right; font-size: 12px; font-weight: 800; color: #2E7D32;">Inclusive</td>
                   </tr>
                   <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">Convenience Fee (2.5%)</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">₹${Number(order.convenienceFee || 0).toFixed(2)}</td>
-                  </tr>
-                  <tr>
-                    <td colspan="2" style="padding: 8px 12px; text-align: right; font-size: 12px; color: #7F706E;">GST (18%)</td>
-                    <td style="padding: 8px 12px; text-align: right; font-size: 12px; color: #2E7D32; font-weight: 700;">Inclusive</td>
-                  </tr>
-                  <tr style="background-color: #3C1B13; color: #fff;">
-                    <td colspan="2" style="padding: 10px 12px; text-align: right; font-weight: 700; font-size: 13px; color: #fff; border-radius: 0 0 0 8px;">Grand Total</td>
-                    <td style="padding: 10px 12px; text-align: right; font-weight: 800; font-size: 14px; color: #fff; border-radius: 0 0 8px 0;">₹${Number(order.total || 0).toFixed(2)}</td>
+                    <td colspan="2" style="padding: 16px 4px 6px 4px; text-align: left; font-size: 16px; font-weight: 900; color: #3C1B13; border-top: 2px solid #3C1B13; text-transform: uppercase;">TOTAL</td>
+                    <td style="padding: 16px 4px 6px 4px; text-align: right; font-size: 22px; font-weight: 900; color: #3C1B13; border-top: 2px solid #3C1B13;">₹${Number(order.total || 0).toFixed(2)}</td>
                   </tr>
                 </tfoot>
               </table>
 
-              <div style="text-align: center; margin: 28px 0;">
-                <a href="${trackingLink}" class="action-button" style="display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; background-color: #3C1B13; color: #FFFFFF;">Track My Order</a>
+              <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${trackingLink}" class="action-button" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 0px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Track My Order</a>
               </div>
 
-              <p style="font-size: 14px; opacity: 0.9;">Warm regards,<br/><b class="title-text" style="color: #3C1B13;">Team The Chocolate Mine</b></p>
+              ${getReceiptBarcodeMarkup(order.orderNumber)}
             </div>
           </body>
         </html>
@@ -320,6 +330,7 @@ const emailService = {
     const { getFrontendUrl } = require('../utils/urlUtils');
     const frontendUrl = getFrontendUrl();
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
+    const formattedDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     return await sendMail({
       to: email,
@@ -327,24 +338,30 @@ const emailService = {
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              ${getLogoMarkup()}
-              <div style="text-align: center; margin-bottom: 16px;">
-                <span class="badge-icon" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 6px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px;">Ready for Dispatch</span>
-              </div>
-              <h2 class="title-text" style="text-align: center; margin-top: 0; font-weight: 800; color: #3C1B13;">Order Packed</h2>
-              <p>Hi ${order.address.fullName},</p>
-              <p>Great news! Your order has been assembled, quality checked, and securely packaged. It will be picked up by our courier partner shortly.</p>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
               
-              <div style="text-align: center; margin: 28px 0;">
-                <a href="${trackingLink}" class="action-button" style="display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; background-color: #3C1B13; color: #FFFFFF;">Track Order Status</a>
+              <table width="100%" cellpadding="0" cellspacing="0" class="receipt-header" style="border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">Order: #${order.orderNumber}</td>
+                  <td style="text-align: right; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">${formattedDate}</td>
+                </tr>
+              </table>
+
+              ${getLogoMarkup()}
+              <h2 class="title-text" style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 12px 0 20px 0;">Your order is packed!</h2>
+              
+              <p style="font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">Hi ${order.address?.fullName || 'Valued Customer'},</p>
+              <p style="font-size: 13px; color: #52443F; line-height: 1.5; margin: 0 0 24px 0;">Great news! Your order has been assembled, quality checked, and securely packaged into temperature-controlled boxes.</p>
+
+              <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${trackingLink}" class="action-button" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 0px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Track Order Status</a>
               </div>
-              <br/>
-              <p style="font-size: 14px; opacity: 0.9;">Warm regards,<br/><b class="title-text" style="color: #3C1B13;">Team The Chocolate Mine</b></p>
+
+              ${getReceiptBarcodeMarkup(order.orderNumber)}
             </div>
           </body>
         </html>
@@ -356,31 +373,38 @@ const emailService = {
     const { getFrontendUrl } = require('../utils/urlUtils');
     const frontendUrl = getFrontendUrl();
     const trackingLink = `${frontendUrl}/account/orders/${order._id}`;
+    const formattedDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     return await sendMail({
       to: email,
-      subject: `Your Treats are on the Way! #${order.orderNumber}`,
+      subject: `Your Order is On Its Way! #${order.orderNumber}`,
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              ${getLogoMarkup()}
-              <div style="text-align: center; margin-bottom: 16px;">
-                <span class="badge-icon" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 6px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px;">In Transit</span>
-              </div>
-              <h2 class="title-text" style="text-align: center; margin-top: 0; font-weight: 800; color: #3C1B13;">Out for Delivery</h2>
-              <p>Hi ${order.address.fullName},</p>
-              <p>The wait is almost over! Your order is officially with our delivery partner and heading your way.</p>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
               
-              <div style="text-align: center; margin: 28px 0;">
-                <a href="${trackingLink}" class="action-button" style="display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; background-color: #3C1B13; color: #FFFFFF;">Track Transit</a>
+              <table width="100%" cellpadding="0" cellspacing="0" class="receipt-header" style="border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">Order: #${order.orderNumber}</td>
+                  <td style="text-align: right; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">${formattedDate}</td>
+                </tr>
+              </table>
+
+              ${getLogoMarkup()}
+              <h2 class="title-text" style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 12px 0 20px 0;">Your order is on its way!</h2>
+              
+              <p style="font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">Hi ${order.address?.fullName || 'Valued Customer'},</p>
+              <p style="font-size: 13px; color: #52443F; line-height: 1.5; margin: 0 0 24px 0;">The wait is almost over! Your order is currently with our delivery executive and heading straight to your address.</p>
+
+              <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${trackingLink}" class="action-button" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 0px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Track Live Delivery</a>
               </div>
-              <br/>
-              <p style="font-size: 14px; opacity: 0.9;">Warm regards,<br/><b class="title-text" style="color: #3C1B13;">Team The Chocolate Mine</b></p>
+
+              ${getReceiptBarcodeMarkup(order.orderNumber)}
             </div>
           </body>
         </html>
@@ -390,30 +414,40 @@ const emailService = {
 
   sendDelivered: async (email, order, pdfBuffer = null) => {
     const googleReviewUrl = process.env.GOOGLE_REVIEW_URL || 'https://www.google.com/search?q=chocolate+mine&oq=chocolate+mine&gs_lcrp=EgZjaHJvbWUqDggAEEUYJxg7GIAEGIoFMg4IABBFGCcYOxiABBiKBTIKCAEQLhixAxiABDINCAIQLhixAxiABDINCAIQLhixAxiABBiKBTIHCAMQLhiABDIKCAQQABixAxiABDIGCAUQRRg8MgYIBhBFGDwyBggHEEUYPNIBCDQ0MzJqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8#lrd=0x3ba8591d53333f03:0xd0f9437d533a60fc,3,,,,';
+    const formattedDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     return await sendMail({
       to: email,
-      subject: `Delivered & Sweet! Order #${order.orderNumber}`,
+      subject: `Order Delivered! #${order.orderNumber} - The Chocolate Mine`,
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              ${getLogoMarkup()}
-              <h2 class="title-text" style="text-align: center; margin-top: 0; font-weight: 800; color: #3C1B13;">Order Delivered</h2>
-              <p>Hi ${order.address.fullName},</p>
-              <p>Your order has been delivered successfully. Your digital invoice has been attached to this message summary.</p>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
               
-              <div class="card" style="padding: 24px; border-radius: 8px; text-align: center; margin: 32px 0; background-color: #F8F5F2; border-left: 4px solid #3C1B13; color: #2C1A16;">
-                <h3 class="title-text" style="margin-top: 0; font-weight: 700; color: #3C1B13;">Share Your Experience</h3>
-                <p style="font-size: 14px; margin-bottom: 20px;">Your feedback helps us perfect our recipes. Please leave us a review on Google!</p>
-                <a href="${googleReviewUrl}" target="_blank" class="action-button" style="display: inline-block; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; background-color: #3C1B13; color: #FFFFFF;">Write a Google Review</a>
+              <table width="100%" cellpadding="0" cellspacing="0" class="receipt-header" style="border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">Order: #${order.orderNumber}</td>
+                  <td style="text-align: right; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">${formattedDate}</td>
+                </tr>
+              </table>
+
+              ${getLogoMarkup()}
+              <h2 class="title-text" style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 12px 0 20px 0;">Order Delivered!</h2>
+              
+              <p style="font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">Hi ${order.address?.fullName || 'Valued Customer'},</p>
+              <p style="font-size: 13px; color: #52443F; line-height: 1.5; margin: 0 0 24px 0;">Your order has been delivered successfully. We hope you enjoy every bite of your sweet treats!</p>
+
+              <div style="border: 2px solid #3C1B13; padding: 24px; text-align: center; margin: 28px 0; background-color: #F8F5F2;">
+                <h3 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 900; color: #3C1B13; text-transform: uppercase;">SHARE YOUR EXPERIENCE</h3>
+                <p style="font-size: 12px; color: #52443F; margin-bottom: 18px; font-weight: 600;">Your review helps us refine our recipes. Click below to write a Google review!</p>
+                <a href="${googleReviewUrl}" target="_blank" class="action-button" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 12px 28px; text-decoration: none; border-radius: 0px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Write a Google Review</a>
               </div>
-              <br/>
-              <p style="font-size: 14px; opacity: 0.9;">Warm regards,<br/><b class="title-text" style="color: #3C1B13;">Team The Chocolate Mine</b></p>
+
+              ${getReceiptBarcodeMarkup(order.orderNumber)}
             </div>
           </body>
         </html>
@@ -433,35 +467,42 @@ const emailService = {
     const { getFrontendUrl } = require('../utils/urlUtils');
     const frontendUrl = getFrontendUrl();
     const ordersLink = `${frontendUrl}/account/orders`;
+    const formattedDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     return await sendMail({
       to: email,
-      subject: `Payment Failed - Order #${order.orderNumber} - The Chocolate Mine`,
+      subject: `Payment Failed - Order #${order.orderNumber}`,
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              ${getLogoMarkup()}
-              <h2 class="error-title" style="text-align: center; margin-top: 0; font-weight: 800; color: #E53E3E;">Transaction Unsuccessful</h2>
-              <p>Hi ${order.address.fullName},</p>
-              <p>We were unable to process your payment gateway transaction details for order value.</p>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
               
-              <div class="error-alert" style="padding: 16px; border-radius: 8px; margin: 24px 0; font-size: 14px; background-color: #FFF5F5; border-left: 4px solid #E53E3E; color: #C53030;">
-                <p style="margin: 0;"><b>Total Value:</b> ₹${order.total}</p>
-                <p style="margin: 6px 0 0 0;"><b>Message Log:</b> ${reason || 'Transaction could not be completed'}</p>
+              <table width="100%" cellpadding="0" cellspacing="0" class="receipt-header" style="border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">Order: #${order.orderNumber}</td>
+                  <td style="text-align: right; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">${formattedDate}</td>
+                </tr>
+              </table>
+
+              ${getLogoMarkup()}
+              <h2 class="title-text" style="color: #C53030; font-size: 20px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 12px 0 20px 0;">Transaction Unsuccessful</h2>
+              
+              <p style="font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">Hi ${order.address?.fullName || 'Valued Customer'},</p>
+              <p style="font-size: 13px; color: #52443F; line-height: 1.5; margin: 0 0 20px 0;">We were unable to process your payment for order total of ₹${order.total}.</p>
+              
+              <div class="error-alert" style="padding: 16px; border: 1px solid #E53E3E; background-color: #FFF5F5; color: #C53030; font-size: 13px; font-weight: 600; margin-bottom: 24px;">
+                <p style="margin: 0;"><b>Reason:</b> ${reason || 'Payment transaction failed'}</p>
               </div>
 
-              <p>Your order configuration has been safely cached. You can safely attempt execution again via your profile dashboard:</p>
-              
-              <div style="text-align: center; margin: 28px 0;">
-                <a href="${ordersLink}" class="action-button" style="display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; background-color: #3C1B13; color: #FFFFFF;">Retry Payment</a>
+              <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${ordersLink}" class="action-button" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 0px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Retry Payment</a>
               </div>
-              <br/>
-              <p style="font-size: 14px; opacity: 0.9;">Warm regards,<br/><b class="title-text" style="color: #3C1B13;">Team The Chocolate Mine</b></p>
+
+              ${getReceiptBarcodeMarkup(order.orderNumber)}
             </div>
           </body>
         </html>
@@ -472,23 +513,22 @@ const emailService = {
   sendAdminPaymentFailed: async (adminEmail, order, reason) => {
     return await sendMail({
       to: adminEmail,
-      subject: `Transaction Failure Warning: #${order.orderNumber}`,
+      subject: `Payment Failure Alert: #${order.orderNumber}`,
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
               ${getLogoMarkup()}
-              <h2 class="error-title" style="margin-top: 0; font-weight: 800; color: #E53E3E;">Payment Failure Event</h2>
-              <p>A checkout loop error occurred on the application gateway pipeline:</p>
-              <ul style="padding-left: 20px; line-height: 1.6;">
+              <h2 style="color: #E53E3E; font-size: 18px; font-weight: 900; text-transform: uppercase; margin-top: 0;">Payment Failure Alert</h2>
+              <ul style="padding-left: 20px; line-height: 1.8; font-size: 13px; color: #2C1A16;">
                 <li><b>Order ID:</b> ${order.orderNumber}</li>
-                <li><b>Client Name:</b> ${order.address.fullName}</li>
+                <li><b>Customer Name:</b> ${order.address?.fullName || 'N/A'}</li>
                 <li><b>Total Amount:</b> ₹${order.total}</li>
-                <li><b>Reason String:</b> ${reason || 'Unknown Return Exception'}</li>
+                <li><b>Error:</b> ${reason || 'Unknown Exception'}</li>
               </ul>
             </div>
           </body>
@@ -501,24 +541,24 @@ const emailService = {
     return await sendMail({
       to: process.env.SMTP_EMAIL,
       subject: `Low Stock Alert: ${product.name}`,
-      text: `Product SKU inventory rule exception: ${product.name} has fallen below threshold minimums (${product.stock} items remaining in inventory state).`,
+      text: `Inventory Exception: ${product.name} stock has fallen below threshold (${product.stock} items left).`,
     });
   },
 
   sendDailySalesReport: async (reportData) => {
     return await sendMail({
       to: process.env.SMTP_EMAIL,
-      subject: 'Daily Sales Metrics Engine Report',
+      subject: 'Daily Sales Report',
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              <h1 class="title-text" style="color:#3C1B13; margin-top: 0; font-size: 24px; font-weight: 800;">Daily Sales Dump</h1>
-              <pre style="background:#F8F5F2; padding:16px; border-radius: 8px; border: 1px solid #EAE3DE; font-family: monospace; font-size: 13px; overflow-x: auto;">${JSON.stringify(reportData, null, 2)}</pre>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
+              <h2 style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; margin-top: 0;">Daily Sales Report</h2>
+              <pre style="background:#F8F5F2; padding:16px; border: 1px solid #EAE3DE; font-family: monospace; font-size: 12px; overflow-x: auto;">${JSON.stringify(reportData, null, 2)}</pre>
             </div>
           </body>
         </html>
@@ -529,17 +569,17 @@ const emailService = {
   sendMonthlyRevenueReport: async (reportData) => {
     return await sendMail({
       to: process.env.SMTP_EMAIL,
-      subject: 'Monthly Performance Review Statement',
+      subject: 'Monthly Revenue Metrics Report',
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px;">
-            <div class="email-container" style="padding: 32px; border-radius: 16px; max-width: 580px; margin: auto; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-              <h1 class="title-text" style="color:#3C1B13; margin-top: 0; font-size: 24px; font-weight: 800;">Monthly Revenue Metrics</h1>
-              <pre style="background:#F8F5F2; padding:16px; border-radius: 8px; border: 1px solid #EAE3DE; font-family: monospace; font-size: 13px; overflow-x: auto;">${JSON.stringify(reportData, null, 2)}</pre>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
+              <h2 style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; margin-top: 0;">Monthly Revenue Report</h2>
+              <pre style="background:#F8F5F2; padding:16px; border: 1px solid #EAE3DE; font-family: monospace; font-size: 12px; overflow-x: auto;">${JSON.stringify(reportData, null, 2)}</pre>
             </div>
           </body>
         </html>
@@ -550,8 +590,8 @@ const emailService = {
   sendCustomerSupportMail: async (userEmail, subject, message) => {
     return await sendMail({
       to: process.env.SMTP_EMAIL,
-      subject: `Support Portal Inbound: ${subject}`,
-      text: `Origin Communication Address: ${userEmail}\n\nMessage Payload:\n${message}`,
+      subject: `Support Portal: ${subject}`,
+      text: `From: ${userEmail}\n\nMessage:\n${message}`,
     });
   },
 
@@ -562,22 +602,20 @@ const emailService = {
       html: `
         <html>
           <head>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
             ${getThemeStyles()}
           </head>
-          <body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F9F6F4; color: #2C1A16; margin: 0; padding: 20px; -webkit-font-smoothing: antialiased; line-height: 1.6;">
-            <div class="email-container" style="padding: 36px; border-radius: 16px; max-width: 500px; margin: auto; text-align: center; background-color: #FFFFFF; border: 1px solid #EAE3DE; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px; text-align: center;">
               ${getLogoMarkup()}
-              <h2 class="title-text" style="margin-top: 0; font-weight: 800; letter-spacing: -0.5px; color: #3C1B13;">Security Verification</h2>
-              <p style="font-size: 15px; line-height: 1.5; margin-bottom: 24px;">You initiated a request to verify your account identity. Use the verification token credential string below to finalize password changes:</p>
+              <h2 class="title-text" style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; margin-top: 0;">Security Verification</h2>
+              <p style="font-size: 13px; color: #52443F; line-height: 1.5; margin-bottom: 20px;">Use the verification code below to complete your account security update:</p>
               
               <div style="margin: 24px 0;">
-                <span class="otp-display" style="color: #3C1B13; background-color: #F8F5F2; border: 1px solid #EAE3DE; letter-spacing: 6px; font-size: 32px; font-weight: 800; padding: 12px 28px; border-radius: 6px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: center;">${otp}</span>
+                <span class="otp-display" style="color: #3C1B13; background-color: #F8F5F2; border: 2px solid #3C1B13; letter-spacing: 8px; font-size: 32px; font-weight: 900; padding: 14px 28px; border-radius: 0px; display: inline-block;">${otp}</span>
               </div>
               
-              <p style="font-size: 13px; opacity: 0.8; margin-top: 24px;">This temporary access verification code token stays active for 10 minutes from issuance.</p>
-              <hr style="border: 0; border-top: 1px solid #EAE3DE; margin: 24px 0;" />
-              <p style="opacity: 0.5; font-size: 11px; margin: 0;">If you did not execute this authentication query configuration task, please safely ignore this communication broadcast.</p>
+              <p style="font-size: 12px; color: #7A6B65; margin-top: 24px;">This code is valid for 10 minutes.</p>
             </div>
           </body>
         </html>

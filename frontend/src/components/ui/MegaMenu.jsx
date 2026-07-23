@@ -34,7 +34,7 @@ const MegaMenu = () => {
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <button className="flex items-center gap-1 text-sm font-black uppercase tracking-widest text-heading group-hover:text-primary transition-colors py-4">
+      <button className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-heading group-hover:text-primary transition-colors py-2">
         SHOP BY CATEGORY <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
       </button>
 

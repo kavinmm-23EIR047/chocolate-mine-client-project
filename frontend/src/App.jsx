@@ -303,3 +303,18 @@ function App() {
 }
 
 export default App;
+
+// export default function App() {
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-6 text-center">
+//       <h1 className="text-5xl font-bold text-gray-800 mb-4">
+//         🚧 Under Maintenance
+//       </h1>
+
+//       <p className="text-lg text-gray-600 max-w-md">
+//         We're currently performing scheduled maintenance.
+//         Please check back soon.
+//       </p>
+//     </div>
+//   );
+// }

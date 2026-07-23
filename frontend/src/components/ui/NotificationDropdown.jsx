@@ -6,7 +6,7 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { getSocket } from '../../sockets/socketManager';
 
-const NotificationDropdown = ({ iconClass, buttonClass, showLabel }) => {
+const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -129,16 +129,17 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel }) => {
       <button
         onClick={toggleDropdown}
         className={buttonClass || "relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center"}
+        aria-label="Notifications"
       >
-        <div className="relative flex items-center justify-center">
-          <Bell size={24} className={iconClass || "text-heading"} />
+        <div className="relative inline-flex items-center justify-center">
+          <Bell size={iconSize} className={iconClass || "text-heading"} />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-accent rounded-full flex items-center justify-center text-[10px] font-black text-[#120806] leading-none z-10">
+            <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 bg-accent text-[#120807] text-[10px] font-black rounded-full flex items-center justify-center leading-none z-10 shadow-sm border border-background">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </div>
-        {showLabel && <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>}
+        {showLabel && <span className="text-[10px] sm:text-[11px] font-extrabold text-muted group-hover:text-primary uppercase tracking-wider whitespace-nowrap leading-none transition-colors mt-0.5">Alerts</span>}
       </button>
 
       <AnimatePresence>

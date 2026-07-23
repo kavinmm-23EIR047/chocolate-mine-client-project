@@ -453,6 +453,8 @@ export default function CustomCake() {
     finally { setIsAdding(false); }
   };
 
+
+
   const goBackToBrowse = () => {
     themeIdToKeep.current = null;
     setThemeIdx(null);
@@ -614,7 +616,6 @@ export default function CustomCake() {
   // ── RENDER ─────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans">
-
       {/* ── BREADCRUMB ── */}
       {themeIdx !== null && (
         <div className="bg-[var(--card)] border-b border-[var(--border)] py-3">
@@ -698,14 +699,14 @@ export default function CustomCake() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={() => setIsFilterOpen(false)}
-                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] sm:hidden"
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] lg:hidden"
                   />
                   <motion.aside
                     initial={{ x: '100%' }}
                     animate={{ x: 0 }}
                     exit={{ x: '100%' }}
                     transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-                    className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[380px] h-full bg-[#1A0E0B] z-[210] flex flex-col text-[#ecded9] border-l border-[#3A211B] shadow-[0_0_50px_rgba(0,0,0,0.8)] sm:hidden"
+                    className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[380px] h-full bg-[#1A0E0B] z-[210] flex flex-col text-[#ecded9] border-l border-[#3A211B] shadow-[0_0_50px_rgba(0,0,0,0.8)] lg:hidden"
                   >
                     {/* Header */}
                     <div className="flex justify-between items-center py-5 px-6 border-b border-[#3A211B] bg-[#2A1813] select-none">

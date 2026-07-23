@@ -211,7 +211,7 @@ export default function CustomCakeBrowse({
 
   // ── Mobile Top Bar (only shown if not hiding filters) ──
   const MobileTopBar = () => (
-    <div className="sm:hidden mb-4 flex flex-col gap-3">
+    <div className="lg:hidden mb-4 flex flex-col gap-3">
       {/* Search */}
       <div className="relative">
         <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
@@ -325,7 +325,7 @@ export default function CustomCakeBrowse({
       </div>
 
       {/* ── Mobile Page Header ── */}
-      <div className="sm:hidden flex items-start justify-between gap-3 pt-1">
+      <div className="lg:hidden flex items-start justify-between gap-3 pt-1">
         <div className="min-w-0 text-left">
           <h1 className="text-xl font-black text-[var(--heading)] leading-none">Custom Cakes</h1>
           <p className="text-[11px] text-[var(--muted)] mt-1 font-medium">Choose your tier and theme to start configuring.</p>

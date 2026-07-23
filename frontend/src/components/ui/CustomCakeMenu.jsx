@@ -33,7 +33,7 @@ const CustomCakeMenu = () => {
     >
       <Link 
         to="/custom-cake"
-        className="flex items-center gap-1 text-sm font-black uppercase tracking-widest text-heading group-hover:text-primary transition-colors py-4"
+        className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-heading group-hover:text-primary transition-colors py-2"
       >
         CUSTOM CAKES <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
       </Link>

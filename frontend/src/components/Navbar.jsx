@@ -73,21 +73,21 @@ const Navbar = () => {
         <div className="responsive-container pb-3 lg:pb-0 relative z-10">
 
           {/* DESKTOP LAYOUT ROW */}
-          <div className="hidden lg:flex items-center justify-between gap-3 py-1 min-h-[44px] tv:min-h-[56px]">
+          <div className="hidden lg:flex items-center justify-between gap-4 py-2.5 min-h-[60px]">
             <div className="flex items-center gap-4 shrink-0">
               <Link to="/" className="shrink-0 block select-none group pr-1">
-                <Logo className="w-[110px] sm:w-[130px] lg:w-[140px] h-auto object-contain" />
+                <Logo className="w-[110px] sm:w-[130px] lg:w-[140px] h-auto object-contain transition-transform group-hover:scale-105" />
               </Link>
 
               <div className="relative shrink-0" ref={locationDropdownRef}>
                 <button
                   onClick={() => setIsLocationOpen(!isLocationOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 bg-surface hover:border-primary/30 transition-all duration-200 min-w-[140px] tv:min-w-[180px]"
+                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl border border-border/60 bg-surface/80 hover:bg-surface hover:border-primary/40 shadow-sm transition-all duration-200 min-w-[145px]"
                 >
-                  <MapPin size={14} className="text-primary shrink-0" />
+                  <MapPin size={15} className="text-primary shrink-0" />
                   <div className="flex flex-col items-start">
-                    <span className="text-[10px] font-bold text-muted uppercase tracking-widest leading-none">Deliver to</span>
-                    <span className="text-[12px] font-black text-heading uppercase tracking-wide flex items-center gap-1 leading-tight mt-0.5">
+                    <span className="text-[9px] font-black text-muted uppercase tracking-widest leading-none">Deliver to</span>
+                    <span className="text-[11px] font-black text-heading uppercase tracking-wide flex items-center gap-1 leading-tight mt-0.5">
                       {deliveryCity === 'pan india' ? 'PAN INDIA' : (deliveryCity?.toUpperCase() || 'SELECT CITY')}
                       <ChevronDown size={11} className={`transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`} />
                     </span>
@@ -102,7 +102,7 @@ const Navbar = () => {
                       {['coimbatore', 'pan india'].map((city) => (
                         <button
                           key={city} onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
-                          className="w-full text-left px-4 py-2 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors"
+                          className="w-full text-left px-4 py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-primary/10 text-heading transition-colors"
                         >
                           {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
                         </button>
@@ -114,63 +114,76 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Search Bar */}
-            <div className="flex flex-1 max-w-md xl:max-w-xl tv:max-w-3xl mx-auto cursor-pointer px-4" onClick={() => setIsSearchOverlayOpen(true)}>
+            <div className="flex flex-1 max-w-md xl:max-w-xl tv:max-w-3xl mx-auto cursor-pointer px-2" onClick={() => setIsSearchOverlayOpen(true)}>
               <div className="relative w-full">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-heading/70" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted transition-colors group-hover:text-primary" />
                 <input
                   type="text" readOnly placeholder="Search for cakes, desserts and more..."
-                  className="w-full bg-surface border border-border/60 text-foreground pl-12 pr-12 py-2 rounded-full outline-none text-sm cursor-pointer"
+                  className="w-full bg-surface/80 hover:bg-surface border border-border/60 text-foreground pl-11 pr-11 py-2 rounded-full outline-none text-xs font-medium cursor-pointer shadow-sm hover:border-primary/40 transition-all flex items-center h-10"
                 />
-                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-heading/60 hover:text-heading transition-colors">
-                  <SlidersHorizontal size={16} />
+                <button className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-heading transition-colors p-1">
+                  <SlidersHorizontal size={15} />
                 </button>
               </div>
             </div>
 
             {/* Desktop Navigation Panels */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {user ? (
                 <NotificationDropdown 
-                  buttonClass="flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[56px] relative cursor-pointer"
+                  buttonClass="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/10 group transition-all min-w-[56px] relative cursor-pointer"
                   iconClass="text-heading group-hover:text-primary transition-colors"
+                  iconSize={20}
                   showLabel={true}
                 />
               ) : (
-                <button onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))} className="flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[56px]">
-                  <Bell size={20} className="text-heading group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">Alerts</span>
+                <button onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))} className="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/10 group transition-all min-w-[56px] relative cursor-pointer">
+                  <div className="relative inline-flex items-center justify-center">
+                    <Bell size={20} className="text-heading group-hover:text-primary transition-colors" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-extrabold text-muted group-hover:text-primary uppercase tracking-wider whitespace-nowrap leading-none transition-colors mt-0.5">Alerts</span>
                 </button>
               )}
 
               {[user ? { icon: User, label: user.name.split(' ')[0], to: user.role === 'admin' ? '/admin/dashboard' : '/account/dashboard' } : { icon: LogIn, label: 'Sign In', to: '/login' }].map(({ icon: Icon, label, to }) => (
-                <Link key={label} to={to} className="flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[56px]">
-                  <Icon size={20} className="text-heading group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide whitespace-nowrap transition-colors">{label}</span>
+                <Link key={label} to={to} className="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/10 group transition-all min-w-[56px] relative cursor-pointer">
+                  <div className="relative inline-flex items-center justify-center">
+                    <Icon size={20} className="text-heading group-hover:text-primary transition-colors" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-extrabold text-muted group-hover:text-primary uppercase tracking-wider whitespace-nowrap leading-none transition-colors mt-0.5">{label}</span>
                 </Link>
               ))}
 
-              <Link to="/cart" className="flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl hover:bg-primary/8 group transition-colors relative min-w-[56px]">
-                <ShoppingCart size={20} className="text-heading group-hover:text-primary transition-colors" />
-                {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-accent text-[#120807] text-[9px] font-black w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none px-1">{cartCount}</span>}
-                <span className="text-[11px] font-bold text-muted group-hover:text-primary uppercase tracking-wide transition-colors">Cart</span>
+              <Link to="/cart" className="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/10 group transition-all min-w-[56px] relative cursor-pointer">
+                <div className="relative inline-flex items-center justify-center">
+                  <ShoppingCart size={20} className="text-heading group-hover:text-primary transition-colors" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 bg-accent text-[#120807] text-[10px] font-black rounded-full flex items-center justify-center leading-none z-10 shadow-sm border border-background">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] sm:text-[11px] font-extrabold text-muted group-hover:text-primary uppercase tracking-wider whitespace-nowrap leading-none transition-colors mt-0.5">Cart</span>
               </Link>
+
               <ThemeToggle 
-                buttonClass="flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl hover:bg-primary/8 group transition-colors min-w-[56px] relative cursor-pointer"
+                buttonClass="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl hover:bg-primary/10 group transition-all min-w-[56px] relative cursor-pointer"
                 iconClass="text-heading group-hover:text-primary transition-colors"
+                iconSize={20}
                 showLabel={true}
               />
             </div>
           </div>
 
           {/* MOBILE VIEW LAYOUT */}
-          <div className="lg:hidden flex flex-col gap-4 pt-3 pb-1">
+          <div className="lg:hidden flex flex-col gap-3 pt-3 pb-1">
 
             {/* Top Row: Menu + Logo + Actions */}
             <div className="flex items-center justify-between w-full px-1">
               {/* Left Side: Menu + Logo */}
               <div className="flex items-center gap-2">
-                <button onClick={() => setIsMenuOpen(true)} className="p-1 rounded-lg transition-colors flex-shrink-0">
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-heading">
+                <button onClick={() => setIsMenuOpen(true)} className="p-1.5 rounded-lg transition-colors flex-shrink-0 active:scale-95">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-heading">
                     <line x1="3" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
                     <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -182,16 +195,16 @@ const Navbar = () => {
               </div>
 
               {/* Right Side: Actions */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {user ? (
-                  <NotificationDropdown iconClass="text-heading" />
+                  <NotificationDropdown iconClass="text-heading" iconSize={22} />
                 ) : (
                   <button onClick={() => window.dispatchEvent(new Event('openNotificationPrompt'))} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center relative">
-                    <Bell size={24} className="text-heading" />
+                    <Bell size={22} className="text-heading" />
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full" />
                   </button>
                 )}
-                <ThemeToggle buttonClass="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center relative" iconClass="text-heading" />
+                <ThemeToggle buttonClass="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center justify-center relative" iconClass="text-heading" iconSize={22} />
               </div>
             </div>
 
@@ -199,11 +212,11 @@ const Navbar = () => {
             <div className="flex justify-start relative mt-0.5" ref={mobileLocationDropdownRef}>
               <button
                 onClick={() => setIsLocationOpen(!isLocationOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-transparent text-heading transition-colors text-[12px] font-black tracking-wider uppercase"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border/70 bg-surface/80 text-heading transition-colors text-[11px] font-black tracking-wider uppercase shadow-sm"
               >
-                <MapPin size={15} className="text-heading" />
+                <MapPin size={14} className="text-primary" />
                 <span>{deliveryCity === 'pan india' ? 'PAN INDIA' : (deliveryCity?.toUpperCase() || 'COIMBATORE')}</span>
-                <ChevronDown size={14} className="text-heading transition-transform duration-200" style={{ transform: isLocationOpen ? 'rotate(180deg)' : 'none' }} />
+                <ChevronDown size={13} className="text-heading transition-transform duration-200" style={{ transform: isLocationOpen ? 'rotate(180deg)' : 'none' }} />
               </button>
 
               <AnimatePresence>
@@ -215,7 +228,7 @@ const Navbar = () => {
                     {['coimbatore', 'pan india'].map((city) => (
                       <button
                         key={city} onClick={() => { setDeliveryCity(city); setIsLocationOpen(false); }}
-                        className="w-full text-left px-5 py-3 text-[11px] font-black uppercase tracking-wider hover:bg-primary/8 text-heading transition-colors"
+                        className="w-full text-left px-4 py-2.5 text-[11px] font-black uppercase tracking-wider hover:bg-primary/10 text-heading transition-colors"
                       >
                         {city === 'pan india' ? 'PAN INDIA' : 'COIMBATORE'}
                       </button>
@@ -227,17 +240,17 @@ const Navbar = () => {
 
             {/* Themed Search Pill with Contrast against bg-navbar */}
             <div
-              className="relative w-full mt-0.5 cursor-pointer flex items-center pl-12 pr-12 py-3 rounded-full bg-card border border-border/60 shadow-sm min-h-[48px] select-none"
+              className="relative w-full mt-0.5 cursor-pointer flex items-center pl-11 pr-11 py-2.5 rounded-full bg-card border border-border/60 shadow-sm min-h-[44px] select-none"
               onClick={() => setIsSearchOverlayOpen(true)}
             >
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
 
-              <span className="text-muted/60 text-sm font-medium truncate flex-1 block">
+              <span className="text-muted/70 text-xs font-medium truncate flex-1 block">
                 Search cakes, desserts and more...
               </span>
 
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-heading transition-colors p-1 flex items-center justify-center">
-                <SlidersHorizontal size={18} />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading transition-colors p-1 flex items-center justify-center">
+                <SlidersHorizontal size={16} />
               </button>
             </div>
           </div>
@@ -245,14 +258,14 @@ const Navbar = () => {
         </div>
 
         {/* BOTTOM DESKTOP NAVIGATION LINKS */}
-        <div className="hidden lg:flex items-center justify-start gap-5 xl:gap-7 tv:gap-10 py-0.5 border-t border-border/10 bg-navbar responsive-container relative">
+        <div className="hidden lg:flex items-center justify-start gap-6 xl:gap-8 tv:gap-10 py-1.5 border-t border-border/15 bg-navbar/95 backdrop-blur-md responsive-container relative">
           <MegaMenu />
           <CustomCakeMenu />
-          <Link to="/shop?offers=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5 flex items-center gap-1">
+          <Link to="/shop?offers=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2 flex items-center gap-1">
             Offer Cakes <span className="text-xs">🔥</span>
           </Link>
-          <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5">Bestseller</Link>
-          <Link to="/shop?featured=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5">Features</Link>
+          <Link to="/shop?bestseller=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2">Bestseller</Link>
+          <Link to="/shop?featured=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2">Features</Link>
         </div>
       </nav>
 

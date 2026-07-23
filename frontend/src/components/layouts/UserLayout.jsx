@@ -33,27 +33,27 @@ const UserLayout = () => {
         <div className="hidden md:flex items-center justify-between responsive-container">
           {/* Left: Pure Veg & Eggless */}
           <div className="flex items-center gap-2.5">
-            <PureVegBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
-            <span className="text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
-            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
+            <PureVegBadge size={18} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
+            <span className="text-xs lg:text-sm font-black uppercase tracking-[0.12em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 hidden lg:inline-block">100% Pure Veg & Eggless cakes across the store</span>
+            <span className="text-xs font-black uppercase tracking-[0.1em] text-[#4ade80] dark:text-[#1B5E20] mt-0.5 inline-block lg:hidden">100% Pure Veg & Eggless Store</span>
           </div>
 
           {/* Center: Delivery */}
-          <div className="flex items-center gap-2 text-[#F2E2DB] dark:text-[#120806] text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] mt-0.5">
-            <Truck size={14} className="shrink-0" />
+          <div className="flex items-center gap-2 text-[#F2E2DB] dark:text-[#120806] text-xs lg:text-sm font-black uppercase tracking-[0.12em] mt-0.5">
+            <Truck size={16} className="shrink-0" />
             <span>Delivery in Coimbatore within 3 Hours</span>
           </div>
 
-          {/* Right: Important Routes */}
-          <div className="flex items-center gap-5 text-[9px] lg:text-xs font-black uppercase tracking-[0.15em] mt-0.5 text-[#4ade80] dark:text-[#4E2820]">
-            <Link to="/contact" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
-              <Phone size={12} className="shrink-0" /> Contact Us
-            </Link>
+          {/* Right: Call & Important Routes */}
+          <div className="flex items-center gap-5 text-xs lg:text-sm font-black uppercase tracking-[0.12em] mt-0.5 text-[#4ade80] dark:text-[#4E2820]">
+            <a href="tel:+919150670077" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
+              <Phone size={16} className="shrink-0" /> +91 91506 70077
+            </a>
             <Link to="/help" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
-              <HelpCircle size={12} className="shrink-0" /> Help
+              <HelpCircle size={15} className="shrink-0" /> Help
             </Link>
             <Link to="/stores" className="flex items-center gap-1.5 hover:text-white dark:hover:text-[#120806] transition-colors">
-              <MapPin size={12} className="shrink-0" /> Stores
+              <MapPin size={15} className="shrink-0" /> Stores
             </Link>
           </div>
         </div>
@@ -62,25 +62,26 @@ const UserLayout = () => {
         <div className="flex md:hidden items-center justify-between w-full">
           {/* Left: Pure Veg & Eggless */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <PureVegBadge size={14} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
+            <PureVegBadge size={16} className="shadow-none bg-white p-0.5 rounded-[2px]" hideText={true} />
           </div>
 
           {/* Center: Delivery */}
-          <div className="flex items-center gap-1 text-[#F2E2DB] dark:text-[#120806] text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] mx-2 mt-0.5">
-            <Truck size={11} className="shrink-0 text-[#F2E2DB] dark:text-[#120806]" />
+          <div className="flex items-center gap-1 text-[#F2E2DB] dark:text-[#120806] text-[9px] sm:text-[10px] font-black uppercase tracking-[0.08em] mx-1 mt-0.5">
+            <Truck size={13} className="shrink-0 text-[#F2E2DB] dark:text-[#120806]" />
             <span>3Hrs Delivery in CBE</span>
           </div>
 
-          {/* Right: Icon links */}
+          {/* Right: Phone Call Number & Icon links */}
           <div className="flex items-center gap-3.5 shrink-0 text-[#4ade80] dark:text-[#4E2820]">
-            <Link to="/contact" className="hover:text-white dark:hover:text-[#120806] transition-colors">
-              <Phone size={12} />
+            <a href="tel:+919150670077" className="flex items-center gap-1 hover:text-white dark:hover:text-[#120806] transition-colors">
+              <Phone size={15} className="shrink-0" />
+              <span className="font-black tracking-tight">+91 91506 70077</span>
+            </a>
+            <Link to="/help" className="hover:text-white dark:hover:text-[#120806] transition-colors" title="Help">
+              <HelpCircle size={16} />
             </Link>
-            <Link to="/help" className="hover:text-white dark:hover:text-[#120806] transition-colors">
-              <HelpCircle size={12} />
-            </Link>
-            <Link to="/stores" className="hover:text-white dark:hover:text-[#120806] transition-colors">
-              <MapPin size={12} />
+            <Link to="/stores" className="hover:text-white dark:hover:text-[#120806] transition-colors" title="Stores">
+              <MapPin size={16} />
             </Link>
           </div>
         </div>

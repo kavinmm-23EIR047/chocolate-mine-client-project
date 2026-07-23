@@ -631,7 +631,7 @@ const Shop = () => {
 
   // Mobile Top Bar
   const MobileTopBar = () => (
-    <div className="sm:hidden mb-4 flex flex-col gap-3">
+    <div className="lg:hidden mb-4 flex flex-col gap-3">
       {/* Search Bar */}
       <div className="relative">
         <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
@@ -787,7 +787,7 @@ const Shop = () => {
         </div>
 
         {/* Mobile Title */}
-        <div className="sm:hidden flex items-start justify-between gap-3 mb-3 pt-1">
+        <div className="lg:hidden flex items-start justify-between gap-3 mb-3 pt-1">
           <div className="min-w-0 text-left">
             <h1 className="text-xl font-black text-[var(--heading)] leading-none">{getPageTitle()}</h1>
             <p className="text-[11px] text-[var(--muted)] mt-1 font-medium">Discover our artisan cakes made with love.</p>

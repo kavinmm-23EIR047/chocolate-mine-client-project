@@ -47,6 +47,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5174',
   'https://chocolate-mine-client-project.vercel.app',
   'https://thechocolatemine.in',
+  'https://www.thechocolatemine.in',
   require('./src/utils/urlUtils').getFrontendUrl()
 ]
   .filter(Boolean)

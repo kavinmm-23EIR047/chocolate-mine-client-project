@@ -316,56 +316,54 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
   await order.save();
 
   // Calculate estimated height dynamically to prevent excessive trailing empty space
-  let estimatedHeight = 150; // base margins & header metadata
+  let estimatedHeight = 160; // base margins & header metadata
   order.items.forEach(item => {
-    estimatedHeight += 30; // item name & qty row
-    if (item.selectedFlavor || item.customFlavor) estimatedHeight += 12;
-    if (item.selectedWeight || item.customWeight) estimatedHeight += 12;
+    estimatedHeight += 36; // item name & qty row
+    if (item.selectedFlavor || item.customFlavor) estimatedHeight += 14;
+    if (item.selectedWeight || item.customWeight) estimatedHeight += 14;
     
     if (item.isCustomCake && item.customDetails) {
-      estimatedHeight += 20; // details divider
-      // shape removed
-      if (item.customDetails.tiers) estimatedHeight += 11;
-      if (item.customDetails.spongeType) estimatedHeight += 11;
-      if (item.customDetails.creamColor) estimatedHeight += 11;
-      if (item.customDetails.frostingColor) estimatedHeight += 11;
-      if (item.customDetails.designTheme) estimatedHeight += 11;
-      if (item.customDetails.eggless) estimatedHeight += 11;
-      if (item.customDetails.lessSugar) estimatedHeight += 11;
-      // toppings removed
-      if (item.customDetails.photoReferenceUrl) estimatedHeight += 11;
+      estimatedHeight += 24; // details divider
+      if (item.customDetails.tiers) estimatedHeight += 14;
+      if (item.customDetails.spongeType) estimatedHeight += 14;
+      if (item.customDetails.creamColor) estimatedHeight += 14;
+      if (item.customDetails.frostingColor) estimatedHeight += 14;
+      if (item.customDetails.designTheme) estimatedHeight += 14;
+      if (item.customDetails.eggless) estimatedHeight += 14;
+      if (item.customDetails.lessSugar) estimatedHeight += 14;
+      if (item.customDetails.photoReferenceUrl) estimatedHeight += 14;
       if (item.customDetails.notes) {
-        const lineCount = Math.ceil(item.customDetails.notes.length / 32) || 1;
-        estimatedHeight += lineCount * 11;
+        const lineCount = Math.ceil(item.customDetails.notes.length / 28) || 1;
+        estimatedHeight += lineCount * 14;
       }
     }
     
     if (item.designImages && (item.designImages.preview || item.designImages.front || item.designImages.top)) {
-      estimatedHeight += 15;
-      if (item.designImages.preview) estimatedHeight += 11;
-      if (item.designImages.front) estimatedHeight += 11;
-      if (item.designImages.top) estimatedHeight += 11;
+      estimatedHeight += 18;
+      if (item.designImages.preview) estimatedHeight += 14;
+      if (item.designImages.front) estimatedHeight += 14;
+      if (item.designImages.top) estimatedHeight += 14;
     }
   });
 
   if (order.customCakePdfUrl) {
-    estimatedHeight += 40;
+    estimatedHeight += 45;
   }
 
   if (order.cakeMessage || order.notes) {
-    estimatedHeight += 25;
+    estimatedHeight += 30;
     if (order.cakeMessage) {
-      const lineCount = Math.ceil(order.cakeMessage.length / 32) || 1;
-      estimatedHeight += lineCount * 11;
+      const lineCount = Math.ceil(order.cakeMessage.length / 28) || 1;
+      estimatedHeight += lineCount * 14;
     }
     if (order.notes) {
-      const lineCount = Math.ceil(order.notes.length / 32) || 1;
-      estimatedHeight += lineCount * 11;
+      const lineCount = Math.ceil(order.notes.length / 28) || 1;
+      estimatedHeight += lineCount * 14;
     }
   }
 
-  estimatedHeight += 50; // footer & padding
-  estimatedHeight = Math.max(300, Math.ceil(estimatedHeight)); // minimum height guard
+  estimatedHeight += 60; // footer & padding
+  estimatedHeight = Math.max(320, Math.ceil(estimatedHeight)); // minimum height guard
 
   const doc = new PDFDocument({ margin: 10, size: [226, estimatedHeight] });
   const buffers = [];
@@ -377,73 +375,82 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
     res.status(200).send(pdfBuffer);
   });
 
-  // Write KOT content to PDF
-  doc.font('Courier-Bold').fontSize(12).text('THE CHOCOLATE MINE', { align: 'center' });
-  doc.font('Courier').fontSize(8).text('KITCHEN ORDER TICKET (KOT)', { align: 'center' });
-  doc.moveDown(0.3);
+  // Helper function to draw crisp solid black divider line
+  const drawDivider = () => {
+    doc.moveDown(0.2);
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000').text('====================================');
+    doc.moveDown(0.2);
+  };
 
-  doc.font('Courier').fontSize(8).text('-------------------------------------');
-  doc.font('Courier-Bold').fontSize(8);
+  // Write KOT content to PDF using 100% Pure Black Bold Helvetica for Thermal Printers
+  doc.fillColor('#000000');
+  doc.font('Helvetica-Bold').fontSize(13).text('THE CHOCOLATE MINE', { align: 'center' });
+  doc.font('Helvetica-Bold').fontSize(9).text('KITCHEN ORDER TICKET (KOT)', { align: 'center' });
+  
+  drawDivider();
+
+  doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000');
   doc.text(`KOT No   : ${order.kotNumber || 'N/A'}`);
   doc.text(`Order No : ${order.orderNumber || 'N/A'}`);
   doc.text(`Reprint  : ${order.kotReprintCount || 0}`);
   doc.text(`Date     : ${new Date(order.createdAt).toLocaleDateString('en-IN')}`);
   doc.text(`Delivery : ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN') : 'N/A'} (${order.deliverySlot || 'N/A'})`);
   doc.text(`Customer : ${order.userId?.name || 'N/A'} (${order.userId?.phone || 'N/A'})`);
-  doc.font('Courier').fontSize(8).text('-------------------------------------');
+  
+  drawDivider();
 
-  doc.font('Courier-Bold').fontSize(8).text('ITEMS PREPARATION:', { underline: true });
-  doc.moveDown(0.2);
+  doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000').text('ITEMS PREPARATION:', { underline: true });
+  doc.moveDown(0.3);
 
   order.items.forEach((item, index) => {
-    doc.font('Courier-Bold').fontSize(9).text(`${item.name} x ${item.qty}`);
+    doc.font('Helvetica-Bold').fontSize(10).fillColor('#000000').text(`${item.name} x ${item.qty}`);
+    
     if (item.selectedFlavor || item.customFlavor) {
-      doc.font('Courier').fontSize(7.5).text(`  Flavour: ${item.selectedFlavor || item.customFlavor}`);
+      doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#000000').text(`  Flavour : ${item.selectedFlavor || item.customFlavor}`);
     }
     if (item.selectedWeight || item.customWeight) {
-      doc.font('Courier').fontSize(7.5).text(`  Weight : ${item.selectedWeight || item.customWeight}`);
+      doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#000000').text(`  Weight  : ${item.selectedWeight || item.customWeight}`);
     }
     
     if (item.isCustomCake && item.customDetails) {
-      doc.font('Courier-Oblique').fontSize(7);
-      doc.text('  -- CUSTOM CAKE DETAILS --');
-      // shape removed
-      if (item.customDetails.tiers) doc.text(`  Tiers: ${item.customDetails.tiers}`);
-      if (item.customDetails.spongeType) doc.text(`  Sponge: ${item.customDetails.spongeType}`);
-      if (item.customDetails.creamColor) doc.text(`  Cream Color: ${item.customDetails.creamColor}`);
-      if (item.customDetails.frostingColor) doc.text(`  Frosting Color: ${item.customDetails.frostingColor}`);
-      if (item.customDetails.designTheme) doc.text(`  Theme: ${item.customDetails.designTheme}`);
-      if (item.customDetails.eggless) doc.text('  Eggless: Yes');
-      if (item.customDetails.lessSugar) doc.text('  Less Sugar: Yes');
-      // toppings removed
-      if (item.customDetails.photoReferenceUrl) doc.text(`  Ref Photo: ${item.customDetails.photoReferenceUrl}`);
-      if (item.customDetails.notes) doc.text(`  Notes: ${item.customDetails.notes}`);
+      doc.moveDown(0.1);
+      doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#000000').text('  -- CUSTOM CAKE DETAILS --');
+      if (item.customDetails.tiers) doc.text(`  Tiers          : ${item.customDetails.tiers}`);
+      if (item.customDetails.spongeType) doc.text(`  Sponge         : ${item.customDetails.spongeType}`);
+      if (item.customDetails.creamColor) doc.text(`  Cream Color    : ${item.customDetails.creamColor}`);
+      if (item.customDetails.frostingColor) doc.text(`  Frosting Color : ${item.customDetails.frostingColor}`);
+      if (item.customDetails.designTheme) doc.text(`  Theme          : ${item.customDetails.designTheme}`);
+      if (item.customDetails.eggless) doc.text('  Eggless        : Yes 🌿');
+      if (item.customDetails.lessSugar) doc.text('  Less Sugar     : Yes');
+      if (item.customDetails.photoReferenceUrl) doc.text(`  Ref Photo      : ${item.customDetails.photoReferenceUrl}`);
+      if (item.customDetails.notes) doc.text(`  Notes          : ${item.customDetails.notes}`);
     }
     
     if (item.designImages && (item.designImages.preview || item.designImages.front || item.designImages.top)) {
-      doc.font('Courier-Oblique').fontSize(7).text('  -- DESIGN IMAGES --');
-      if (item.designImages.preview) doc.text(`  Preview: ${item.designImages.preview}`);
-      if (item.designImages.front) doc.text(`  Front: ${item.designImages.front}`);
-      if (item.designImages.top) doc.text(`  Top: ${item.designImages.top}`);
+      doc.moveDown(0.1);
+      doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#000000').text('  -- DESIGN IMAGES --');
+      if (item.designImages.preview) doc.text(`  Preview : ${item.designImages.preview}`);
+      if (item.designImages.front) doc.text(`  Front   : ${item.designImages.front}`);
+      if (item.designImages.top) doc.text(`  Top     : ${item.designImages.top}`);
     }
-    doc.moveDown(0.2);
+    doc.moveDown(0.3);
   });
 
   if (order.customCakePdfUrl) {
-    doc.font('Courier').fontSize(8).text('-------------------------------------');
-    doc.font('Courier-Bold').fontSize(8).text(`DESIGN PDF:`);
-    doc.font('Courier').fontSize(7.5).text(order.customCakePdfUrl);
+    drawDivider();
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000').text(`DESIGN PDF:`);
+    doc.font('Helvetica-Bold').fontSize(8).fillColor('#000000').text(order.customCakePdfUrl);
   }
 
   if (order.cakeMessage || order.notes) {
-    doc.font('Courier').fontSize(8).text('-------------------------------------');
-    doc.font('Courier-Bold').fontSize(8).text('INSTRUCTIONS:');
-    if (order.cakeMessage) doc.font('Courier').fontSize(7.5).text(`Msg on Cake: ${order.cakeMessage}`);
-    if (order.notes) doc.font('Courier').fontSize(7.5).text(`Notes: ${order.notes}`);
+    drawDivider();
+    doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000').text('INSTRUCTIONS:');
+    if (order.cakeMessage) doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#000000').text(`Msg on Cake : "${order.cakeMessage}"`);
+    if (order.notes) doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#000000').text(`Notes       : ${order.notes}`);
   }
 
-  doc.font('Courier').fontSize(8).text('-------------------------------------');
-  doc.font('Courier').fontSize(7).text(`Generated: ${new Date(order.kotPrintedAt).toLocaleString('en-IN')}`, { align: 'center' });
+  drawDivider();
+  doc.font('Helvetica-Bold').fontSize(8).fillColor('#000000').text(`Generated: ${new Date(order.kotPrintedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`, { align: 'center' });
   doc.end();
 });
 

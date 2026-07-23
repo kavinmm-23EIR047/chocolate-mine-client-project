@@ -51,24 +51,25 @@ const StaffLayout = () => {
           </Link>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-300 group ${isActive
-                    ? 'bg-secondary text-background shadow-lg translate-x-2'
-                    : 'text-heading hover:bg-secondary/10 border border-transparent hover:border-border/30'
-                  }`}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-amber-900 text-white dark:bg-amber-500 dark:text-slate-950 shadow-md font-black translate-x-1.5'
+                    : 'text-stone-800 dark:text-stone-200 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-transparent'
+                }`}
               >
                 <item.icon
-                  size={16}
-                  className={isActive ? 'text-background' : 'text-secondary/80 group-hover:text-secondary transition-colors'}
+                  size={18}
+                  className={isActive ? 'text-white dark:text-slate-950' : 'text-amber-700 dark:text-amber-400 group-hover:scale-110 transition-transform'}
                 />
                 <span>{item.label}</span>
-                {isActive && <ChevronRight size={14} className="ml-auto opacity-60" />}
+                {isActive && <ChevronRight size={16} className="ml-auto text-white dark:text-slate-950" />}
               </Link>
             );
           })}
@@ -77,23 +78,23 @@ const StaffLayout = () => {
         <div className="p-4 border-t border-border space-y-3">
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-heading hover:bg-border/50 transition-all"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 transition-all cursor-pointer"
           >
-            {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-heading" />}
+            {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-stone-700" />}
             <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
           <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-9 h-9 rounded-full bg-secondary/20 text-secondary flex items-center justify-center text-sm font-bold">
+            <div className="w-9 h-9 rounded-full bg-amber-900/10 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center text-sm font-extrabold">
               {getInitials(user?.name)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-heading truncate">{user?.name}</p>
-              <p className="text-xs text-muted">Staff</p>
+              <p className="text-sm font-extrabold text-stone-900 dark:text-white truncate">{user?.name}</p>
+              <p className="text-xs font-bold text-stone-500 dark:text-stone-400">Staff</p>
             </div>
           </div>
           <button
             onClick={logout}
-            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-error hover:bg-error/10 transition-all"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
           >
             <LogOut size={18} />
             <span>Logout</span>
@@ -109,7 +110,7 @@ const StaffLayout = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
@@ -122,17 +123,17 @@ const StaffLayout = () => {
               <div className="px-5 py-6 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Logo className="w-7 h-7" />
-                  <span className="text-base font-black text-heading">Kitchen Panel</span>
+                  <span className="text-base font-black text-stone-900 dark:text-white">Kitchen Panel</span>
                 </div>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-xl text-heading hover:bg-heading/10 transition-all active:scale-95 flex items-center justify-center"
+                  className="p-2 rounded-xl text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 transition-all active:scale-95 flex items-center justify-center cursor-pointer"
                   aria-label="Close menu"
                 >
                   <X size={22} />
                 </button>
               </div>
-              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+              <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto custom-scrollbar">
                 {menuItems.map((item) => {
                   const isActive = location.pathname === item.path;
                   return (
@@ -140,12 +141,13 @@ const StaffLayout = () => {
                       key={item.path}
                       to={item.path}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${isActive
-                          ? 'bg-secondary text-background'
-                          : 'text-heading hover:bg-secondary/10'
-                        }`}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all ${
+                        isActive
+                          ? 'bg-amber-900 text-white dark:bg-amber-500 dark:text-slate-950 shadow-md font-black'
+                          : 'text-stone-800 dark:text-stone-200 hover:bg-amber-500/10 dark:hover:bg-amber-500/20'
+                      }`}
                     >
-                      <item.icon size={20} className={isActive ? 'text-background' : ''} />
+                      <item.icon size={18} className={isActive ? 'text-white dark:text-slate-950' : 'text-amber-700 dark:text-amber-400'} />
                       <span>{item.label}</span>
                     </Link>
                   );

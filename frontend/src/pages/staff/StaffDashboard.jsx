@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChefHat, ShoppingBag, Clock, CheckCircle, Printer, RefreshCw, Eye, Flame, Truck, Package, X, KeyRound, Phone, ChevronDown, ChevronUp, LayoutDashboard, History, ClipboardList, MapPin, CreditCard, Calendar, Hash, Search, Plus, Minus, Trash2, Store, ShoppingCart, User } from 'lucide-react';
+import { ChefHat, ShoppingBag, Clock, CheckCircle, Printer, RefreshCw, Eye, Flame, Truck, Package, X, KeyRound, Phone, ChevronDown, ChevronUp, ChevronRight, LayoutDashboard, History, ClipboardList, MapPin, CreditCard, Calendar, Hash, Search, Plus, Minus, Trash2, Store, ShoppingCart, User, Cake } from 'lucide-react';
 import staffService from '../../services/staffService';
 import productService from '../../services/productService';
 import { OrderStatusBadge } from '../../components/ui/StatusBadge';
@@ -58,9 +58,9 @@ const OrderStatusDropdown = ({ order, onUpdate }) => {
 
   if (actions.length === 0) {
     return (
-      <Button disabled className="flex-1 rounded-2xl py-3 text-xs opacity-50 cursor-not-allowed bg-card-soft text-muted">
-        COMPLETED
-      </Button>
+      <div className="flex-1 inline-flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
+        <CheckCircle size={14} /> COMPLETED
+      </div>
     );
   }
 
@@ -838,7 +838,7 @@ const StaffDashboard = () => {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   useEffect(() => {
-    const userStr = sessionStorage.getItem('user');
+    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (!userStr) return;
     let userId = '';
     try {
@@ -949,53 +949,123 @@ const StaffDashboard = () => {
     }
   };
 
-  // Dashboard summary view (theme‑aware)
+  // Dashboard summary view (Ultra-Clean Executive Web Design)
   if (pageType === 'dashboard') {
     const summaryItems = [
-      { id: 'confirmed', label: 'Confirmed', icon: ClipboardList, count: stats.confirmedOrders, color: 'text-secondary', bg: 'bg-secondary/10', path: '/staff/orders/new' },
-      { id: 'active', label: 'Out For Delivery', icon: Flame, count: stats.outForDeliveryOrders, color: 'text-primary', bg: 'bg-primary/10', path: '/staff/orders/active' },
-      { id: 'delivered', label: 'Delivered', icon: CheckCircle, count: stats.deliveredOrders, color: 'text-success', bg: 'bg-success/10', path: '/staff/orders/history' },
-      { id: 'inshop', label: 'In-Shop Orders', icon: Store, count: stats.inShopOrdersCount, color: 'text-warning', bg: 'bg-warning/10', path: '/staff/orders/in-shop-history' },
+      { id: 'confirmed', label: 'Confirmed Orders', icon: ClipboardList, count: stats.confirmedOrders, accentColor: 'text-amber-400', badgeBg: 'bg-amber-500/15 border-amber-500/30 text-amber-400', hoverBorder: 'hover:border-amber-500/50', path: '/staff/orders/new' },
+      { id: 'active', label: 'Out For Delivery', icon: Flame, count: stats.outForDeliveryOrders, accentColor: 'text-orange-400', badgeBg: 'bg-orange-500/15 border-orange-500/30 text-orange-400', hoverBorder: 'hover:border-orange-500/50', path: '/staff/orders/active' },
+      { id: 'delivered', label: 'Delivered Orders', icon: CheckCircle, count: stats.deliveredOrders, accentColor: 'text-emerald-400', badgeBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400', hoverBorder: 'hover:border-emerald-500/50', path: '/staff/orders/history' },
+      { id: 'inshop', label: 'In-Shop Orders', icon: Store, count: stats.inShopOrdersCount, accentColor: 'text-purple-400', badgeBg: 'bg-purple-500/15 border-purple-500/30 text-purple-400', hoverBorder: 'hover:border-purple-500/50', path: '/staff/orders/in-shop-history' },
     ];
+
     return (
       <div className="space-y-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Welcome Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-heading tracking-tight">Kitchen & Store Operations</h2>
+            <p className="text-xs sm:text-sm font-semibold text-heading/80 mt-1">Live order pipeline, kitchen preparation & counter sales overview</p>
+          </div>
+          
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-card border border-border/80 shadow-xs">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <span className="text-xs font-extrabold text-heading">Live WebSockets Synced</span>
+          </div>
+        </div>
+
+        {/* 4 Primary Stat Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {summaryItems.map((item) => (
-            <Link key={item.id} to={item.path} className="group">
-              <motion.div whileHover={{ y: -5 }} className="bg-card border border-border p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${item.bg} ${item.color} rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
-                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+            <Link key={item.id} to={item.path} className="group block">
+              <motion.div 
+                whileHover={{ y: -4 }} 
+                className={`bg-card border border-border/80 ${item.hoverBorder} p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 rounded-2xl ${item.badgeBg} border flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <span className={`text-xs font-black uppercase tracking-widest ${item.accentColor} group-hover:translate-x-1 transition-transform flex items-center gap-1`}>
+                      View →
+                    </span>
+                  </div>
+
+                  <h3 className="text-xs font-extrabold text-heading/90 uppercase tracking-wider">{item.label}</h3>
+                  <p className="text-4xl sm:text-5xl font-black text-heading mt-2 tracking-tight">{item.count || 0}</p>
                 </div>
-                <h3 className="text-[10px] sm:text-xs font-black text-muted uppercase tracking-widest truncate">{item.label}</h3>
-                <p className="text-2xl sm:text-3xl font-black text-heading mt-1">{item.count || 0}</p>
-                <div className="hidden sm:flex items-center gap-2 text-[10px] font-black text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  VIEW ALL →
+
+                <div className="pt-4 mt-4 border-t border-border/40 flex items-center justify-between text-xs font-bold text-muted">
+                  <span>Pipeline Queue</span>
+                  <span className="text-heading font-extrabold">Active</span>
                 </div>
               </motion.div>
             </Link>
           ))}
         </div>
-        {/* Quick Action: Create In-Shop Order */}
-        <Link to="/staff/orders/create-inshop">
-          <motion.div whileHover={{ y: -3 }} className="bg-gradient-to-r from-secondary/10 to-primary/10 border border-secondary/20 p-6 rounded-3xl flex items-center gap-6 cursor-pointer hover:shadow-lg transition-all">
-            <div className="w-12 h-12 bg-secondary/20 rounded-2xl shadow-sm flex items-center justify-center text-secondary">
-              <ShoppingCart size={24} />
+
+        {/* Feature Action Banner: Create In-Shop Order */}
+        <Link to="/staff/orders/create-inshop" className="block group">
+          <motion.div 
+            whileHover={{ y: -3 }} 
+            className="bg-card border border-primary/40 hover:border-primary p-6 sm:p-7 rounded-3xl shadow-md hover:shadow-xl transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 relative overflow-hidden"
+          >
+            {/* Top Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary" />
+
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-primary/15 text-primary border border-primary/30 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                <ShoppingCart size={28} />
+              </div>
+
+              <div>
+                <h4 className="text-lg font-black text-heading uppercase tracking-tight flex items-center gap-2">
+                  Create New In-Shop Order
+                  <span className="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-extrabold tracking-wider">COUNTER SALES</span>
+                </h4>
+                <p className="text-xs sm:text-sm font-semibold text-heading/80 mt-1 max-w-xl leading-relaxed">
+                  Record walk-in customer purchases instantly. Select flavors, weights, and items. Payment collected at counter — no online gateway required.
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h4 className="font-black text-heading uppercase tracking-tight">Create In-Shop Order</h4>
-              <p className="text-xs text-muted font-medium mt-1">Record a walk-in customer order. Payment collected at counter — no online payment needed.</p>
+
+            <div className="w-full sm:w-auto text-right">
+              <div className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-900 text-white dark:bg-amber-500 dark:text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-md group-hover:scale-105 active:scale-95 cursor-pointer">
+                <span>+ Create Order Now</span>
+                <ChevronRight size={16} />
+              </div>
             </div>
-            <ChevronDown size={20} className="text-muted -rotate-90" />
           </motion.div>
         </Link>
-        <div className="bg-primary/5 border border-primary/10 p-6 rounded-3xl flex items-center gap-6">
-          <div className="w-12 h-12 bg-primary/10 rounded-2xl shadow-sm flex items-center justify-center text-primary">
-            <RefreshCw size={24} />
+
+        {/* Real-time System Banner */}
+        <div className="p-5 rounded-3xl bg-card border border-border/80 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+              <RefreshCw size={22} />
+            </div>
+            <div>
+              <h4 className="font-extrabold text-heading text-sm uppercase tracking-wider flex items-center gap-2">
+                Real-Time Order Feed Connected
+              </h4>
+              <p className="text-xs font-semibold text-heading/80 mt-0.5">
+                New online orders and status changes appear live on screen automatically.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-black text-heading uppercase tracking-tight">Real-time Updates Active</h4>
-            <p className="text-xs text-muted font-medium mt-1">Orders from the kitchen and online store will appear here automatically as they are confirmed.</p>
-          </div>
+
+          <Button 
+            variant="outline" 
+            icon={RefreshCw} 
+            onClick={fetchData} 
+            loading={loading}
+            className="w-full sm:w-auto rounded-xl py-2.5 text-xs font-extrabold"
+          >
+            Refresh Feed
+          </Button>
         </div>
       </div>
     );
@@ -1010,19 +1080,23 @@ const StaffDashboard = () => {
   if (pageType === 'in-shop-history') {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-black text-heading">In-Shop Order History</h2>
-          <div className="flex gap-2">
-            <Link to="/staff/orders/create-inshop">
-              <Button variant="primary" icon={ShoppingCart}>New Order</Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-border/50">
+          <div>
+            <h2 className="text-2xl font-black text-heading tracking-tight">In-Shop Order History</h2>
+            <p className="text-xs font-bold text-muted mt-0.5">Walk-in counter sales and store orders</p>
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Link to="/staff/orders/create-inshop" className="flex-1 sm:flex-initial">
+              <Button variant="primary" icon={ShoppingCart} className="w-full sm:w-auto rounded-xl py-2.5">New Order</Button>
             </Link>
-            <Button variant="outline" icon={RefreshCw} onClick={fetchData} loading={loading}>Refresh</Button>
+            <Button variant="outline" icon={RefreshCw} onClick={fetchData} loading={loading} className="rounded-xl py-2.5">Refresh</Button>
           </div>
         </div>
+
         {loading ? <TableSkeleton rows={3} cols={1} /> : orders.length === 0 ? (
           <EmptyState icon={Store} title="No in-shop orders yet" message="Create your first in-shop order using the button above." />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
             <AnimatePresence mode="popLayout">
               {orders.map((order) => (
                 <motion.div
@@ -1031,44 +1105,57 @@ const StaffDashboard = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="bg-card border-t-4 border-t-warning rounded-2xl shadow-card border border-border/50 p-6 relative group flex flex-col"
+                  className="bg-card border-t-4 border-t-amber-500 rounded-2xl sm:rounded-3xl shadow-md border border-border/80 p-5 sm:p-6 relative group flex flex-col justify-between hover:shadow-xl transition-all duration-300"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <Badge variant="secondary" className="mb-2 text-[10px] tracking-widest bg-warning/10 text-warning border-warning/30">IN-SHOP</Badge>
-                      <h3 className="font-black text-xl text-heading">#{order.orderNumber}</h3>
-                      <p className="text-[9px] text-muted font-mono mt-0.5">{new Date(order.createdAt).toLocaleString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[9px] text-muted uppercase tracking-widest">Total</span>
-                      <p className="font-black text-primary text-xl leading-tight">{formatCurrency(order.total)}</p>
-                    </div>
-                  </div>
-                  <div className="mb-3 p-3 bg-card-soft rounded-xl border border-border/30">
-                    <p className="font-black text-xs uppercase tracking-widest text-secondary mb-1">Customer</p>
-                    <p className="font-bold text-sm text-heading truncate">{order.address?.fullName}</p>
-                    <p className="text-xs text-muted">{order.address?.phone}</p>
-                  </div>
-                  <div className="space-y-2 mb-4 max-h-36 overflow-y-auto custom-scrollbar pr-1 flex-1">
-                    {order.items?.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-2 bg-border/10 rounded-lg text-sm border border-transparent">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold truncate text-sm text-heading">{item.name}</p>
-                          <p className="text-[10px] text-muted">{item.qty}x · {formatCurrency(item.price)} each</p>
-                        </div>
-                        <p className="font-black text-xs ml-2 shrink-0 text-heading">{formatCurrency(item.price * item.qty)}</p>
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex justify-between items-start gap-2 pb-3 border-b border-border/40">
+                      <div>
+                        <span className="inline-block px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-black text-[11px] uppercase tracking-wider mb-2">
+                          IN-SHOP STORE
+                        </span>
+                        <h3 className="font-extrabold text-xl sm:text-2xl text-heading tracking-tight">#{order.orderNumber}</h3>
+                        <p className="text-xs text-muted font-mono font-bold mt-1">
+                          {new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
+                        </p>
                       </div>
-                    ))}
+                      <div className="text-right">
+                        <span className="text-[10px] font-black text-muted uppercase tracking-widest block">Total</span>
+                        <p className="font-black text-primary text-xl sm:text-2xl leading-tight">{formatCurrency(order.total)}</p>
+                      </div>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div className="p-3.5 bg-card-soft/80 rounded-2xl border border-border/60 space-y-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary block">Customer</span>
+                      <p className="font-extrabold text-sm text-heading truncate">{order.address?.fullName || 'Walk-in Customer'}</p>
+                      <p className="text-xs font-bold text-muted font-mono">{order.address?.phone || 'No phone'}</p>
+                    </div>
+
+                    {/* Items List */}
+                    <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                      {order.items?.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-2.5 bg-card border border-border/50 rounded-xl text-xs">
+                          <div className="flex-1 min-w-0 pr-2">
+                            <p className="font-extrabold truncate text-heading text-xs">{item.name}</p>
+                            <p className="text-[11px] text-muted font-semibold mt-0.5">{item.qty}x · {formatCurrency(item.price)} each</p>
+                          </div>
+                          <p className="font-black text-xs text-heading shrink-0">{formatCurrency(item.price * item.qty)}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-border">
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-muted uppercase tracking-widest">Payment</span>
-                      <span className="text-xs font-bold text-heading">In-Shop · <span className="text-success">Paid</span></span>
+
+                  {/* Footer */}
+                  <div className="pt-3 mt-4 border-t border-border/40 flex justify-between items-center text-xs">
+                    <div>
+                      <span className="text-[10px] font-black text-muted uppercase tracking-widest block">Payment</span>
+                      <span className="font-extrabold text-heading">Counter · <span className="text-emerald-600 dark:text-emerald-400">Paid</span></span>
                     </div>
                     {order.createdByStaff && (
-                      <div className="flex flex-col text-right">
-                        <span className="text-[9px] text-muted uppercase tracking-widest">Staff</span>
-                        <span className="text-xs font-bold text-heading">{order.createdByStaff?.name || 'Staff'}</span>
+                      <div className="text-right">
+                        <span className="text-[10px] font-black text-muted uppercase tracking-widest block">Staff</span>
+                        <span className="font-extrabold text-heading">{order.createdByStaff?.name || 'Staff'}</span>
                       </div>
                     )}
                   </div>
@@ -1084,13 +1171,26 @@ const StaffDashboard = () => {
   return (
     <div className="space-y-6">
       <OrderDetailsModal order={selectedOrderDetails} onClose={() => { setDetailsModalOpen(false); setSelectedOrderDetails(null); }} />
-      <div className="flex justify-end">
-        <Button variant="outline" icon={RefreshCw} onClick={fetchData} loading={loading}>Refresh</Button>
+      
+      {/* Header bar */}
+      <div className="flex justify-between items-center pb-2 border-b border-border/50">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-black text-heading tracking-tight capitalize">
+            {pageType === 'new' ? 'New Confirmed Orders' : pageType === 'active' ? 'Active Delivery Orders' : pageType === 'history' ? 'Order History' : 'Kitchen Dashboard'}
+          </h2>
+          <p className="text-xs font-bold text-muted mt-0.5">
+            {pageType === 'new' ? 'Orders ready for preparation & packing' : pageType === 'active' ? 'Orders currently out for delivery' : 'Completed and delivered orders'}
+          </p>
+        </div>
+        <Button variant="outline" icon={RefreshCw} onClick={fetchData} loading={loading} className="rounded-xl py-2.5 text-xs font-extrabold">
+          Refresh
+        </Button>
       </div>
+
       {loading ? <TableSkeleton rows={3} cols={1} /> : orders.length === 0 ? (
-        <EmptyState icon={ShoppingBag} title="No orders found" message="Relax! There's nothing to do in this section right now." />
+        <EmptyState icon={ShoppingBag} title="No orders found" message="Relax! There's nothing to process in this section right now." />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
           <AnimatePresence mode="popLayout">
             {orders.map((order) => (
               <motion.div
@@ -1099,71 +1199,121 @@ const StaffDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-card border-t-4 border-t-secondary rounded-2xl shadow-card border border-border/50 p-6 relative group flex flex-col"
+                className="bg-card border-t-4 border-t-primary rounded-2xl sm:rounded-3xl shadow-md border border-border/80 p-5 sm:p-6 relative group flex flex-col justify-between hover:shadow-xl transition-all duration-300"
               >
-                {/* Header */}
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <Badge variant="secondary" className="mb-2 text-[10px] tracking-widest">{order.deliverySlot}</Badge>
-                    <h3 className="font-black text-xl text-heading">#{order.orderNumber}</h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Hash size={10} className="text-muted" />
-                      <p className="text-[9px] text-muted font-mono">{order.trackingCode || '—'}</p>
-                    </div>
-                    <p className="text-[9px] text-muted font-mono mt-0.5">{new Date(order.createdAt).toLocaleString()}</p>
-                  </div>
-                  <OrderStatusBadge status={order.orderStatus} />
-                </div>
-                {/* Customer Info */}
-                <div className="mb-3 p-3 bg-card-soft rounded-xl border border-border/30">
-                  <p className="font-black text-xs uppercase tracking-widest text-secondary mb-1">Customer</p>
-                  <p className="font-bold text-sm text-heading truncate">{order.address?.fullName}</p>
-                  <p className="text-xs text-muted">{order.address?.phone}</p>
-                  <div className="flex items-start gap-1.5 mt-2">
-                    <MapPin size={12} className="text-muted mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-muted leading-tight">{order.address?.houseNo ? `${order.address.houseNo}, ` : ''}{order.address?.street}, {order.address?.city}</p>
-                  </div>
-                </div>
-                {/* Delivery Info */}
-                <div className="flex justify-between items-center mb-3 text-xs">
-                  <div className="flex items-center gap-1 text-muted"><Calendar size={12} /><span>{new Date(order.deliveryDate).toLocaleDateString()}</span></div>
-                  <div className="flex items-center gap-1 text-muted"><Clock size={12} /><span>{order.deliverySlot}</span></div>
-                </div>
-                {/* Order Items */}
-                <div className="space-y-2 mb-4 max-h-36 overflow-y-auto custom-scrollbar pr-1 flex-1">
-                  {order.items?.map((item, idx) => {
-                    const itemPrice = item.price || item.originalPrice;
-                    const total = itemPrice * item.qty;
-                    return (
-                      <div key={idx} className="flex justify-between items-center p-2 bg-border/10 rounded-lg text-sm border border-transparent group-hover:border-border/50 transition-all">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold truncate text-sm text-heading">{item.name}</p>
-                          <p className="text-[10px] text-muted">{item.qty}x · {getDisplayFlavor(item)}{item.selectedWeight && ` · ${item.selectedWeight}`}</p>
+                <div className="space-y-4">
+                  {/* Header info */}
+                  <div className="flex justify-between items-start gap-2 pb-3 border-b border-border/40">
+                    <div>
+                      <span className="inline-block px-3 py-1 rounded-xl bg-primary/10 text-primary border border-primary/20 font-black text-xs uppercase tracking-wider mb-2">
+                        {order.deliverySlot || 'Standard Delivery'}
+                      </span>
+                      <h3 className="font-extrabold text-xl sm:text-2xl text-heading tracking-tight">#{order.orderNumber}</h3>
+                      
+                      {order.trackingCode && (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Hash size={12} className="text-primary shrink-0" />
+                          <span className="text-xs font-mono font-bold text-heading/80">Track: {order.trackingCode}</span>
                         </div>
-                        <p className="font-black text-xs ml-2 shrink-0 text-heading">{formatCurrency(total)}</p>
-                      </div>
-                    );
-                  })}
+                      )}
+
+                      <p className="text-xs font-mono font-bold text-muted mt-1">
+                        {new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
+                      </p>
+                    </div>
+                    
+                    <OrderStatusBadge status={order.orderStatus} />
+                  </div>
+
+                  {/* Customer Info Card */}
+                  <div className="p-3.5 bg-card-soft/80 rounded-2xl border border-border/60 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Customer</span>
+                      {order.address?.phone && (
+                        <a href={`tel:${order.address.phone}`} className="text-emerald-600 dark:text-emerald-400 font-extrabold text-xs flex items-center gap-1 hover:underline">
+                          <Phone size={12} /> Call
+                        </a>
+                      )}
+                    </div>
+                    <p className="font-extrabold text-base text-heading truncate">{order.address?.fullName || 'Customer'}</p>
+                    <p className="text-xs font-bold text-muted font-mono">{order.address?.phone}</p>
+                    <div className="flex items-start gap-1.5 mt-2 text-xs font-medium text-heading/90">
+                      <MapPin size={14} className="text-primary mt-0.5 shrink-0" />
+                      <p className="line-clamp-2 leading-relaxed">
+                        {[order.address?.houseNo, order.address?.street, order.address?.city, order.address?.pincode].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Schedule Pills */}
+                  <div className="flex items-center justify-between gap-2 p-2.5 bg-card border border-border/50 rounded-xl text-xs">
+                    <div className="flex items-center gap-1.5 font-extrabold text-heading">
+                      <Calendar size={14} className="text-primary" />
+                      <span>{order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN') : 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 font-extrabold text-heading">
+                      <Clock size={14} className="text-primary" />
+                      <span>{order.deliverySlot}</span>
+                    </div>
+                  </div>
+
+                  {/* Items List */}
+                  <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                    {order.items?.map((item, idx) => {
+                      const itemPrice = item.price || item.originalPrice;
+                      const total = itemPrice * item.qty;
+                      return (
+                        <div key={idx} className="flex justify-between items-center p-2.5 bg-card border border-border/50 rounded-xl text-xs hover:border-primary/40 transition-colors">
+                          <div className="flex-1 min-w-0 pr-2">
+                            <p className="font-extrabold truncate text-heading text-xs">{item.name}</p>
+                            <p className="text-[11px] text-muted font-semibold mt-0.5">
+                              {item.qty}x · {getDisplayFlavor(item)}{item.selectedWeight && ` · ${item.selectedWeight}`}
+                            </p>
+                          </div>
+                          <p className="font-black text-xs text-heading shrink-0">{formatCurrency(total)}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Payment & Total */}
-                <div className="flex justify-between items-center mb-5 pt-2 border-t border-border">
-                  <div className="flex flex-col"><span className="text-[9px] text-muted uppercase tracking-widest">Payment</span><span className="text-xs font-bold text-heading">{order.paymentMethod} · {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}</span></div>
-                  <div className="text-right"><span className="text-[9px] text-muted uppercase tracking-widest">Total</span><p className="font-black text-primary text-xl leading-tight">{formatCurrency(order.total)}</p></div>
-                </div>
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2">
-                  <button onClick={() => handleViewOrderDetails(order._id)} className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0" title="View Details"><Eye size={18} /></button>
-                  <OrderStatusDropdown order={order} onUpdate={handleDeliveryStatusUpdate} />
-                  <a 
-                    href={`${import.meta.env.VITE_API_URL}/staff/orders/${order._id}/kot/print`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 bg-border/20 rounded-2xl hover:bg-secondary/10 transition-colors text-heading shrink-0 flex items-center justify-center" 
-                    title="Print KOT"
-                  >
-                    <ChefHat size={18} />
-                  </a>
+                {/* Card Footer & Controls */}
+                <div className="pt-4 mt-4 border-t border-border/50 space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <div>
+                      <span className="text-[10px] font-black text-muted uppercase tracking-widest block">Payment</span>
+                      <span className="font-extrabold text-heading">
+                        {order.paymentMethod || 'ONLINE'} · <span className={order.paymentStatus === 'paid' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>{order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}</span>
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-black text-muted uppercase tracking-widest block">Total</span>
+                      <p className="font-black text-primary text-xl sm:text-2xl leading-tight">{formatCurrency(order.total)}</p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button 
+                      onClick={() => handleViewOrderDetails(order._id)} 
+                      className="p-3 bg-card border border-border/80 rounded-2xl hover:bg-primary/10 hover:border-primary/40 transition-all text-heading shrink-0 active:scale-95 cursor-pointer" 
+                      title="View Full Order Details"
+                    >
+                      <Eye size={18} />
+                    </button>
+
+                    <OrderStatusDropdown order={order} onUpdate={handleDeliveryStatusUpdate} />
+
+                    <a 
+                      href={`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000')}/staff/orders/${order._id}/kot/print`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3 bg-card border border-border/80 rounded-2xl hover:bg-primary/10 hover:border-primary/40 transition-all text-heading shrink-0 flex items-center justify-center active:scale-95 cursor-pointer" 
+                      title="Print KOT"
+                    >
+                      <ChefHat size={18} />
+                    </a>
+                  </div>
                 </div>
               </motion.div>
             ))}

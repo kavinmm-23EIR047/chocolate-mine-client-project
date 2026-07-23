@@ -40,6 +40,18 @@ const Notifications = () => {
     }
   };
 
+  const handleClearAll = async () => {
+    if (notifications.length === 0) return;
+    try {
+      await api.delete('/notifications/clear-all');
+      setNotifications([]);
+      toast.success('All notifications cleared');
+    } catch (err) {
+      console.error('Failed to clear notifications:', err);
+      toast.error('Failed to clear notifications');
+    }
+  };
+
   const handleNotificationClick = async (notif) => {
     // Mark as read if unread
     if (!notif.isRead) {
@@ -105,9 +117,17 @@ const Notifications = () => {
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="px-4 py-2 border border-border/60 hover:bg-secondary/5 text-heading font-black text-[10px] uppercase tracking-widest rounded-xl transition-all"
+              className="px-4 py-2 border border-border/60 hover:bg-secondary/5 text-heading font-black text-[10px] uppercase tracking-widest rounded-xl transition-all cursor-pointer"
             >
               Mark all read
+            </button>
+          )}
+          {notifications.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="px-4 py-2 border border-rose-500/30 hover:bg-rose-500/10 text-rose-500 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Trash2 size={12} /> Clear all
             </button>
           )}
           <span className="bg-primary text-button-text px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-premium">

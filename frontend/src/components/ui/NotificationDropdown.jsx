@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, CheckCircle, Package, Clock, ShoppingBag, X } from 'lucide-react';
+import { Bell, CheckCircle, Package, Clock, ShoppingBag, X, Trash2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { getSocket } from '../../sockets/socketManager';
+import toast from 'react-hot-toast';
 
 const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20 }) => {
   const { user } = useAuth();
@@ -18,11 +19,8 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
     try {
       const res = await api.get('/notifications');
       const data = res.data.data || [];
-      // Backend already formats notifications in notificationController.js,
-      // but let's ensure we parse correctly in case of fallback or direct format.
-      setNotifications(data.slice(0, 5)); // show only top 5 in dropdown
+      setNotifications(data.slice(0, 5)); // show top 5 in dropdown
       
-      // Fetch fresh count from unread-count endpoint
       const countRes = await api.get('/notifications/unread-count');
       setUnreadCount(countRes.data.count || 0);
     } catch (err) {
@@ -89,10 +87,22 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
     }
   };
 
+  const handleClearAll = async () => {
+    if (notifications.length === 0) return;
+    try {
+      await api.delete('/notifications/clear-all');
+      setNotifications([]);
+      setUnreadCount(0);
+      toast.success('All notifications cleared');
+    } catch (err) {
+      console.error('Failed to clear notifications', err);
+      toast.error('Failed to clear notifications');
+    }
+  };
+
   const handleNotificationClick = async (notif) => {
     setIsOpen(false);
     
-    // Mark read if unread
     if (!notif.isRead) {
       try {
         await api.patch(`/notifications/${notif._id}/read`);
@@ -103,7 +113,6 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
       }
     }
 
-    // Redirect
     const url = notif.data?.url;
     if (url) {
       navigate(url);
@@ -153,20 +162,28 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
           >
             <div className="p-4 border-b border-border/50 flex items-center justify-between bg-black/5 dark:bg-white/5">
               <h3 className="font-black text-heading text-sm uppercase tracking-wider">Notifications</h3>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="text-[10px] text-primary font-black uppercase tracking-wider hover:underline"
+                    className="text-[10px] text-primary font-black uppercase tracking-wider hover:underline cursor-pointer"
                   >
-                    Mark all read
+                    Mark read
+                  </button>
+                )}
+                {notifications.length > 0 && (
+                  <button
+                    onClick={handleClearAll}
+                    className="text-[10px] text-rose-500 font-black uppercase tracking-wider hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    <Trash2 size={12} /> Clear all
                   </button>
                 )}
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center bg-background rounded-full border border-border/50 text-muted hover:text-heading hover:bg-border/30 transition-all"
+                  className="w-7 h-7 flex items-center justify-center bg-background rounded-full border border-border/50 text-muted hover:text-heading hover:bg-border/30 transition-all cursor-pointer"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               </div>
             </div>
@@ -196,7 +213,7 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
                         <p className={`text-xs ${notif.isRead ? 'text-heading font-bold' : 'text-primary font-black'}`}>
                           {notif.title}
                         </p>
-                        <p className="text-[11px] text-muted mt-0.5 leading-relaxed line-clamp-2">
+                        <p className="text-[11px] text-muted mt-0.5 leading-relaxed whitespace-pre-line line-clamp-3">
                           {notif.message}
                         </p>
                         <p className="text-[9px] text-muted/60 font-bold mt-1.5 uppercase tracking-wider">

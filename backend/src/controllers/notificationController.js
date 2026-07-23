@@ -110,6 +110,10 @@ exports.markAllAsRead = asyncHandler(async (req, res, next) => {
 // @route   DELETE /api/v1/notifications/:id
 // @access  Private
 exports.deleteNotification = asyncHandler(async (req, res, next) => {
+  if (req.params.id === 'clear-all' || req.params.id === 'clear') {
+    return exports.clearAllNotifications(req, res, next);
+  }
+
   const notification = await Notification.findOneAndDelete({
     _id: req.params.id,
     userId: req.user._id
@@ -124,3 +128,19 @@ exports.deleteNotification = asyncHandler(async (req, res, next) => {
     message: 'Notification deleted successfully'
   });
 });
+
+// @desc    Clear/Delete all user's notifications
+// @route   DELETE /api/v1/notifications/clear-all
+// @access  Private
+exports.clearAllNotifications = asyncHandler(async (req, res, next) => {
+  await Notification.deleteMany({
+    userId: req.user._id,
+    channel: 'WEB'
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'All notifications cleared successfully'
+  });
+});
+

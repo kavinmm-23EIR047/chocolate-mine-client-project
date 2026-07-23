@@ -158,15 +158,15 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-[80px] left-4 right-4 mx-auto w-auto max-w-[400px] sm:absolute sm:top-full sm:mt-2 sm:left-auto sm:right-0 sm:mx-0 sm:w-96 bg-card border border-border/50 rounded-2xl shadow-xl z-[999] overflow-hidden origin-top"
+            className="fixed top-[80px] left-4 right-4 mx-auto w-auto max-w-[420px] sm:absolute sm:top-full sm:mt-2 sm:left-auto sm:right-0 sm:mx-0 sm:w-[420px] bg-card border border-border/50 rounded-2xl shadow-xl z-[999] overflow-hidden origin-top"
           >
-            <div className="p-4 border-b border-border/50 flex items-center justify-between bg-black/5 dark:bg-white/5">
-              <h3 className="font-black text-heading text-sm uppercase tracking-wider">Notifications</h3>
-              <div className="flex items-center gap-2.5">
+            <div className="px-4 py-3.5 border-b border-border/50 flex items-center justify-between bg-black/5 dark:bg-white/5">
+              <h3 className="font-black text-heading text-xs uppercase tracking-wider">Notifications</h3>
+              <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="text-[10px] text-primary font-black uppercase tracking-wider hover:underline cursor-pointer"
+                    className="px-2 py-1 text-[10px] text-primary font-black uppercase tracking-wider rounded-md hover:bg-primary/10 transition-colors cursor-pointer"
                   >
                     Mark read
                   </button>
@@ -174,16 +174,17 @@ const NotificationDropdown = ({ iconClass, buttonClass, showLabel, iconSize = 20
                 {notifications.length > 0 && (
                   <button
                     onClick={handleClearAll}
-                    className="text-[10px] text-rose-500 font-black uppercase tracking-wider hover:underline cursor-pointer flex items-center gap-1"
+                    className="px-2 py-1 text-[10px] text-rose-400 hover:text-rose-500 font-black uppercase tracking-wider rounded-md hover:bg-rose-500/10 transition-colors cursor-pointer flex items-center gap-1"
                   >
                     <Trash2 size={12} /> Clear all
                   </button>
                 )}
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="w-7 h-7 flex items-center justify-center bg-background rounded-full border border-border/50 text-muted hover:text-heading hover:bg-border/30 transition-all cursor-pointer"
+                  className="w-7 h-7 ml-1 flex items-center justify-center bg-background rounded-full border border-border/50 text-muted hover:text-heading hover:bg-border/30 transition-all cursor-pointer shrink-0"
+                  aria-label="Close"
                 >
-                  <X size={15} />
+                  <X size={14} />
                 </button>
               </div>
             </div>

@@ -329,6 +329,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     return next(new AppError('Product not found', 404));
   }
 
+  // Capture old values for notification comparison
+  const oldStock = product.stock;
+  const oldOfferPrice = product.offerPrice;
+  const oldPrice = product.price;
+
   // Handle occasion array
   if (occasion !== undefined) {
     let finalOccasion = [];
@@ -468,6 +473,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   });
 
   await product.save();
+
+  // Trigger real-time notifications (Back in Stock, Offers, Price Updates)
+  const notificationManager = require('../services/notificationManager');
+  const previousData = { stock: oldStock, offerPrice: oldOfferPrice, price: oldPrice };
+  notificationManager.notifyProductUpdated(product, previousData).catch(console.error);
 
   res.status(200).json({
     status: 'success',

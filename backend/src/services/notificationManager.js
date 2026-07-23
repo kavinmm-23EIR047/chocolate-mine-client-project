@@ -634,8 +634,11 @@ exports.notifyProductUpdated = async (product, previousData = {}) => {
     });
 
     // Determine what changed:
-    const isBackInStock = previousData.stock === false && product.stock === true;
-    const isOutOfStock = previousData.stock === true && product.stock === false;
+    const wasInStock = previousData.stock === true || previousData.stock === 'true';
+    const isNowInStock = product.stock === true || product.stock === 'true';
+
+    const isBackInStock = (!wasInStock || previousData.stock === false || previousData.stock === 'false') && isNowInStock;
+    const isOutOfStock = wasInStock && !isNowInStock;
     const isNewOffer = product.offerPrice && product.offerPrice < product.price &&
                        (!previousData.offerPrice || previousData.offerPrice >= previousData.price);
 

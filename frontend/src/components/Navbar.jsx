@@ -261,6 +261,9 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center justify-start gap-6 xl:gap-8 tv:gap-10 py-1.5 border-t border-border/15 bg-navbar/95 backdrop-blur-md responsive-container relative">
           <MegaMenu />
           <CustomCakeMenu />
+          <Link to="/shop?category=special-cakes" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2 flex items-center gap-1">
+            Special Cakes ✨
+          </Link>
           <Link to="/shop?offers=true" className="text-xs font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2 flex items-center gap-1">
             Offer Cakes <span className="text-xs">🔥</span>
           </Link>
@@ -332,6 +335,16 @@ const Navbar = () => {
                         <Link to="/custom-cake?tier=3" onClick={() => setIsMenuOpen(false)} className="text-[10px] font-bold text-center py-1 rounded bg-card/60 hover:bg-primary/20 text-heading hover:text-primary transition-colors">3 Tiers</Link>
                       </div>
                     </div>
+
+                    <Link to="/shop?category=special-cakes" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-primary/10 transition-colors group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Sparkles size={16} />
+                        </div>
+                        <span className="font-extrabold text-sm text-heading group-hover:text-primary transition-colors">Special Cakes</span>
+                      </div>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">✨ SPECIAL</span>
+                    </Link>
 
                     <Link to="/shop?offers=true" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-amber-500/10 transition-colors group">
                       <div className="flex items-center gap-3">

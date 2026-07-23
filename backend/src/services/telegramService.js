@@ -131,6 +131,21 @@ const sendMediaWhatsApp = () => {};
  * Rich Order alert for internal staff/admin group
  * Now includes custom cake details inline with items.
  */
+const formatIST = (dateVal) => {
+  const d = dateVal ? new Date(dateVal) : new Date();
+  const validDate = isNaN(d.getTime()) ? new Date() : d;
+  return validDate.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+};
+
 const sendInternalOrderAlert = (phone, order) => {
   // If only one argument is passed, it might be the order
   const orderObj = (typeof phone === 'object') ? phone : order;
@@ -151,6 +166,9 @@ const sendInternalOrderAlert = (phone, order) => {
   if (orderObj.address.lat && orderObj.address.lng) {
     mapsUrlMsg = `\n🗺️ *Directions:* https://www.google.com/maps/search/?api=1&query=${orderObj.address.lat},${orderObj.address.lng}`;
   }
+
+  const orderedTimeString = formatIST(orderObj.createdAt || orderObj.updatedAt);
+  const deliveryDateString = orderObj.deliveryDate ? new Date(orderObj.deliveryDate).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A';
   
   const message = `🍫 *New Order Received*\n\n` +
     `🆔 *Order ID:* ${orderObj.orderNumber}\n` +
@@ -165,9 +183,9 @@ const sendInternalOrderAlert = (phone, order) => {
     `   Convenience Fee (2.5%): ₹${orderObj.convenienceFee}\n` +
     `   GST (18%): Inclusive\n` +
     `   *Grand Total:* ₹${orderObj.total}\n\n` +
-    `📅 *Delivery Date:* ${orderObj.deliveryDate ? new Date(orderObj.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
+    `📅 *Delivery Date:* ${deliveryDateString}\n` +
     `⏰ *Delivery Slot:* ${orderObj.deliverySlot || 'N/A'}\n` +
-    `📅 *Ordered Time:* ${new Date(orderObj.createdAt).toLocaleString()}` +
+    `📅 *Ordered Time:* ${orderedTimeString} (IST)` +
     mapsUrlMsg + `\n\n` +
     `Please check admin dashboard now.`;
 

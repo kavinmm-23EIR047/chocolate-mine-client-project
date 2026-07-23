@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import api from '../../utils/api';
 import fallbackCakeImg from '../../assets/cake.png';
 import allCategoryImg from '../../assets/all.png';
@@ -74,11 +74,11 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
       if (container.scrollLeft >= maxScroll - 20) {
         container.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
-        const itemWidth = container.firstElementChild?.offsetWidth || 180;
-        const gap = 16;
+        const itemWidth = container.firstElementChild?.offsetWidth || 160;
+        const gap = 20;
         container.scrollBy({ left: itemWidth + gap, behavior: 'smooth' });
       }
-    }, 3500);
+    }, 4000);
 
     return () => {
       clearInterval(interval);
@@ -106,56 +106,56 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
 
   const scroll = (direction) => {
     if (!scrollRef.current) return;
-    const amount = direction === 'left' ? -260 : 260;
+    const amount = direction === 'left' ? -280 : 280;
     scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
   };
 
   if (loading) return null;
 
   return (
-    <section className="pt-12 sm:pt-16 lg:pt-20 pb-8 sm:pb-10 lg:pb-14 relative z-10 w-full overflow-hidden bg-[var(--background)] border-b border-[var(--border)]/20">
+    <section className="py-10 sm:py-14 lg:py-16 relative z-10 w-full overflow-hidden bg-[var(--background)] border-b border-[var(--border)]/30">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* ── HEADER SECTION ── */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
-          <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] sm:text-xs font-black uppercase tracking-[0.18em] border border-[var(--primary)]/20 flex items-center gap-1.5 shadow-xs">
-                <Sparkles size={12} className="text-amber-500 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-semibold tracking-wide">
+                <Sparkles size={13} className="text-amber-500 animate-pulse" />
                 Curated Range
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight uppercase text-[var(--heading)]">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[var(--heading)]">
               Shop By Category
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--muted)] font-medium max-w-lg">
+            <p className="text-xs sm:text-sm text-[var(--muted)] font-normal max-w-md">
               Explore our artisan handcrafted cakes, desserts, bento treats & custom delights.
             </p>
           </div>
 
           {/* Desktop Navigation Controls */}
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <div className="hidden sm:flex items-center gap-2.5 shrink-0">
             <button
               onClick={() => scroll('left')}
               aria-label="Previous categories"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--border)]/50 bg-[var(--card)] hover:bg-[var(--primary)] hover:text-[var(--button-text)] text-[var(--heading)] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="w-10 h-10 rounded-full border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--primary)] hover:border-[var(--primary)] hover:text-[var(--button-text)] text-[var(--heading)] flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
             >
-              <ChevronLeft size={18} strokeWidth={2.5} />
+              <ChevronLeft size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => scroll('right')}
               aria-label="Next categories"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--border)]/50 bg-[var(--card)] hover:bg-[var(--primary)] hover:text-[var(--button-text)] text-[var(--heading)] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="w-10 h-10 rounded-full border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--primary)] hover:border-[var(--primary)] hover:text-[var(--button-text)] text-[var(--heading)] flex items-center justify-center transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
             >
-              <ChevronRight size={18} strokeWidth={2.5} />
+              <ChevronRight size={20} strokeWidth={2} />
             </button>
           </div>
         </div>
 
-        {/* ── CATEGORY CARDS CAROUSEL ── */}
+        {/* ── CATEGORY CIRCLES CAROUSEL ── */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto gap-3 sm:gap-4 lg:gap-6 pb-4 pt-1 scroll-smooth [&::-webkit-scrollbar]:hidden snap-x snap-mandatory items-stretch"
+          className="flex overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-4 pt-2 scroll-smooth [&::-webkit-scrollbar]:hidden snap-x snap-mandatory items-start"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {categories.map((cat, index) => {
@@ -178,77 +178,67 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
                     }
                   }
                 }}
-                className="snap-start shrink-0 w-[130px] sm:w-[160px] md:w-[180px] lg:w-[200px] group cursor-pointer select-none"
+                className="snap-start shrink-0 flex flex-col items-center group cursor-pointer select-none w-[110px] sm:w-[130px] md:w-[150px]"
               >
-                <div
-                  className={`h-full flex flex-col items-center justify-between p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all duration-300 relative overflow-hidden text-center ${
-                    isActive
-                      ? 'bg-[var(--card)] border-[var(--primary)] ring-2 ring-[var(--primary)]/30 shadow-lg -translate-y-1'
-                      : 'bg-[var(--card)] border-[var(--border)]/40 hover:border-[var(--primary)]/40 hover:shadow-xl hover:-translate-y-1.5'
-                  }`}
-                >
-                  {/* ── OPACITY-BASED BACKGROUND IMAGE ── */}
+                {/* Image Ring Avatar Container */}
+                <div className="relative mb-3.5 flex items-center justify-center">
+
+                  {/* Subtle active / hover ambient glow */}
                   <div
-                    className="absolute inset-0 bg-cover bg-center transition-all duration-500 opacity-15 group-hover:opacity-25 group-hover:scale-110 pointer-events-none"
-                    style={{ backgroundImage: `url(${categoryImageUrl})` }}
+                    className={`absolute -inset-1.5 rounded-full transition-all duration-300 blur-sm ${isActive
+                        ? 'bg-[var(--primary)]/30 opacity-100 scale-105'
+                        : 'bg-[var(--primary)]/0 group-hover:bg-[var(--primary)]/15 opacity-0 group-hover:opacity-100'
+                      }`}
                   />
-                  
-                  {/* Dark/Theme Tint Overlay for Contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-[var(--card)]/80 via-[var(--card)]/90 to-[var(--card)] transition-opacity duration-300 pointer-events-none" />
 
-                  {/* Circular Image Container with Ambient Glow */}
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center mb-3 mt-1 shrink-0 z-10">
-                    <div className="absolute inset-0 rounded-full bg-[var(--primary)]/10 group-hover:bg-[var(--primary)]/20 transition-colors duration-300" />
-                    <div className="absolute inset-1 rounded-full border border-[var(--primary)]/20 group-hover:border-[var(--primary)]/50 transition-colors duration-300" />
-                    
-                    <img
-                      src={categoryImageUrl}
-                      alt={displayName}
-                      className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain relative z-10 transition-transform duration-500 ease-out group-hover:scale-110 drop-shadow-md"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = FALLBACK_IMAGE;
-                      }}
-                    />
-                  </div>
-
-                  {/* Title & Active Pill Indicator */}
-                  <div className="flex flex-col items-center gap-1.5 w-full relative z-10 min-h-[40px] justify-center">
-                    <span className="text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-wider text-[var(--heading)] group-hover:text-[var(--primary)] transition-colors text-center break-words leading-tight w-full px-1">
-                      {displayName}
-                    </span>
-
-                    <div className="flex items-center gap-1 mt-auto">
-                      <div
-                        className={`h-1 rounded-full bg-[var(--primary)] transition-all duration-300 ${
-                          isActive ? 'w-8' : 'w-0 group-hover:w-6 opacity-60'
-                        }`}
+                  {/* Outer Border Ring */}
+                  <div
+                    className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full p-1 transition-all duration-300 ${isActive
+                        ? 'bg-gradient-to-tr from-[var(--primary)] via-[var(--primary)]/70 to-[var(--primary)]/30 shadow-md scale-105'
+                        : 'bg-[var(--border)]/60 group-hover:bg-[var(--primary)]/50 group-hover:scale-105'
+                      }`}
+                  >
+                    {/* Inner Glass Frame */}
+                    <div className="w-full h-full rounded-full bg-[var(--card)] p-2.5 flex items-center justify-center overflow-hidden border border-[var(--border)]/20 shadow-inner">
+                      <img
+                        src={categoryImageUrl}
+                        alt={displayName}
+                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-sm"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = FALLBACK_IMAGE;
+                        }}
                       />
-                      {isActive && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[var(--primary)] hidden sm:inline-block">
-                          Active
-                        </span>
-                      )}
                     </div>
                   </div>
+                </div>
 
-                  {/* Hover Arrow Icon Pill */}
-                  <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 translate-x-1 z-10">
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center">
-                      <ArrowRight size={10} className="sm:w-3 sm:h-3" />
-                    </div>
-                  </div>
+                {/* Title & Selection Marker */}
+                <div className="flex flex-col items-center text-center px-1 max-w-full">
+                  <span
+                    className={`text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-200 line-clamp-2 ${isActive
+                        ? 'text-[var(--primary)] font-bold'
+                        : 'text-[var(--heading)] group-hover:text-[var(--primary)]'
+                      }`}
+                  >
+                    {displayName}
+                  </span>
+
+                  {/* Active Indicator Bar */}
+                  <span
+                    className={`h-0.5 rounded-full bg-[var(--primary)] mt-1.5 transition-all duration-300 ${isActive ? 'w-6 opacity-100' : 'w-0 opacity-0 group-hover:w-3 group-hover:opacity-50'
+                      }`}
+                  />
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* ── MOBILE SCROLL INDICATOR ── */}
-        <div className="flex sm:hidden items-center justify-center gap-2 mt-3 text-[var(--muted)]">
-          <ChevronLeft size={14} className="animate-pulse text-[var(--primary)]/70" />
-          <span className="text-[9px] font-black uppercase tracking-[0.2em]">Swipe to Explore</span>
-          <ChevronRight size={14} className="animate-pulse text-[var(--primary)]/70" />
+        {/* ── MOBILE SCROLL HINT ── */}
+        <div className="flex sm:hidden items-center justify-center gap-1.5 mt-4 text-[var(--muted)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]/60 animate-ping" />
+          <span className="text-[10px] font-medium tracking-wider uppercase">Swipe to explore</span>
         </div>
 
       </div>

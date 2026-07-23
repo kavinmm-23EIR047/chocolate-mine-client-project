@@ -2,13 +2,17 @@ const nodemailer = require('nodemailer');
 const logger = require('../utils/logger');
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: Number(process.env.SMTP_PORT) || 587,
   secure: Number(process.env.SMTP_PORT) === 465,
+  family: 4, // Force IPv4 to prevent IPv6 ENETUNREACH network unreachable errors in cloud/production
   auth: {
     user: process.env.SMTP_EMAIL,
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 transporter.verify((error, success) => {

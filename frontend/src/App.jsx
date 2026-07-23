@@ -177,129 +177,144 @@ const GlobalNotificationHandler = () => {
   return null;
 };
 
-function App() {
-  useEffect(() => {
-    // 🚀 Background health ping to wake up Render free tier backend instantly on page load
-    const healthUrl = import.meta.env.VITE_API_URL
-      ? import.meta.env.VITE_API_URL.replace('/api/v1', '/health')
-      : '/health';
-    fetch(healthUrl, { method: 'GET' }).catch(() => { });
-  }, []);
+// function App() {
+//   useEffect(() => {
+//     // 🚀 Background health ping to wake up Render free tier backend instantly on page load
+//     const healthUrl = import.meta.env.VITE_API_URL
+//       ? import.meta.env.VITE_API_URL.replace('/api/v1', '/health')
+//       : '/health';
+//     fetch(healthUrl, { method: 'GET' }).catch(() => {});
+//   }, []);
 
+return (
+  <AuthProvider>
+    <LocationProvider>
+      <WishlistProvider>
+        <ThemeProvider>
+          <BrandIntroGate />
+          <Router>
+            <ScrollToTop />
+            <SocketInitializer />
+            <GlobalNotificationHandler />
+            <Toaster
+              position="bottom-center"
+              toastOptions={{
+                className: 'toast-premium',
+                duration: 4000,
+                style: {
+                  background: 'var(--card)',
+                  color: 'var(--foreground)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '16px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: 'var(--shadow-premium)',
+                }
+              }}
+            />
+            <Routes>
+              {/* Public/User Routes */}
+              <Route element={<UserLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/custom-cake" element={<CustomCake />} />
+                <Route path="/product/:slug" element={<ProductDetails />} />
+                <Route path="/occasion/:name" element={<OccasionProducts />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/track/:orderId?" element={<OrderTracking />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
+                <Route path="/oauth-callback" element={<OAuthCallback />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/stores" element={<Stores />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsConditions />} />
+                <Route path="/refund" element={<RefundPolicy />} />
+
+                {/* Guest only */}
+                <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+                <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                {/* Protected User */}
+                <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="/review/:orderId" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
+
+                {/* Legacy Redirects */}
+                <Route path="/profile" element={<Navigate to="/account/dashboard" replace />} />
+                <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
+
+                {/* Premium Dashboard */}
+                <Route path="/account" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<DashboardHome />} />
+                  <Route path="profile" element={<ProfileDetails />} />
+                  <Route path="addresses" element={<AddressManager />} />
+                  <Route path="settings" element={<AccountSettings />} />
+                  <Route path="orders" element={<OrderHistory />} />
+                  <Route path="orders/:id" element={<OrderDetails />} />
+                  <Route path="notifications" element={<UserNotifications />} />
+                  <Route path="wishlist" element={<Wishlist />} />
+                  <Route path="reviews" element={<MyReviews />} />
+                </Route>
+              </Route>
+
+
+
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="products/create" element={<ProductForm />} />
+                <Route path="products/edit/:id" element={<ProductForm />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="staff" element={<AdminStaff />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="categories" element={<CategoryManager />} />
+                <Route path="occasions" element={<OccasionManager />} />
+                <Route path="addons" element={<AddonManager />} />
+                <Route path="banners" element={<AdminBanner />} />
+                <Route path="custom-cakes" element={<AdminCustomCakes />} />
+                <Route path="reviews" element={<AdminReviews />} />
+                <Route path="google-reviews" element={<AdminGoogleReviews />} />
+                <Route path="settings" element={<AdminDashboard />} />
+              </Route>
+
+//                 {/* Staff Routes */}
+//                 <Route path="/staff" element={<StaffRoute><StaffLayout /></StaffRoute>}>
+//                   <Route index element={<Navigate to="/staff/dashboard" replace />} />
+//                   <Route path="dashboard" element={<StaffDashboard />} />
+//                   <Route path="orders/new" element={<StaffDashboard />} />
+//                   <Route path="orders/active" element={<StaffDashboard />} />
+//                   <Route path="orders/history" element={<StaffDashboard />} />
+//                   <Route path="orders/out-for-delivery" element={<StaffDashboard />} />
+//                   <Route path="orders/delivered" element={<StaffDashboard />} />
+//                   <Route path="orders/create-inshop" element={<StaffDashboard />} />
+//                   <Route path="orders/in-shop-history" element={<StaffDashboard />} />
+//                 </Route>
+//               </Routes>
+//             </Router>
+//           </ThemeProvider>
+//         </WishlistProvider>
+//       </LocationProvider>
+//     </AuthProvider>
+//   );
+// }
+
+// export default App;
+
+export default function App() {
   return (
-    <AuthProvider>
-      <LocationProvider>
-        <WishlistProvider>
-          <ThemeProvider>
-            <BrandIntroGate />
-            <Router>
-              <ScrollToTop />
-              <SocketInitializer />
-              <GlobalNotificationHandler />
-              <Toaster
-                position="bottom-center"
-                toastOptions={{
-                  className: 'toast-premium',
-                  duration: 4000,
-                  style: {
-                    background: 'var(--card)',
-                    color: 'var(--foreground)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '16px',
-                    padding: '12px 20px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    boxShadow: 'var(--shadow-premium)',
-                  }
-                }}
-              />
-              <Routes>
-                {/* Public/User Routes */}
-                <Route element={<UserLayout />}>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/custom-cake" element={<CustomCake />} />
-                  <Route path="/product/:slug" element={<ProductDetails />} />
-                  <Route path="/occasion/:name" element={<OccasionProducts />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/track/:orderId?" element={<OrderTracking />} />
-                  <Route path="/order-success" element={<OrderSuccess />} />
-                  <Route path="/oauth-callback" element={<OAuthCallback />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/stores" element={<Stores />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/terms" element={<TermsConditions />} />
-                  <Route path="/refund" element={<RefundPolicy />} />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-6 text-center">
+      <h1 className="text-5xl font-bold text-gray-800 mb-4">
+        🚧 Under Maintenance
+      </h1>
 
-                  {/* Guest only */}
-                  <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-                  <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-
-                  {/* Protected User */}
-                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                  <Route path="/review/:orderId" element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
-
-                  {/* Legacy Redirects */}
-                  <Route path="/profile" element={<Navigate to="/account/dashboard" replace />} />
-                  <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
-
-                  {/* Premium Dashboard */}
-                  <Route path="/account" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<DashboardHome />} />
-                    <Route path="profile" element={<ProfileDetails />} />
-                    <Route path="addresses" element={<AddressManager />} />
-                    <Route path="settings" element={<AccountSettings />} />
-                    <Route path="orders" element={<OrderHistory />} />
-                    <Route path="orders/:id" element={<OrderDetails />} />
-                    <Route path="notifications" element={<UserNotifications />} />
-                    <Route path="wishlist" element={<Wishlist />} />
-                    <Route path="reviews" element={<MyReviews />} />
-                  </Route>
-                </Route>
-
-
-
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="products/create" element={<ProductForm />} />
-                  <Route path="products/edit/:id" element={<ProductForm />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="staff" element={<AdminStaff />} />
-                  <Route path="analytics" element={<AdminAnalytics />} />
-                  <Route path="categories" element={<CategoryManager />} />
-                  <Route path="occasions" element={<OccasionManager />} />
-                  <Route path="addons" element={<AddonManager />} />
-                  <Route path="banners" element={<AdminBanner />} />
-                  <Route path="custom-cakes" element={<AdminCustomCakes />} />
-                  <Route path="reviews" element={<AdminReviews />} />
-                  <Route path="google-reviews" element={<AdminGoogleReviews />} />
-                  <Route path="settings" element={<AdminDashboard />} />
-                </Route>
-
-                {/* Staff Routes */}
-                <Route path="/staff" element={<StaffRoute><StaffLayout /></StaffRoute>}>
-                  <Route index element={<Navigate to="/staff/dashboard" replace />} />
-                  <Route path="dashboard" element={<StaffDashboard />} />
-                  <Route path="orders/new" element={<StaffDashboard />} />
-                  <Route path="orders/active" element={<StaffDashboard />} />
-                  <Route path="orders/history" element={<StaffDashboard />} />
-                  <Route path="orders/out-for-delivery" element={<StaffDashboard />} />
-                  <Route path="orders/delivered" element={<StaffDashboard />} />
-                  <Route path="orders/create-inshop" element={<StaffDashboard />} />
-                  <Route path="orders/in-shop-history" element={<StaffDashboard />} />
-                </Route>
-              </Routes>
-            </Router>
-          </ThemeProvider>
-        </WishlistProvider>
-      </LocationProvider>
-    </AuthProvider>
+      <p className="text-lg text-gray-600 max-w-md">
+        We're currently performing scheduled maintenance.
+        Please check back soon.
+      </p>
+    </div>
   );
 }
-
-export default App;

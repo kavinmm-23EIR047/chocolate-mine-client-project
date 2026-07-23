@@ -173,6 +173,11 @@ exports.notifyOrderSuccess = async (order) => {
         .catch(e => logger.error('Order Email Failed:', e.message));
     }
 
+    // Send Dedicated Admin Order Alert Email to Admin
+    const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
+    emailService.sendAdminNewOrderAlert(adminEmail, populatedOrder)
+      .catch(e => logger.error('Admin Order Alert Email Failed:', e.message));
+
     const userTitle = '✅ Order Confirmed';
     const userMsg = `Your order #${trackingNumber} has been confirmed.`;
     const userMetadata = {

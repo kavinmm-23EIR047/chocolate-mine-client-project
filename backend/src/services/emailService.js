@@ -64,13 +64,10 @@ const getLogoMarkup = () => {
   `;
 };
 
-// Generates receipt barcode visual section at bottom
-const getReceiptBarcodeMarkup = (orderNumber) => `
-  <div style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px dashed #3C1B13;">
-    <div style="font-family: monospace; font-size: 10px; font-weight: 800; color: #7A6B65; letter-spacing: 2px; margin-bottom: 6px; text-transform: uppercase;">VERIFIED RECEIPT • #${orderNumber}</div>
-    <div style="font-family: 'Courier New', Courier, monospace; font-size: 26px; font-weight: 900; color: #3C1B13; letter-spacing: -2px; line-height: 1; user-select: none;">
-      ||||| | |||| || |||||| | |||| ||| ||| | ||||
-    </div>
+// Generates clean receipt footer markup at bottom
+const getReceiptBarcodeMarkup = () => `
+  <div style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px dashed #D8CFC8; font-size: 11px; font-weight: 700; color: #7A6B65;">
+    Thank you for choosing The Chocolate Mine!
   </div>
 `;
 
@@ -81,7 +78,6 @@ const getReceiptBarcodeMarkup = (orderNumber) => `
 const sendViaBrevo = async (options) => {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SMTP_EMAIL || process.env.SENDER_EMAIL || 'akwebflairtechnologies@gmail.com';
-  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
   
   const payload = {
     sender: { name: 'The Chocolate Mine', email: senderEmail },
@@ -90,8 +86,10 @@ const sendViaBrevo = async (options) => {
     htmlContent: options.html || '<p></p>',
   };
 
-  if (options.to !== adminEmail) {
-    payload.bcc = [{ email: adminEmail }];
+  if (options.bcc) {
+    payload.bcc = Array.isArray(options.bcc) 
+      ? options.bcc.map(b => typeof b === 'string' ? { email: b } : b)
+      : [{ email: options.bcc }];
   }
 
   if (options.text) payload.textContent = options.text;
@@ -111,14 +109,13 @@ const sendViaBrevo = async (options) => {
     }
   });
 
-  logger.info(`Email sent via Brevo HTTP API to ${options.to} (Admin Copy: ${options.to !== adminEmail ? adminEmail : 'N/A'})`);
+  logger.info(`Email sent via Brevo HTTP API to ${options.to}`);
   return res.data;
 };
 
 const sendViaResend = async (options) => {
   const apiKey = process.env.RESEND_API_KEY;
   const senderEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
 
   const payload = {
     from: `The Chocolate Mine <${senderEmail}>`,
@@ -127,8 +124,8 @@ const sendViaResend = async (options) => {
     html: options.html,
   };
 
-  if (options.to !== adminEmail) {
-    payload.bcc = [adminEmail];
+  if (options.bcc) {
+    payload.bcc = Array.isArray(options.bcc) ? options.bcc : [options.bcc];
   }
 
   if (options.text) payload.text = options.text;
@@ -147,7 +144,7 @@ const sendViaResend = async (options) => {
     }
   });
 
-  logger.info(`Email sent via Resend HTTP API to ${options.to} (Admin Copy: ${options.to !== adminEmail ? adminEmail : 'N/A'})`);
+  logger.info(`Email sent via Resend HTTP API to ${options.to}`);
   return res.data;
 };
 
@@ -160,19 +157,17 @@ const sendMail = async (options) => {
       return await sendViaResend(options);
     }
 
-    const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'thechocolateminercm@gmail.com';
-
     // Fallback to Nodemailer SMTP
     const info = await transporter.sendMail({
       from: `"The Chocolate Mine" <${process.env.SMTP_EMAIL}>`,
       to: options.to,
-      bcc: options.to !== adminEmail ? adminEmail : undefined,
+      bcc: options.bcc,
       subject: options.subject,
       text: options.text,
       html: options.html,
       attachments: options.attachments,
     });
-    logger.info(`Email sent via SMTP: ${info.messageId}`);
+    logger.info(`Email sent via SMTP to ${options.to}: ${info.messageId}`);
     return info;
   } catch (err) {
     const errorDetails = err.response?.data ? JSON.stringify(err.response.data) : err.message;
@@ -201,6 +196,139 @@ const getDisplayFlavor = (item) => {
 };
 
 const emailService = {
+  sendAdminNewOrderAlert: async (adminEmail, order) => {
+    const { getFrontendUrl } = require('../utils/urlUtils');
+    const frontendUrl = getFrontendUrl();
+    const adminDashboardLink = `${frontendUrl}/admin/orders`;
+    const formattedDate = new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Build items table rows
+    const itemsRows = (order.items || []).map(item => {
+      const resolvedFlavor = getDisplayFlavor(item);
+      const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
+      const weight = item.selectedWeight || (item.isCustomCake && item.customDetails?.weight) || '';
+      const flavorDisplay = item.isCustomCake
+        ? (item.customDetails?.flavour || resolvedFlavor)
+        : (showFlavor ? resolvedFlavor : '');
+      const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
+      
+      const subtagParts = [flavorDisplay, weight];
+      let subtag = subtagParts.filter(Boolean).join(' · ');
+      
+      let addonTotal = 0;
+      if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
+        const addonList = item.addons.map(a => `+ ${a.name} (x${a.qty || 1}) - ₹${(a.price * (a.qty || 1)).toFixed(2)}`).join('<br/>');
+        subtag = subtag ? `${subtag}<br/><span style="color: #7A6B65;">${addonList}</span>` : `<span style="color: #7A6B65;">${addonList}</span>`;
+        addonTotal = item.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0);
+      }
+      
+      const lineTotal = (finalUnitPrice * Number(item.qty || 1)) + (addonTotal * Number(item.qty || 1));
+
+      return `
+        <tr>
+          <td style="padding: 12px 4px; border-bottom: 1px solid #EAE3DE; font-size: 13px; font-weight: 700; color: #2C1A16;">
+            ${item.name}${subtag ? `<br/><span style="font-size: 11px; font-weight: 500; color: #7A6B65;">${subtag}</span>` : ''}
+          </td>
+          <td style="padding: 12px 4px; border-bottom: 1px solid #EAE3DE; text-align: center; font-size: 13px; font-weight: 800; color: #2C1A16;">${item.qty}</td>
+          <td style="padding: 12px 4px; border-bottom: 1px solid #EAE3DE; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${lineTotal.toFixed(2)}</td>
+        </tr>`;
+    }).join('');
+
+    return await sendMail({
+      to: adminEmail,
+      subject: `🚨 NEW ORDER RECEIVED! #${order.orderNumber} - ₹${order.total}`,
+      html: `
+        <html>
+          <head>
+            <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+            ${getThemeStyles()}
+          </head>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F5F2EF; color: #2C1A16; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased;">
+            <div class="receipt-container" style="background-color: #FFFFFF; color: #2C1A16; border: 1px solid #D8CFC8; max-width: 540px; margin: 0 auto; padding: 36px 32px; border-radius: 0px;">
+              
+              <!-- Header Bar -->
+              <table width="100%" cellpadding="0" cellspacing="0" class="receipt-header" style="border-bottom: 2px solid #3C1B13; padding-bottom: 12px; margin-bottom: 24px;">
+                <tr>
+                  <td style="font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">ADMIN NOTIFICATION • #${order.orderNumber}</td>
+                  <td style="text-align: right; font-size: 11px; font-weight: 800; color: #7A6B65; text-transform: uppercase;">${formattedDate}</td>
+                </tr>
+              </table>
+
+              ${getLogoMarkup()}
+              <h2 class="title-text" style="color: #3C1B13; font-size: 20px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 12px 0 20px 0;">New Order Alert!</h2>
+              
+              <!-- Customer Details Section -->
+              <div style="background-color: #F8F5F2; border: 1px solid #EAE3DE; padding: 18px; margin-bottom: 24px;">
+                <div style="font-size: 11px; font-weight: 900; color: #3C1B13; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; border-bottom: 1px solid #3C1B13; padding-bottom: 4px;">CUSTOMER & DELIVERY DETAILS</div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #2C1A16; line-height: 1.6;">
+                  <tr>
+                    <td style="font-weight: 700; color: #7A6B65; width: 38%;">Customer Name:</td>
+                    <td style="font-weight: 800; color: #2C1A16;">${order.address?.fullName || order.userId?.name || 'Walk-in Customer'}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 700; color: #7A6B65;">Phone Number:</td>
+                    <td style="font-weight: 800; color: #2C1A16;">${order.address?.phone || order.userId?.phone || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 700; color: #7A6B65;">Delivery Address:</td>
+                    <td style="font-weight: 800; color: #2C1A16;">${[order.address?.street, order.address?.city, order.address?.pincode].filter(Boolean).join(', ') || 'Counter Order'}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 700; color: #7A6B65;">Payment Info:</td>
+                    <td style="font-weight: 900; color: ${order.paymentStatus === 'paid' ? '#2E7D32' : '#C53030'}; text-transform: uppercase;">${(order.paymentStatus || 'PENDING').toUpperCase()} (${(order.paymentMethod || 'ONLINE').toUpperCase()})</td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Ordered Items Summary Table -->
+              <div style="font-size: 11px; font-weight: 900; color: #3C1B13; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1.5px solid #3C1B13; padding-bottom: 6px;">
+                ORDERED ITEMS BREAKDOWN
+              </div>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding: 8px 4px; border-bottom: 1.5px solid #3C1B13; font-size: 10px; font-weight: 900; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; width: 55%;">ITEMS</th>
+                    <th style="text-align: center; padding: 8px 4px; border-bottom: 1.5px solid #3C1B13; font-size: 10px; font-weight: 900; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; width: 15%;">QTY</th>
+                    <th style="text-align: right; padding: 8px 4px; border-bottom: 1.5px solid #3C1B13; font-size: 10px; font-weight: 900; color: #7A6B65; text-transform: uppercase; letter-spacing: 0.5px; width: 30%;">PRICE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsRows}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="2" style="padding: 10px 4px 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #7A6B65;">Subtotal</td>
+                    <td style="padding: 10px 4px 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${Number(order.subtotal || 0).toFixed(2)}</td>
+                  </tr>
+                  ${Number(order.discount || 0) > 0 ? `
+                  <tr>
+                    <td colspan="2" style="padding: 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #2E7D32;">Discount</td>
+                    <td style="padding: 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2E7D32;">-₹${Number(order.discount).toFixed(2)}</td>
+                  </tr>` : ''}
+                  <tr>
+                    <td colspan="2" style="padding: 6px 4px; text-align: left; font-size: 12px; font-weight: 700; color: #7A6B65;">Delivery Charge</td>
+                    <td style="padding: 6px 4px; text-align: right; font-size: 13px; font-weight: 800; color: #2C1A16;">₹${Number(order.deliveryCharge || 0).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding: 16px 4px 6px 4px; text-align: left; font-size: 16px; font-weight: 900; color: #3C1B13; border-top: 2px solid #3C1B13; text-transform: uppercase;">ORDER VALUE</td>
+                    <td style="padding: 16px 4px 6px 4px; text-align: right; font-size: 22px; font-weight: 900; color: #3C1B13; border-top: 2px solid #3C1B13;">₹${Number(order.total || 0).toFixed(2)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${adminDashboardLink}" class="action-button" style="background-color: #3C1B13; color: #FFFFFF; display: inline-block; padding: 14px 32px; text-decoration: none; border-radius: 0px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Open Admin Dashboard</a>
+              </div>
+
+              ${getReceiptBarcodeMarkup(order.orderNumber)}
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  },
+
   sendOrderConfirmed: async (email, order) => {
     const { getFrontendUrl } = require('../utils/urlUtils');
     const frontendUrl = getFrontendUrl();

@@ -1,11 +1,18 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+const axios = require('axios');
 const logger = require('../utils/logger');
+
+// Force Node.js to resolve IPv4 addresses first for all DNS lookups (fixes Gmail SMTP IPv6 ENETUNREACH in cloud/production)
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: Number(process.env.SMTP_PORT) || 587,
   secure: Number(process.env.SMTP_PORT) === 465,
-  family: 4, // Force IPv4 to prevent IPv6 ENETUNREACH network unreachable errors in cloud/production
+  family: 4,
   auth: {
     user: process.env.SMTP_EMAIL,
     pass: process.env.SMTP_PASS,
@@ -17,7 +24,11 @@ const transporter = nodemailer.createTransport({
 
 transporter.verify((error, success) => {
   if (error) {
-    logger.error('SMTP Connection Error:', error.message);
+    if (process.env.BREVO_API_KEY || process.env.RESEND_API_KEY) {
+      logger.info('HTTP Email Provider API Key detected (bypassing SMTP)');
+    } else {
+      logger.warn('SMTP Connection Error (Render free tier blocks SMTP port 587/465. Use BREVO_API_KEY for free HTTP API):', error.message);
+    }
   } else {
     logger.info('SMTP Server is ready');
   }
@@ -75,8 +86,83 @@ const getLogoMarkup = () => {
   `;
 };
 
+// =============================================================================
+// HTTP Email Sending Providers (For Render Free Tier compatibility - Port 443)
+// =============================================================================
+
+const sendViaBrevo = async (options) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.SMTP_EMAIL || process.env.SENDER_EMAIL || 'akwebflairtechnologies@gmail.com';
+  
+  const payload = {
+    sender: { name: 'The Chocolate Mine', email: senderEmail },
+    to: [{ email: options.to }],
+    subject: options.subject,
+    htmlContent: options.html || '<p></p>',
+  };
+
+  if (options.text) payload.textContent = options.text;
+
+  if (options.attachments && Array.isArray(options.attachments) && options.attachments.length > 0) {
+    payload.attachment = options.attachments.map(att => ({
+      name: att.filename,
+      content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : Buffer.from(att.content).toString('base64')
+    }));
+  }
+
+  const res = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
+    headers: {
+      'api-key': apiKey,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
+
+  logger.info(`Email sent via Brevo HTTP API: ${res.data.messageId || 'Success'}`);
+  return res.data;
+};
+
+const sendViaResend = async (options) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  const senderEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+  const payload = {
+    from: `The Chocolate Mine <${senderEmail}>`,
+    to: [options.to],
+    subject: options.subject,
+    html: options.html,
+  };
+
+  if (options.text) payload.text = options.text;
+
+  if (options.attachments && Array.isArray(options.attachments) && options.attachments.length > 0) {
+    payload.attachments = options.attachments.map(att => ({
+      filename: att.filename,
+      content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : Buffer.from(att.content).toString('base64')
+    }));
+  }
+
+  const res = await axios.post('https://api.resend.com/emails', payload, {
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  logger.info(`Email sent via Resend HTTP API: ${res.data.id || 'Success'}`);
+  return res.data;
+};
+
 const sendMail = async (options) => {
   try {
+    if (process.env.BREVO_API_KEY) {
+      return await sendViaBrevo(options);
+    }
+    if (process.env.RESEND_API_KEY) {
+      return await sendViaResend(options);
+    }
+
+    // Fallback to Nodemailer SMTP
     const info = await transporter.sendMail({
       from: `"The Chocolate Mine" <${process.env.SMTP_EMAIL}>`,
       to: options.to,
@@ -85,11 +171,12 @@ const sendMail = async (options) => {
       html: options.html,
       attachments: options.attachments,
     });
-    logger.info(`Email sent: ${info.messageId}`);
+    logger.info(`Email sent via SMTP: ${info.messageId}`);
     return info;
   } catch (err) {
-    logger.error('Email Delivery Failed:', err.message);
-    throw new Error(`Email delivery failed: ${err.message}`);
+    const errorDetails = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+    logger.error('Email Delivery Failed:', errorDetails);
+    throw new Error(`Email delivery failed: ${errorDetails}`);
   }
 };
 

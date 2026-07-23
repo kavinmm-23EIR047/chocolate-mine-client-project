@@ -529,8 +529,8 @@ const Cart = () => {
 
                   <Button 
                     onClick={() => {
-                      if (subtotal < 500) {
-                        toast.error("Purchase price is not eligible for delivery. Add more products for online delivery.");
+                      if (subtotal < 300) {
+                        toast.error("Purchase price is not eligible for online delivery (minimum ₹300). Add more items or order via WhatsApp Enquiry.");
                       } else {
                         navigate("/checkout");
                       }
@@ -540,6 +540,25 @@ const Cart = () => {
                     PROCEED TO CHECKOUT
                     <ArrowRight size={16} className="ml-2" />
                   </Button>
+
+                  {subtotal < 300 && (
+                    <div className="mt-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2.5">
+                      <p className="text-xs font-bold text-amber-600 dark:text-amber-400 leading-relaxed">
+                        ⚠️ Online delivery requires a minimum order of ₹300. For smaller orders, you can enquire & order directly via WhatsApp:
+                      </p>
+                      <a
+                        href={`https://wa.me/919363265477?text=${encodeURIComponent(
+                          `Hi The Chocolate Mine! I would like to order items from my bag (Total: ₹${subtotal}):\n` +
+                          cartItems.map(i => `• ${i.name} (x${i.qty})`).join('\n')
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
+                      >
+                        <span>💬 Order via WhatsApp Enquiry</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

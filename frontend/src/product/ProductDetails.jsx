@@ -445,19 +445,15 @@ const ProductDetails = () => {
       else { toast.error('Please select weight'); return; }
     }
 
-    const directItem = {
-      product: product,
-      productId: product._id?.$oid || product._id,
-      name: product.name,
-      image: product.image,
-      qty: quantity,
-      price: isCakeWithVariants ? currentPrice : product.price,
-      options: options,
-      addons: selectedAddons,
-      coupon: (product.coupon?.enabled && isCouponApplied) ? product.coupon : null
-    };
-
-    navigate('/checkout', { state: { directItem } });
+    dispatch(addToCart({ 
+      product, 
+      qty: quantity, 
+      options, 
+      variantPrice: isCakeWithVariants ? currentPrice : null, 
+      addons: selectedAddons 
+    }));
+    toast.success('Item added to bag!');
+    navigate('/cart');
   };
 
   const getFlavorImages = (flavor) => {

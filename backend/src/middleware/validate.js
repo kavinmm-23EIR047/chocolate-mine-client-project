@@ -1,12 +1,80 @@
 const Joi = require('joi');
 const AppError = require('../utils/AppError');
 
-const validate = (schema) => (req, res, next) => {
-  const { error } = schema.validate(req.body, { abortEarly: false });
-  if (error) {
-    const message = error.details.map(el => el.message).join(', ');
-    return next(new AppError(message, 400));
+const formatFieldLabel = (field) => {
+  const labels = {
+    name: 'Name',
+    email: 'Email',
+    password: 'Password',
+    phone: 'Phone number',
+    otp: 'OTP',
+    confirmPassword: 'Confirm password',
+    price: 'Price',
+    category: 'Category',
+    description: 'Description',
+    shortDescription: 'Short description',
+    image: 'Image',
+    stock: 'Stock',
+    flavour: 'Flavour',
+    weight: 'Weight',
+    deliveryDate: 'Delivery date',
+    deliverySlot: 'Delivery slot'
+  };
+  return labels[field] || field.charAt(0).toUpperCase() + field.slice(1);
+};
+
+const formatJoiDetail = (detail) => {
+  const field = detail.path.join('.') || 'general';
+  const type = detail.type;
+  const label = formatFieldLabel(detail.path[detail.path.length - 1] || field);
+
+  // If Joi rule has a tailored custom message provided in schema, prioritize it
+  if (detail.message && !detail.message.includes('fails to match') && !detail.message.includes('must be one of')) {
+    const cleanMsg = detail.message.replace(/['"]/g, '');
+    if (!cleanMsg.startsWith(detail.path.join('.'))) {
+      return { field, message: cleanMsg };
+    }
   }
+
+  // Fallback friendly formatting
+  if (type === 'string.empty' || type === 'any.required') {
+    return { field, message: `${label} is required.` };
+  }
+  if (type === 'string.email') {
+    return { field, message: 'Please enter a valid email address.' };
+  }
+  if (type === 'string.min') {
+    return { field, message: `${label} must be at least ${detail.context?.limit} characters.` };
+  }
+  if (type === 'string.max') {
+    return { field, message: `${label} cannot exceed ${detail.context?.limit} characters.` };
+  }
+  if (type === 'number.min') {
+    return { field, message: `${label} must be at least ${detail.context?.limit}.` };
+  }
+  if (type === 'number.base') {
+    return { field, message: `${label} must be a valid number.` };
+  }
+
+  const cleanMessage = detail.message.replace(/['"]/g, '').replace(`${detail.path.join('.')}`, label);
+  return { field, message: cleanMessage };
+};
+
+const validate = (schema) => (req, res, next) => {
+  const { error, value } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    const errorDetails = error.details.map(formatJoiDetail);
+    
+    let primaryMessage = 'Please complete the required fields.';
+    if (errorDetails.length === 1) {
+      primaryMessage = errorDetails[0].message;
+    } else {
+      primaryMessage = 'Please correct the highlighted fields.';
+    }
+
+    return next(new AppError(primaryMessage, 400, 'VALIDATION_ERROR', errorDetails));
+  }
+  req.body = value;
   next();
 };
 

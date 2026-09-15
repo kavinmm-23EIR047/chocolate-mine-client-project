@@ -1,127 +1,136 @@
-import { useRef, useState } from 'react';
-import { CheckCircle2, Loader2, Phone, ShieldCheck } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Phone, ArrowLeft, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import LightLogo from '../assets/light logo.png';
 
 const PhoneVerification = () => {
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const otpRefs = useRef([]);
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
-  const sendOtp = async (event) => {
-    event.preventDefault();
-    if (!/^\d{10}$/.test(phone)) return toast.error('Enter a valid 10-digit mobile number.');
-
-    try {
-      setLoading(true);
-      await api.post('/auth/phone-verification/send-otp', { phone });
-      setOtpSent(true);
-      setOtp(['', '', '', '', '', '']);
-      toast.success('OTP sent to your mobile number.');
-      setTimeout(() => otpRefs.current[0]?.focus(), 0);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Could not send OTP. Please try again.');
-    } finally {
-      setLoading(false);
+  const handleSavePhone = async (e) => {
+    e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      return toast.error('Please enter a valid 10-digit phone number.');
     }
-  };
-
-  const updateOtp = (index, value) => {
-    if (!/^\d?$/.test(value)) return;
-    const next = [...otp];
-    next[index] = value;
-    setOtp(next);
-    if (value && index < 5) otpRefs.current[index + 1]?.focus();
-  };
-
-  const verifyOtp = async (event) => {
-    event.preventDefault();
-    const code = otp.join('');
-    if (code.length !== 6) return toast.error('Enter the complete 6-digit OTP.');
 
     try {
       setLoading(true);
-      const response = await api.post('/auth/phone-verification/verify-otp', { otp: code });
-      updateUser({ ...user, ...response.data.user, phoneVerified: true });
-      toast.success('Mobile number verified successfully.');
+      const response = await api.post('/auth/save-phone', { phone: cleanPhone });
+
+      if (response.data?.user) {
+        updateUser(response.data.user);
+      } else {
+        updateUser({ ...user, phone: cleanPhone, phoneVerified: true });
+      }
+
+      toast.success('Phone number saved successfully!');
       navigate('/', { replace: true });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'OTP verification failed.');
+      toast.error(error.response?.data?.message || 'Could not save phone number. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background p-4">
-      <section className="w-full max-w-md rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-xl">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <ShieldCheck size={28} />
-        </div>
-        <h1 className="text-2xl font-black text-heading">Complete Your Profile</h1>
-        <p className="mt-2 text-sm font-medium text-muted">Please verify your mobile number to continue.</p>
-        {user?.email && <p className="mt-2 text-xs font-bold text-muted">Signed in as {user.email}</p>}
+    <main className="min-h-screen min-h-[100dvh] flex items-center justify-center bg-[#EDE4DB] dark:bg-[#0D0604] p-3 sm:p-6 lg:p-10">
+      <section className="w-full max-w-md rounded-3xl border border-[#D9C4B2] dark:border-[#4A2B1C]/60 bg-[#FAF5F0] dark:bg-[#1E110B] p-0 shadow-2xl overflow-hidden">
+        {/* Brand Banner (Flush top & sides with rounded bottom & full character visible) */}
+        <div className="relative w-full h-[280px] sm:h-[300px] rounded-b-[32px] overflow-hidden text-white shadow-xl shrink-0">
+          <div className="absolute inset-0 bg-[url('/assets/auth-bg.png')] bg-cover bg-[center_top]"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/10"></div>
 
-        {!otpSent ? (
-          <form className="mt-7 space-y-5" onSubmit={sendOtp}>
-            <label className="block text-xs font-black uppercase tracking-widest text-heading">Mobile number</label>
-            <div className="flex gap-2">
-              <span className="flex items-center rounded-xl border border-input-border bg-muted/10 px-3 font-black text-heading">+91</span>
-              <div className="relative flex-1">
-                <Phone className="pointer-events-none absolute left-3 top-3.5 text-muted" size={18} />
-                <input
-                  autoFocus
-                  inputMode="numeric"
-                  maxLength={10}
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="9876543210"
-                  className="w-full rounded-xl border border-input-border bg-background py-3 pl-10 pr-3 font-bold text-heading outline-none focus:border-primary"
-                />
+          {/* Top Left Circular Back Button */}
+          <Link
+            to="/"
+            className="absolute top-4 left-4 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-all shadow-md"
+          >
+            <ArrowLeft size={20} />
+          </Link>
+
+          {/* Center Logo & Brand Title positioned over chest/cake */}
+          <div className="relative z-10 h-full flex flex-col items-center justify-end pb-4 pt-3 text-center">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-2 sm:p-2.5 shadow-2xl mb-1.5 flex items-center justify-center">
+              <img src={LightLogo} alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            <h2 className="font-black text-white text-xl sm:text-2xl tracking-tight drop-shadow-md">
+              The Chocolate Mine
+            </h2>
+            <p className="text-xs sm:text-sm font-bold text-stone-100 drop-shadow">
+              Join the family
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 sm:p-8">
+          {/* Instructions & User Email */}
+          <div className="text-center mb-5">
+            <h3 className="text-lg sm:text-xl font-black uppercase text-stone-900 dark:text-[#FAF5F0] tracking-tight">
+              Add Phone Number
+            </h3>
+            <p className="text-xs sm:text-sm font-semibold text-stone-600 dark:text-stone-300 mt-1">
+              Please enter your 10-digit Phone Number to continue
+            </p>
+            {user?.email && (
+              <div className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-200/80 dark:bg-stone-800/90 text-xs sm:text-sm font-bold text-stone-700 dark:text-stone-300">
+                <span>Email ID:</span>
+                <strong className="text-[#A67538] dark:text-[#E6B25A]">{user.email}</strong>
+              </div>
+            )}
+          </div>
+
+          {/* Simple Phone Input Form */}
+          <form className="mt-6 space-y-5" onSubmit={handleSavePhone}>
+            <div className="space-y-2">
+              <label className="text-xs sm:text-sm font-black uppercase tracking-wider text-stone-800 dark:text-stone-200 block ml-0.5">
+                Phone Number
+              </label>
+              <div className="flex gap-2.5">
+                <span className="flex items-center justify-center rounded-2xl border border-stone-300 dark:border-[#4A2B1C] bg-white dark:bg-[#120805] px-4 font-black text-stone-800 dark:text-stone-200 text-base shadow-sm">
+                  +91
+                </span>
+                <div className="relative flex-1">
+                  <Phone className="pointer-events-none absolute left-4 top-4 text-stone-400" size={20} />
+                  <input
+                    autoFocus
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="Enter 10-digit phone number"
+                    disabled={loading}
+                    className="w-full h-[54px] bg-white dark:bg-[#120805] border border-stone-300 dark:border-[#4A2B1C] text-stone-900 dark:text-[#FAF5F0] pl-12 pr-4 rounded-2xl outline-none focus:border-[#C89D5A] dark:focus:border-[#E6B25A] focus:ring-4 focus:ring-[#C89D5A]/15 transition-all font-bold text-base shadow-sm placeholder:text-stone-400 dark:placeholder:text-stone-400/90"
+                  />
+                </div>
               </div>
             </div>
-            <button disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-black uppercase tracking-widest text-button-text disabled:opacity-60">
-              {loading && <Loader2 className="animate-spin" size={18} />}
-              Send OTP
+
+            <button
+              type="submit"
+              disabled={loading || phone.replace(/\D/g, '').length !== 10}
+              className="w-full mt-4 h-[54px] sm:h-[56px] rounded-2xl bg-gradient-to-r from-[#D9A35F] to-[#C89D5A] hover:from-[#E6B25A] hover:to-[#D9A35F] text-stone-950 font-black text-sm sm:text-base uppercase tracking-wider shadow-lg hover:shadow-xl hover:shadow-[#C89D5A]/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={21} className="animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <span>Save & Continue</span>
+                  <ArrowRight size={19} />
+                </>
+              )}
             </button>
           </form>
-        ) : (
-          <form className="mt-7 space-y-5" onSubmit={verifyOtp}>
-            <div>
-              <p className="text-xs font-black uppercase tracking-widest text-heading">Enter OTP</p>
-              <p className="mt-1 text-xs font-medium text-muted">Sent to +91 {phone}</p>
-            </div>
-            <div className="flex justify-between gap-2">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(element) => { otpRefs.current[index] = element; }}
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(event) => updateOtp(index, event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Backspace' && !digit && index > 0) otpRefs.current[index - 1]?.focus();
-                  }}
-                  className="h-12 w-11 rounded-xl border border-input-border bg-background text-center text-lg font-black text-heading outline-none focus:border-primary"
-                />
-              ))}
-            </div>
-            <button disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-black uppercase tracking-widest text-button-text disabled:opacity-60">
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-              Verify OTP
-            </button>
-            <button type="button" disabled={loading} onClick={() => setOtpSent(false)} className="w-full text-xs font-black uppercase tracking-widest text-primary">
-              Change mobile number
-            </button>
-          </form>
-        )}
+        </div>
       </section>
     </main>
   );

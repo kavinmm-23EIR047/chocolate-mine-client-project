@@ -14,35 +14,92 @@ const router = express.Router();
 ================================== */
 
 const signupSchema = Joi.object({
-  name: Joi.string().trim().min(2).max(100).required(),
-  email: Joi.string().trim().email().required(),
-  password: Joi.string().min(6).max(100).required(),
-  phone: Joi.string().trim().min(8).max(20).required()
-});
+  name: Joi.string().trim().min(2).max(100).required().messages({
+    'string.empty': 'Name is required.',
+    'any.required': 'Name is required.',
+    'string.min': 'Name must be at least 2 characters.'
+  }),
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  }),
+  password: Joi.string().min(6).max(100).required().messages({
+    'string.empty': 'Password is required.',
+    'any.required': 'Password is required.',
+    'string.min': 'Password must be at least 6 characters.'
+  }),
+  phone: Joi.string().trim().min(8).max(20).required().messages({
+    'string.empty': 'Phone number is required.',
+    'any.required': 'Phone number is required.',
+    'string.min': 'Please enter a valid phone number (at least 8 digits).'
+  })
+}).unknown(true);
 
 const loginSchema = Joi.object({
-  email: Joi.string().trim().email().required(),
-  password: Joi.string().required()
-});
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  }),
+  password: Joi.string().required().messages({
+    'string.empty': 'Password is required.',
+    'any.required': 'Password is required.'
+  })
+}).unknown(true);
 
 const forgotPasswordSchema = Joi.object({
-  email: Joi.string().trim().email().required()
-});
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  })
+}).unknown(true);
 
 const resetPasswordSchema = Joi.object({
-  email: Joi.string().email().required(),
-  otp: Joi.string().required(),
-  password: Joi.string().min(6).max(100).required()
-});
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  }),
+  otp: Joi.string().trim().required().messages({
+    'string.empty': 'OTP is required.',
+    'any.required': 'OTP is required.'
+  }),
+  password: Joi.string().min(6).max(100).required().messages({
+    'string.empty': 'Password is required.',
+    'any.required': 'Password is required.',
+    'string.min': 'Password must be at least 6 characters.'
+  })
+}).unknown(true);
 
 const verifySignupSchema = Joi.object({
-  email: Joi.string().trim().email().required(),
-  otp: Joi.string().required()
-});
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  }),
+  otp: Joi.string().trim().required().messages({
+    'string.empty': 'OTP is required.',
+    'any.required': 'OTP is required.'
+  })
+}).unknown(true);
 
 const resendSignupOtpSchema = Joi.object({
-  email: Joi.string().trim().email().required()
-});
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  })
+}).unknown(true);
+
+const checkEmailSchema = Joi.object({
+  email: Joi.string().trim().email().required().messages({
+    'string.empty': 'Email is required.',
+    'any.required': 'Email is required.',
+    'string.email': 'Please enter a valid email address.'
+  })
+}).unknown(true);
 
 /* ==================================
    AUTH ROUTES
@@ -61,6 +118,14 @@ const otpLimiter = rateLimiter({
   message: 'Too many OTP requests. Please try again later.'
 });
 
+// POST /api/v1/auth/check-email
+router.post('/check-email', authLimiter, validate(checkEmailSchema), authController.checkEmail);
+
+// POST /api/v1/auth/send-signup-otp
+router.post('/send-signup-otp', otpLimiter, validate(checkEmailSchema), authController.sendSignupOtp);
+
+// POST /api/v1/auth/verify-email-otp
+router.post('/verify-email-otp', otpLimiter, validate(verifySignupSchema), authController.verifyEmailOtp);
 
 // POST /api/v1/auth/signup
 router.post('/signup', authLimiter, validate(signupSchema), authController.signup);
@@ -77,6 +142,7 @@ router.post('/login', authLimiter, validate(loginSchema), authController.login);
 
 // POST /api/v1/auth/firebase-login
 router.post('/firebase-login', authLimiter, authController.firebaseLogin);
+router.post('/save-phone', protect, authController.savePhone);
 router.post('/phone-verification/send-otp', protect, otpLimiter, authController.sendPhoneVerificationOtp);
 router.post('/phone-verification/verify-otp', protect, otpLimiter, authController.verifyPhoneVerificationOtp);
 

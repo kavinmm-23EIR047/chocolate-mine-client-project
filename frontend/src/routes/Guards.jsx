@@ -120,6 +120,7 @@ export const GuestRoute = ({ children }) => {
   if (user) {
     if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
     if (user.role === 'staff') return <Navigate to="/staff/dashboard" replace />;
+    if (user.role === 'user' && user.phoneVerified !== true) return <Navigate to="/verify-phone" replace />;
     return <Navigate to="/" replace />;
   }
 

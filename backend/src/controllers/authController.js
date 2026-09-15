@@ -94,38 +94,205 @@ const issueSignupOtp = async (email) => {
   return targetEmail;
 };
 
-// @desc    Normal Signup / Google Signup Completion
+// @desc    Check if email is already registered
+// @route   POST /api/v1/auth/check-email
+exports.checkEmail = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email || !email.trim()) {
+    return next(new AppError('Please provide an email address.', 400, 'VALIDATION_ERROR'));
+  }
+  const targetEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ email: targetEmail }).select('+password');
+
+  if (user) {
+    if (user.provider === 'google') {
+      return res.status(200).json({
+        status: 'success',
+        exists: true,
+        provider: 'google',
+        code: 'GOOGLE_ACCOUNT_DETECTED',
+        message: 'This email is registered with Google. Please use Continue with Google.'
+      });
+    }
+    if (user.isVerified || user.password) {
+      return res.status(200).json({
+        status: 'success',
+        exists: true,
+        provider: 'local',
+        code: 'ACCOUNT_EXISTS',
+        message: 'An account with this email already exists. Please Sign In.'
+      });
+    }
+  }
+
+  return res.status(200).json({
+    status: 'success',
+    exists: false,
+    message: 'Email is available'
+  });
+});
+
+// @desc    Send Signup OTP to email
+// @route   POST /api/v1/auth/send-signup-otp
+exports.sendSignupOtp = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email || !email.trim()) {
+    return next(new AppError('Please provide an email address.', 400, 'VALIDATION_ERROR'));
+  }
+  const targetEmail = email.trim().toLowerCase();
+  const user = await User.findOne({ email: targetEmail }).select('+password');
+
+  if (user) {
+    if (user.provider === 'google') {
+      return next(
+        new AppError(
+          'This email is already registered with Google. Please click "Continue with Google" to sign in.',
+          400,
+          'GOOGLE_ACCOUNT_DETECTED'
+        )
+      );
+    }
+    if (user.isVerified || user.password) {
+      return next(
+        new AppError(
+          'An account with this email already exists. Please sign in instead.',
+          400,
+          'ACCOUNT_EXISTS'
+        )
+      );
+    }
+  }
+
+  await issueSignupOtp(targetEmail);
+  console.log(`[AUTH][SEND_OTP][SUCCESS] email=${targetEmail}`);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'A 6-digit verification code has been sent to your email.'
+  });
+});
+
+// @desc    Verify Email OTP before registration
+// @route   POST /api/v1/auth/verify-email-otp
+exports.verifyEmailOtp = asyncHandler(async (req, res, next) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return next(new AppError('Please provide both email and OTP.', 400, 'VALIDATION_ERROR'));
+  }
+  const targetEmail = email.trim().toLowerCase();
+  
+  const otpSession = await OtpSession.findOne({
+    email: targetEmail,
+    type: 'register',
+    isUsed: false,
+    expiresAt: { $gt: new Date() }
+  }).sort('-createdAt');
+
+  if (!otpSession) {
+    return next(new AppError('The verification code has expired or is invalid. Please request a new one.', 400, 'OTP_EXPIRED'));
+  }
+
+  const isMatch = await bcrypt.compare(otp.trim(), otpSession.hashedOtp);
+  if (!isMatch) {
+    return next(new AppError('Incorrect verification code. Please check and try again.', 400, 'INVALID_OTP'));
+  }
+
+  otpSession.isUsed = true;
+  otpSession.verifiedAt = new Date();
+  await otpSession.save();
+
+  console.log(`[AUTH][VERIFY_EMAIL_OTP][SUCCESS] email=${targetEmail}`);
+  res.status(200).json({
+    status: 'success',
+    message: 'Email verified successfully!',
+    email: targetEmail,
+    verified: true
+  });
+});
+
+// @desc    Password-based User Registration
 // @route   POST /api/v1/auth/signup
 exports.signup = asyncHandler(async (req, res, next) => {
-  const { name, email, password, phone, isGoogle } = req.body;
-  const targetEmail = email.trim().toLowerCase();
+  const { name, email, password, phone, otp } = req.body;
+  const targetEmail = (email || '').trim().toLowerCase();
+  console.log(`[AUTH][SIGNUP][REQUEST] email=${targetEmail}`);
 
   let user = await User.findOne({ email: targetEmail }).select('+password');
 
-  // If user already exists with complete details (both phone & password) and is verified
-  if (user && user.isVerified && user.phone && user.password) {
-    return next(new AppError('An account with this email already exists. Please sign in.', 400));
+  if (user) {
+    // 1. If user previously signed up using Google
+    if (user.provider === 'google') {
+      console.log(`[AUTH][SIGNUP][FAILED] email=${targetEmail} reason=GOOGLE_ACCOUNT_EXISTS`);
+      return next(
+        new AppError(
+          'This email is already registered with Google. Please click "Continue with Google" to sign in.',
+          400,
+          'GOOGLE_ACCOUNT_DETECTED'
+        )
+      );
+    }
+
+    // 2. If user already has a complete/verified password account
+    if (user.isVerified || user.password) {
+      console.log(`[AUTH][SIGNUP][FAILED] email=${targetEmail} reason=ACCOUNT_ALREADY_EXISTS`);
+      return next(
+        new AppError(
+          'An account with this email already exists. Please sign in instead.',
+          400,
+          'ACCOUNT_EXISTS'
+        )
+      );
+    }
+  }
+
+  // Verify email verification session or provided OTP
+  let isEmailVerified = false;
+
+  if (otp) {
+    const otpSession = await OtpSession.findOne({
+      email: targetEmail,
+      type: 'register',
+      $or: [
+        { isUsed: false, expiresAt: { $gt: new Date() } },
+        { isUsed: true, verifiedAt: { $gt: new Date(Date.now() - 30 * 60 * 1000) } }
+      ]
+    }).sort('-createdAt');
+
+    if (otpSession) {
+      if (otpSession.isUsed && otpSession.verifiedAt) {
+        isEmailVerified = true;
+      } else if (await bcrypt.compare(otp.trim(), otpSession.hashedOtp)) {
+        otpSession.isUsed = true;
+        otpSession.verifiedAt = new Date();
+        await otpSession.save();
+        isEmailVerified = true;
+      }
+    }
+  }
+
+  // Check if a recent verified OtpSession exists for this email
+  if (!isEmailVerified) {
+    const recentVerifiedSession = await OtpSession.findOne({
+      email: targetEmail,
+      type: 'register',
+      isUsed: true,
+      verifiedAt: { $gt: new Date(Date.now() - 30 * 60 * 1000) }
+    }).sort('-verifiedAt');
+
+    if (recentVerifiedSession) {
+      isEmailVerified = true;
+    }
   }
 
   if (user) {
-    // User exists (e.g. created via Google without phone/password or unverified local signup)
     user.name = name || user.name;
     user.password = password;
-    user.phone = phone;
-    if (isGoogle) {
-      user.isVerified = true;
-      user.provider = 'google';
-      user.phoneVerified = false;
-    } else {
-      user.phoneVerified = true;
-    }
+    user.phone = phone || user.phone;
+    user.isVerified = isEmailVerified;
+    user.phoneVerified = true;
+    user.provider = 'local';
     await user.save();
-
-    if (isGoogle) {
-      return sendTokenResponse(user, 201, res);
-    }
   } else {
-    // Create new user
     user = await User.create({
       name,
       email: targetEmail,
@@ -133,28 +300,24 @@ exports.signup = asyncHandler(async (req, res, next) => {
       phone,
       role: 'user',
       active: true,
-      isVerified: isGoogle ? true : false,
-      provider: isGoogle ? 'google' : 'local',
-      phoneVerified: !isGoogle
+      isVerified: isEmailVerified,
+      provider: 'local',
+      phoneVerified: true
     });
-
-    if (isGoogle) {
-      try {
-        const notificationManager = require('../services/notificationManager');
-        notificationManager.notifyNewUserRegistration(user).catch(err => console.error('Notification Error:', err));
-      } catch (err) {
-        console.error('Notification Error:', err);
-      }
-      return sendTokenResponse(user, 201, res);
-    }
   }
 
-  await issueSignupOtp(targetEmail);
+  if (isEmailVerified) {
+    console.log(`[AUTH][SIGNUP][SUCCESS] userId=${user._id} email=${targetEmail}`);
+    return sendTokenResponse(user, 201, res);
+  }
 
-  // Respond to frontend for standard local signup
+  // If email was not verified yet, issue OTP and request verification
+  await issueSignupOtp(targetEmail);
+  console.log(`[AUTH][SIGNUP][OTP_ISSUED] email=${targetEmail}`);
+
   res.status(201).json({
     status: 'success',
-    message: 'OTP sent to your email',
+    message: 'A 6-digit verification code has been sent to your email. Please verify to complete registration.',
     requiresOtp: true,
     email: targetEmail
   });
@@ -166,11 +329,11 @@ exports.verifySignup = asyncHandler(async (req, res, next) => {
   const { email, otp } = req.body;
 
   if (!email || !otp) {
-    return next(new AppError('Please provide email and otp', 400));
+    return next(new AppError('Please provide both email and OTP.', 400, 'VALIDATION_ERROR'));
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  console.log(`[Auth] Verifying signup OTP for ${normalizedEmail}`);
+  console.log(`[AUTH][VERIFY_OTP][REQUEST] email=${normalizedEmail}`);
   const mongoSession = await mongoose.startSession();
   let user;
 
@@ -184,11 +347,11 @@ exports.verifySignup = asyncHandler(async (req, res, next) => {
       }).sort('-createdAt').session(mongoSession);
 
       if (!otpSession) {
-        throw new AppError('OTP expired or not found. Please request a new one.', 400);
+        throw new AppError('The verification code has expired or is invalid. Please request a new one.', 400, 'OTP_EXPIRED');
       }
 
       if (!await bcrypt.compare(otp, otpSession.hashedOtp)) {
-        throw new AppError('Invalid OTP. Please try again.', 400);
+        throw new AppError('Incorrect verification code. Please check and try again.', 400, 'INVALID_OTP');
       }
 
       const claimedSession = await OtpSession.findOneAndUpdate(
@@ -198,27 +361,24 @@ exports.verifySignup = asyncHandler(async (req, res, next) => {
       );
 
       if (!claimedSession) {
-        throw new AppError('OTP was already used. Please request a new one.', 400);
+        throw new AppError('This verification code was already used. Please request a new one.', 400, 'OTP_ALREADY_USED');
       }
 
       user = await User.findOneAndUpdate(
-        { email: normalizedEmail, isVerified: { $ne: true } },
-        { $set: { isVerified: true } },
+        { email: normalizedEmail },
+        { $set: { isVerified: true, phoneVerified: true } },
         { new: true, session: mongoSession }
       );
 
       if (!user) {
-        throw new AppError('User not found or already verified', 404);
+        throw new AppError('Account not found. Please sign up again.', 404, 'USER_NOT_FOUND');
       }
     });
   } catch (err) {
     await mongoSession.endSession();
     if (err.isOperational) return next(err);
-    console.error(`[Auth] Failed to persist verification for ${normalizedEmail}:`, err);
-    return res.status(500).json({
-      status: 'fail',
-      message: 'Failed to update verification status. Please try again.'
-    });
+    console.error(`[AUTH][VERIFY_OTP][ERROR] email=${normalizedEmail}:`, err);
+    return next(new AppError('Failed to verify account. Please try again.', 500, 'SERVER_ERROR'));
   }
   await mongoSession.endSession();
 
@@ -229,6 +389,7 @@ exports.verifySignup = asyncHandler(async (req, res, next) => {
     console.error('Notification Error:', err);
   }
 
+  console.log(`[AUTH][VERIFY_OTP][SUCCESS] userId=${user._id} email=${normalizedEmail}`);
   sendTokenResponse(user, 200, res);
 });
 
@@ -238,35 +399,36 @@ exports.resendSignupOtp = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
 
   if (!email) {
-    return next(new AppError('Please provide an email address', 400));
+    return next(new AppError('Please provide an email address.', 400, 'VALIDATION_ERROR'));
   }
 
   const targetEmail = email.trim().toLowerCase();
   const user = await User.findOne({ email: targetEmail });
 
   if (!user) {
-    return next(new AppError('No user found with that email address', 404));
+    return next(new AppError('No account found with that email address.', 404, 'USER_NOT_FOUND'));
   }
 
   if (user.isVerified) {
-    return next(new AppError('Account is already verified. Please login.', 400));
+    return next(new AppError('Your account is already verified. Please log in.', 400, 'ACCOUNT_ALREADY_VERIFIED'));
   }
 
   await issueSignupOtp(targetEmail);
+  console.log(`[AUTH][RESEND_OTP][SUCCESS] email=${targetEmail}`);
 
   res.status(200).json({
     status: 'success',
-    message: 'OTP resent to your email'
+    message: 'A new OTP has been sent to your email.'
   });
 });
 
-// @desc    Normal Login
+// @desc    Password-based User Login
 // @route   POST /api/v1/auth/login
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
+    return next(new AppError('Please provide both email and password.', 400, 'VALIDATION_ERROR'));
   }
 
   const trimmedEmail = email.trim().toLowerCase();
@@ -277,13 +439,13 @@ exports.login = asyncHandler(async (req, res, next) => {
   }).select('+password');
 
   if (!user) {
-    console.log(`❌ Login failed: User not found for ${trimmedEmail}`);
-    return next(new AppError('Invalid email or password', 401));
+    console.log(`[AUTH][LOGIN][FAILED] email=${trimmedEmail} reason=USER_NOT_FOUND`);
+    return next(new AppError('Incorrect email or password. Please try again.', 401, 'INVALID_CREDENTIALS'));
   }
 
-  if (!user.password) {
-    console.log(`❌ Login failed: User ${trimmedEmail} has no password set (likely a Google user)`);
-    return next(new AppError('This account does not have a password. Please login with Google.', 401));
+  if (user.provider === 'google' || !user.password) {
+    console.log(`[AUTH][LOGIN][FAILED] email=${trimmedEmail} reason=GOOGLE_ACCOUNT_DETECTED`);
+    return next(new AppError('This account was created using Google. Please continue with Google Sign-In.', 401, 'GOOGLE_ACCOUNT_DETECTED'));
   }
 
   if (!user.isVerified) {
@@ -292,12 +454,11 @@ exports.login = asyncHandler(async (req, res, next) => {
     } catch (err) {
       return next(err);
     }
-    console.log(`❌ Login failed: User ${trimmedEmail} is not verified`);
-    // We send a specific error format or message so frontend can handle it and redirect to OTP screen if needed,
-    // or just return 403
+    console.log(`[AUTH][LOGIN][OTP_REQUIRED] email=${trimmedEmail}`);
     return res.status(403).json({
       status: 'fail',
-      message: 'Please verify your email first',
+      code: 'EMAIL_NOT_VERIFIED',
+      message: 'Please verify your email before continuing.',
       requiresOtp: true,
       email: trimmedEmail
     });
@@ -325,8 +486,8 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
 
   if (!isCorrect) {
-    console.log(`❌ Login failed: Incorrect password for ${trimmedEmail}`);
-    return next(new AppError('Invalid email or password', 401));
+    console.log(`[AUTH][LOGIN][FAILED] email=${trimmedEmail} reason=INVALID_PASSWORD`);
+    return next(new AppError('Incorrect email or password. Please try again.', 401, 'INVALID_CREDENTIALS'));
   }
 
   user.lastActiveAt = Date.now();
@@ -335,6 +496,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     validateBeforeSave: false
   });
 
+  console.log(`[AUTH][LOGIN][SUCCESS] userId=${user._id} email=${trimmedEmail}`);
   sendTokenResponse(user, 200, res);
 });
 
@@ -404,7 +566,7 @@ exports.firebaseLogin = asyncHandler(async (req, res, next) => {
   const { email, name, avatar } = req.body;
 
   if (!email) {
-    return next(new AppError('Email is required for Firebase Login', 400));
+    return next(new AppError('Google authentication failed. Email was not provided.', 400, 'VALIDATION_ERROR'));
   }
 
   const trimmedEmail = email.trim().toLowerCase();
@@ -427,15 +589,50 @@ exports.firebaseLogin = asyncHandler(async (req, res, next) => {
       user = await User.findOne({ email: trimmedEmail });
     }
   } else {
-    user.provider = 'google';
+    user.provider = user.provider || 'google';
     user.isVerified = true;
     user.lastActiveAt = Date.now();
     await user.save({ validateBeforeSave: false });
   }
 
-  // The customer receives a session so they can complete protected phone OTP
-  // verification. Route and payment guards keep unverified users from normal use.
+  console.log(`[AUTH][GOOGLE_LOGIN][SUCCESS] userId=${user._id} email=${trimmedEmail}`);
   return sendTokenResponse(user, 200, res);
+});
+
+// @desc    Save/Add mobile number for authenticated user (Google Sign-In profile completion)
+// @route   POST /api/v1/auth/save-phone
+exports.savePhone = asyncHandler(async (req, res, next) => {
+  const phone = normalizeIndianPhone(req.body.phone);
+  if (!phone) {
+    return next(new AppError('Please enter a valid 10-digit Indian mobile number.', 400, 'VALIDATION_ERROR'));
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return next(new AppError('User not found.', 404, 'USER_NOT_FOUND'));
+  }
+
+  user.phone = phone;
+  user.phoneVerified = true;
+  await user.save({ validateBeforeSave: false });
+
+  console.log(`[AUTH][SAVE_PHONE][SUCCESS] userId=${user._id} phone=${phone}`);
+  res.status(200).json({
+    status: 'success',
+    message: 'Mobile number added successfully!',
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      phoneNumber: user.phone,
+      phoneVerified: true,
+      isVerified: user.isVerified === true,
+      fcmTokens: user.fcmTokens || [],
+      notificationEnabled: user.notificationEnabled
+    }
+  });
 });
 
 // @desc    Send OTP for the authenticated customer's phone verification

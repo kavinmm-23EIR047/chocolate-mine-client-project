@@ -7,7 +7,7 @@ const handleRefreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return next(new AppError('You are not logged in. Please login to get access.', 401));
+      return next(new AppError('Authentication required. Please log in to continue.', 401, 'AUTH_REQUIRED'));
     }
     
     // Verify refresh token
@@ -15,7 +15,7 @@ const handleRefreshToken = async (req, res, next) => {
     
     const currentUser = await User.findById(decoded.userId);
     if (!currentUser || !currentUser.active) {
-      return next(new AppError('Session expired. Please login again.', 401));
+      return next(new AppError('Session expired. Please log in again.', 401, 'SESSION_EXPIRED'));
     }
 
     // Generate new Access Token
@@ -37,7 +37,7 @@ const handleRefreshToken = async (req, res, next) => {
     req.user = currentUser;
     next();
   } catch (err) {
-    return next(new AppError('Session expired. Please login again.', 401));
+    return next(new AppError('Session expired. Please log in again.', 401, 'SESSION_EXPIRED'));
   }
 };
 
@@ -59,7 +59,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     if (req.cookies && req.cookies.refreshToken) {
       return handleRefreshToken(req, res, next);
     }
-    return next(new AppError('You are not logged in. Please login to get access.', 401));
+    return next(new AppError('Authentication required. Please log in to continue.', 401, 'AUTH_REQUIRED'));
   }
 
   try {
@@ -69,12 +69,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
     // 2. Check if user still exists
     const currentUser = await User.findById(decoded.userId);
     if (!currentUser) {
-      return next(new AppError('The user belonging to this token no longer exists.', 401));
+      return next(new AppError('The account belonging to this session no longer exists.', 401, 'USER_NOT_FOUND'));
     }
 
     // 3. Check if user is active
     if (!currentUser.active) {
-      return next(new AppError('Your account has been deactivated.', 403));
+      return next(new AppError('Your account has been deactivated. Please contact support.', 403, 'ACCOUNT_DEACTIVATED'));
     }
 
     // Grant access
@@ -84,7 +84,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     if (req.cookies && req.cookies.refreshToken) {
       return handleRefreshToken(req, res, next);
     }
-    return next(new AppError('Invalid token. Please login again.', 401));
+    return next(new AppError('Session expired. Please log in again.', 401, 'SESSION_EXPIRED'));
   }
 });
 
@@ -92,7 +92,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(new AppError('You do not have permission to perform this action', 403));
+      return next(new AppError('You do not have permission to access this resource.', 403, 'FORBIDDEN'));
     }
     next();
   };

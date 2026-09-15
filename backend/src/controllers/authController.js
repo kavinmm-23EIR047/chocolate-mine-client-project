@@ -357,7 +357,7 @@ exports.verifySignup = asyncHandler(async (req, res, next) => {
       const claimedSession = await OtpSession.findOneAndUpdate(
         { _id: otpSession._id, isUsed: false },
         { $set: { isUsed: true, verifiedAt: new Date() } },
-        { new: true, session: mongoSession }
+        { returnDocument: 'after', session: mongoSession }
       );
 
       if (!claimedSession) {
@@ -367,7 +367,7 @@ exports.verifySignup = asyncHandler(async (req, res, next) => {
       user = await User.findOneAndUpdate(
         { email: normalizedEmail },
         { $set: { isVerified: true, phoneVerified: true } },
-        { new: true, session: mongoSession }
+        { returnDocument: 'after', session: mongoSession }
       );
 
       if (!user) {

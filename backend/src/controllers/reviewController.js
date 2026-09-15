@@ -202,7 +202,7 @@ exports.approveReview = asyncHandler(async (req, res, next) => {
   const review = await Review.findByIdAndUpdate(
     req.params.id,
     { isApproved: true },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!review) {
@@ -264,7 +264,7 @@ exports.updateReview = asyncHandler(async (req, res, next) => {
   const review = await Review.findByIdAndUpdate(
     req.params.id,
     updateData,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   if (!review) {

@@ -93,7 +93,7 @@ exports.updateFlavor = async (req, res, next) => {
       data.weights = calculateWeights(Number(basePrice));
     }
     const flavor = await CustomCakeFlavor.findByIdAndUpdate(req.params.id, data, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     });
     

@@ -227,7 +227,7 @@ exports.updateFcmToken = asyncHandler(async (req, res, next) => {
     await AdminFcmToken.findOneAndUpdate(
       { token: fcmToken },
       { userId: user._id, deviceName: deviceName || 'Admin Device', createdAt: new Date() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
   } else {
     // Store user FCM tokens (structured)

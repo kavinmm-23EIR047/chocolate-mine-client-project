@@ -25,7 +25,7 @@ exports.createFlavour = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateFlavour = asyncHandler(async (req, res, next) => {
-  const flavour = await CustomCakeFlavor.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const flavour = await CustomCakeFlavor.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after', runValidators: true });
   if (!flavour) return next(new AppError('Flavour not found', 404));
   res.status(200).json({ status: 'success', data: flavour });
 });
@@ -165,7 +165,7 @@ exports.createTheme = asyncHandler(async (req, res, next) => {
 
 exports.updateTheme = asyncHandler(async (req, res, next) => {
   const sanitized = sanitizeThemeData(req.body);
-  const theme = await CustomCakeTheme.findByIdAndUpdate(req.params.id, sanitized, { new: true, runValidators: true });
+  const theme = await CustomCakeTheme.findByIdAndUpdate(req.params.id, sanitized, { returnDocument: 'after', runValidators: true });
   if (!theme) return next(new AppError('Theme not found', 404));
   res.status(200).json({ status: 'success', data: theme });
 });
@@ -377,7 +377,7 @@ exports.updateThemeColorImages = asyncHandler(async (req, res, next) => {
         'colors.$.images': color.images
       }
     },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   const updatedColor = updatedTheme.colors.id(req.params.colorId);
@@ -401,7 +401,7 @@ exports.deleteThemeColorTierImage = asyncHandler(async (req, res, next) => {
   const updatedTheme = await CustomCakeTheme.findOneAndUpdate(
     { _id: id, 'colors._id': colorId },
     { $set: { [`colors.$.images.${tierKey}`]: null } },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   const updatedColor = updatedTheme.colors.id(colorId);
@@ -444,7 +444,7 @@ exports.createColor = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateColor = asyncHandler(async (req, res, next) => {
-  const color = await CustomCakeColor.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  const color = await CustomCakeColor.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after', runValidators: true });
   if (!color) return next(new AppError('Color not found', 404));
   res.status(200).json({ status: 'success', data: color });
 });

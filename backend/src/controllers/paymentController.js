@@ -730,7 +730,7 @@ const reconcilePaidOrder = async ({ order, razorpayPaymentId, razorpaySignature 
   const updatedOrder = await Order.findOneAndUpdate(
     { _id: order._id, paymentStatus: { $ne: 'paid' } },
     { $set: { paymentStatus: 'paid', orderStatus: 'confirmed', razorpayPaymentId, ...(razorpaySignature ? { razorpaySignature } : {}) } },
-    { new: true }
+    { returnDocument: 'after' }
   );
   const finalOrder = updatedOrder || await Order.findById(order._id);
   await Payment.findOneAndUpdate(

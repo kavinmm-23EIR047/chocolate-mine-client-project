@@ -87,7 +87,7 @@ exports.getAddresses = asyncHandler(async (req, res) => {
   res.status(200).json({ status: 'success', data: user.addresses });
 });
 
-// @desc    Add new address
+// @desc    Add new address (with smart deduplication)
 // @route   POST /api/v1/users/addresses
 exports.addAddress = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id);
@@ -99,18 +99,53 @@ exports.addAddress = asyncHandler(async (req, res, next) => {
     isDelivery: true
   });
   
-  const newAddress = {
-    ...req.body,
-    lat: geo.lat ?? req.body.lat ?? null,
-    lng: geo.lng ?? req.body.lng ?? null,
-    isDefault: user.addresses.length === 0 ? true : req.body.isDefault
-  };
+  const targetLat = geo.lat ?? req.body.lat ?? null;
+  const targetLng = geo.lng ?? req.body.lng ?? null;
 
-  if (newAddress.isDefault) {
-    user.addresses.forEach(addr => addr.isDefault = false);
+  const normalized = (v) => String(v || '').trim().toLowerCase();
+
+  // Find if user already has a matching address (by text or within 100 meters)
+  const existingAddress = user.addresses.find(addr => {
+    const isSameText = normalized(addr.street) === normalized(req.body.street) &&
+                       normalized(addr.houseNo) === normalized(req.body.houseNo) &&
+                       normalized(addr.pincode) === normalized(req.body.pincode);
+    
+    let isSameCoords = false;
+    if (addr.lat && addr.lng && targetLat && targetLng) {
+      const distKm = calculateDistanceKm(addr.lat, addr.lng, targetLat, targetLng);
+      isSameCoords = distKm < 0.1; // within 100 meters
+    }
+
+    return isSameText || isSameCoords;
+  });
+
+  if (existingAddress) {
+    // Update existing address instead of creating a duplicate
+    Object.assign(existingAddress, {
+      ...req.body,
+      lat: targetLat,
+      lng: targetLng
+    });
+    if (req.body.isDefault) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+      existingAddress.isDefault = true;
+    }
+  } else {
+    // Add new address
+    const newAddress = {
+      ...req.body,
+      lat: targetLat,
+      lng: targetLng,
+      isDefault: user.addresses.length === 0 ? true : req.body.isDefault
+    };
+
+    if (newAddress.isDefault) {
+      user.addresses.forEach(addr => addr.isDefault = false);
+    }
+
+    user.addresses.push(newAddress);
   }
 
-  user.addresses.push(newAddress);
   await user.save();
 
   res.status(200).json({ status: 'success', data: user.addresses });

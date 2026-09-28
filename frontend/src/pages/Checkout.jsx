@@ -969,13 +969,19 @@ const Checkout = () => {
       lng: deliveryInfo.position.lng,
     };
 
-    const duplicate = savedAddresses.find((address) =>
-      normalized(address.houseNo) === normalized(payload.houseNo) &&
-      normalized(address.street) === normalized(payload.street) &&
-      normalized(address.pincode) === normalized(payload.pincode) &&
-      Number(address.lat) === Number(payload.lat) &&
-      Number(address.lng) === Number(payload.lng)
-    );
+    const duplicate = savedAddresses.find((address) => {
+      const sameText = normalized(address.street) === normalized(payload.street) &&
+                       normalized(address.houseNo) === normalized(payload.houseNo) &&
+                       normalized(address.pincode) === normalized(payload.pincode);
+      
+      let sameCoords = false;
+      if (address.lat && address.lng && payload.lat && payload.lng) {
+        const dLat = Math.abs(Number(address.lat) - Number(payload.lat));
+        const dLng = Math.abs(Number(address.lng) - Number(payload.lng));
+        sameCoords = (dLat < 0.001 && dLng < 0.001); // within ~100m
+      }
+      return sameText || sameCoords;
+    });
 
     if (duplicate) {
       setSelectedAddressId(duplicate._id);

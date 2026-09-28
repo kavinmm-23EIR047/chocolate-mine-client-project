@@ -8,6 +8,7 @@ import { CardSkeleton } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import toast from 'react-hot-toast';
 import MapSelector from '../../components/MapSelector';
+import { isNearShop } from '../../utils/geoUtils';
 
 const AddressManager = () => {
   const [addresses, setAddresses] = useState([]);
@@ -112,6 +113,11 @@ const AddressModal = ({ address, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.lat || !formData.lng || isNearShop(formData.lat, formData.lng)) {
+      toast.error('Please pick your delivery location on the map. Bakery shop location cannot be saved as delivery address.');
+      setShowMap(true);
+      return;
+    }
     try {
       if (address) {
         await api.patch(`/users/addresses/${address._id}`, formData);
@@ -218,9 +224,17 @@ const AddressModal = ({ address, onClose, onSuccess }) => {
                 className="w-full h-full h-[100dvh] max-h-[100dvh] flex flex-col"
               >
                 <MapSelector 
+                  initialPosition={formData.lat && formData.lng ? { lat: formData.lat, lng: formData.lng } : null}
+                  initialPincode={formData.pincode}
                   onClose={() => setShowMap(false)}
                   onSelect={(data) => {
-                    setFormData({ ...formData, lat: data.position.lat, lng: data.position.lng, street: data.address });
+                    setFormData(prev => ({
+                      ...prev,
+                      lat: data.position.lat,
+                      lng: data.position.lng,
+                      street: data.address || prev.street,
+                      pincode: data.pincode || prev.pincode
+                    }));
                     setShowMap(false);
                   }} 
                 />

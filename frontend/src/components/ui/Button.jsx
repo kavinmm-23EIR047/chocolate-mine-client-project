@@ -7,11 +7,14 @@ const variants = {
   secondary: 'bg-button-alt-bg text-button-alt-text border border-border hover:bg-button-alt-hover',
   danger: 'bg-error/10 text-error border border-error/30 hover:bg-error/20',
   success: 'bg-success/10 text-success border border-success/30 hover:bg-success/20',
+  warning: 'bg-amber-600 hover:bg-amber-700 text-white shadow-md active:scale-95 transition-all',
+  amber: 'bg-amber-600 hover:bg-amber-700 text-white shadow-md active:scale-95 transition-all',
   ghost: 'bg-transparent hover:bg-border text-body',
   outline: 'bg-transparent border border-input-border text-body hover:bg-input',
   'primary-outline': 'border-2 border-primary text-primary hover:bg-primary hover:text-button-text transition-all',
   'filter-active': 'bg-primary text-button-text shadow-sm hover:bg-primary-hover',
   'filter-inactive': 'bg-transparent border border-border/50 text-heading/70 hover:border-primary/40 hover:text-heading',
+  raw: '',
 };
 
 const sizes = {

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
+const { resolveDeliveryCoordinates } = require('../utils/geoUtils');
 
 // @desc    Get user profile
 // @route   GET /api/v1/users/profile
@@ -90,9 +91,18 @@ exports.getAddresses = asyncHandler(async (req, res) => {
 // @route   POST /api/v1/users/addresses
 exports.addAddress = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id);
+
+  const geo = resolveDeliveryCoordinates({
+    lat: req.body.lat,
+    lng: req.body.lng,
+    pincode: req.body.pincode,
+    isDelivery: true
+  });
   
   const newAddress = {
     ...req.body,
+    lat: geo.lat ?? req.body.lat ?? null,
+    lng: geo.lng ?? req.body.lng ?? null,
     isDefault: user.addresses.length === 0 ? true : req.body.isDefault
   };
 
@@ -115,7 +125,18 @@ exports.updateAddress = asyncHandler(async (req, res, next) => {
   const address = user.addresses.id(addressId);
   if (!address) return next(new AppError('Address not found', 404));
 
-  Object.assign(address, req.body);
+  const geo = resolveDeliveryCoordinates({
+    lat: req.body.lat ?? address.lat,
+    lng: req.body.lng ?? address.lng,
+    pincode: req.body.pincode ?? address.pincode,
+    isDelivery: true
+  });
+
+  Object.assign(address, {
+    ...req.body,
+    lat: geo.lat ?? req.body.lat ?? address.lat ?? null,
+    lng: geo.lng ?? req.body.lng ?? address.lng ?? null
+  });
 
   if (req.body.isDefault) {
     user.addresses.forEach(addr => {

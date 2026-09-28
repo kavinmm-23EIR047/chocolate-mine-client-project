@@ -50,6 +50,15 @@ import Button from '../components/ui/Button';
 
 import { formatCurrency, getCouponUnitDiscount, normalizeCartCoupon } from '../utils/helpers';
 import {
+  lookupPincode,
+  geocodePincodeOrAddress,
+  isNearShop,
+  calculateDistanceKm,
+  SHOP_LAT,
+  SHOP_LNG,
+  DELIVERY_RADIUS_KM
+} from '../utils/geoUtils';
+import {
   loadCustomCakeRequest,
   formatCustomCakeNotes,
   clearCustomCakeRequest,
@@ -427,6 +436,16 @@ const Checkout = () => {
   const [distance, setDistance] = useState(0);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [locationValid, setLocationValid] = useState(true);
+  const [locationError, setLocationError] = useState('');
+  const [pincodeAreaInfo, setPincodeAreaInfo] = useState(null);
+  const [isResolvingPincode, setIsResolvingPincode] = useState(false);
+  const [deliverySlot, setDeliverySlot] = useState(savedState.deliverySlot || null);
+  const [customCakeRequest, setCustomCakeRequest] = useState(null);
+  const [orderNotesExtra, setOrderNotesExtra] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [backendTotal, setBackendTotal] = useState(null);
+  const [productDescriptions, setProductDescriptions] = useState({});
 
   useEffect(() => {
     if (deliveryInfo && deliveryInfo.position) {
@@ -493,119 +512,6 @@ const Checkout = () => {
     }
   }, [user?.phone]);
 
-  const SHOP_LAT = import.meta.env.VITE_SHOP_LAT || 11.004540031168712;
-  const SHOP_LNG = import.meta.env.VITE_SHOP_LNG || 76.97510955713153;
-  const DELIVERY_RADIUS = import.meta.env.VITE_DELIVERY_RADIUS_KM || 30;
-
-  const [locationValid, setLocationValid] = useState(true);
-  const [locationError, setLocationError] = useState('');
-  const [deliverySlot, setDeliverySlot] = useState(savedState.deliverySlot || null);
-  const [customCakeRequest, setCustomCakeRequest] = useState(null);
-  const [orderNotesExtra, setOrderNotesExtra] = useState('');
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  const [backendTotal, setBackendTotal] = useState(null);
-
-  useEffect(() => {
-    if (deliverySlot) {
-      sessionStorage.setItem(STORAGE_KEYS.DELIVERY_SLOT, deliverySlot);
-    } else {
-      sessionStorage.removeItem(STORAGE_KEYS.DELIVERY_SLOT);
-    }
-  }, [deliverySlot]);
-
-  useEffect(() => {
-    if (localCoupon) {
-      sessionStorage.setItem(STORAGE_KEYS.LOCAL_COUPON, typeof localCoupon === 'object' ? JSON.stringify(localCoupon) : localCoupon);
-    } else {
-      sessionStorage.removeItem(STORAGE_KEYS.LOCAL_COUPON);
-    }
-  }, [localCoupon]);
-
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const isSlotAvailableForDate = (slot, date, now) => {
-    const current = now || new Date();
-    const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const todayDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
-
-    if (selectedDate > todayDate) return true;
-
-    const slotStartMinutes = slot.startHour * 60 + slot.startMinute;
-    const slotEndMinutes = slot.endHour * 60 + slot.endMinute;
-    const currentMinutes = current.getHours() * 60 + current.getMinutes();
-
-    return (slotStartMinutes - currentMinutes >= 120) && (currentMinutes < slotEndMinutes);
-  };
-
-  const getSlotsWithAvailability = () => {
-    return slots.map((slot) => ({
-      ...slot,
-      available: isSlotAvailableForDate(slot, deliveryDate, currentTime),
-    }));
-  };
-
-  const availableSlots = getSlotsWithAvailability();
-  const noSlotsAvailable = availableSlots.every((slot) => !slot.available);
-
-  useEffect(() => {
-    const selectedSlot = availableSlots.find((s) => s.value === deliverySlot && s.available);
-    if (!selectedSlot) {
-      const first = availableSlots.find((s) => s.available);
-      setDeliverySlot(first ? first.value : null);
-    }
-  }, [deliveryDate, currentTime]);
-
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  };
-
-  useEffect(() => {
-    const validate = async () => {
-      if (!deliveryInfo.position || deliveryInfo.position.lat === undefined || deliveryInfo.position.lng === undefined) return;
-      const dist = calculateDistance(
-        SHOP_LAT,
-        SHOP_LNG,
-        deliveryInfo.position.lat,
-        deliveryInfo.position.lng
-      );
-      setDistance(dist);
-      setDeliveryFee(Math.round(dist * 10));
-      if (dist > DELIVERY_RADIUS) {
-        setLocationValid(false);
-        setLocationError('Delivery available only inside Coimbatore service area (within 30km).');
-        return;
-      }
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${deliveryInfo.position.lat}&lon=${deliveryInfo.position.lng}`
-        );
-        const data = await res.json();
-        if (!(data.display_name || '').toLowerCase().includes('coimbatore')) {
-          setLocationValid(false);
-          setLocationError('Delivery available only inside Coimbatore service area.');
-          return;
-        }
-        setLocationValid(true);
-        setLocationError('');
-      } catch {
-        setLocationValid(true);
-      }
-    };
-    validate();
-  }, [deliveryInfo.position]);
-
   const cartItems = useMemo(
     () => (directItem ? [directItem] : cartItemsFromRedux),
     [directItem, cartItemsFromRedux]
@@ -665,8 +571,6 @@ const Checkout = () => {
       setCustomCakeRequest(null);
     }
   }, [cartItems]);
-
-  const [productDescriptions, setProductDescriptions] = useState({});
 
   useEffect(() => {
     const missingIds = cartItems
@@ -782,7 +686,8 @@ const Checkout = () => {
     return s + i.addons.reduce((sum, a) => sum + (Number(a.price || 0) * (a.qty || 1)), 0) * i.qty;
   }, 0);
 
-  const isAddressSelected = !!deliveryInfo.position;
+  const isAddressSelected = subtotal < 300 || (!!deliveryInfo.position && !isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng));
+  const isMapLocationPicked = subtotal < 300 || (!!deliveryInfo.position && !isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng) && locationValid);
   const gst = Math.round((subtotal * 0.05) / 1.05);
   const convenienceFee = Math.round(subtotal * 0.025);
   const clientTotal = subtotal + (isAddressSelected ? deliveryFee : 0) + convenienceFee - couponDiscount;
@@ -811,6 +716,146 @@ const Checkout = () => {
     });
     return coupons;
   }, [cartItems, hasAppliedCoupon]);
+
+  // Auto-resolve coordinates and distance whenever a 6-digit pincode is entered or changed
+  useEffect(() => {
+    const pin = String(addressDetails.pincode || '').trim().replace(/\D/g, '').slice(0, 6);
+    if (pin.length === 6) {
+      let cancelled = false;
+      const resolvePin = async () => {
+        setIsResolvingPincode(true);
+        const match = await geocodePincodeOrAddress(pin, addressDetails.street);
+        if (cancelled) return;
+        setIsResolvingPincode(false);
+        if (match) {
+          setPincodeAreaInfo(match);
+          // If current pin is unset or sitting at the shop (0 km), auto-center coordinates to this pincode
+          const currentIsShop = !deliveryInfo.position || isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng);
+          if (currentIsShop) {
+            setDeliveryInfo({
+              position: { lat: match.lat, lng: match.lng },
+              address: `${match.name}, Coimbatore - ${match.pincode}`,
+              pincode: match.pincode
+            });
+            setDistance(match.distanceKm);
+            setDeliveryFee(match.deliveryFee);
+            setLocationValid(match.isWithinRadius);
+            if (!match.isWithinRadius) {
+              setLocationError('This pincode is outside our 30km delivery service radius in Coimbatore.');
+            } else {
+              setLocationError('');
+            }
+          }
+        } else {
+          setPincodeAreaInfo(null);
+        }
+      };
+      resolvePin();
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      setPincodeAreaInfo(null);
+    }
+  }, [addressDetails.pincode]);
+
+  useEffect(() => {
+    if (deliverySlot) {
+      sessionStorage.setItem(STORAGE_KEYS.DELIVERY_SLOT, deliverySlot);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.DELIVERY_SLOT);
+    }
+  }, [deliverySlot]);
+
+  useEffect(() => {
+    if (localCoupon) {
+      sessionStorage.setItem(STORAGE_KEYS.LOCAL_COUPON, typeof localCoupon === 'object' ? JSON.stringify(localCoupon) : localCoupon);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.LOCAL_COUPON);
+    }
+  }, [localCoupon]);
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const isSlotAvailableForDate = (slot, date, now) => {
+    const current = now || new Date();
+    const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const todayDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+
+    if (selectedDate > todayDate) return true;
+
+    const slotStartMinutes = slot.startHour * 60 + slot.startMinute;
+    const slotEndMinutes = slot.endHour * 60 + slot.endMinute;
+    const currentMinutes = current.getHours() * 60 + current.getMinutes();
+
+    return (slotStartMinutes - currentMinutes >= 120) && (currentMinutes < slotEndMinutes);
+  };
+
+  const getSlotsWithAvailability = () => {
+    return slots.map((slot) => ({
+      ...slot,
+      available: isSlotAvailableForDate(slot, deliveryDate, currentTime),
+    }));
+  };
+
+  const availableSlots = getSlotsWithAvailability();
+  const noSlotsAvailable = availableSlots.every((slot) => !slot.available);
+
+  useEffect(() => {
+    const selectedSlot = availableSlots.find((s) => s.value === deliverySlot && s.available);
+    if (!selectedSlot) {
+      const first = availableSlots.find((s) => s.available);
+      setDeliverySlot(first ? first.value : null);
+    }
+  }, [deliveryDate, currentTime]);
+
+  useEffect(() => {
+    const validate = async () => {
+      if (!deliveryInfo.position || deliveryInfo.position.lat === undefined || deliveryInfo.position.lng === undefined) return;
+      const isShop = isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng);
+      const dist = calculateDistanceKm(
+        SHOP_LAT,
+        SHOP_LNG,
+        deliveryInfo.position.lat,
+        deliveryInfo.position.lng
+      );
+      setDistance(dist);
+      setDeliveryFee(Math.round(dist * 10));
+
+      // Home delivery prevention for shop coordinates (< 400m)
+      if (subtotal >= 300 && isShop) {
+        setLocationValid(false);
+        setLocationError('Shop location cannot be selected for Home Delivery. Please enter your pincode or select your delivery address on map.');
+        return;
+      }
+
+      if (dist > DELIVERY_RADIUS_KM) {
+        setLocationValid(false);
+        setLocationError('Delivery available only inside Coimbatore service area (within 30km).');
+        return;
+      }
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${deliveryInfo.position.lat}&lon=${deliveryInfo.position.lng}`
+        );
+        const data = await res.json();
+        if (!(data.display_name || '').toLowerCase().includes('coimbatore')) {
+          setLocationValid(false);
+          setLocationError('Delivery available only inside Coimbatore service area.');
+          return;
+        }
+        setLocationValid(true);
+        setLocationError('');
+      } catch {
+        setLocationValid(true);
+        setLocationError('');
+      }
+    };
+    validate();
+  }, [deliveryInfo.position, subtotal]);
 
   useEffect(() => {
     if (subtotal < 100) {
@@ -952,7 +997,10 @@ const Checkout = () => {
       if (!addressDetails.street?.trim()) return toast.error('Please enter street address');
       if (!addressDetails.landmark?.trim()) return toast.error('Please enter a landmark');
       if (!/^[0-9]{6}$/.test(addressDetails.pincode || '')) return toast.error('Please enter a valid 6-digit pincode');
-      if (!deliveryInfo.position) return toast.error('Please select delivery location on map');
+      if (!deliveryInfo.position) return toast.error('Please select delivery location on map or enter pincode');
+      if (isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng)) {
+        return toast.error('Shop location cannot be selected for Home Delivery. Please enter your delivery pincode or select your address on the map.');
+      }
       if (!locationValid) return toast.error(locationError || 'Location outside service area');
     }
 
@@ -990,7 +1038,11 @@ const Checkout = () => {
       if (!addressDetails.houseNo?.trim()) { toast.error('Please enter house/flat number'); return false; }
       if (!addressDetails.street?.trim()) { toast.error('Please enter street address'); return false; }
       if (!addressDetails.landmark?.trim()) { toast.error('Please enter a landmark'); return false; }
-      if (!deliveryInfo.position) { toast.error('Please select delivery location on map'); return false; }
+      if (!deliveryInfo.position) { toast.error('Please select delivery location on map or enter pincode'); return false; }
+      if (isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng)) {
+        toast.error('Shop location cannot be selected for Home Delivery. Please enter your delivery pincode or select your address on the map.');
+        return false;
+      }
       if (!locationValid) { toast.error(locationError || 'Location outside service area'); return false; }
     }
     if (!deliverySlot) { toast.error('Please select a delivery slot'); return false; }
@@ -1505,56 +1557,92 @@ const Checkout = () => {
                       )}
 
                       {subtotal >= 300 && (
-                        <div className="p-3.5 sm:p-4 rounded-2xl bg-surface/30 border-2 border-dashed border-border-muted flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                              <MapPin size={20} />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-black text-heading uppercase tracking-widest">Pin Location on Map *</p>
-                              {deliveryInfo.position ? (
-                                <>
-                                  {!locationValid ? (
-                                    <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest mt-0.5 leading-tight">
-                                      {locationError || 'Outside delivery area'}
-                                    </p>
-                                  ) : (
-                                    <>
-                                      <p className="text-[10px] text-heading font-bold uppercase tracking-widest mt-0.5 leading-tight">
-                                        Location Pinned • {distance.toFixed(1)} km • Delivery: {formatCurrency(deliveryFee)}
-                                      </p>
-                                      {deliveryInfo.address && (
-                                        <p className="text-[10px] text-muted font-bold mt-1 leading-snug line-clamp-2">
-                                          {deliveryInfo.address}
-                                        </p>
-                                      )}
-                                    </>
-                                  )}
-                                </>
-                              ) : (
-                                <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5">
-                                  Required for accurate delivery
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                            {deliveryInfo.position && (
+                        <div className="space-y-3">
+                          {isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng) && (
+                            <div className="p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                              <div className="flex items-start gap-3 min-w-0">
+                                <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 shrink-0 mt-0.5">
+                                  <MapPin size={20} />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-black text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400">⚠️ Shop Address Selected</p>
+                                  <p className="text-xs font-bold mt-0.5 leading-snug">
+                                    You have selected our bakery shop address. Delivery cannot be dispatched to the shop. Please change your address or enter your delivery pincode below to proceed.
+                                  </p>
+                                </div>
+                              </div>
                               <Button
-                                onClick={() => setDeliveryInfo({ ...deliveryInfo, position: null })}
-                                className="flex-1 sm:flex-none justify-center bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-500 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2 sm:px-3 py-2 whitespace-nowrap transition-colors"
+                                type="button"
+                                variant="warning"
+                                onClick={() => setShowMap(true)}
+                                className="w-full sm:w-auto px-4 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl shadow-md shrink-0 whitespace-nowrap active:scale-95"
                               >
-                                <Trash2 size={12} className="mr-1 inline" />
-                                Remove
+                                Change Address on Map
                               </Button>
-                            )}
-                            <Button
-                              onClick={() => setShowMap(true)}
-                              className="flex-1 sm:flex-none justify-center bg-primary text-button-text hover:bg-primary/90 text-[10px] sm:text-xs font-black uppercase tracking-widest px-2 sm:px-3 py-2 whitespace-nowrap shadow-md transition-colors"
-                            >
-                              <Navigation size={12} className="mr-1 inline" />
-                              {deliveryInfo.position ? 'Update Map' : 'Select on Map'}
-                            </Button>
+                            </div>
+                          )}
+
+                          <div className="p-3.5 sm:p-4 rounded-2xl bg-surface/30 border-2 border-dashed border-border-muted flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                <MapPin size={20} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-black text-heading uppercase tracking-widest">Pin Location on Map *</p>
+                                {deliveryInfo.position ? (
+                                  <>
+                                    {isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng) ? (
+                                      <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-widest mt-0.5 leading-tight">
+                                        Shop Address Selected (Change required for delivery)
+                                      </p>
+                                    ) : !locationValid ? (
+                                      <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest mt-0.5 leading-tight">
+                                        {locationError || 'Outside delivery area'}
+                                      </p>
+                                    ) : (
+                                      <>
+                                        <p className="text-[10px] text-heading font-bold uppercase tracking-widest mt-0.5 leading-tight">
+                                          Location Pinned • {distance.toFixed(1)} km • Delivery: {formatCurrency(deliveryFee)}
+                                        </p>
+                                        {deliveryInfo.address && (
+                                          <p className="text-[10px] text-muted font-bold mt-1 leading-snug line-clamp-2">
+                                            {deliveryInfo.address}
+                                          </p>
+                                        )}
+                                      </>
+                                    )}
+                                  </>
+                                ) : (
+                                  <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5">
+                                    Required for accurate delivery
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                              {deliveryInfo.position && (
+                                <Button
+                                  type="button"
+                                  variant="danger"
+                                  onClick={() => {
+                                    setDeliveryInfo({ address: null, position: null });
+                                    setAddressDetails(prev => ({ ...prev, street: '', pincode: '', houseNo: '', landmark: '' }));
+                                  }}
+                                  className="flex-1 sm:flex-none justify-center text-[10px] sm:text-xs font-black uppercase tracking-widest px-2.5 sm:px-3 py-2 whitespace-nowrap"
+                                >
+                                  <Trash2 size={12} className="mr-1 inline" />
+                                  Reset
+                                </Button>
+                              )}
+                              <Button
+                                onClick={() => setShowMap(true)}
+                                variant="primary"
+                                className="flex-1 sm:flex-none justify-center text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 sm:px-4 py-2 whitespace-nowrap shadow-md"
+                              >
+                                <Navigation size={12} className="mr-1 inline" />
+                                {deliveryInfo.position ? 'Update Map' : 'Select on Map'}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1596,59 +1684,106 @@ const Checkout = () => {
                         {subtotal >= 300 && (
                           <>
                             <div className="space-y-1.5 sm:space-y-2">
-                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
-                                <Home size={12} /> House / Flat No. *
+                              <label className="flex items-center justify-between text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <span className="flex items-center gap-1.5"><Home size={12} /> House / Door No. *</span>
+                                {!isMapLocationPicked ? (
+                                  <span className="text-[10px] text-amber-600 font-bold">🔒 Pick map first</span>
+                                ) : (
+                                  <span className="text-[10px] text-emerald-600 font-bold">✓ Enabled</span>
+                                )}
                               </label>
                               <input
-                                className="input-field text-sm sm:text-base min-w-0"
-                                placeholder="Apartment, studio…"
+                                className="input-field text-sm sm:text-base min-w-0 disabled:opacity-50 disabled:bg-muted/10 disabled:cursor-not-allowed"
+                                placeholder={isMapLocationPicked ? "Apartment, door no., building name…" : "Pick location on map first"}
                                 value={addressDetails.houseNo}
                                 onChange={(e) => setAddressDetails({ ...addressDetails, houseNo: e.target.value })}
+                                disabled={!isMapLocationPicked}
                                 type="text"
                               />
                             </div>
                             <div className="space-y-1.5 sm:space-y-2">
-                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
-                                <MapPin size={12} /> Street Address *
+                              <label className="flex items-center justify-between text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <span className="flex items-center gap-1.5"><Tag size={12} className="text-muted" /> Landmark *</span>
+                                {!isMapLocationPicked ? (
+                                  <span className="text-[10px] text-amber-600 font-bold">🔒 Pick map first</span>
+                                ) : (
+                                  <span className="text-[10px] text-emerald-600 font-bold">✓ Enabled</span>
+                                )}
                               </label>
                               <input
-                                className="input-field text-sm sm:text-base min-w-0"
-                                placeholder="Street name, area"
-                                value={addressDetails.street}
-                                onChange={(e) => setAddressDetails({ ...addressDetails, street: e.target.value })}
-                                type="text"
-                              />
-                            </div>
-                            <div className="space-y-1.5 sm:space-y-2">
-                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
-                                <Tag size={12} className="text-muted" /> Landmark *
-                              </label>
-                              <input
-                                className="input-field text-sm sm:text-base min-w-0"
-                                placeholder="e.g. Opp. Central Mall"
+                                className="input-field text-sm sm:text-base min-w-0 disabled:opacity-50 disabled:bg-muted/10 disabled:cursor-not-allowed"
+                                placeholder={isMapLocationPicked ? "e.g. Opp. Central Mall / Near Park" : "Pick location on map first"}
                                 value={addressDetails.landmark || ''}
                                 onChange={(e) => setAddressDetails({ ...addressDetails, landmark: e.target.value })}
+                                disabled={!isMapLocationPicked}
                                 type="text"
                               />
                             </div>
                             <div className="space-y-1.5 sm:space-y-2">
-                              <label className="flex items-center gap-1.5 text-xs font-black text-muted uppercase tracking-widest ml-1">
-                                <MapPin size={12} className="text-muted" /> Pincode *
+                              <label className="flex items-center justify-between text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <span className="flex items-center gap-1.5"><MapPin size={12} /> Street / Area (From Map) *</span>
+                                {isMapLocationPicked && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowMap(true)}
+                                    className="text-[10px] text-primary font-bold hover:underline cursor-pointer"
+                                  >
+                                    Change on Map
+                                  </button>
+                                )}
                               </label>
                               <input
-                                className="input-field text-sm sm:text-base min-w-0 font-bold"
-                                placeholder="6-digit Pincode (e.g. 641012)"
-                                value={addressDetails.pincode || ''}
-                                onChange={(e) => setAddressDetails({ ...addressDetails, pincode: e.target.value.replace(/[^0-9]/g, '').slice(0, 6) })}
-                                type="text"
-                                maxLength={6}
+                                className="input-field text-sm sm:text-base min-w-0 bg-muted/10 opacity-90 cursor-not-allowed font-medium"
+                                placeholder={isMapLocationPicked ? "Street address from map" : "Pick location on map to set"}
+                                value={addressDetails.street || (deliveryInfo.address || '')}
+                                disabled
+                                readOnly
                               />
+                            </div>
+                            <div className="space-y-1.5 sm:space-y-2">
+                              <label className="flex items-center justify-between text-xs font-black text-muted uppercase tracking-widest ml-1">
+                                <span className="flex items-center gap-1.5"><MapPin size={12} className="text-muted" /> Pincode (From Map) *</span>
+                                {isMapLocationPicked && (
+                                  <span className="text-[10px] text-emerald-600 font-bold">✓ Verified ({distance.toFixed(1)} km)</span>
+                                )}
+                              </label>
+                              <input
+                                className="input-field text-sm sm:text-base min-w-0 font-bold bg-muted/10 opacity-90 cursor-not-allowed"
+                                placeholder={isMapLocationPicked ? "Pincode from map" : "Set via map location"}
+                                value={addressDetails.pincode || (deliveryInfo.pincode || '')}
+                                disabled
+                                readOnly
+                              />
+                              {isMapLocationPicked && (
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold ml-1 flex items-center gap-1 flex-wrap">
+                                  <span>📍 {distance.toFixed(1)} km from bakery</span>
+                                  <span>•</span>
+                                  <span>Delivery Charge: {formatCurrency(deliveryFee)}</span>
+                                </p>
+                              )}
                             </div>
                           </>
                         )}
                       </div>
 
-                      {locationValid && (deliveryInfo.position || subtotal < 300) && (
+                      {subtotal >= 300 && !isMapLocationPicked ? (
+                        <div className="pt-4 flex flex-col sm:flex-row justify-end items-center gap-3">
+                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                            {isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng)
+                              ? "Shop location cannot be used for delivery. Pick your address on map."
+                              : "Please pick your delivery location on the map to continue."}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="warning"
+                            onClick={() => setShowMap(true)}
+                            className="px-8 w-full sm:w-auto flex items-center justify-center gap-2 shadow-lg"
+                          >
+                            <Navigation size={14} />
+                            <span>{isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng) ? "Change Shop Address on Map" : "Pick Delivery Location on Map"}</span>
+                          </Button>
+                        </div>
+                      ) : isMapLocationPicked ? (
                         <div className="pt-4 flex justify-end gap-3">
                           {subtotal >= 300 && editingAddressId && (
                             <Button onClick={handleUpdateAddress} className="btn-secondary px-6 border-primary/20 text-primary">
@@ -1659,7 +1794,7 @@ const Checkout = () => {
                             {subtotal >= 300 ? 'Deliver Here' : 'Confirm Details'}
                           </Button>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </motion.div>
                 )}
@@ -1995,27 +2130,56 @@ const Checkout = () => {
                 </div>
 
                 <div className="p-4 sm:p-5 pt-0">
-                  <Button
-                    onClick={handlePlaceOrder}
-                    className="w-full h-12 sm:h-14 text-xs sm:text-sm font-black uppercase tracking-widest rounded-2xl"
-                    disabled={
-                      !addressDetails.fullName.trim() ||
-                      !validatePhoneNumber(addressDetails.phone) ||
-                      (subtotal >= 300 && !deliveryInfo.position)
-                    }
-                  >
-                    {subtotal < 300 ? (
-                      <>
-                        <Send size={12} className="mr-1 inline shrink-0" />
-                        <span className="truncate">Order via WhatsApp • {formatCurrency(displayTotal)}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Lock size={12} className="mr-1 inline shrink-0" />
-                        <span className="truncate">{`Pay Securely ${isAddressSelected ? formatCurrency(displayTotal) : ''}`}</span>
-                      </>
-                    )}
-                  </Button>
+                  {subtotal >= 300 && !isMapLocationPicked ? (
+                    <div className="space-y-2">
+                      <Button
+                        type="button"
+                        variant="warning"
+                        onClick={() => {
+                          toast.error(
+                            isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng)
+                              ? 'Shop address selected (₹0 delivery). Please pick your delivery location on the map.'
+                              : 'Please select your delivery location on the map to proceed.'
+                          );
+                          setActiveStep(1);
+                          setShowMap(true);
+                        }}
+                        className="w-full h-12 sm:h-14 text-xs sm:text-sm font-black uppercase tracking-widest rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95"
+                      >
+                        <MapPin size={15} className="shrink-0 animate-pulse" />
+                        <span className="truncate font-black">
+                          {isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng)
+                            ? 'Change Shop Address on Map to Pay'
+                            : 'Pick Location on Map to Pay'}
+                        </span>
+                      </Button>
+                      <p className="text-[11px] font-bold text-center text-amber-600 dark:text-amber-400">
+                        🔒 Delivery location on map required before payment.
+                      </p>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handlePlaceOrder}
+                      className="w-full h-12 sm:h-14 text-xs sm:text-sm font-black uppercase tracking-widest rounded-2xl"
+                      disabled={
+                        !addressDetails.fullName.trim() ||
+                        !validatePhoneNumber(addressDetails.phone) ||
+                        (subtotal >= 300 && (!isMapLocationPicked || !addressDetails.houseNo?.trim() || !addressDetails.landmark?.trim()))
+                      }
+                    >
+                      {subtotal < 300 ? (
+                        <>
+                          <Send size={12} className="mr-1 inline shrink-0" />
+                          <span className="truncate">Order via WhatsApp • {formatCurrency(displayTotal)}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={12} className="mr-1 inline shrink-0" />
+                          <span className="truncate">{`Pay Securely ${isAddressSelected ? formatCurrency(displayTotal) : ''}`}</span>
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </motion.div>
             </div>
@@ -2033,6 +2197,8 @@ const Checkout = () => {
               className="w-full h-full h-[100dvh] max-h-[100dvh] flex flex-col"
             >
               <MapSelector
+                initialPosition={deliveryInfo?.position}
+                initialPincode={addressDetails?.pincode}
                 onClose={() => setShowMap(false)}
                 onSelect={(data) => {
                   setDeliveryInfo(data);

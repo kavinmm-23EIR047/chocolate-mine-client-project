@@ -487,9 +487,17 @@ const AddressModal = ({ address, onClose, onSuccess }) => {
                 className="w-full h-full min-h-screen min-h-[100dvh] max-h-[100dvh] flex flex-col"
               >
                 <MapSelector 
+                  initialPosition={formData.lat && formData.lng ? { lat: formData.lat, lng: formData.lng } : null}
+                  initialPincode={formData.pincode}
                   onClose={() => setShowMap(false)}
                   onSelect={(data) => {
-                    setFormData({ ...formData, lat: data.position.lat, lng: data.position.lng, street: data.address });
+                    setFormData(prev => ({
+                      ...prev,
+                      lat: data.position.lat,
+                      lng: data.position.lng,
+                      street: data.address || prev.street,
+                      pincode: data.pincode || prev.pincode
+                    }));
                     setShowMap(false);
                   }} 
                 />

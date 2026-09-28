@@ -17,8 +17,8 @@ import { formatCurrency } from '../utils/helpers';
 import 'leaflet/dist/leaflet.css';
 
 // --- Configuration & Global Constants ---
-const DEFAULT_SHOP_LAT = parseFloat(import.meta.env.VITE_SHOP_LAT) || 11.0045;
-const DEFAULT_SHOP_LNG = parseFloat(import.meta.env.VITE_SHOP_LNG) || 76.9751;
+const DEFAULT_SHOP_LAT = parseFloat(import.meta.env.VITE_SHOP_LAT) || 11.004451331397814;
+const DEFAULT_SHOP_LNG = parseFloat(import.meta.env.VITE_SHOP_LNG) || 76.97477228939373;
 const SHOP_POS = [DEFAULT_SHOP_LAT, DEFAULT_SHOP_LNG];
 
 // Maps backend string tokens directly to the 3-step visual timeline indices

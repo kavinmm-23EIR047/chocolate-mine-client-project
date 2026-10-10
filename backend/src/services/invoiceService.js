@@ -142,12 +142,12 @@ exports.generateInvoiceBuffer = async (orderId) => {
     const landmark = (order.address && order.address.landmark) || '';
 
     const invoiceDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric'
+      day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata'
     });
 
     const deliveryDate = order.deliveryDate
-      ? new Date(order.deliveryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-      : (order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : 'N/A');
+      ? new Date(order.deliveryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })
+      : (order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A');
 
     const COL_W_GRID = (CONTENT_W - 20) / 2;
     const LEFT_X = MARGIN;

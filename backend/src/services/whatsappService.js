@@ -267,7 +267,7 @@ const sendOrderPlaced = (phone, orderNumber, order = null) => {
       `📞 *Phone:* ${order.address.phone}\n` +
       `🍰 *Items:* ${itemsList}\n` +
       `💰 *Total:* ₹${order.total}\n` +
-      `📅 *Delivery:* ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'} ${order.deliverySlot ? `(${order.deliverySlot})` : ''}\n\n` +
+      `📅 *Delivery:* ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A'} ${order.deliverySlot ? `(${order.deliverySlot})` : ''}\n\n` +
       `Thank you for choosing The Chocolate Mine! 🎉\n` +
       `We'll keep you updated on your order status.`;
     return sendWhatsApp(phone, message, 'user');
@@ -356,9 +356,9 @@ const sendInternalOrderAlert = (to, order) => {
     `📍 *Full Address:* ${address}\n` +
     `🍰 *Ordered Items:*\n${itemsList}\n` +
     `💰 *Total Amount:* ₹${order.total}\n` +
-    `📅 *Delivery Date:* ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'}\n` +
+    `📅 *Delivery Date:* ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A'}\n` +
     `⏰ *Delivery Slot:* ${order.deliverySlot || 'N/A'}\n` +
-    `📅 *Ordered Time:* ${new Date(order.createdAt).toLocaleString()}` +
+    `📅 *Ordered Time:* ${new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}` +
     mapsUrlMsg + `\n\n` +
     `Please check admin dashboard now.`;
   return sendWhatsApp(to, message, 'admin');

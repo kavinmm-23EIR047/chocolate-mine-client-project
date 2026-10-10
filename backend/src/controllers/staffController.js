@@ -407,8 +407,8 @@ exports.printKOT = asyncHandler(async (req, res, next) => {
   doc.text(`KOT No   : ${order.kotNumber || 'N/A'}`);
   doc.text(`Order No : ${order.orderNumber || 'N/A'}`);
   doc.text(`Reprint  : ${order.kotReprintCount || 0}`);
-  doc.text(`Date     : ${new Date(order.createdAt).toLocaleDateString('en-IN')}`);
-  doc.text(`Delivery : ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN') : 'N/A'} (${order.deliverySlot || 'N/A'})`);
+  doc.text(`Date     : ${new Date(order.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
+  doc.text(`Delivery : ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A'} (${order.deliverySlot || 'N/A'})`);
   const customerName = order.address?.fullName || order.customerName || order.userId?.name || 'N/A';
   const customerPhone = order.address?.phone || order.customerPhone || order.userId?.phone || 'N/A';
   doc.text(`Customer : ${customerName} (${customerPhone})`);

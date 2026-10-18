@@ -55,6 +55,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
     token = req.cookies.jwt;
   }
 
+  // 3. Fallback to query param token (e.g. for window.open PDF/KOT print tabs)
+  if (!token && req.query && req.query.token) {
+    token = req.query.token;
+  }
+
   if (!token) {
     if (req.cookies && req.cookies.refreshToken) {
       return handleRefreshToken(req, res, next);

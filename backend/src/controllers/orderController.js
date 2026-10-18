@@ -195,34 +195,40 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
     return next(new AppError('Order not found', 404));
   }
 
-  const allowedStatuses = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
+  const allowedStatuses = ['awaiting_payment', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled', 'failed'];
 
   if (!allowedStatuses.includes(status)) {
     return next(new AppError('Invalid status update', 400));
   }
 
-  // Status transition map
-  const transitions = {
-    confirmed: ['out_for_delivery', 'cancelled'],
-    out_for_delivery: ['delivered', 'cancelled'],
-    delivered: [],
-    cancelled: []
-  };
-
-  const allowed = transitions[order.orderStatus];
-  if (!allowed || !allowed.includes(status)) {
-    return next(new AppError(
-      `Cannot update from "${order.orderStatus}" to "${status}".`,
-      400
-    ));
+  // If order is failed, do not allow any status updates
+  if (order.orderStatus === 'failed' || order.paymentStatus === 'failed') {
+    return next(new AppError('Cannot update status: this order has failed and is closed.', 400));
   }
 
-  // PROTECTION: 'delivered' status requires delivery OTP verification
-  if (status === 'delivered') {
-    const orderWithOtp = await Order.findById(order._id).select('+deliveryOtp');
-    if (!orderWithOtp.deliveryOtpVerified) {
-      return next(new AppError('Delivery OTP must be verified before marking order as delivered. Please use the Send OTP → Verify OTP flow.', 400));
+  // If order is awaiting payment or online payment is pending/not paid, only allow moving to 'failed' or 'cancelled'
+  if (order.orderStatus === 'awaiting_payment' || (order.paymentMethod === 'ONLINE' && order.paymentStatus !== 'paid')) {
+    if (status !== 'failed' && status !== 'cancelled') {
+      return next(new AppError('Cannot activate unpaid order. Only moving to "failed" is allowed for awaiting payment orders.', 400));
     }
+  }
+
+  // If status is 'delivered', automatically mark OTP as verified (OTP concept removed for admin/staff)
+  if (status === 'delivered') {
+    order.deliveryOtpVerified = true;
+    order.deliveryOtpVerifiedAt = new Date();
+  }
+
+  // If status is 'failed' or 'cancelled', update payment status if unpaid
+  if (status === 'failed' || status === 'cancelled') {
+    if (order.paymentStatus === 'pending' || order.paymentStatus === 'created') {
+      order.paymentStatus = 'failed';
+    }
+  }
+
+  // If out_for_delivery, assign staff or admin
+  if (status === 'out_for_delivery' && req.user && !order.assignedStaff) {
+    order.assignedStaff = req.user._id;
   }
 
   order.orderStatus = status;

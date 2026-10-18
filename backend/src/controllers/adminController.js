@@ -163,21 +163,43 @@ exports.getDashboard = asyncHandler(async (req, res) => {
   const Product = require('../models/Product');
   const User = require('../models/User');
   const CustomCakeTheme = require('../models/CustomCakeTheme');
+  const { expireAwaitingPaymentOrders } = require('../services/orderExpiryService');
+
+  // Trigger auto-expiry for any unpaid orders > 30 minutes
+  await expireAwaitingPaymentOrders();
+
+  const successQuery = {
+    $or: [
+      { paymentStatus: 'paid' },
+      { orderStatus: { $in: ['confirmed', 'out_for_delivery', 'delivered'] }, paymentStatus: { $ne: 'failed' } }
+    ]
+  };
+
+  const failedQuery = {
+    $or: [
+      { paymentStatus: 'failed' },
+      { orderStatus: { $in: ['cancelled', 'failed'] } }
+    ]
+  };
 
   const [
     totalOrders,
     confirmedOrders,
     outForDeliveryOrders,
     deliveredOrders,
+    failedOrders,
+    awaitingPaymentOrders,
     totalProducts,
     totalCustomCakes,
     totalUsers,
     revenueStats
   ] = await Promise.all([
-    Order.countDocuments(),
-    Order.countDocuments({ orderStatus: 'confirmed' }),
+    Order.countDocuments(successQuery), // Total orders ONLY counts success orders
+    Order.countDocuments({ orderStatus: 'confirmed', paymentStatus: { $ne: 'failed' } }),
     Order.countDocuments({ orderStatus: 'out_for_delivery' }),
     Order.countDocuments({ orderStatus: 'delivered' }),
+    Order.countDocuments(failedQuery),
+    Order.countDocuments({ orderStatus: 'awaiting_payment', paymentStatus: { $in: ['pending', 'created'] } }),
     Product.countDocuments(),
     CustomCakeTheme.countDocuments().catch(() => 0),
     User.countDocuments({ role: 'user' }),
@@ -192,8 +214,11 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     data: {
       totalOrders,
       confirmedOrders,
+      pendingOrders: confirmedOrders,
       outForDeliveryOrders,
       deliveredOrders,
+      failedOrders,
+      awaitingPaymentOrders,
       totalProducts,
       totalCustomCakes,
       totalUsers,
@@ -591,14 +616,18 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Get All Orders (Admin view-only - no edit buttons)
+// @desc    Get All Orders
 // @route   GET /api/admin/orders
 exports.getAllOrders = asyncHandler(async (req, res) => {
   const Order = require('../models/Order');
-  
+  const { expireAwaitingPaymentOrders } = require('../services/orderExpiryService');
+
+  // Auto-expire unpaid orders > 30 minutes
+  await expireAwaitingPaymentOrders();
+
   const orders = await Order.find()
     .populate('userId', 'name email phone')
-    .populate('assignedStaff', 'name')
+    .populate('assignedStaff', 'name phone')
     .sort('-createdAt');
 
   res.status(200).json({
@@ -608,14 +637,14 @@ exports.getAllOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get Single Order Details (Admin view-only)
+// @desc    Get Single Order Details
 // @route   GET /api/admin/orders/:id
 exports.getOrderDetails = asyncHandler(async (req, res, next) => {
   const Order = require('../models/Order');
   
   const order = await Order.findById(req.params.id)
     .populate('userId', 'name email phone')
-    .populate('assignedStaff', 'name');
+    .populate('assignedStaff', 'name phone');
 
   if (!order) {
     return next(new AppError('Order not found', 404));

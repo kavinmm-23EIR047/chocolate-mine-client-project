@@ -11,6 +11,7 @@ import {
   TrendingUp,
   ArrowUpRight,
   Download,
+  XCircle,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useGoogleReviews } from '../../hooks/useGoogleReviews';
@@ -22,12 +23,13 @@ import SocialMediaDashboard from '../../components/admin/SocialMediaDashboard';
 import toast from 'react-hot-toast';
 
 const statCards = [
-  { key: 'totalOrders', label: 'Total Orders', icon: ShoppingBag, color: 'from-blue-500 to-blue-600' },
+  { key: 'totalOrders', label: 'Success Orders', icon: ShoppingBag, color: 'from-blue-500 to-blue-600' },
   { key: 'revenue', label: 'Revenue', icon: DollarSign, color: 'from-emerald-500 to-emerald-600', isCurrency: true },
-  { key: 'pendingOrders', label: 'Pending', icon: Clock, color: 'from-amber-500 to-amber-600' },
+  { key: 'pendingOrders', label: 'Confirmed / Pending', icon: Clock, color: 'from-amber-500 to-amber-600' },
   { key: 'deliveredOrders', label: 'Delivered', icon: CheckCircle, color: 'from-green-500 to-green-600' },
+  { key: 'failedOrders', label: 'Failed / Cancelled', icon: XCircle, color: 'from-rose-500 to-rose-600' },
   { key: 'totalUsers', label: 'Customers', icon: Users, color: 'from-purple-500 to-purple-600' },
-  { key: 'totalProducts', label: 'Ordinary Products', icon: Package, color: 'from-rose-500 to-rose-600' },
+  { key: 'totalProducts', label: 'Ordinary Products', icon: Package, color: 'from-indigo-500 to-indigo-600' },
   { key: 'totalCustomCakes', label: 'Custom Cakes', icon: Cake, color: 'from-amber-600 to-amber-700' },
 ];
 
@@ -103,7 +105,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-8 gap-4">
         {statCards.map((card, i) => (
           <motion.div
             key={card.key}

@@ -9,6 +9,10 @@ export const initSocket = (dispatch) => {
   socket = io(socketUrl, {
     transports: ['polling', 'websocket'],
     reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 10000,
   });
 
   socket.on('connect', () => {
@@ -22,15 +26,23 @@ export const initSocket = (dispatch) => {
     dispatch(syncCartStock(data));
 
     // 2. Invalidate RTK Query cache for the specific product
-    // This triggers a re-fetch or updates the cache if using cache manipulation
     dispatch(
       apiSlice.util.invalidateTags([{ type: 'Product', id: data.productId }])
     );
   });
 
-  socket.on('disconnect', () => {
-    console.log('📡 Global Socket Disconnected');
+  socket.on('disconnect', (reason) => {
+    console.log('📡 Global Socket Disconnected:', reason);
   });
+
+  // Reconnect automatically when page is restored from Back-Forward Cache (bfcache)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted && socket && !socket.connected) {
+        socket.connect();
+      }
+    });
+  }
 
   return socket;
 };

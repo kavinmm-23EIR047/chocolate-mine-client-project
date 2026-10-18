@@ -30,7 +30,7 @@ const MobileBottomNav = () => {
     { label: 'Profile', icon: User, path: '/account/dashboard' },
   ];
 
-  const hideOn = ['/product', '/checkout', '/login', '/register', '/forgot-password'];
+  const hideOn = ['/product', '/checkout', '/cart', '/login', '/register', '/forgot-password'];
   if (isFooterVisible || hideOn.some((path) => location.pathname.startsWith(path))) return null;
 
   return (

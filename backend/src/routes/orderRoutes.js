@@ -74,9 +74,9 @@ router.post('/:id/delivery-otp/verify', restrictTo('staff', 'admin'), orderContr
 
 /**
  * @route   PATCH /api/v1/orders/:id/status
- * @desc    Update order status (Staff only: confirmed → out_for_delivery → delivered)
- * @access  Staff only (Admin cannot update status)
+ * @desc    Update order status (Staff and Admin: confirmed → out_for_delivery → delivered)
+ * @access  Staff and Admin
  */
-router.patch('/:id/status', restrictTo('staff'), orderController.updateStatus);
+router.patch('/:id/status', restrictTo('staff', 'admin'), orderController.updateStatus);
 
 module.exports = router;

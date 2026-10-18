@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ShoppingBag, Eye, Filter, Download, RefreshCw, Info, Package, ChevronDown, ChevronUp,
+  ShoppingBag, Eye, ChefHat, Filter, Download, RefreshCw, Info, Package, ChevronDown, ChevronUp,
   X, Volume2, VolumeX, Search, MapPin, Truck, CheckCircle2, Phone, Receipt, Navigation, ArrowLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -20,6 +20,7 @@ import Pagination from '../../components/ui/Pagination';
 import useNotificationSound from '../../hooks/useNotificationSound';
 import { isWithinServiceHours, getServiceHoursMessage } from '../../utils/serviceHours';
 import { joinAdminRoom } from '../../sockets/socketManager';
+import OrderStatusDropdown from '../../components/orders/OrderStatusDropdown';
 
 const STATUS_ORDER = ["confirmed", "out_for_delivery", "delivered"];
 
@@ -77,6 +78,16 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
     } catch (err) {
       console.error('Download failed:', err);
       toast.error('Failed to download invoice');
+    }
+  };
+
+  const handleDeliveryStatusUpdate = async (id, status) => {
+    try {
+      await adminService.updateOrderStatus(id, status);
+      toast.success(`Order marked as ${status.replace(/_/g, ' ')}`);
+      await fetchOrder();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update status');
     }
   };
 
@@ -165,9 +176,20 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
           )}
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3 flex-wrap">
+          <div className="min-w-[190px]">
+            <OrderStatusDropdown
+              order={order}
+              onUpdate={handleDeliveryStatusUpdate}
+              onRefresh={fetchOrder}
+              role="admin"
+            />
+          </div>
           <Button icon={RefreshCw} variant="outline" onClick={fetchOrder}>
             Refresh
+          </Button>
+          <Button icon={ChefHat} variant="outline" onClick={() => adminService.printKOT(order._id)}>
+            KOT TICKET
           </Button>
           <Button icon={Download} onClick={handleDownloadInvoice} variant="primary">
             INVOICE
@@ -183,13 +205,21 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
 
           {/* Delivery Timeline */}
           <div className="bg-card p-6 sm:p-8 rounded-3xl border border-border shadow-soft">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
               <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-heading flex items-center gap-2.5">
                 <Truck size={22} className="text-primary" /> Delivery Status Timeline
               </h3>
-              <Badge variant={order.orderStatus === 'delivered' ? 'success' : isCancelled ? 'error' : 'warning'}>
-                {order.orderStatus?.replace(/_/g, ' ')?.toUpperCase()}
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge variant={order.orderStatus === 'delivered' ? 'success' : isCancelled ? 'error' : 'warning'}>
+                  {order.orderStatus?.replace(/_/g, ' ')?.toUpperCase()}
+                </Badge>
+                <OrderStatusDropdown
+                  order={order}
+                  onUpdate={handleDeliveryStatusUpdate}
+                  onRefresh={fetchOrder}
+                  role="admin"
+                />
+              </div>
             </div>
 
             <div className="relative pl-2 sm:pl-4">
@@ -486,9 +516,21 @@ const AdminOrders = () => {
       const res = await adminService.getOrders();
       const rawOrders = res.data?.data?.orders || res.data?.data || (Array.isArray(res.data) ? res.data : []);
 
-      let filtered = statusFilter
-        ? rawOrders.filter(o => o.orderStatus === statusFilter)
-        : rawOrders;
+      let filtered = rawOrders;
+      if (statusFilter === 'success') {
+        filtered = rawOrders.filter(o => 
+          o.paymentStatus === 'paid' || 
+          (['confirmed', 'out_for_delivery', 'delivered'].includes(o.orderStatus) && o.paymentStatus !== 'failed')
+        );
+      } else if (statusFilter === 'failed') {
+        filtered = rawOrders.filter(o => 
+          o.paymentStatus === 'failed' || 
+          o.orderStatus === 'cancelled' || 
+          o.orderStatus === 'failed'
+        );
+      } else if (statusFilter) {
+        filtered = rawOrders.filter(o => o.orderStatus === statusFilter);
+      }
 
       if (orderSearch.trim()) {
         const q = orderSearch.toLowerCase().trim();
@@ -555,7 +597,26 @@ const AdminOrders = () => {
     };
   }, [notificationsMuted, fetchOrders, playSound]);
 
-  const statusOptions = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
+  const statusOptions = [
+    { value: '', label: 'All Orders' },
+    { value: 'success', label: 'Success Orders' },
+    { value: 'failed', label: 'Failed / Cancelled' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'out_for_delivery', label: 'Out for Delivery' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'awaiting_payment', label: 'Awaiting Payment' },
+    { value: 'cancelled', label: 'Cancelled' }
+  ];
+
+  const handleDeliveryStatusUpdate = async (id, status) => {
+    try {
+      await adminService.updateOrderStatus(id, status);
+      toast.success(`Order marked as ${status.replace(/_/g, ' ')}`);
+      await fetchOrders();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update status');
+    }
+  };
 
   const getOrderDisplayId = (order) => {
     if (order.orderNumber) return order.orderNumber;
@@ -574,78 +635,110 @@ const AdminOrders = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-heading">Orders</h2>
-          <p className="text-base text-muted font-medium mt-1">View and monitor customer orders (View Only)</p>
+          <p className="text-base text-muted font-medium mt-1">View and manage customer orders and delivery status</p>
         </div>
         <Button variant="outline" icon={RefreshCw} onClick={fetchOrders}>Refresh</Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Search Bar */}
-        <div className="relative flex-1 sm:min-w-[280px] max-w-sm">
+      {/* Search & Filters Section - Clean Responsive Mobile & Desktop */}
+      <div className="space-y-3">
+        {/* Row 1: Full-Width Search Input */}
+        <div className="relative w-full">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
-            placeholder="Search by name, phone, order #..."
+            placeholder="Search orders by customer name, phone, order #..."
             value={orderSearch}
             onChange={(e) => { setOrderSearch(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-9 py-2.5 bg-card border border-border rounded-xl text-heading text-base outline-none focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-muted"
+            className="w-full pl-10 pr-9 py-3 bg-card border border-border rounded-2xl text-heading text-sm sm:text-base outline-none focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-muted/70 shadow-2xs"
           />
           {orderSearch && (
-            <button onClick={() => setOrderSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading cursor-pointer p-0.5">
+            <button onClick={() => setOrderSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-heading cursor-pointer p-1">
               <X size={16} />
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-2 bg-card border border-border px-4 py-2.5 rounded-xl">
-          <Filter size={18} className="text-muted" />
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="bg-transparent border-none focus:ring-0 text-base font-bold text-heading outline-none cursor-pointer"
-          >
-            <option value="">All Statuses</option>
-            {statusOptions.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ').toUpperCase()}</option>)}
-          </select>
+        {/* Row 2: Smooth Horizontal Scroll Tabs for Quick Filters */}
+        <div className="w-full overflow-x-auto pb-1 pt-0.5 flex items-center gap-2 select-none touch-pan-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {[
+            { key: '', label: 'All Orders' },
+            { key: 'success', label: 'Success Orders' },
+            { key: 'failed', label: 'Failed / Cancelled' },
+            { key: 'confirmed', label: 'Confirmed' },
+            { key: 'out_for_delivery', label: 'Out for Delivery' },
+            { key: 'delivered', label: 'Delivered' }
+          ].map((tab) => {
+            const isActive = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => { setStatusFilter(tab.key); setPage(1); }}
+                className={`shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-black whitespace-nowrap transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-primary text-button-text shadow-sm ring-2 ring-primary/40'
+                    : 'bg-card border border-border text-heading/80 hover:bg-border/20 shadow-2xs'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Notification Sound Controls */}
-        <div className="flex items-center gap-2 bg-card border border-border px-3 py-2 rounded-xl">
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-card-soft/50">
-            <div className={`w-2.5 h-2.5 rounded-full ${serviceHoursInfo?.isWithinHours ? 'bg-success' : 'bg-warning'}`} />
-            <span className="text-sm font-bold text-muted">{getServiceHoursMessage()}</span>
+        {/* Row 3: Status Select Dropdown & Service / Sound Notification Controls */}
+        <div className="flex items-center justify-between gap-2.5 flex-wrap">
+          {/* Detailed Status Filter Dropdown */}
+          <div className="flex items-center gap-2 bg-card border border-border px-3.5 py-2 rounded-xl shadow-2xs flex-1 min-w-[150px] max-w-full sm:max-w-xs">
+            <Filter size={15} className="text-muted shrink-0" />
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+              className="bg-transparent border-none focus:ring-0 text-xs sm:text-sm font-bold text-heading outline-none cursor-pointer w-full"
+            >
+              {statusOptions.map(opt => (
+                <option key={opt.value} value={opt.value} className="bg-card text-heading py-1">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <button
-            onClick={() => {
-              const newMuted = toggleMute();
-              setNotificationsMuted(newMuted);
-              toast.success(newMuted ? '🔇 Notifications Muted' : '🔊 Notifications Enabled', { duration: 2 });
-            }}
-            className={`p-2 rounded-lg transition-all ${notificationsMuted
-              ? 'bg-amber-700 text-white border border-amber-600'
-              : 'bg-emerald-700 text-white border border-emerald-600'
-              }`}
-            title={notificationsMuted ? 'Notifications Muted' : 'Notifications Enabled'}
-          >
-            {notificationsMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
+          {/* Service Hours & Sound Notification Bar */}
+          <div className="flex items-center gap-2 bg-card border border-border p-1.5 rounded-xl shadow-2xs shrink-0">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card-soft/60">
+              <span className={`w-2 h-2 rounded-full ${serviceHoursInfo?.isWithinHours ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span className="text-[11px] sm:text-xs font-bold text-muted">
+                {serviceHoursInfo?.isWithinHours ? 'Service Active' : 'Service Closed'}
+              </span>
+            </div>
 
-          <button
-            onClick={() => {
-              testSounds();
-              toast.success('Testing all notification sounds...', { duration: 2 });
-            }}
-            className="px-3.5 py-2 text-sm font-bold rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
-            title="Test all notification sounds"
-          >
-            🎵 Test
-          </button>
-        </div>
+            <button
+              onClick={() => {
+                const newMuted = toggleMute();
+                setNotificationsMuted(newMuted);
+                toast.success(newMuted ? '🔇 Notifications Muted' : '🔊 Notifications Enabled', { duration: 2 });
+              }}
+              className={`p-1.5 sm:p-2 rounded-lg transition-all ${notificationsMuted
+                ? 'bg-amber-700 text-white'
+                : 'bg-emerald-700 text-white'
+                }`}
+              title={notificationsMuted ? 'Notifications Muted' : 'Notifications Enabled'}
+            >
+              {notificationsMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
 
-        <div className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-black shadow-xs">
-          <Info size={16} className="text-white" />
-          <span>Admin View Only - Status updates disabled</span>
+            <button
+              onClick={() => {
+                testSounds();
+                toast.success('Testing notification sound...', { duration: 2 });
+              }}
+              className="px-2.5 py-1.5 text-xs font-black rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+              title="Test sound notification"
+            >
+              Test
+            </button>
+          </div>
         </div>
       </div>
 
@@ -662,7 +755,7 @@ const AdminOrders = () => {
           {/* Desktop Table */}
           <div className="hidden md:block bg-card border border-border rounded-2xl shadow-soft">
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full min-w-[1100px] whitespace-nowrap">
+              <table className="w-full min-w-[1260px] whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-border bg-border/20">
                     <th className="text-left px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Order ID</th>
@@ -671,8 +764,8 @@ const AdminOrders = () => {
                     <th className="text-left px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Items</th>
                     <th className="text-left px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Amount</th>
                     <th className="text-left px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Payment</th>
-                    <th className="text-left px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Status</th>
-                    <th className="text-right px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Actions</th>
+                    <th className="text-left px-5 py-4 text-xs font-black text-muted uppercase tracking-wider">Status / Action</th>
+                    <th className="text-right px-6 py-4 text-xs font-black text-muted uppercase tracking-wider min-w-[220px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -732,17 +825,30 @@ const AdminOrders = () => {
                           {order.paymentStatus?.toUpperCase()}
                         </Badge>
                       </td>
-                      <td className="px-5 py-4">
-                        <OrderStatusBadge status={order.orderStatus} />
+                      <td className="px-5 py-4 min-w-[200px]" onClick={(e) => e.stopPropagation()}>
+                        <OrderStatusDropdown
+                          order={order}
+                          onUpdate={handleDeliveryStatusUpdate}
+                          onRefresh={fetchOrders}
+                          role="admin"
+                        />
                       </td>
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-6 py-4 text-right min-w-[220px]">
+                        <div className="flex items-center justify-end gap-2 shrink-0 pr-1" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => adminService.printKOT(order._id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black transition-all shadow-xs cursor-pointer shrink-0"
+                            title="Print Kitchen Order Ticket (KOT)"
+                          >
+                            <ChefHat size={14} />
+                            <span>KOT</span>
+                          </button>
                           <button
                             onClick={() => navigate(`/admin/orders/${order._id}`)}
-                            className="p-2.5 bg-heading text-background hover:opacity-90 rounded-xl transition-colors shrink-0 shadow-sm cursor-pointer"
+                            className="p-2 bg-heading text-background hover:opacity-90 rounded-xl transition-all shrink-0 shadow-xs cursor-pointer flex items-center justify-center w-8 h-8"
                             title="View Full Order Details"
                           >
-                            <Eye size={18} />
+                            <Eye size={16} />
                           </button>
 
                           {order.orderStatus === 'delivered' && (
@@ -765,10 +871,11 @@ const AdminOrders = () => {
                                   toast.error('Failed to download invoice');
                                 }
                               }}
-                              className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black transition-all shadow-xs cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black transition-all shadow-xs cursor-pointer shrink-0"
                               title="Download Invoice"
                             >
-                              <Download size={14} /> Invoice
+                              <Download size={14} />
+                              <span>Invoice</span>
                             </button>
                           )}
                         </div>
@@ -780,32 +887,129 @@ const AdminOrders = () => {
             </div>
           </div>
 
-          {/* Mobile Accordion List */}
-          <div className="md:hidden space-y-4">
+          {/* Mobile Accordion List - Crystal Clear Responsive Design */}
+          <div className="md:hidden space-y-3.5">
             {orders.slice((page - 1) * 10, page * 10).map((order) => (
               <div
                 key={`mobile-${order._id}`}
                 onClick={() => navigate(`/admin/orders/${order._id}`)}
-                className="bg-card border border-border rounded-2xl overflow-hidden p-5 space-y-3.5 cursor-pointer hover:bg-border/10 transition-colors shadow-sm"
+                className="bg-card border border-border rounded-2xl overflow-hidden p-4 sm:p-5 space-y-3 cursor-pointer hover:border-primary/50 transition-all shadow-soft"
               >
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-heading text-lg">#{getOrderDisplayId(order)}</span>
+                {/* Header: Order ID & Date/Time & Status Badge */}
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <span className="font-black text-heading text-lg">#{getOrderDisplayId(order)}</span>
+                    <p className="text-[11px] text-muted font-medium mt-0.5">
+                      {new Date(order.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })} • {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
                   <OrderStatusBadge status={order.orderStatus} />
                 </div>
-                <div className="text-sm space-y-1.5">
-                  <p className="font-bold text-heading text-base">{order.address?.fullName || order.user?.name || 'Guest'}</p>
-                  <p className="text-muted">{order.address?.phone || order.user?.email}</p>
-                  <p className="text-primary font-bold text-base mt-1">Total: {formatCurrency(order.total || 0)}</p>
+
+                {/* Customer Details */}
+                <div className="bg-card-soft/40 border border-border/40 rounded-xl p-3 space-y-1">
+                  <p className="font-bold text-heading text-sm sm:text-base">{order.address?.fullName || order.user?.name || 'Guest Customer'}</p>
+                  {order.address?.phone && (
+                    <a
+                      href={`tel:${order.address.phone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline"
+                    >
+                      <Phone size={13} /> {order.address.phone}
+                    </a>
+                  )}
+                  {order.deliveryDate && (
+                    <p className="text-xs text-primary font-bold mt-1">
+                      Deliver: {new Date(order.deliveryDate).toLocaleDateString()} {order.deliverySlot ? `(${order.deliverySlot})` : ''}
+                    </p>
+                  )}
                 </div>
-                <div className="pt-3 border-t border-border/40 flex justify-between items-center text-xs sm:text-sm">
-                  <span className="text-muted font-medium">{new Date(order.createdAt).toLocaleDateString()}</span>
-                  <span className="text-primary font-bold flex items-center gap-1 text-sm">
-                    <Eye size={16} /> View Details ➔
-                  </span>
+
+                {/* Items & Payment Info */}
+                <div className="flex items-center justify-between gap-2 text-xs pt-0.5">
+                  <div className="flex items-center gap-1.5 text-muted truncate max-w-[65%]">
+                    <Package size={14} className="text-muted shrink-0" />
+                    <span className="font-bold text-heading">{order.items?.length || 0} items</span>
+                    {order.items?.[0] && (
+                      <span className="truncate text-muted">({order.items[0].name})</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Badge variant={order.paymentStatus === 'paid' ? 'success' : order.paymentStatus === 'failed' ? 'error' : 'warning'}>
+                      {order.paymentStatus?.toUpperCase()}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Total Price */}
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider">Total Amount</span>
+                  <span className="font-black text-primary text-lg">{formatCurrency(order.total || 0)}</span>
+                </div>
+
+                {/* Order Status Action Dropdown */}
+                <div className="pt-2 border-t border-border/40 space-y-1" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-muted">
+                    <span>Update Status</span>
+                    <span className="text-[10px] text-muted/80 font-normal">Tap to modify</span>
+                  </div>
+                  <OrderStatusDropdown
+                    order={order}
+                    className="w-full"
+                    onUpdate={handleDeliveryStatusUpdate}
+                    onRefresh={fetchOrders}
+                    role="admin"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => adminService.printKOT(order._id)}
+                    className="flex-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    title="Print Kitchen Order Ticket (KOT)"
+                  >
+                    <ChefHat size={14} /> Print KOT
+                  </button>
+
+                  {order.orderStatus === 'delivered' && (
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const res = await adminService.downloadInvoice(order._id);
+                          const url = window.URL.createObjectURL(new Blob([res.data]));
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', `Invoice-${getOrderDisplayId(order)}.pdf`);
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
+                          toast.success('Invoice downloaded');
+                        } catch (err) {
+                          console.error('Download failed:', err);
+                          toast.error('Failed to download invoice');
+                        }
+                      }}
+                      className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      title="Download Invoice"
+                    >
+                      <Download size={14} /> Invoice
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => navigate(`/admin/orders/${order._id}`)}
+                    className="flex-1 py-2 px-3 bg-heading text-background rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <Eye size={14} /> Details
+                  </button>
                 </div>
               </div>
             ))}
           </div>
+        
         </>
       )}
       <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

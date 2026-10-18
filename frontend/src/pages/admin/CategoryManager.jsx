@@ -13,7 +13,7 @@ const CategoryManager = () => {
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ name: '', label: '', categoryType: 'both', subCategories: '', allowCakeMessage: false, imageFile: null });
+  const [form, setForm] = useState({ name: '', label: '', categoryType: 'both', subCategories: '', allowCakeMessage: false, imageFile: null, currentImage: '' });
 
   const fetchCategories = async () => {
     try {
@@ -30,7 +30,7 @@ const CategoryManager = () => {
   useEffect(() => { fetchCategories(); }, []);
 
   const resetForm = () => {
-    setForm({ name: '', label: '', categoryType: 'both', subCategories: '', allowCakeMessage: false, imageFile: null });
+    setForm({ name: '', label: '', categoryType: 'both', subCategories: '', allowCakeMessage: false, imageFile: null, currentImage: '' });
     setEditId(null);
     setShowForm(false);
   };
@@ -38,14 +38,22 @@ const CategoryManager = () => {
   const handleEdit = (cat) => {
     setEditId(cat._id);
     const subStr = Array.isArray(cat.subCategories) ? cat.subCategories.join(', ') : (cat.subCategories || '');
-    setForm({ name: cat.name, label: cat.label || cat.name, categoryType: cat.categoryType || 'both', subCategories: subStr, allowCakeMessage: !!cat.allowCakeMessage, imageFile: null });
+    setForm({ 
+      name: cat.name, 
+      label: cat.label || cat.name, 
+      categoryType: cat.categoryType || 'both', 
+      subCategories: subStr, 
+      allowCakeMessage: !!cat.allowCakeMessage, 
+      imageFile: null,
+      currentImage: cat.image || ''
+    });
     setShowForm(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) return toast.error('Category name is required');
-    if (!editId && !form.imageFile) return toast.error('Image is required');
+    if (!editId && !form.imageFile) return toast.error('Category image is required');
 
     try {
       setSaving(true);
@@ -55,25 +63,35 @@ const CategoryManager = () => {
       fd.append('categoryType', form.categoryType || 'both');
       fd.append('allowCakeMessage', String(form.allowCakeMessage));
       
-      const subList = form.subCategories.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+      const subList = form.subCategories
+        ? form.subCategories.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+        : [];
       fd.append('subCategories', JSON.stringify(subList));
       
       if (form.imageFile) {
-        const imageToUpload = form.imageFile instanceof File ? await compressImage(form.imageFile) : form.imageFile;
+        let imageToUpload = form.imageFile;
+        if (form.imageFile instanceof File) {
+          try {
+            imageToUpload = await compressImage(form.imageFile);
+          } catch (compressErr) {
+            console.warn('Compression skipped, using original file:', compressErr);
+          }
+        }
         fd.append('image', imageToUpload);
       }
 
       if (editId) {
         await adminService.updateCategory(editId, fd);
-        toast.success('Category updated!');
+        toast.success('Category updated successfully!');
       } else {
         await adminService.createCategory(fd);
-        toast.success('Category created!');
+        toast.success('Category created successfully!');
       }
       resetForm();
       fetchCategories();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Save failed');
+      console.error('Category save failed:', err);
+      toast.error(err.response?.data?.message || err.message || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -83,10 +101,10 @@ const CategoryManager = () => {
     if (!window.confirm('Delete this category?')) return;
     try {
       await adminService.deleteCategory(id);
-      toast.success('Category deleted');
+      toast.success('Category deleted successfully');
       fetchCategories();
-    } catch {
-      toast.error('Delete failed');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed');
     }
   };
 
@@ -95,9 +113,10 @@ const CategoryManager = () => {
       const fd = new FormData();
       fd.append('active', String(!cat.active));
       await adminService.updateCategory(cat._id, fd);
+      toast.success(`Category ${!cat.active ? 'activated' : 'deactivated'}`);
       fetchCategories();
-    } catch {
-      toast.error('Update failed');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed');
     }
   };
 
@@ -185,6 +204,7 @@ const CategoryManager = () => {
               </div>
               <ImageUpload
                 label="Category Image"
+                value={form.imageFile || form.currentImage}
                 onChange={(file) => setForm(p => ({ ...p, imageFile: file }))}
               />
               <div className="flex items-center gap-3 pt-2">

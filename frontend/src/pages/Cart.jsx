@@ -180,7 +180,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28 lg:pb-0">
+    <div className="min-h-screen bg-background pb-36 lg:pb-0">
       <div className="bg-navbar text-navbar-text border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-2 text-xs text-muted">
@@ -547,19 +547,22 @@ const Cart = () => {
                     </div>
                   )}
 
-                  <Button 
-                    onClick={() => {
-                      if (subtotal < 300) {
-                        toast.error("Purchase price is not eligible for online delivery (minimum ₹300). Add more items or order via WhatsApp Enquiry.");
-                      } else {
-                        navigate("/checkout");
-                      }
-                    }} 
-                    className="w-full mt-2"
-                  >
-                    PROCEED TO CHECKOUT
-                    <ArrowRight size={16} className="ml-2" />
-                  </Button>
+                  {/* Desktop Only Inline Proceed to Checkout Button */}
+                  <div className="hidden lg:block w-full mt-2">
+                    <Button 
+                      onClick={() => {
+                        if (subtotal < 300) {
+                          toast.error("Purchase price is not eligible for online delivery (minimum ₹300). Add more items or order via WhatsApp Enquiry.");
+                        } else {
+                          navigate("/checkout");
+                        }
+                      }} 
+                      className="w-full flex items-center justify-center"
+                    >
+                      PROCEED TO CHECKOUT
+                      <ArrowRight size={16} className="ml-2" />
+                    </Button>
+                  </div>
 
                   {subtotal < 300 && (
                     <div className="mt-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2.5">
@@ -582,6 +585,70 @@ const Cart = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── MOBILE FLOATING BOTTOM ACTION BAR (PROCEED TO CHECKOUT) ─── */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-card/95 backdrop-blur-md border-t border-border/80 px-3 py-2.5 shadow-2xl transition-all"
+        style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom))" }}
+      >
+        <div className="max-w-lg mx-auto space-y-1.5">
+          {subtotal < 300 && (
+            <div className="flex items-center justify-between px-1 text-[10px] font-bold text-amber-500">
+              <span>⚠️ Min. ₹300 for online delivery</span>
+              <span>Add ₹{300 - subtotal} more</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            {/* Price Preview */}
+            <button
+              type="button"
+              onClick={() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+              }}
+              className="flex flex-col text-left py-1.5 px-3 rounded-xl bg-card-soft border border-border/60 shrink-0 active:scale-95 transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-1 leading-none">
+                <span className="text-[9px] uppercase font-bold text-muted tracking-wider">
+                  {cartItems.reduce((acc, i) => acc + i.qty, 0)} Items
+                </span>
+                <ChevronDown size={10} className="text-muted" />
+              </div>
+              <span className="text-sm font-black text-heading leading-tight tabular-nums mt-0.5">
+                {formatCurrency(subtotal)}
+              </span>
+              {(offerDiscount + couponDiscount) > 0 && (
+                <span className="text-[9px] font-bold text-emerald-500 leading-none">
+                  Saved {formatCurrency(offerDiscount + couponDiscount)}
+                </span>
+              )}
+            </button>
+
+            {/* Proceed to Checkout Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (subtotal < 300) {
+                  toast.error("Purchase price is not eligible for online delivery (minimum ₹300). Add more items or order via WhatsApp Enquiry.");
+                } else {
+                  navigate("/checkout");
+                }
+              }}
+              className={`flex-1 py-3 px-3.5 rounded-xl font-black text-xs sm:text-sm tracking-wide shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                subtotal >= 300
+                  ? "bg-accent hover:bg-accent-hover text-[#1A0C08]"
+                  : "bg-card-soft text-muted border border-border/60"
+              }`}
+            >
+              <ShoppingBag size={14} className="shrink-0" />
+              <span className="truncate">
+                {subtotal >= 300 ? "PROCEED TO CHECKOUT" : "MIN ORDER ₹300"}
+              </span>
+              <ArrowRight size={14} className="shrink-0" />
+            </button>
           </div>
         </div>
       </div>

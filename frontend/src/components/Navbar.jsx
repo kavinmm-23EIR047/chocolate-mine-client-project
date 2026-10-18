@@ -24,13 +24,13 @@ const Navbar = () => {
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
+
   const { location: deliveryCity, setLocation: setDeliveryCity } = useDeliveryLocation();
-  
-  const { data: offerProductsRes } = useGetProductsQuery({ 
-    offers: 'true', 
-    limit: 1, 
-    location: deliveryCity 
+
+  const { data: offerProductsRes } = useGetProductsQuery({
+    offers: 'true',
+    limit: 1,
+    location: deliveryCity
   });
   const hasOffers = offerProductsRes?.data?.length > 0;
 
@@ -104,10 +104,10 @@ const Navbar = () => {
         <div className="responsive-container pb-1 lg:pb-0 relative z-10">
 
           {/* DESKTOP LAYOUT ROW */}
-          <div className="hidden lg:flex items-center justify-between gap-3 py-0.5">
+          <div className="hidden lg:flex items-center justify-between gap-3 pt-3.5 pb-2.5">
             <div className="flex items-center gap-3 shrink-0">
               <Link to="/" className="shrink-0 block select-none group pr-1">
-                <Logo className="w-[110px] sm:w-[130px] lg:w-[140px] h-auto object-contain" />
+                <Logo className="w-[100px] sm:w-[118px] lg:w-[128px] h-auto object-contain" />
               </Link>
 
               <div className="relative shrink-0" ref={locationDropdownRef}>
@@ -215,7 +215,7 @@ const Navbar = () => {
                   </svg>
                 </button>
                 <Link to="/" className="shrink-0 block select-none group pr-0.5 pl-0">
-                  <Logo className="w-[110px] sm:w-[130px] h-auto object-contain" />
+                  <Logo className="w-[100px] sm:w-[118px] h-auto object-contain" />
                 </Link>
               </div>
 
@@ -285,16 +285,16 @@ const Navbar = () => {
         </div>
 
         {/* BOTTOM DESKTOP NAVIGATION LINKS */}
-        <div className="hidden lg:flex items-center justify-start gap-5 xl:gap-7 tv:gap-10 py-0.5 bg-navbar responsive-container relative">
+        <div className="hidden lg:flex items-center justify-start gap-5 xl:gap-7 tv:gap-10 pt-1 pb-2.5 bg-navbar responsive-container relative">
           <MegaMenu />
           <CustomCakeMenu />
           {hasOffers && (
-            <Link to="/shop?offers=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5 flex items-center gap-1">
+            <Link to="/shop?offers=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2 flex items-center gap-1">
               Offer Cakes <span className="text-xs">🔥</span>
             </Link>
           )}
-          <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5">Bestseller</Link>
-          <Link to="/shop?category=special cakes" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-1.5">Special Cakes</Link>
+          <Link to="/shop?bestseller=true" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2">Bestseller</Link>
+          <Link to="/shop?category=special cakes" className="text-sm font-black uppercase tracking-widest text-heading hover:text-primary transition-colors py-2">Special Cakes</Link>
         </div>
       </nav>
 

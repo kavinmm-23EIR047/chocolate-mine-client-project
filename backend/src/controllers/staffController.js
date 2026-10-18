@@ -676,5 +676,57 @@ exports.getInShopOrders = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Update Kitchen / Order Status for Staff (NO OTP Required)
+// @route   PATCH /api/v1/staff/orders/:id/kitchen-status
+exports.updateKitchenStatus = asyncHandler(async (req, res, next) => {
+  const { status } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return next(new AppError('Order not found', 404));
+  }
+
+  const allowedStatuses = ['awaiting_payment', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled', 'failed'];
+  if (!allowedStatuses.includes(status)) {
+    return next(new AppError('Invalid status update', 400));
+  }
+
+  // If order is failed, do not allow any status updates
+  if (order.orderStatus === 'failed' || order.paymentStatus === 'failed') {
+    return next(new AppError('Cannot update status: this order has failed and is closed.', 400));
+  }
+
+  // If order is awaiting payment or online payment is pending/not paid, only allow moving to 'failed' or 'cancelled'
+  if (order.orderStatus === 'awaiting_payment' || (order.paymentMethod === 'ONLINE' && order.paymentStatus !== 'paid')) {
+    if (status !== 'failed' && status !== 'cancelled') {
+      return next(new AppError('Cannot activate unpaid order. Only moving to "failed" is allowed for awaiting payment orders.', 400));
+    }
+  }
+
+  if (status === 'delivered') {
+    order.deliveryOtpVerified = true;
+    order.deliveryOtpVerifiedAt = new Date();
+  }
+
+  if (status === 'out_for_delivery' && req.user && !order.assignedStaff) {
+    order.assignedStaff = req.user._id;
+  }
+
+  order.orderStatus = status;
+  await order.save();
+
+  // Real-time socket emit
+  emitOrderUpdate(order);
+
+  // Trigger Notifications asynchronously
+  const notificationManager = require('../services/notificationManager');
+  notificationManager.handleStatusChange(order, status).catch(console.error);
+
+  res.status(200).json({
+    status: 'success',
+    data: order
+  });
+});
+
 // Export setIo function for server.js
 module.exports.setIo = setIo;

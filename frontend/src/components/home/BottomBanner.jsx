@@ -3,10 +3,9 @@ import { Link } from 'react-router-dom';
 import { Sparkles, ArrowRight, Cake, Star, Leaf } from 'lucide-react';
 import { getOptimizedCloudinaryUrl } from '../../utils/cloudinary';
 
-const BANNER_IMG = getOptimizedCloudinaryUrl(
-  'https://res.cloudinary.com/djkfvoxpx/image/upload/v1784865898/categories/uo822q9gaftknwyldjtg.png',
-  1000
-);
+import bakeryImg from '../../assets/bakery.png';
+
+const BANNER_IMG = bakeryImg;
 
 const BottomBanner = () => (
   <section className="relative w-full rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl group border border-white/10 my-6 sm:my-10">

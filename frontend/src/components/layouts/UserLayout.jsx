@@ -51,6 +51,7 @@ const UserLayout = () => {
 
   const isProductPage = location.pathname.startsWith('/product/');
   const isAuthPage = ['/login', '/register', '/forgot-password', '/verify-otp'].some(path => location.pathname.toLowerCase().startsWith(path));
+  const isCheckoutPage = location.pathname.startsWith('/checkout');
 
   return (
     <>
@@ -64,8 +65,9 @@ const UserLayout = () => {
           <Navbar />
         </header>
 
-        {/* ── RESPONSIVE INFO BANNER (Hidden on mobile for Auth pages) ── */}
-        <div className={`bg-[#4E2820] dark:bg-[#F5EDE8] py-2 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-300 ${isAuthPage ? 'hidden md:block' : 'block'}`}>
+        {/* ── RESPONSIVE INFO BANNER (Hidden on mobile for Auth pages, hidden on Checkout to avoid duplicate banner) ── */}
+        {!isCheckoutPage && (
+          <div className={`bg-[#4E2820] dark:bg-[#F5EDE8] py-2 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-300 ${isAuthPage ? 'hidden md:block' : 'block'}`}>
           {/* DESKTOP/TABLET LAYOUT (md and up) */}
           <div className="hidden md:flex items-center justify-between responsive-container gap-4">
             <div className="flex items-center gap-2.5 shrink-0">
@@ -113,6 +115,7 @@ const UserLayout = () => {
             </div>
           </div>
         </div>
+      )}
 
         <main className={`flex-grow min-w-0 ${isAuthPage ? 'pb-0' : 'pb-24 lg:pb-0'}`}>
           <Outlet />

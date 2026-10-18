@@ -29,10 +29,20 @@ router.get('/export-users', adminController.exportUsers);
 router.get('/dashboard', adminController.getDashboard);
 
 // --- Order Management ---
+const orderController = require('../controllers/orderController');
 router.get('/orders', adminController.getAllOrders);
 router.get('/orders/:id', adminController.getOrderDetails);
+router.patch('/orders/:id/status', orderController.updateStatus);
+router.post('/orders/:id/delivery-otp/send', orderController.sendDeliveryOtp);
+router.post('/orders/:id/delivery-otp/verify', orderController.verifyDeliveryOtp);
 router.get('/orders/:id/invoice', adminController.downloadInvoice);
 router.post('/orders/:id/resend-invoice', adminController.resendInvoice);
+
+// --- KOT Management ---
+const staffController = require('../controllers/staffController');
+router.get('/orders/:id/kot', staffController.getKOTData);
+router.get('/orders/:id/kot/print', staffController.printKOT);
+router.patch('/orders/:id/print-kot', staffController.markKOTPrinted);
 
 // --- Broadcast Notification ---
 // @route   POST /api/admin/broadcast
@@ -48,5 +58,14 @@ router.delete('/reviews/:id', reviewController.deleteReview);
 const socialMediaController = require('../controllers/socialMediaController');
 router.get('/social-media/google', socialMediaController.getGoogleAnalytics);
 router.get('/social-media/instagram', socialMediaController.getInstagramStats);
+
+// --- Category Management (Admin alias) ---
+const categoryController = require('../controllers/categoryController');
+const upload = require('../middleware/upload');
+router.get('/categories', categoryController.getCategories);
+router.post('/categories', upload.single('image'), categoryController.createCategory);
+router.put('/categories/:id', upload.single('image'), categoryController.updateCategory);
+router.patch('/categories/:id', upload.single('image'), categoryController.updateCategory);
+router.delete('/categories/:id', categoryController.deleteCategory);
 
 module.exports = router;

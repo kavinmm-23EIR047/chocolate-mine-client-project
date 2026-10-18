@@ -38,30 +38,28 @@ exports.getCategory = asyncHandler(async (req, res, next) => {
 
 // POST /api/v1/categories
 exports.createCategory = asyncHandler(async (req, res, next) => {
-  console.log('Create category request received');
-  console.log('Body:', req.body);
-  console.log('File:', req.file);
-  
   const { name, label, subCategories, categoryType, allowCakeMessage } = req.body;
   
-  if (!name) {
+  if (!name || !name.trim()) {
     return next(new AppError('Category name is required', 400));
+  }
+
+  const cleanName = name.trim().toLowerCase();
+
+  // Check if category already exists
+  const existingCategory = await Category.findOne({ name: cleanName });
+  if (existingCategory) {
+    return next(new AppError('Category already exists', 400));
   }
 
   let imageUrl = null;
   let imagePublicId = null;
 
-  // Check if category already exists
-  const existingCategory = await Category.findOne({ name: name.trim().toLowerCase() });
-  if (existingCategory) {
-    return next(new AppError('Category already exists', 400));
-  }
-
   // Handle image upload from file
   if (req.file) {
     try {
       const b64 = Buffer.from(req.file.buffer).toString('base64');
-      const dataUri = `data:${req.file.mimetype};base64,${b64}`;
+      const dataUri = `data:${req.file.mimetype || 'image/jpeg'};base64,${b64}`;
       const uploaded = await cloudinaryService.uploadImage(dataUri, 'categories');
       if (!uploaded) {
         return next(new AppError('Image upload failed', 500));
@@ -73,15 +71,19 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
       return next(new AppError('Failed to upload image: ' + error.message, 500));
     }
   } 
-  // Handle image upload from base64 string
+  // Handle image upload from URL or base64 string
   else if (req.body.image) {
     try {
-      const uploaded = await cloudinaryService.uploadImage(req.body.image, 'categories');
-      if (!uploaded) {
-        return next(new AppError('Image upload failed', 500));
+      if (typeof req.body.image === 'string' && req.body.image.startsWith('http')) {
+        imageUrl = req.body.image;
+      } else {
+        const uploaded = await cloudinaryService.uploadImage(req.body.image, 'categories');
+        if (!uploaded) {
+          return next(new AppError('Image upload failed', 500));
+        }
+        imageUrl = uploaded.secure_url;
+        imagePublicId = uploaded.public_id;
       }
-      imageUrl = uploaded.secure_url;
-      imagePublicId = uploaded.public_id;
     } catch (error) {
       console.error('Image upload error:', error);
       return next(new AppError('Failed to upload image: ' + error.message, 500));
@@ -91,11 +93,25 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
     return next(new AppError('Category image is required', 400));
   }
 
+  let parsedSubCategories = [];
+  if (subCategories) {
+    if (Array.isArray(subCategories)) {
+      parsedSubCategories = subCategories;
+    } else if (typeof subCategories === 'string') {
+      try {
+        const parsed = JSON.parse(subCategories);
+        parsedSubCategories = Array.isArray(parsed) ? parsed : [parsed];
+      } catch (e) {
+        parsedSubCategories = subCategories.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    }
+  }
+
   const category = await Category.create({
-    name: name.trim().toLowerCase(),
-    label: label || name.trim(),
+    name: cleanName,
+    label: label?.trim() || cleanName,
     categoryType: categoryType || 'both',
-    subCategories: subCategories ? (Array.isArray(subCategories) ? subCategories : JSON.parse(subCategories)).map(s => s.trim().toLowerCase()) : [],
+    subCategories: parsedSubCategories.map(s => String(s).trim().toLowerCase()),
     allowCakeMessage: allowCakeMessage === 'true' || allowCakeMessage === true,
     image: imageUrl,
     imagePublicId: imagePublicId
@@ -129,28 +145,63 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     category.name = newName;
 
     // Synchronize all product documents to the new category name
-    await Product.updateMany(
-      { category: oldName },
-      { $set: { "category.$": newName } }
-    );
+    try {
+      await Product.updateMany(
+        { category: oldName },
+        { $set: { "category.$": newName } }
+      );
+    } catch (e) {
+      console.warn('Product category array update fallback:', e.message);
+      try {
+        await Product.updateMany({ category: oldName }, { category: [newName] });
+      } catch (err) {}
+    }
   }
   
-  if (label !== undefined) category.label = label;
+  if (label !== undefined) category.label = label.trim();
   if (categoryType !== undefined) category.categoryType = categoryType;
   if (active !== undefined) category.active = active === 'true' || active === true;
   if (allowCakeMessage !== undefined) category.allowCakeMessage = allowCakeMessage === 'true' || allowCakeMessage === true;
-  if (subCategories !== undefined) category.subCategories = (Array.isArray(subCategories) ? subCategories : JSON.parse(subCategories)).map(s => s.trim().toLowerCase());
+
+  if (subCategories !== undefined) {
+    let parsedSubCategories = [];
+    if (Array.isArray(subCategories)) {
+      parsedSubCategories = subCategories;
+    } else if (typeof subCategories === 'string') {
+      try {
+        const parsed = JSON.parse(subCategories);
+        parsedSubCategories = Array.isArray(parsed) ? parsed : [parsed];
+      } catch (e) {
+        parsedSubCategories = subCategories.split(',').map(s => s.trim()).filter(Boolean);
+      }
+    }
+    category.subCategories = parsedSubCategories.map(s => String(s).trim().toLowerCase());
+  }
 
   if (req.file) {
     try {
       if (category.imagePublicId) {
-        await cloudinaryService.deleteImage(category.imagePublicId);
+        await cloudinaryService.deleteImage(category.imagePublicId).catch(() => {});
       }
       
       const b64 = Buffer.from(req.file.buffer).toString('base64');
-      const dataUri = `data:${req.file.mimetype};base64,${b64}`;
+      const dataUri = `data:${req.file.mimetype || 'image/jpeg'};base64,${b64}`;
       const uploaded = await cloudinaryService.uploadImage(dataUri, 'categories');
       
+      if (uploaded) {
+        category.image = uploaded.secure_url;
+        category.imagePublicId = uploaded.public_id;
+      }
+    } catch (error) {
+      console.error('Image update error:', error);
+      return next(new AppError('Failed to update image: ' + error.message, 500));
+    }
+  } else if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
+    try {
+      if (category.imagePublicId) {
+        await cloudinaryService.deleteImage(category.imagePublicId).catch(() => {});
+      }
+      const uploaded = await cloudinaryService.uploadImage(req.body.image, 'categories');
       if (uploaded) {
         category.image = uploaded.secure_url;
         category.imagePublicId = uploaded.public_id;
@@ -177,13 +228,14 @@ exports.deleteCategory = asyncHandler(async (req, res, next) => {
   }
   
   if (category.imagePublicId) {
-    await cloudinaryService.deleteImage(category.imagePublicId);
+    await cloudinaryService.deleteImage(category.imagePublicId).catch(() => {});
   }
   
   await category.deleteOne();
   
-  res.status(204).json({ 
+  res.status(200).json({ 
     status: 'success', 
+    message: 'Category deleted successfully',
     data: null 
   });
 });

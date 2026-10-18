@@ -13,7 +13,9 @@ const storage = multer.memoryStorage();
  * File filter to allow only images
  */
 const fileFilter = (req, file, cb) => {
-  if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+  const allowed = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'];
+  const ext = (file.originalname || '').split('.').pop()?.toLowerCase();
+  if (allowed.includes((file.mimetype || '').toLowerCase()) || ['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
     cb(null, true);
   } else {
     cb(new AppError('Not an image! Please upload only images (jpg, jpeg, png, webp).', 400), false);
@@ -25,7 +27,7 @@ const upload = multer({
   fileFilter: fileFilter,
   limits: {
     // Optimized browser uploads should be small; retain headroom for valid PNGs.
-    fileSize: 2 * 1024 * 1024,
+    fileSize: 10 * 1024 * 1024,
     files: 20
   }
 });

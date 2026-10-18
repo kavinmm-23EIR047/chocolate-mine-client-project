@@ -38,6 +38,12 @@ const adminService = {
   updateOrderStatus: (id, status) =>
     api.patch(`/admin/orders/${id}/status`, { status }),
 
+  sendDeliveryOtp: (orderId, channel = 'both') =>
+    api.post(`/orders/${orderId}/delivery-otp/send`, { channel }),
+
+  verifyDeliveryOtp: (orderId, otp) =>
+    api.post(`/orders/${orderId}/delivery-otp/verify`, { otp }),
+
   downloadInvoice: (id) =>
     api.get(`/admin/orders/${id}/invoice`, {
       responseType: 'blob',
@@ -48,6 +54,19 @@ const adminService = {
 
   resendInvoice: (id) =>
     api.post(`/admin/orders/${id}/resend-invoice`),
+
+  /* ----------------------------------------
+     KOT (Kitchen Order Ticket)
+  ---------------------------------------- */
+  getKOTData: (id) => api.get(`/admin/orders/${id}/kot`),
+  printKOT: (id) => {
+    const rawUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
+    const baseUrl = rawUrl.replace(/\/api\/v\d+.*$/, '');
+    const token = localStorage.getItem('token') || '';
+    const url = `${baseUrl}/api/v1/admin/orders/${id}/kot/print${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+    window.open(url, '_blank');
+  },
+  markKOTPrinted: (id) => api.patch(`/admin/orders/${id}/print-kot`),
 
   /* ----------------------------------------
      Category Management

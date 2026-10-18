@@ -7,7 +7,14 @@ export const MAX_IMAGE_DIMENSION = 2600;
 export const MAX_OPTIMIZED_BYTES = 1.9 * 1024 * 1024;
 export const TARGET_OPTIMIZED_BYTES = 1.5 * 1024 * 1024;
 
-const SUPPORTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const SUPPORTED_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/pjpeg',
+  'image/png',
+  'image/x-png',
+  'image/webp'
+]);
 
 const loadImage = (file) => new Promise((resolve, reject) => {
   const objectUrl = URL.createObjectURL(file);
@@ -29,7 +36,7 @@ export const getImageDimensions = async (file) => {
 };
 
 const hasTransparency = async (file, dimensions) => {
-  if (file.type !== 'image/png') return false;
+  if (file.type !== 'image/png' && file.type !== 'image/x-png') return false;
 
   const image = await loadImage(file);
   const scale = Math.min(1, 256 / Math.max(dimensions.width, dimensions.height));
@@ -55,42 +62,51 @@ const optimize = (file, fileType, quality, maxSizeMB) => imageCompression(file, 
 });
 
 /**
- * Compress a locally selected product image before it reaches the API.
- * The original is retained only when it already meets the storage rules.
+ * Compress a locally selected product/category image before it reaches the API.
+ * Safely falls back to the original file if compression is unsupported or fails.
  */
 export const compressImage = async (file) => {
-  if (!(file instanceof File)) throw new Error('Please select an image file.');
-  if (!SUPPORTED_TYPES.has(file.type)) {
-    throw new Error('Unsupported image format. Please use JPG, PNG, or WebP.');
+  if (!(file instanceof File)) return file;
+
+  const ext = (file.name || '').split('.').pop()?.toLowerCase();
+  const isImageByExt = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
+
+  if (!SUPPORTED_TYPES.has(file.type) && !isImageByExt) {
+    return file;
   }
 
-  const dimensions = await getImageDimensions(file);
-  if (!dimensions.width || !dimensions.height) throw new Error('The image has invalid dimensions.');
+  try {
+    const dimensions = await getImageDimensions(file);
+    if (!dimensions.width || !dimensions.height) return file;
 
-  const preserveTransparency = await hasTransparency(file, dimensions);
-  const alreadyOptimized = file.size <= TARGET_OPTIMIZED_BYTES &&
-    file.type === 'image/webp' &&
-    dimensions.width <= MAX_IMAGE_DIMENSION &&
-    dimensions.height <= MAX_IMAGE_DIMENSION;
+    const preserveTransparency = await hasTransparency(file, dimensions);
+    const alreadyOptimized = file.size <= TARGET_OPTIMIZED_BYTES &&
+      file.type === 'image/webp' &&
+      dimensions.width <= MAX_IMAGE_DIMENSION &&
+      dimensions.height <= MAX_IMAGE_DIMENSION;
 
-  if (alreadyOptimized) return file;
+    if (alreadyOptimized) return file;
 
-  const outputType = preserveTransparency ? 'image/png' : 'image/webp';
-  let compressed = await optimize(file, outputType, 0.94, 1.9);
-  if (compressed.size > MAX_OPTIMIZED_BYTES) {
-    compressed = await optimize(file, outputType, 0.89, 1.9);
+    const outputType = preserveTransparency ? 'image/png' : 'image/webp';
+    let compressed = await optimize(file, outputType, 0.94, 1.9);
+    if (compressed.size > MAX_OPTIMIZED_BYTES) {
+      compressed = await optimize(file, outputType, 0.89, 1.9);
+    }
+
+    if (compressed.size > MAX_OPTIMIZED_BYTES) {
+      return file;
+    }
+
+    const outExt = outputType === 'image/png' ? 'png' : 'webp';
+    const baseName = file.name.replace(/\.[^/.]+$/, '') || 'upload-image';
+    return new File([compressed], `${baseName}.${outExt}`, {
+      type: outputType,
+      lastModified: Date.now(),
+    });
+  } catch (err) {
+    console.warn('Image compression fallback to original file:', err);
+    return file;
   }
-
-  if (compressed.size > MAX_OPTIMIZED_BYTES) {
-    throw new Error('This image is larger than 1.9 MB after quality optimization. Please choose a smaller source image.');
-  }
-
-  const extension = outputType === 'image/png' ? 'png' : 'webp';
-  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'product-image';
-  return new File([compressed], `${baseName}.${extension}`, {
-    type: outputType,
-    lastModified: Date.now(),
-  });
 };
 
 export default compressImage;

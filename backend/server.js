@@ -245,6 +245,9 @@ server.listen(PORT, () => {
   // Initialize scheduled jobs for Google Reviews
   require('./src/jobs/googleReviewsSyncJob').initScheduledJobs();
 
+  // Initialize auto-expiry for unpaid orders (older than 30 mins)
+  require('./src/services/orderExpiryService').startOrderExpiryJob();
+
   // 🚀 Render Free-Tier Keep-Alive Self-Ping (pings every 10 minutes to prevent sleep)
   const selfUrl = process.env.RENDER_EXTERNAL_URL || process.env.BACKEND_URL;
   if (selfUrl) {

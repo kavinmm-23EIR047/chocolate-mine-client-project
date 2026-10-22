@@ -6,9 +6,19 @@ const cloudinaryService = require('../services/cloudinaryService');
 // POST /api/v1/banners - Create Banner
 exports.createBanner = asyncHandler(async (req, res, next) => {
   const { title, link, bannerType, displayOrder, isActive } = req.body;
+  const requestedType = bannerType || 'home';
   
   if (!title) {
     return next(new AppError('Banner title is required', 400));
+  }
+  if (!['home', 'popup'].includes(requestedType)) {
+    return next(new AppError('Banner type must be Home Slider or Popup Banner', 400));
+  }
+  if (requestedType === 'popup' && !link?.trim()) {
+    return next(new AppError('A redirect link is required for the popup View Offer button', 400));
+  }
+  if (requestedType === 'popup' && await Banner.exists({ bannerType: 'popup' })) {
+    return next(new AppError('Only one popup banner is allowed. Edit the existing popup instead.', 409));
   }
 
   let imageUrl = null;
@@ -53,7 +63,7 @@ exports.createBanner = asyncHandler(async (req, res, next) => {
     image: imageUrl,
     imagePublicId,
     link,
-    bannerType: bannerType || 'home',
+    bannerType: requestedType,
     displayOrder: displayOrder || 0,
     isActive: isActive !== undefined ? isActive : true
   });
@@ -94,6 +104,16 @@ exports.updateBanner = asyncHandler(async (req, res, next) => {
   }
 
   const { title, link, bannerType, displayOrder, isActive } = req.body;
+
+  if (bannerType && !['home', 'popup'].includes(bannerType)) {
+    return next(new AppError('Banner type must be Home Slider or Popup Banner', 400));
+  }
+  if (bannerType === 'popup' && !(link ?? banner.link)?.trim()) {
+    return next(new AppError('A redirect link is required for the popup View Offer button', 400));
+  }
+  if (bannerType === 'popup' && await Banner.exists({ bannerType: 'popup', _id: { $ne: banner._id } })) {
+    return next(new AppError('Only one popup banner is allowed. Edit the existing popup instead.', 409));
+  }
   
   if (title) banner.title = title;
   if (link !== undefined) banner.link = link;

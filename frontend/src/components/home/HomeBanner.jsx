@@ -31,7 +31,7 @@ const getActiveBanners = async () => {
 
 const HomeBanner = () => {
   const hasCachedBanners = Boolean(bannerCache);
-  const cachedBanners = bannerCache?.data || [];
+  const cachedBanners = (bannerCache?.data || []).filter((banner) => banner.bannerType === 'home');
   const [banners, setBanners] = useState(cachedBanners);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(!hasCachedBanners);
@@ -47,7 +47,7 @@ const HomeBanner = () => {
         // Cached banners render immediately. Revalidate in the background so
         // newly changed admin banners appear without a visible reload.
         if (!bannerCache) setLoading(true);
-        const activeBanners = await getActiveBanners();
+        const activeBanners = (await getActiveBanners()).filter((banner) => banner.bannerType === 'home');
         if (cancelled) return;
 
         setBanners(activeBanners);

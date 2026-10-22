@@ -21,6 +21,7 @@ const AdminBanner = () => {
     isActive: true,
     imageFile: null
   });
+  const popupBannerExists = banners.some((banner) => banner.bannerType === 'popup');
 
   const fetchBanners = async () => {
     try {
@@ -54,7 +55,7 @@ const AdminBanner = () => {
     setForm({
       title: banner.title,
       link: banner.link || '',
-      bannerType: banner.bannerType || 'home',
+      bannerType: banner.bannerType === 'popup' ? 'popup' : 'home',
       displayOrder: banner.displayOrder || 0,
       isActive: banner.isActive,
       imageFile: null
@@ -66,6 +67,10 @@ const AdminBanner = () => {
     e.preventDefault();
     if (!form.title.trim()) return toast.error('Banner title is required');
     if (!editId && !form.imageFile) return toast.error('Image is required');
+    if (form.bannerType === 'popup' && !form.link.trim()) return toast.error('Add a redirect link for the popup View Offer button.');
+    if (form.bannerType === 'popup' && popupBannerExists && !editId) {
+      return toast.error('Only one popup banner is allowed. Edit the existing popup instead.');
+    }
 
     try {
       setSaving(true);
@@ -121,7 +126,7 @@ const AdminBanner = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-2xl font-black text-heading uppercase tracking-tight">Banner Manager</h2>
-          <p className="text-muted text-sm mt-1">Manage homepage and promotional banners</p>
+          <p className="text-muted text-sm mt-1">Manage home slider banners and one site entry popup</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
@@ -154,7 +159,9 @@ const AdminBanner = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-black text-muted uppercase tracking-widest">Redirect Link (Optional)</label>
+                  <label className="text-xs font-black text-muted uppercase tracking-widest">
+                    Redirect Link {form.bannerType === 'popup' ? '(Required for View Offer)' : '(Optional)'}
+                  </label>
                   <input
                     type="text"
                     value={form.link}
@@ -174,8 +181,9 @@ const AdminBanner = () => {
                     className="w-full bg-input border border-input-border px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary outline-none font-bold"
                   >
                     <option value="home">Home Slider</option>
-                    <option value="promotion">Promotion Strip</option>
-                    <option value="popup">Popup Banner</option>
+                    <option value="popup" disabled={popupBannerExists && form.bannerType !== 'popup'}>
+                      {popupBannerExists && form.bannerType !== 'popup' ? 'Popup Banner (limit reached)' : 'Popup Banner'}
+                    </option>
                   </select>
                 </div>
                 <div className="space-y-1.5">
@@ -201,7 +209,7 @@ const AdminBanner = () => {
               </div>
 
               <ImageUpload
-                label="Banner Image (Suggested: 1600x600 for slider)"
+                label={form.bannerType === 'popup' ? 'Popup Image (one image; square or portrait recommended)' : 'Banner Image (Suggested: 1600x600 for slider)'}
                 onChange={(file) => setForm(p => ({ ...p, imageFile: file }))}
               />
 
@@ -269,7 +277,9 @@ const AdminBanner = () => {
                 </div>
               </div>
               <div className="p-4 flex items-center justify-between bg-card/50">
-                <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">{banner.bannerType} banner</span>
+                <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">
+                  {banner.bannerType === 'promotion' ? 'Retired promotion (hidden)' : `${banner.bannerType === 'popup' ? 'Popup' : 'Home slider'} banner`}
+                </span>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleToggleActive(banner._id)}

@@ -12,6 +12,7 @@ import Features from '../components/home/features';
 import DeliveryHero from '../components/home/DeliveryHero';
 import { useDeliveryLocation } from '../context/LocationContext';
 import HomeBanner from '../components/home/HomeBanner';
+import PopupBanner from '../components/home/PopupBanner';
 import api from '../utils/api';
 import HomeLoader from '../components/home/HomeLoader';
 import WhatsAppButton from '../components/WhatsAppButton';
@@ -125,6 +126,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background text-body">
       <HomeLoader show={showHomeLoader} onFinish={handleLoaderFinish} />
+      <PopupBanner enabled={!showHomeLoader && !query} />
 
       <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore | Pan India Delivery | Pure Veg & Eggless Cakes</h1>
 

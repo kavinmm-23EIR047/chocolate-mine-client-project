@@ -3,9 +3,13 @@
  * Protects against shop location exploits and provides multi-tier verification
  */
 
-const SHOP_LAT = Number(process.env.SHOP_LAT ?? 11.004451331397814);
-const SHOP_LNG = Number(process.env.SHOP_LNG ?? 76.97477228939373);
+const SHOP_LAT = Number(process.env.SHOP_LAT ?? 11.004650612472016);
+const SHOP_LNG = Number(process.env.SHOP_LNG ?? 76.9752329387344);
 const MAX_DELIVERY_RADIUS_KM = Number(process.env.DELIVERY_RADIUS_KM ?? 30);
+const reverseGeocodeCache = new Map();
+const pendingReverseGeocodes = new Map();
+let reverseGeocodeQueue = Promise.resolve();
+let lastReverseGeocodeAt = 0;
 
 // Comprehensive database of Coimbatore district postal codes with centroid coordinates
 const COIMBATORE_PINCODES = {
@@ -86,10 +90,76 @@ const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+const calculateDrivingDistanceKm = async (lat, lng, shopLat = SHOP_LAT, shopLng = SHOP_LNG) => {
+  const targetLat = Number(lat);
+  const targetLng = Number(lng);
+  if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
+    throw new Error('A valid delivery location is required.');
+  }
+
+  if (targetLat === Number(shopLat) && targetLng === Number(shopLng)) return 0;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${shopLng},${shopLat};${targetLng},${targetLat}?overview=false&steps=false`;
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error('Route lookup failed.');
+    const data = await response.json();
+    const meters = data?.code === 'Ok' ? Number(data.routes?.[0]?.distance) : NaN;
+    if (!Number.isFinite(meters) || meters < 0) throw new Error('No drivable route was found.');
+    return meters / 1000;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const isInsideCoimbatore = async (lat, lng) => {
+  const cacheKey = `${Number(lat).toFixed(5)},${Number(lng).toFixed(5)}`;
+  const cached = reverseGeocodeCache.get(cacheKey);
+  if (cached && Date.now() - cached.checkedAt < 24 * 60 * 60 * 1000) return cached.isInside;
+  if (pendingReverseGeocodes.has(cacheKey)) return pendingReverseGeocodes.get(cacheKey);
+
+  const lookup = reverseGeocodeQueue.then(async () => {
+    const waitMs = Math.max(0, 1000 - (Date.now() - lastReverseGeocodeAt));
+    if (waitMs) await new Promise(resolve => setTimeout(resolve, waitMs));
+    lastReverseGeocodeAt = Date.now();
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'TheChocolateMineDelivery/1.0' }
+      });
+      if (!response.ok) throw new Error('Coimbatore location verification failed.');
+      const data = await response.json();
+      const isInside = (data?.display_name || '').toLowerCase().includes('coimbatore');
+      reverseGeocodeCache.set(cacheKey, { isInside, checkedAt: Date.now() });
+      if (reverseGeocodeCache.size > 500) {
+        const oldestKey = reverseGeocodeCache.keys().next().value;
+        reverseGeocodeCache.delete(oldestKey);
+      }
+      return isInside;
+    } finally {
+      clearTimeout(timeout);
+    }
+  });
+
+  pendingReverseGeocodes.set(cacheKey, lookup);
+  reverseGeocodeQueue = lookup.catch(() => undefined);
+  try {
+    return await lookup;
+  } finally {
+    pendingReverseGeocodes.delete(cacheKey);
+  }
+};
+
 /**
- * Check if a coordinate is within the shop perimeter (e.g. within 400 meters)
+ * Check if a coordinate is exactly at the shop
  */
-const isNearShop = (lat, lng, thresholdKm = 0.4) => {
+const isNearShop = (lat, lng, thresholdKm = 0) => {
   if (lat == null || lng == null) return false;
   const dist = calculateDistanceKm(SHOP_LAT, SHOP_LNG, lat, lng);
   return dist <= thresholdKm;
@@ -121,7 +191,7 @@ const resolvePincode = (pincode) => {
  * - Prevents users from pinning the shop location for free delivery on delivery orders.
  * - Automatically falls back to pincode geocoding if coordinates are missing or set to the shop.
  */
-const resolveDeliveryCoordinates = ({
+const resolveDeliveryCoordinates = async ({
   lat,
   lng,
   pincode,
@@ -143,13 +213,13 @@ const resolveDeliveryCoordinates = ({
   let isShopCoordinate = false;
   if (hasValidProvidedCoords) {
     const distFromShop = calculateDistanceKm(shopLat, shopLng, targetLat, targetLng);
-    isShopCoordinate = distFromShop < 0.4; // within 400m
+    isShopCoordinate = distFromShop === 0;
   }
 
   let isResolvedFromPincode = false;
 
   // If this is a delivery order and the coordinate is missing, invalid, or placed on the shop:
-  if (isDelivery && (!hasValidProvidedCoords || isShopCoordinate)) {
+  if (isDelivery && !hasValidProvidedCoords) {
     if (pinData) {
       targetLat = pinData.lat;
       targetLng = pinData.lng;
@@ -158,9 +228,16 @@ const resolveDeliveryCoordinates = ({
     }
   }
 
-  const finalDistance = calculateDistanceKm(shopLat, shopLng, targetLat, targetLng);
+  let finalDistance = 0;
+  let isCoimbatore = true;
+  if (isDelivery) {
+    finalDistance = await calculateDrivingDistanceKm(targetLat, targetLng, shopLat, shopLng);
+    isCoimbatore = await isInsideCoimbatore(targetLat, targetLng);
+  }
   // Rate: ₹10 per km rounded to nearest integer
-  const deliveryCharge = isDelivery ? Math.max(0, Math.round(finalDistance * 10)) : 0;
+  const deliveryCharge = isDelivery && finalDistance > 0
+    ? Math.max(30, Math.round(finalDistance * 10))
+    : 0;
 
   return {
     lat: targetLat || null,
@@ -170,7 +247,7 @@ const resolveDeliveryCoordinates = ({
     isResolvedFromPincode,
     isShopLocation: isShopCoordinate,
     areaName: pinData?.name || null,
-    isWithinServiceRadius: finalDistance <= MAX_DELIVERY_RADIUS_KM
+    isWithinServiceRadius: finalDistance <= MAX_DELIVERY_RADIUS_KM && isCoimbatore
   };
 };
 
@@ -180,6 +257,7 @@ module.exports = {
   MAX_DELIVERY_RADIUS_KM,
   COIMBATORE_PINCODES,
   calculateDistanceKm,
+  calculateDrivingDistanceKm,
   isNearShop,
   resolvePincode,
   resolveDeliveryCoordinates

@@ -23,6 +23,7 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     // Match filter for the selected time range
     const timeFilter = { createdAt: { $gte: startDate } };
     const paidTimeFilter = { paymentStatus: 'paid', createdAt: { $gte: startDate } };
+    const allTimePaidFilter = { paymentStatus: 'paid' };
 
     const [
       ordersCount,
@@ -40,7 +41,7 @@ exports.getDashboard = asyncHandler(async (req, res) => {
       
       // Total Revenue
       Order.aggregate([
-        { $match: paidTimeFilter },
+        { $match: allTimePaidFilter },
         {
           $group: {
             _id: null,

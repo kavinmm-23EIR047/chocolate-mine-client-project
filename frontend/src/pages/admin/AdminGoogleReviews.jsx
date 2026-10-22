@@ -53,14 +53,14 @@ const AdminGoogleReviews = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-[var(--heading)]">Google Reviews Management</h1>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
           <button 
             onClick={handleSync} 
             disabled={syncing}
-            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50"
+            className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50"
           >
             {syncing ? 'Syncing...' : 'Force Sync Now'}
           </button>
@@ -68,7 +68,7 @@ const AdminGoogleReviews = () => {
             href={googleReviewsService.getExportUrl()} 
             target="_blank" 
             rel="noreferrer"
-            className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
+            className="w-full sm:w-auto text-center bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
           >
             Export to Excel
           </a>

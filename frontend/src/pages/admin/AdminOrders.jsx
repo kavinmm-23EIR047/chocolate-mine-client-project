@@ -32,6 +32,7 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState({});
+  const customerPhone = order?.address?.phone || order?.user?.phone;
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -150,7 +151,7 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
   return (
     <div className="space-y-8">
       {/* Top Header Navigation Bar */}
-      <div className="flex items-center gap-4 border-b border-border/60 pb-6 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-border/60 pb-6">
         <button
           onClick={onBack || (() => navigate('/admin/orders'))}
           className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center hover:bg-border/20 transition-colors shadow-xs cursor-pointer"
@@ -176,22 +177,14 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
           )}
         </div>
 
-        <div className="ml-auto flex items-center gap-3 flex-wrap">
-          <div className="min-w-[190px]">
-            <OrderStatusDropdown
-              order={order}
-              onUpdate={handleDeliveryStatusUpdate}
-              onRefresh={fetchOrder}
-              role="admin"
-            />
-          </div>
-          <Button icon={RefreshCw} variant="outline" onClick={fetchOrder}>
+        <div className="w-full sm:w-auto sm:ml-auto grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3">
+          <Button icon={RefreshCw} variant="outline" onClick={fetchOrder} className="col-span-2 sm:col-span-1 w-full sm:w-auto">
             Refresh
           </Button>
-          <Button icon={ChefHat} variant="outline" onClick={() => adminService.printKOT(order._id)}>
+          <Button icon={ChefHat} variant="outline" onClick={() => adminService.printKOT(order._id)} className="w-full sm:w-auto">
             KOT TICKET
           </Button>
-          <Button icon={Download} onClick={handleDownloadInvoice} variant="primary">
+          <Button icon={Download} onClick={handleDownloadInvoice} variant="primary" className="w-full sm:w-auto">
             INVOICE
           </Button>
         </div>
@@ -205,57 +198,56 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
 
           {/* Delivery Timeline */}
           <div className="bg-card p-6 sm:p-8 rounded-3xl border border-border shadow-soft">
-            <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-3">
               <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-heading flex items-center gap-2.5">
                 <Truck size={22} className="text-primary" /> Delivery Status Timeline
               </h3>
-              <div className="flex items-center gap-3">
-                <Badge variant={order.orderStatus === 'delivered' ? 'success' : isCancelled ? 'error' : 'warning'}>
-                  {order.orderStatus?.replace(/_/g, ' ')?.toUpperCase()}
-                </Badge>
+              <div className="w-full sm:w-[210px] flex flex-col gap-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Change delivery status</span>
                 <OrderStatusDropdown
                   order={order}
                   onUpdate={handleDeliveryStatusUpdate}
                   onRefresh={fetchOrder}
                   role="admin"
+                  className="w-full"
                 />
               </div>
             </div>
 
-            <div className="relative pl-2 sm:pl-4">
+            <div className="relative pl-0 sm:pl-2">
               <div className="space-y-0">
                 {timelineSteps.map((step, index) => {
                   const isCompleted = step.completed;
                   const isCurrent = index === activeStep && !isCancelled;
 
                   return (
-                    <div key={step.id} className="relative flex gap-4 sm:gap-6 mb-8 last:mb-0">
+                    <div key={step.id} className="relative flex gap-3 sm:gap-5 mb-5 sm:mb-6 last:mb-0">
                       <div className="relative flex flex-col items-center z-10 w-9 sm:w-11 shrink-0">
                         {index !== timelineSteps.length - 1 && (
-                          <div className={`absolute top-9 sm:top-11 -bottom-8 left-1/2 -translate-x-1/2 w-[3px] ${activeStep > index ? 'bg-primary' : 'bg-border/40'}`} />
+                          <div className={`absolute top-9 sm:top-11 -bottom-8 left-1/2 -translate-x-1/2 w-[3px] ${activeStep > index ? 'bg-amber-700 dark:bg-[#E6B25A]' : 'bg-stone-300 dark:bg-[#70462F]'}`} />
                         )}
 
                         <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border-4 border-card shadow-sm transition-all duration-300 ${isCompleted
-                            ? "bg-primary text-white"
-                            : "bg-card text-muted border-border"
-                          } ${isCurrent ? "ring-4 ring-primary/20 scale-110" : ""}`}>
+                            ? "bg-amber-800 text-white dark:bg-[#E6B25A] dark:text-[#1A0C08]"
+                            : "bg-stone-100 text-stone-700 border-stone-400 dark:bg-[#24130E] dark:text-[#F2EADF] dark:border-[#A67853]"
+                          } ${isCurrent ? "ring-4 ring-amber-500/40 dark:ring-[#E6B25A]/40 scale-110" : ""}`}>
                           <step.icon size={18} />
                         </div>
                       </div>
 
-                      <div className={`flex-1 p-5 rounded-2xl border transition-all ${isCurrent ? "border-primary bg-primary/5" : "border-border/60"
+                      <div className={`min-w-0 flex-1 p-4 sm:p-5 rounded-2xl border transition-all ${isCurrent ? "border-amber-700 bg-amber-50 dark:border-[#E6B25A] dark:bg-[#3B2818]" : "border-stone-300 bg-white dark:border-[#70462F] dark:bg-[#24130E]"
                         }`}>
                         <div className="flex justify-between items-start flex-wrap gap-2">
-                          <h4 className={`text-sm sm:text-base font-black uppercase ${isCurrent ? "text-primary" : "text-heading"}`}>
+                          <h4 className={`text-sm sm:text-base font-black uppercase ${isCurrent ? "text-amber-900 dark:text-[#FFD27A]" : "text-heading"}`}>
                             {step.label}
                           </h4>
                           {step.time && (
-                            <span className="text-xs sm:text-sm text-muted font-medium">
+                          <span className="text-xs sm:text-sm text-stone-600 dark:text-[#D6BE9F] font-medium">
                               {new Date(step.time).toLocaleString()}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs sm:text-sm mt-2 text-muted leading-relaxed">
+                        <p className="text-xs sm:text-sm mt-2 text-stone-700 dark:text-[#D6BE9F] leading-relaxed">
                           {step.description}
                         </p>
                       </div>
@@ -267,7 +259,7 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
 
             {/* Courier driver info if assigned */}
             {order.assignedStaff && (
-              <div className="mt-8 pt-4 border-t border-border/50 flex items-center justify-between bg-card-soft/40 p-4 rounded-2xl border border-border/40">
+              <div className="mt-6 sm:mt-8 pt-4 border-t border-border/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-card-soft/50 p-4 rounded-2xl border border-border">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-primary/10 text-primary font-black rounded-xl flex items-center justify-center text-base">
                     🚚
@@ -278,7 +270,7 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
                   </div>
                 </div>
                 {order.assignedStaff.phone && (
-                  <a href={`tel:${order.assignedStaff.phone}`} className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all">
+                  <a href={`tel:${order.assignedStaff.phone}`} className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 bg-success text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all">
                     <Phone size={16} /> Call Driver
                   </a>
                 )}
@@ -380,7 +372,15 @@ const AdminOrderDetailsView = ({ orderId, onBack }) => {
 
             <div className="p-5 rounded-2xl bg-card-soft/40 border border-border/40 space-y-3 text-base">
               <p className="font-black text-heading text-lg">{order.address?.fullName}</p>
-              <p className="text-muted font-bold text-base">{order.address?.phone}</p>
+              {customerPhone && <p className="text-muted font-bold text-base break-all">{customerPhone}</p>}
+              {customerPhone && (
+                <a
+                  href={`tel:${customerPhone}`}
+                  className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-button-text rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
+                >
+                  <Phone size={16} /> Call Customer
+                </a>
+              )}
               <p className="text-muted text-sm sm:text-base leading-relaxed">
                 {[order.address?.houseNo, order.address?.street].filter(Boolean).join(', ')}
                 {order.address?.landmark && <><br /><strong className="text-heading">Landmark:</strong> {order.address.landmark}</>}

@@ -98,14 +98,14 @@ const AddonManager = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
           <h2 className="text-2xl font-black text-heading">Add-ons Manager</h2>
           <p className="text-muted text-sm mt-1">Create and manage add-ons for products</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="flex items-center gap-2 bg-primary text-button-text px-5 py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"
+          className="w-full sm:w-auto justify-center whitespace-nowrap flex items-center gap-2 bg-primary text-button-text px-5 py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"
         >
           <Plus size={16} /> New Add-on
         </button>

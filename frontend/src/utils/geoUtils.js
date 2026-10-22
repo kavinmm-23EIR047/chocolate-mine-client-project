@@ -4,8 +4,8 @@
  * and shop location prevention for delivery orders.
  */
 
-export const SHOP_LAT = Number(import.meta.env.VITE_SHOP_LAT) || 11.004451331397814;
-export const SHOP_LNG = Number(import.meta.env.VITE_SHOP_LNG) || 76.97477228939373;
+export const SHOP_LAT = Number(import.meta.env.VITE_SHOP_LAT) || 11.004650612472016;
+export const SHOP_LNG = Number(import.meta.env.VITE_SHOP_LNG) || 76.9752329387344;
 export const DELIVERY_RADIUS_KM = Number(import.meta.env.VITE_DELIVERY_RADIUS_KM) || 30;
 
 // Comprehensive database of Coimbatore postal codes with centroid coordinates
@@ -119,10 +119,41 @@ export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+/** Return driving-route distance in km, using the same OSRM router as checkout pricing. */
+export const calculateDrivingDistanceKm = async (lat, lng) => {
+  const targetLat = Number(lat);
+  const targetLng = Number(lng);
+  if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
+    throw new Error('A valid delivery location is required.');
+  }
+
+  if (targetLat === SHOP_LAT && targetLng === SHOP_LNG) return 0;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${SHOP_LNG},${SHOP_LAT};${targetLng},${targetLat}?overview=false&steps=false`;
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error('Route lookup failed.');
+    const data = await response.json();
+    const meters = data?.code === 'Ok' ? Number(data.routes?.[0]?.distance) : NaN;
+    if (!Number.isFinite(meters) || meters < 0) throw new Error('No drivable route was found.');
+    return meters / 1000;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+export const calculateDeliveryFee = (distanceKm) => {
+  const distance = Number(distanceKm);
+  if (!Number.isFinite(distance) || distance <= 0) return 0;
+  return Math.max(30, Math.round(distance * 10));
+};
+
 /**
- * Check if a coordinate is within the shop perimeter (< 400 meters)
+ * Check if a coordinate is exactly at the shop
  */
-export const isNearShop = (lat, lng, thresholdKm = 0.4) => {
+export const isNearShop = (lat, lng, thresholdKm = 0) => {
   if (lat == null || lng == null) return false;
   const dist = calculateDistanceKm(SHOP_LAT, SHOP_LNG, lat, lng);
   return dist <= thresholdKm;
@@ -200,7 +231,7 @@ export const searchCoimbatoreLocal = (query) => {
             lat: data.lat,
             lng: data.lng,
             distanceKm: dist,
-            deliveryFee: Math.round(dist * 10),
+            deliveryFee: calculateDeliveryFee(dist),
             isLocal: true
           });
         }
@@ -228,7 +259,7 @@ export const searchCoimbatoreLocal = (query) => {
           lat: area.lat,
           lng: area.lng,
           distanceKm: dist,
-          deliveryFee: Math.round(dist * 10),
+          deliveryFee: calculateDeliveryFee(dist),
           isLocal: true
         });
       }
@@ -264,7 +295,7 @@ export const lookupPincode = (pincode) => {
       lat: data.lat,
       lng: data.lng,
       distanceKm: dist,
-      deliveryFee: Math.round(dist * 10),
+      deliveryFee: calculateDeliveryFee(dist),
       isCoimbatore: true,
       isWithinRadius: dist <= DELIVERY_RADIUS_KM
     };
@@ -302,7 +333,7 @@ export const geocodePincodeOrAddress = async (pincode, street = '') => {
           lat,
           lng,
           distanceKm: dist,
-          deliveryFee: Math.round(dist * 10),
+          deliveryFee: calculateDeliveryFee(dist),
           isCoimbatore: (item.display_name || '').toLowerCase().includes('coimbatore'),
           isWithinRadius: dist <= DELIVERY_RADIUS_KM
         };

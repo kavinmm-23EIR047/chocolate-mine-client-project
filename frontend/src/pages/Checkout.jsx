@@ -65,6 +65,8 @@ import {
   POPULAR_COIMBATORE_AREAS,
   isNearShop,
   calculateDistanceKm,
+  calculateDrivingDistanceKm,
+  calculateDeliveryFee,
   SHOP_LAT,
   SHOP_LNG,
   DELIVERY_RADIUS_KM
@@ -260,6 +262,8 @@ const Checkout = () => {
   });
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [distance, setDistance] = useState(0);
+  const [isCalculatingDelivery, setIsCalculatingDelivery] = useState(false);
+  const [isExactMapPin, setIsExactMapPin] = useState(() => Boolean(savedState.deliveryInfo?.isExactMapPin));
   const [locationValid, setLocationValid] = useState(() => {
     const savedPin = String(savedState.addressDetails?.pincode || '').trim();
     const savedStreet = String(savedState.addressDetails?.street || '').trim();
@@ -450,6 +454,7 @@ const Checkout = () => {
     Boolean(addressDetails.pincode?.trim()?.length === 6) &&
     Boolean(addressDetails.street?.trim()) &&
     Boolean(deliveryInfo?.position) &&
+    isExactMapPin &&
     !isNearShop(deliveryInfo.position?.lat, deliveryInfo.position?.lng) &&
     locationValid
   );
@@ -581,27 +586,41 @@ const Checkout = () => {
 
   // Recalculate distance when map coordinates change
   useEffect(() => {
+    let cancelled = false;
     const validate = async () => {
-      if (!deliveryInfo.position || deliveryInfo.position.lat === undefined || deliveryInfo.position.lng === undefined) return;
+      if (!deliveryInfo.position || deliveryInfo.position.lat === undefined || deliveryInfo.position.lng === undefined) {
+        setIsCalculatingDelivery(false);
+        return;
+      }
       const isShop = isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng);
-      const dist = calculateDistanceKm(
-        SHOP_LAT,
-        SHOP_LNG,
-        deliveryInfo.position.lat,
-        deliveryInfo.position.lng
-      );
+      setIsCalculatingDelivery(true);
+      setLocationValid(false);
+      setDistance(0);
+      setDeliveryFee(0);
+      let dist;
+      try {
+        dist = await calculateDrivingDistanceKm(deliveryInfo.position.lat, deliveryInfo.position.lng);
+      } catch {
+        if (cancelled) return;
+        setLocationError('Unable to calculate the driving route. Please try again.');
+        setIsCalculatingDelivery(false);
+        return;
+      }
+      if (cancelled) return;
       setDistance(dist);
-      setDeliveryFee(Math.round(dist * 10));
+      setDeliveryFee(calculateDeliveryFee(dist));
 
       if (subtotal >= 300 && isShop) {
         setLocationValid(false);
         setLocationError('Bakery shop address cannot be used for Home Delivery. Please enter your pincode or select your delivery address on the map.');
+        setIsCalculatingDelivery(false);
         return;
       }
 
       if (dist > DELIVERY_RADIUS_KM) {
         setLocationValid(false);
         setLocationError('Delivery is available only inside Coimbatore (within 30km).');
+        setIsCalculatingDelivery(false);
         return;
       }
 
@@ -610,19 +629,25 @@ const Checkout = () => {
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${deliveryInfo.position.lat}&lon=${deliveryInfo.position.lng}`
         );
         const data = await res.json();
+        if (cancelled) return;
         if (!(data.display_name || '').toLowerCase().includes('coimbatore')) {
           setLocationValid(false);
           setLocationError('Delivery available only inside Coimbatore service area.');
+          setIsCalculatingDelivery(false);
           return;
         }
         setLocationValid(true);
         setLocationError('');
       } catch {
-        setLocationValid(true);
-        setLocationError('');
+        if (cancelled) return;
+        setLocationValid(false);
+        setLocationError('Unable to verify that this address is inside Coimbatore. Please try again.');
+      } finally {
+        if (!cancelled) setIsCalculatingDelivery(false);
       }
     };
     validate();
+    return () => { cancelled = true; };
   }, [deliveryInfo.position, subtotal]);
 
   // Subtotal < 100 auto pickup guard
@@ -658,7 +683,7 @@ const Checkout = () => {
         lat: area.lat,
         lng: area.lng,
         distanceKm: dist,
-        deliveryFee: Math.round(dist * 10),
+        deliveryFee: calculateDeliveryFee(dist),
         isLocal: true
       };
     });
@@ -670,6 +695,7 @@ const Checkout = () => {
     setIsAddressConfirmed(false);
     lastMapSelectedPin.current = null;
     setDeliveryInfo({ address: null, position: null });
+    setIsExactMapPin(false);
     sessionStorage.removeItem(STORAGE_KEYS.DELIVERY_INFO);
     setDistance(0);
     setDeliveryFee(0);
@@ -695,6 +721,14 @@ const Checkout = () => {
       return;
     }
     if (subtotal >= 300) {
+      if (isCalculatingDelivery) {
+        toast.error('Please wait while we verify the driving distance.');
+        return;
+      }
+      if (!isExactMapPin) {
+        toast.error('Please pin your exact delivery address on the map to calculate the route accurately.');
+        return;
+      }
       if (!addressDetails.houseNo?.trim()) {
         toast.error('Please enter house / door number');
         return;
@@ -733,6 +767,7 @@ const Checkout = () => {
   const handlePincodeChange = (e) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 6);
     setIsAddressConfirmed(false);
+    setIsExactMapPin(false);
 
     // If pincode is cleared by user -> both pincode & street are removed automatically & verified removed
     if (!val) {
@@ -757,6 +792,7 @@ const Checkout = () => {
 
   const handleStreetChange = (e) => {
     const val = e.target.value;
+    setIsExactMapPin(false);
 
     // If street is cleared by user -> both street & pincode are removed automatically & verified removed
     if (!val.trim()) {
@@ -786,17 +822,17 @@ const Checkout = () => {
     setDeliveryInfo({
       position: { lat: item.lat, lng: item.lng },
       address: chosenStreet,
-      pincode: chosenPin
+      pincode: chosenPin,
+      isExactMapPin: false
     });
+    setIsExactMapPin(false);
+    setIsCalculatingDelivery(true);
+    setLocationValid(false);
 
-    setDistance(item.distanceKm);
-    setDeliveryFee(item.deliveryFee);
-    setLocationValid(item.distanceKm <= DELIVERY_RADIUS_KM);
-    if (item.distanceKm > DELIVERY_RADIUS_KM) {
-      setLocationError('This location is outside our 30km delivery radius in Coimbatore.');
-    } else {
-      setLocationError('');
-    }
+    setDistance(0);
+    setDeliveryFee(0);
+    setLocationValid(false);
+    setLocationError('');
 
     lastMapSelectedPin.current = chosenPin;
     setShowStreetSuggestions(false);
@@ -812,6 +848,14 @@ const Checkout = () => {
       return false;
     }
     if (subtotal >= 300) {
+      if (isCalculatingDelivery) {
+        toast.error('Please wait while we verify the driving distance.');
+        return false;
+      }
+      if (!isExactMapPin) {
+        toast.error('Please pin your exact delivery address on the map to calculate the route accurately.');
+        return false;
+      }
       if (!addressDetails.houseNo?.trim()) {
         toast.error('Please enter house / door number');
         return false;
@@ -1480,10 +1524,10 @@ const Checkout = () => {
                               </div>
                               <div className="text-right shrink-0">
                                 <span className="text-[11px] font-black text-accent block leading-tight">
-                                  ₹{item.deliveryFee}
+                                  ₹10/km
                                 </span>
                                 <span className="text-[9px] text-muted block">
-                                  {item.distanceKm.toFixed(1)} km
+                                  road route after selection
                                 </span>
                               </div>
                             </button>
@@ -1515,6 +1559,7 @@ const Checkout = () => {
                     Boolean(addressDetails.pincode?.trim()?.length === 6) &&
                     Boolean(addressDetails.street?.trim()) &&
                     Boolean(deliveryInfo?.position) &&
+                    Boolean(deliveryInfo?.isExactMapPin) &&
                     !isNearShop(deliveryInfo.position.lat, deliveryInfo.position.lng) &&
                     locationValid && (
                     <div className="mt-3 py-1.5 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-between text-xs">
@@ -2016,7 +2061,9 @@ const Checkout = () => {
                 onClose={() => setShowMap(false)}
                 onSelect={(data) => {
                   lastMapSelectedPin.current = data.pincode || 'MAP_PIN';
-                  setDeliveryInfo(data);
+                  const exactPinData = { ...data, isExactMapPin: true };
+                  setDeliveryInfo(exactPinData);
+                  setIsExactMapPin(true);
                   if (data.address || data.pincode) {
                     setAddressDetails(prev => ({
                       ...prev,

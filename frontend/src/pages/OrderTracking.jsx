@@ -262,12 +262,12 @@ const OrderTracking = () => {
               {/* Stepper Timeline with animated line */}
               <div className="space-y-8 relative">
                 {/* Background track line */}
-                <div className="absolute left-[23px] top-6 bottom-6 w-[2px] bg-border rounded-full z-0" />
+                <div className="absolute left-[23px] top-6 bottom-6 w-[3px] bg-stone-300 dark:bg-[#70462F] rounded-full z-0" />
 
                 {/* Animated fill line (only when not cancelled) */}
                 {!isCancelled && (
                   <motion.div
-                    className="absolute left-[23px] top-6 w-[2px] bg-secondary rounded-full z-0 origin-top"
+                    className="absolute left-[23px] top-6 w-[3px] bg-amber-700 dark:bg-[#E6B25A] rounded-full z-0 origin-top"
                     initial={{ height: 0 }}
                     animate={{ height: `${progressPercent}%` }}
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
@@ -284,19 +284,19 @@ const OrderTracking = () => {
                       <motion.div
                         initial={false}
                         animate={{ scale: isCurrent ? 1.05 : 1 }}
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md
-                          ${isActive ? 'bg-secondary text-white' :
-                            isCancelled ? 'bg-error/20 text-error' : 'bg-muted text-muted-foreground'}
-                          ${isCurrent ? 'ring-4 ring-secondary/30' : ''}
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 shadow-md
+                          ${isActive ? 'bg-amber-800 border-amber-900 text-white dark:bg-[#E6B25A] dark:border-[#F3C878] dark:text-[#1A0C08]' :
+                            isCancelled ? 'bg-red-100 border-red-400 text-red-800 dark:bg-red-950/60 dark:border-red-500 dark:text-red-200' : 'bg-stone-100 border-stone-400 text-stone-700 dark:bg-[#24130E] dark:border-[#A67853] dark:text-[#F2EADF]'}
+                          ${isCurrent ? 'ring-4 ring-amber-500/30 dark:ring-[#E6B25A]/35' : ''}
                         `}
                       >
                         {isCancelled && step.id === 1 ? <X size={20} /> : <StepIcon size={20} />}
                       </motion.div>
                       <div className="flex-1 pt-1">
-                        <p className={`text-sm font-bold ${isActive ? 'text-foreground' : isCancelled ? 'text-error' : 'text-muted-foreground'}`}>
+                        <p className={`text-sm font-bold ${isActive ? 'text-foreground' : isCancelled ? 'text-red-800 dark:text-red-200' : 'text-stone-700 dark:text-[#F2EADF]'}`}>
                           {step.label}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{step.desc}</p>
+                        <p className="text-xs text-stone-600 dark:text-[#D6BE9F] mt-0.5">{step.desc}</p>
                       </div>
                       {isCurrent && !isCancelled && status !== 3 && (
                         <motion.span
@@ -304,8 +304,8 @@ const OrderTracking = () => {
                           animate={{ scale: 1 }}
                           className="relative flex h-2 w-2 mt-4"
                         >
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-600 dark:bg-[#E6B25A] opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-700 dark:bg-[#E6B25A]" />
                         </motion.span>
                       )}
                     </div>

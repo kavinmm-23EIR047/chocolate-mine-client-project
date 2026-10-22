@@ -16,6 +16,8 @@ import {
   lookupPincode, 
   isNearShop, 
   calculateDistanceKm, 
+  calculateDrivingDistanceKm,
+  calculateDeliveryFee,
   SHOP_LAT, 
   SHOP_LNG, 
   DELIVERY_RADIUS_KM 
@@ -158,6 +160,9 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
   const [isMapMoving, setIsMapMoving] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isLocatingUser, setIsLocatingUser] = useState(false);
+  const [distance, setDistance] = useState(null);
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
+  const [routeError, setRouteError] = useState('');
 
   // Address Information
   const [addressDetails, setAddressDetails] = useState(() => formatAddressDetails(null, startingPos.lat, startingPos.lng));
@@ -171,9 +176,37 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
 
   // Distance & Delivery Calculation
   const isAtShop = isNearShop(position?.lat, position?.lng);
-  const distance = useMemo(() => calculateDistanceKm(SHOP_LAT, SHOP_LNG, position?.lat, position?.lng), [position]);
-  const deliveryFee = useMemo(() => Math.round(distance * 10), [distance]);
-  const isOutOfRadius = distance > DELIVERY_RADIUS_KM;
+  const deliveryFee = calculateDeliveryFee(distance);
+  const isOutOfRadius = distance != null && distance > DELIVERY_RADIUS_KM;
+
+  useEffect(() => {
+    let cancelled = false;
+    if (isAtShop) {
+      setDistance(0);
+      setIsCalculatingRoute(false);
+      setRouteError('');
+      return undefined;
+    }
+
+    setDistance(null);
+    setIsCalculatingRoute(true);
+    setRouteError('');
+    const timer = setTimeout(async () => {
+      try {
+        const routeDistance = await calculateDrivingDistanceKm(position?.lat, position?.lng);
+        if (!cancelled) setDistance(routeDistance);
+      } catch {
+        if (!cancelled) setRouteError('Unable to calculate the driving route. Please try again.');
+      } finally {
+        if (!cancelled) setIsCalculatingRoute(false);
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [position, isAtShop]);
 
   // Reverse Geocoding Function
   const fetchAddressForCoords = useCallback(async (lat, lng) => {
@@ -309,7 +342,7 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
                 lat,
                 lng,
                 distanceKm: dist,
-                deliveryFee: Math.round(dist * 10),
+                deliveryFee: calculateDeliveryFee(dist),
                 isLocal: false
               };
             });
@@ -410,6 +443,7 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
 
   // Confirm Location
   const handleConfirm = () => {
+    if (distance == null || isCalculatingRoute || routeError) return;
     if (isAtShop) {
       alert('Bakery shop location cannot be used for home delivery. Please choose your area or move the map to your address.');
       return;
@@ -542,7 +576,7 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-xs sm:text-sm font-bold text-[var(--primary)] dark:text-[#E6B25A]">
-                    {item.distanceKm.toFixed(1)} km
+                    Route calculated after selection
                   </span>
                 </div>
               </button>
@@ -743,7 +777,7 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
 
             <div className="text-right">
               <span className={`text-xs sm:text-base font-bold ${isOutOfRadius ? 'text-red-500' : isAtShop ? 'text-amber-600' : 'text-[var(--heading)] dark:text-[#E6B25A]'}`}>
-                {isAtShop ? 'Shop (0.0 km)' : `${distance.toFixed(1)} km • ₹${deliveryFee} Delivery`}
+                {isAtShop ? 'Shop (0.0 km)' : isCalculatingRoute ? 'Calculating driving route…' : routeError || `${distance?.toFixed(1)} km • ₹${deliveryFee} Delivery`}
               </span>
             </div>
           </div>
@@ -778,7 +812,7 @@ const MapSelector = ({ initialPosition, initialPincode, onSelect, onClose }) => 
           <button 
             type="button"
             onClick={isAtShop ? handleUseCurrentLocation : handleConfirm}
-            disabled={isGeocoding || isOutOfRadius}
+            disabled={isGeocoding || isCalculatingRoute || distance == null || Boolean(routeError) || isOutOfRadius}
             className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-base uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-98 cursor-pointer ${
               isOutOfRadius
                 ? 'bg-red-600 text-white cursor-not-allowed opacity-80'

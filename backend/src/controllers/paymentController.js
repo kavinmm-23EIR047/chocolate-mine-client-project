@@ -79,7 +79,7 @@ const getFlavorPriceHelper = (flavor) => {
 
 
 
-const computePricing = ({ cartItems, addressLat, addressLng, pincode, discount = 0, paymentMethod = 'ONLINE' }) => {
+const computePricing = async ({ cartItems, addressLat, addressLng, pincode, discount = 0, paymentMethod = 'ONLINE' }) => {
   const subtotal = cartItems.reduce((sum, item) => {
     const unitPrice = Number(item.finalPrice ?? item.price ?? 0);
     const qty = validateQuantity(item.qty);
@@ -94,13 +94,26 @@ const computePricing = ({ cartItems, addressLat, addressLng, pincode, discount =
     return sum + itemTotal;
   }, 0);
 
-  const isDelivery = paymentMethod !== 'WHATSAPP';
-  const geoResult = resolveDeliveryCoordinates({
-    lat: addressLat,
-    lng: addressLng,
-    pincode,
-    isDelivery
-  });
+  const isDelivery = paymentMethod !== 'WHATSAPP' && subtotal >= 300;
+  let geoResult;
+  try {
+    geoResult = await resolveDeliveryCoordinates({
+      lat: addressLat,
+      lng: addressLng,
+      pincode,
+      isDelivery
+    });
+  } catch (error) {
+    throw new AppError('Unable to calculate the delivery route. Please try again.', 503);
+  }
+
+  if (isDelivery && geoResult.distanceKm <= 0) {
+    throw new AppError('Delivery location must be farther than 0 km from the shop.', 400);
+  }
+
+  if (isDelivery && !geoResult.isWithinServiceRadius) {
+    throw new AppError('Delivery is available only inside the Coimbatore 30 km service area.', 400);
+  }
 
   const deliveryCharge = isDelivery ? geoResult.deliveryCharge : 0;
   const convenienceFee = Math.round(subtotal * 0.025);
@@ -608,7 +621,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
     }
   }
 
-  const { subtotal, deliveryCharge, convenienceFee, gst, total, verifiedLat, verifiedLng } = computePricing({
+  const { subtotal, deliveryCharge, convenienceFee, gst, total, verifiedLat, verifiedLng } = await computePricing({
     cartItems: cart.items,
     addressLat: Number(address?.lat),
     addressLng: Number(address?.lng),

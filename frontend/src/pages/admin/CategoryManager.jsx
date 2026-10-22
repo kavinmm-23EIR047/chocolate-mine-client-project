@@ -122,14 +122,14 @@ const CategoryManager = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
           <h2 className="text-2xl font-black text-heading">Category Manager</h2>
           <p className="text-muted text-sm mt-1">Create and manage product categories</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="flex items-center gap-2 bg-primary text-button-text px-5 py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"
+          className="w-full sm:w-auto justify-center whitespace-nowrap flex items-center gap-2 bg-primary text-button-text px-5 py-2.5 rounded-xl font-black text-sm uppercase tracking-widest hover:brightness-110 transition-all shadow-lg"
         >
           <Plus size={16} /> New Category
         </button>
@@ -230,7 +230,7 @@ const CategoryManager = () => {
 
       {/* Category Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse h-40" />
           ))}
@@ -240,14 +240,14 @@ const CategoryManager = () => {
           No categories yet. Create your first one!
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
           {categories.map((cat, i) => (
             <motion.div
               key={cat._id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all ${!cat.active ? 'opacity-50' : 'border-border'}`}
+              className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all ${!cat.active ? 'opacity-50' : ''}`}
             >
               <div className="aspect-video relative overflow-hidden">
                 <img src={getOptimizedCloudinaryUrl(cat.image, 300)} alt={cat.label || cat.name} className="w-full h-full object-cover" />

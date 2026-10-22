@@ -801,13 +801,6 @@ td {
   font-variation-settings: "ELSH" 0;
 }
 
-.truncate {
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  word-break: break-word !important;
-}
-
 /* SAFARI / IOS FIXES */
 @supports (-webkit-touch-callout: none) {
   .min-h-\[100dvh\] {

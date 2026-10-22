@@ -125,9 +125,20 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
       if (container.scrollLeft >= maxScroll - 20) {
         container.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
-        const itemWidth = container.firstElementChild?.offsetWidth || 140;
-        const gap = 16;
-        container.scrollBy({ left: itemWidth + gap, behavior: 'smooth' });
+        const items = Array.from(container.children);
+        const containerCenter = container.scrollLeft + container.clientWidth / 2;
+        const currentIndex = items.reduce((closestIndex, item, index) => {
+          const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+          const closestCenter = items[closestIndex].offsetLeft + items[closestIndex].offsetWidth / 2;
+          return Math.abs(itemCenter - containerCenter) < Math.abs(closestCenter - containerCenter)
+            ? index
+            : closestIndex;
+        }, 0);
+        const nextItem = items[Math.min(currentIndex + 1, items.length - 1)];
+        if (nextItem) {
+          const nextScrollLeft = nextItem.offsetLeft - (container.clientWidth - nextItem.offsetWidth) / 2;
+          container.scrollTo({ left: Math.max(0, Math.min(maxScroll, nextScrollLeft)), behavior: 'smooth' });
+        }
       }
     }, 5500);
 
@@ -254,7 +265,7 @@ export const CategoryCircles = ({ activeCategory, setActiveCategory }) => {
           onMouseLeave={handleMouseLeave}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
-          className="relative left-1/2 -translate-x-1/2 w-screen flex overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-4 pt-2 px-4 sm:px-8 pr-20 scroll-smooth select-none cursor-grab active:cursor-grabbing [&::-webkit-scrollbar]:hidden snap-x snap-mandatory items-start"
+          className="relative w-full max-w-full flex overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-4 pt-2 px-4 sm:px-8 pr-20 scroll-smooth select-none cursor-grab active:cursor-grabbing [&::-webkit-scrollbar]:hidden snap-x snap-mandatory items-start"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollPaddingInline: '1rem' }}
         >
           {categories.map((cat, index) => {

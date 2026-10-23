@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-export const ProtectedRoute = ({ children, allowUnverified = false }) => {
+export const ProtectedRoute = ({ children, allowUnverified = false, adminRedirectTo }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -17,6 +17,10 @@ export const ProtectedRoute = ({ children, allowUnverified = false }) => {
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (adminRedirectTo && user.role === 'admin') {
+    return <Navigate to={adminRedirectTo} replace />;
   }
 
   if (!allowUnverified && user.role === 'user' && user.phoneVerified !== true) {

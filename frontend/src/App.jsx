@@ -254,7 +254,7 @@ function App() {
                   <Route path="/orders" element={<Navigate to="/account/orders" replace />} />
 
                   {/* Dashboard Routes */}
-                  <Route path="/account" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                  <Route path="/account" element={<ProtectedRoute adminRedirectTo="/admin/dashboard"><DashboardLayout /></ProtectedRoute>}>
                     <Route index element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard" element={<DashboardHome />} />
                     <Route path="profile" element={<ProfileDetails />} />

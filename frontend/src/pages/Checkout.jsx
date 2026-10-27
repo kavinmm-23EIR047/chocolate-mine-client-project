@@ -80,6 +80,15 @@ import api from '../utils/api';
 import paymentService from '../services/paymentService';
 import toast from 'react-hot-toast';
 
+const DIWALI_HOLIDAYS = new Set(['2026-11-08', '2026-11-09']);
+
+const isDiwaliHoliday = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return DIWALI_HOLIDAYS.has(`${year}-${month}-${day}`);
+};
+
 /* ─────────────────────────────────────────────
    PAYMENT LOGOS — Direct High Quality SVG URLs
 ───────────────────────────────────────────── */
@@ -311,10 +320,13 @@ const Checkout = () => {
   const [deliveryDate, setDeliveryDate] = useState(() => {
     if (savedState.deliveryDate) {
       const d = new Date(savedState.deliveryDate);
-      if (!isNaN(d.getTime())) return d;
+      if (!isNaN(d.getTime()) && !isDiwaliHoliday(d)) return d;
     }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    while (isDiwaliHoliday(today)) {
+      today.setDate(today.getDate() + 1);
+    }
     return today;
   });
 
@@ -360,6 +372,8 @@ const Checkout = () => {
 
   // Slot availability calculation
   const isSlotAvailableForDate = (slot, date, now) => {
+    if (isDiwaliHoliday(date)) return false;
+
     const current = now || new Date();
     const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const todayDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
@@ -1677,6 +1691,7 @@ const Checkout = () => {
                     {availableDates.map((dateObj) => {
                       const isSelected = deliveryDate.toDateString() === dateObj.toDateString();
                       const isToday = new Date().toDateString() === dateObj.toDateString();
+                      const isHoliday = isDiwaliHoliday(dateObj);
                       const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                       const dayNumber = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
@@ -1684,8 +1699,13 @@ const Checkout = () => {
                         <button
                           key={dateObj.toISOString()}
                           type="button"
-                          onClick={() => setDeliveryDate(dateObj)}
+                          onClick={() => !isHoliday && setDeliveryDate(dateObj)}
+                          disabled={isHoliday}
+                          aria-label={isHoliday ? `${dayNumber}, Diwali Holiday, unavailable` : undefined}
                           className={`min-w-[66px] sm:min-w-[76px] py-1.5 px-1.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center shrink-0 ${
+                            isHoliday
+                              ? 'opacity-50 cursor-not-allowed bg-card-soft/40 border-border/40 text-muted'
+                              :
                             isSelected
                               ? 'bg-accent text-[#1A0C08] border-accent font-black shadow-xs scale-[1.02]'
                               : 'bg-card-soft text-body border-border/70 hover:border-accent/60 hover:bg-card'
@@ -1697,7 +1717,11 @@ const Checkout = () => {
                           <span className="text-xs font-black whitespace-nowrap leading-tight mt-0.5">
                             {dayNumber}
                           </span>
-                          {isToday && (
+                          {isHoliday ? (
+                            <span className="text-[8px] font-black uppercase tracking-wider px-1 py-0.2 rounded mt-0.5 bg-red-500/10 text-red-600">
+                              Diwali Holiday
+                            </span>
+                          ) : isToday && (
                             <span className={`text-[8px] font-black uppercase tracking-wider px-1 py-0.2 rounded mt-0.5 ${
                               isSelected ? 'bg-black/15 text-[#1A0C08]' : 'bg-accent/15 text-accent'
                             }`}>

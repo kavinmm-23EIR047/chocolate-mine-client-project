@@ -9,6 +9,7 @@ const cacheService = require('../services/cacheService');
 const telegramService = require('../services/telegramService');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
+const { resolveProductWeight } = require('../utils/productUtils');
 
 let ioInstance = null;
 const setIo = (io) => {
@@ -390,10 +391,18 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       }
 
       let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
-      const isCake = categoryStr.includes('cake');
-      const isBento = categoryStr.includes('bento');
-      const customWeightMatch = (product.hasCustomWeights || (product.customWeightPrices && product.customWeightPrices.length > 0)) && (directItem.selectedWeight || directItem.options?.weight)
-        ? product.customWeightPrices?.find(c => String(c.weight).toLowerCase().trim() === String(directItem.selectedWeight || directItem.options?.weight).toLowerCase().trim())
+      const isMiniCake = categoryStr.includes('mini') || product.name.toLowerCase().includes('mini');
+      const isCake = categoryStr.includes('cake') || isMiniCake;
+      const isBento = categoryStr.includes('bento') || String(product.cakeType || '').toLowerCase().includes('bento');
+
+      const resolvedWeightDirect = resolveProductWeight(
+        product,
+        directItem.selectedWeight || (directItem.options && directItem.options.weight),
+        product.price
+      );
+
+      const customWeightMatch = (product.hasCustomWeights || (product.customWeightPrices && product.customWeightPrices.length > 0)) && resolvedWeightDirect
+        ? product.customWeightPrices?.find(c => String(c.weight).toLowerCase().trim() === String(resolvedWeightDirect).toLowerCase().trim())
         : null;
 
       let defaultFlavorPriceDirect = 0;
@@ -406,13 +415,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
       if (customWeightMatch && customWeightMatch.price !== undefined && customWeightMatch.price !== null) {
         salePrice = Number(customWeightMatch.price) + defaultFlavorPriceDirect;
       } else if (isCake && !isCustomCake) {
-        const selectedWeight = directItem.selectedWeight || (directItem.options && directItem.options.weight) || (isBento ? '250g' : '500g');
+        const selectedWeight = resolvedWeightDirect || (isBento ? '250g' : (isMiniCake ? '130g' : '500g'));
         const multiplier = getWeightMultiplier(selectedWeight);
         salePrice = (product.price * multiplier) + defaultFlavorPriceDirect;
-      } else if (product.hasVariants && product.variants && (directItem.selectedFlavor || directItem.options?.flavor) && (directItem.selectedWeight || directItem.options?.weight)) {
+      } else if (product.hasVariants && product.variants && (directItem.selectedFlavor || directItem.options?.flavor) && resolvedWeightDirect) {
         const selFlavor = directItem.selectedFlavor || directItem.options?.flavor;
-        const selWeight = directItem.selectedWeight || directItem.options?.weight;
-        const variant = product.variants.find(v => v.flavor === selFlavor && v.weight === selWeight);
+        const variant = product.variants.find(v => v.flavor === selFlavor && v.weight === resolvedWeightDirect);
         if (variant) salePrice = variant.price;
         if (variant && variant.stock === false)
           throw new AppError(`Stock error: Selected combination is out of stock`, 400);
@@ -444,7 +452,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         items: [{
           productId: product._id, name: product.name, qty: validatedQty, price: product.price, image: product.image,
           finalPrice, activeCouponCode, selectedFlavor: directItem.selectedFlavor || (directItem.options && (directItem.options.color || directItem.options.flavor)),
-          selectedWeight: directItem.selectedWeight || (directItem.options && directItem.options.weight), isCustomCake, customDetails,
+          selectedWeight: resolvedWeightDirect, isCustomCake, customDetails,
           cakeMessage: (directItem.cakeMessage || directItem.options?.cakeMessage || '') ? String(directItem.cakeMessage || directItem.options?.cakeMessage).trim() : undefined,
           category: product.category, addons: safeAddons
         }],
@@ -512,10 +520,18 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         }
 
         let salePrice = product.offerPrice && product.offerPrice < product.price ? product.offerPrice : product.price;
-        const isCake = categoryStr.includes('cake');
-        const isBento = categoryStr.includes('bento');
-        const customWeightMatch = (product.hasCustomWeights || (product.customWeightPrices && product.customWeightPrices.length > 0)) && (item.options?.weight || item.selectedWeight)
-          ? product.customWeightPrices?.find(c => String(c.weight).toLowerCase().trim() === String(item.options?.weight || item.selectedWeight).toLowerCase().trim())
+        const isMiniCake = categoryStr.includes('mini') || product.name.toLowerCase().includes('mini');
+        const isCake = categoryStr.includes('cake') || isMiniCake;
+        const isBento = categoryStr.includes('bento') || String(product.cakeType || '').toLowerCase().includes('bento');
+
+        const resolvedWeightCart = resolveProductWeight(
+          product,
+          item.options?.weight || item.selectedWeight,
+          product.price
+        );
+
+        const customWeightMatch = (product.hasCustomWeights || (product.customWeightPrices && product.customWeightPrices.length > 0)) && resolvedWeightCart
+          ? product.customWeightPrices?.find(c => String(c.weight).toLowerCase().trim() === String(resolvedWeightCart).toLowerCase().trim())
           : null;
 
         let defaultFlavorPriceCart = 0;
@@ -528,13 +544,12 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         if (customWeightMatch && customWeightMatch.price !== undefined && customWeightMatch.price !== null) {
           salePrice = Number(customWeightMatch.price) + defaultFlavorPriceCart;
         } else if (isCake && !isCustomCake) {
-          const selectedWeight = item.options?.weight || item.selectedWeight || (isBento ? '250g' : '500g');
+          const selectedWeight = resolvedWeightCart || (isBento ? '250g' : (isMiniCake ? '130g' : '500g'));
           const multiplier = getWeightMultiplier(selectedWeight);
           salePrice = (product.price * multiplier) + defaultFlavorPriceCart;
-        } else if (product.hasVariants && product.variants && (item.options?.flavor || item.selectedFlavor) && (item.options?.weight || item.selectedWeight)) {
+        } else if (product.hasVariants && product.variants && (item.options?.flavor || item.selectedFlavor) && resolvedWeightCart) {
           const selFlavor = item.options?.flavor || item.selectedFlavor;
-          const selWeight = item.options?.weight || item.selectedWeight;
-          const variant = product.variants.find(v => v.flavor === selFlavor && v.weight === selWeight);
+          const variant = product.variants.find(v => v.flavor === selFlavor && v.weight === resolvedWeightCart);
           if (variant) salePrice = variant.price;
         }
 
@@ -563,7 +578,7 @@ exports.createRazorpayOrder = asyncHandler(async (req, res) => {
         validatedItems.push({
           productId: product._id, name: product.name, qty: validatedQty, price: product.price, image: product.image,
           finalPrice, activeCouponCode, selectedFlavor: item.options?.color || item.options?.flavor || item.selectedFlavor,
-          selectedWeight: item.options?.weight || item.selectedWeight, isCustomCake, customDetails,
+          selectedWeight: resolvedWeightCart, isCustomCake, customDetails,
           cakeMessage: (item.cakeMessage || item.options?.cakeMessage || '') ? String(item.cakeMessage || item.options?.cakeMessage).trim() : undefined,
           category: product.category, addons: safeAddons
         });

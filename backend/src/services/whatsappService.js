@@ -3,6 +3,8 @@
 const axios = require('axios');
 const { formatPhone } = require('../utils/phoneUtil');
 const logger = require('../utils/logger');
+const Product = require('../models/Product');
+const { resolveProductWeight } = require('../utils/productUtils');
 
 // =============================================================================
 // Phone Number Normalization Helper
@@ -208,7 +210,7 @@ const getDisplayFlavor = (item) => {
 // =============================================================================
 // Helper: Format item for ADMIN (full details including custom cake)
 // =============================================================================
-const formatAdminOrderItem = (item) => {
+const formatAdminOrderItem = (item, product = null) => {
   if (item.isCustomCake && item.customDetails) {
     const cd = item.customDetails;
     let details = `🎨 *${item.name}* (x${item.qty})\n`;
@@ -226,7 +228,22 @@ const formatAdminOrderItem = (item) => {
   let details = `🍰 *${item.name}* (x${item.qty})`;
   const resolvedFlavor = getDisplayFlavor(item);
   const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
-  const showWeight = item.selectedWeight;
+
+  let showWeight = null;
+  if (product) {
+    showWeight = resolveProductWeight(product, item.selectedWeight, item.finalPrice ?? item.price);
+  } else {
+    const cat = Array.isArray(item.category) ? item.category.join(' ').toLowerCase() : String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('mini') || name.includes('mini')) {
+      showWeight = '130g';
+    } else if (cat.includes('bento') || name.includes('bento')) {
+      showWeight = (item.selectedWeight && item.selectedWeight !== '500g') ? item.selectedWeight : '250g';
+    } else {
+      showWeight = item.selectedWeight;
+    }
+  }
+
   if (showFlavor || showWeight) {
     details += `\n`;
     if (showFlavor) details += `   Flavor: ${resolvedFlavor}\n`;
@@ -238,10 +255,25 @@ const formatAdminOrderItem = (item) => {
 // =============================================================================
 // Helper: Format item for CUSTOMER (includes flavor & weight if available)
 // =============================================================================
-const formatCustomerOrderItem = (item) => {
+const formatCustomerOrderItem = (item, product = null) => {
   const resolvedFlavor = getDisplayFlavor(item);
   const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
-  const showWeight = item.selectedWeight;
+
+  let showWeight = null;
+  if (product) {
+    showWeight = resolveProductWeight(product, item.selectedWeight, item.finalPrice ?? item.price);
+  } else {
+    const cat = Array.isArray(item.category) ? item.category.join(' ').toLowerCase() : String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('mini') || name.includes('mini')) {
+      showWeight = '130g';
+    } else if (cat.includes('bento') || name.includes('bento')) {
+      showWeight = (item.selectedWeight && item.selectedWeight !== '500g') ? item.selectedWeight : '250g';
+    } else {
+      showWeight = item.selectedWeight;
+    }
+  }
+
   if (showFlavor || showWeight) {
     const parts = [];
     if (showFlavor) parts.push(resolvedFlavor);
@@ -332,8 +364,28 @@ const sendPaymentFailure = (phone, amount, customerName) => {
 // ADMIN Notifications – FULL details including custom cakes
 // =============================================================================
 
-const sendInternalOrderAlert = (to, order) => {
-  const itemsList = order.items.map(item => formatAdminOrderItem(item)).join('\n');
+const sendInternalOrderAlert = async (to, order) => {
+  if (!order || !Array.isArray(order.items)) return;
+
+  const productIds = order.items
+    .map(i => i.productId?._id || i.productId)
+    .filter(id => id && String(id).match(/^[0-9a-fA-F]{24}$/));
+
+  const productMap = {};
+  if (productIds.length > 0) {
+    try {
+      const prods = await Product.find({ _id: { $in: productIds } }).lean();
+      prods.forEach(p => { productMap[p._id.toString()] = p; });
+    } catch (err) {
+      logger.warn(`Could not load products for WhatsApp alert: ${err.message}`);
+    }
+  }
+
+  const itemsList = order.items.map(item => {
+    const pId = (item.productId?._id || item.productId)?.toString();
+    const prod = productMap[pId] || (item.productId && typeof item.productId === 'object' && item.productId.name ? item.productId : null);
+    return formatAdminOrderItem(item, prod);
+  }).join('\n');
   
   const addrParts = [];
   if (order.address.fullName) addrParts.push(order.address.fullName);

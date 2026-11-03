@@ -80,7 +80,7 @@ import api from '../utils/api';
 import paymentService from '../services/paymentService';
 import toast from 'react-hot-toast';
 
-const DIWALI_HOLIDAYS = new Set(['2026-11-08', '2026-11-09']);
+const DIWALI_HOLIDAYS = new Set(['2026-11-08', '2026-11-09', '2026-11-10']);
 
 const isDiwaliHoliday = (date) => {
   const year = date.getFullYear();

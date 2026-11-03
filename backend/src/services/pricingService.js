@@ -1,3 +1,5 @@
+const { resolveProductWeight } = require('../utils/productUtils');
+
 const getWeightMultiplier = (weightStr) => {
   if (!weightStr) return 1;
   const w = String(weightStr).toLowerCase().replace(/\s+/g, '');
@@ -19,28 +21,31 @@ const getItemPriceDetails = (product, selectedFlavor = null, selectedWeight = nu
   const categoryStr = Array.isArray(product.category)
     ? product.category.join(' ').toLowerCase()
     : String(product.category || '').toLowerCase();
-  const isCake = categoryStr.includes('cake');
-  const isBento = categoryStr.includes('bento-cakes');
+  const isMiniCake = categoryStr.includes('mini') || String(product.name || '').toLowerCase().includes('mini');
+  const isCake = categoryStr.includes('cake') || isMiniCake;
+  const isBento = categoryStr.includes('bento-cakes') || categoryStr.includes('bento');
+
+  const resolvedWeight = resolveProductWeight(product, selectedWeight, salePrice);
 
   // Check if product has custom weight prices defined
-  const customWeightMatch = (product.hasCustomWeights || (product.customWeightPrices && product.customWeightPrices.length > 0)) && selectedWeight
-    ? product.customWeightPrices?.find(c => String(c.weight).toLowerCase().trim() === String(selectedWeight).toLowerCase().trim())
+  const customWeightMatch = (product.hasCustomWeights || (product.customWeightPrices && product.customWeightPrices.length > 0)) && resolvedWeight
+    ? product.customWeightPrices?.find(c => String(c.weight).toLowerCase().trim() === String(resolvedWeight).toLowerCase().trim())
     : null;
 
   // If this is a cake with variants and we have selected flavor/weight
   if (customWeightMatch && customWeightMatch.price !== undefined && customWeightMatch.price !== null) {
     salePrice = Number(customWeightMatch.price);
     variantPrice = salePrice;
-  } else if (product.hasVariants && product.variants && product.variants.length > 0 && selectedFlavor && selectedWeight) {
+  } else if (product.hasVariants && product.variants && product.variants.length > 0 && selectedFlavor && resolvedWeight) {
     const variant = product.variants.find(
-      v => v.flavor === selectedFlavor && v.weight === selectedWeight
+      v => v.flavor === selectedFlavor && v.weight === resolvedWeight
     );
     if (variant) {
       variantPrice = variant.price;
       salePrice = variant.price;
     }
   } else if (isCake) {
-    const weight = selectedWeight || (isBento ? '250g' : '500g');
+    const weight = resolvedWeight || (isBento ? '250g' : (isMiniCake ? '130g' : '500g'));
     const multiplier = getWeightMultiplier(weight);
     salePrice = product.price * multiplier;
     variantPrice = salePrice;

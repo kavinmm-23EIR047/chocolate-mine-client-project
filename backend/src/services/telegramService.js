@@ -1,7 +1,10 @@
 'use strict';
 
 const axios = require('axios');
+const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const Product = require('../models/Product');
+const { resolveProductWeight } = require('../utils/productUtils');
 
 /**
  * Core Telegram sender using Bot API.
@@ -60,7 +63,7 @@ const getDisplayFlavor = (item) => {
  * @param {Object} item - Order item from database
  * @returns {string} Formatted item string (multi-line if custom cake)
  */
-const formatOrderItem = (item) => {
+const formatOrderItem = (item, product = null) => {
   const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
   const origPrice = Number(item.price || 0);
   let priceDetails = ``;
@@ -100,7 +103,24 @@ const formatOrderItem = (item) => {
   let details = `🍰 *${item.name}* (x${item.qty})${priceDetails}`;
   const resolvedFlavor = getDisplayFlavor(item);
   const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
-  const showWeight = item.selectedWeight;
+
+  // Resolve weight accurately using product rules or smart heuristics
+  let showWeight = null;
+  if (product) {
+    showWeight = resolveProductWeight(product, item.selectedWeight, item.finalPrice ?? item.price);
+  }
+  if (!showWeight) {
+    const cat = Array.isArray(item.category) ? item.category.join(' ').toLowerCase() : String(item.category || '').toLowerCase();
+    const name = String(item.name || '').toLowerCase();
+    if (cat.includes('mini') || name.includes('mini')) {
+      showWeight = '130g';
+    } else if (cat.includes('bento') || name.includes('bento')) {
+      showWeight = (item.selectedWeight && item.selectedWeight !== '500g') ? item.selectedWeight : '250g';
+    } else {
+      showWeight = item.selectedWeight;
+    }
+  }
+
   const msgOnCake = (item.cakeMessage || item.messageOnCake || '').trim();
   if (showFlavor || showWeight || msgOnCake || addonStr) {
     details += `\n`;
@@ -145,12 +165,32 @@ const formatIST = (dateVal) => {
   });
 };
 
-const sendInternalOrderAlert = (phone, order) => {
+const sendInternalOrderAlert = async (phone, order) => {
   // If only one argument is passed, it might be the order
   const orderObj = (typeof phone === 'object') ? phone : order;
-  
+  if (!orderObj || !Array.isArray(orderObj.items)) return;
+
+  // Batch query products for accurate item details and weights
+  const productIds = orderObj.items
+    .map(i => i.productId?._id || i.productId)
+    .filter(id => id && String(id).match(/^[0-9a-fA-F]{24}$/));
+
+  const productMap = {};
+  if (productIds.length > 0) {
+    try {
+      const prods = await Product.find({ _id: { $in: productIds } }).lean();
+      prods.forEach(p => { productMap[p._id.toString()] = p; });
+    } catch (err) {
+      logger.warn(`Could not load products for Telegram alert: ${err.message}`);
+    }
+  }
+
   // Build detailed items list with custom cake support
-  const itemsList = orderObj.items.map(item => formatOrderItem(item)).join('\n');
+  const itemsList = orderObj.items.map(item => {
+    const pId = (item.productId?._id || item.productId)?.toString();
+    const prod = productMap[pId] || (item.productId && typeof item.productId === 'object' && item.productId.name ? item.productId : null);
+    return formatOrderItem(item, prod);
+  }).join('\n');
   
   const addrParts = [];
   if (orderObj.address.fullName) addrParts.push(orderObj.address.fullName);
@@ -227,6 +267,7 @@ const sendStaffAlert = (message) => {
 const sendInternalOrderAlertWithCustomDetails = sendInternalOrderAlert;
 
 module.exports = {
+  formatOrderItem,
   sendTelegram,
   sendInternalOrderAlert,
   sendOrderPlaced,

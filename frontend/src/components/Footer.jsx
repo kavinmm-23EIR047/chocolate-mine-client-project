@@ -325,7 +325,7 @@ const Footer = () => {
           <p className="text-muted text-[9px] font-black uppercase tracking-[0.25em] text-center">
             © 2026 THE CHOCOLATE MINE. CRAFTED BY{' '}
             <a
-              href="https://akwebflairtechnologies.vercel.app"
+              href="https://akwebflairtechnologies.in"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline transition"

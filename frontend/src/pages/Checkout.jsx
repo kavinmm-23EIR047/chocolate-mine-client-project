@@ -94,14 +94,15 @@ const isDiwaliHoliday = (date) => {
 ───────────────────────────────────────────── */
 export const paymentLogos = {
   cards: {
-    visa: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg",
+    visa: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg",
     mastercard: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",
-    rupay: "https://upload.wikimedia.org/wikipedia/en/c/c6/RuPay_Card_logo.svg",
+    rupay: "https://upload.wikimedia.org/wikipedia/commons/d/d1/RuPay.svg",
   },
   upi: {
+    brand: "https://upload.wikimedia.org/wikipedia/commons/6/6f/UPI_logo.svg",
     gpay: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg",
     phonepe: "https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg",
-    paytm: "https://upload.wikimedia.org/wikipedia/commons/2/23/Paytm_Logo.svg",
+    paytm: "https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg",
   },
   banking: {
     sbi: "https://upload.wikimedia.org/wikipedia/commons/c/cc/SBI-logo.svg",
@@ -1841,30 +1842,21 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                {/* Crisp Payment Badges that NEVER break */}
+                {/* Official payment brand marks */}
                 <div className="flex items-center gap-1.5 flex-wrap shrink-0">
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white text-[10px] font-black text-[#1B365D] shadow-2xs border border-gray-200 shrink-0">
-                    UPI
-                  </span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white text-[10px] font-black tracking-tight shadow-2xs border border-gray-200 shrink-0">
-                    <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span>
-                  </span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[#5f259f] text-[10px] font-bold text-white shadow-2xs shrink-0">
-                    PhonePe
-                  </span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white text-[10px] font-black text-[#002e6e] shadow-2xs border border-gray-200 shrink-0">
-                    Pay<span className="text-[#00b9f5]">tm</span>
-                  </span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white text-[10px] font-black italic text-[#1A1F71] shadow-2xs border border-gray-200 shrink-0">
-                    VISA
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white shadow-2xs border border-gray-200 shrink-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#EB001B] inline-block -mr-1 opacity-90" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#F79E1B] inline-block opacity-90" />
-                  </span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white text-[10px] font-black text-[#097939] shadow-2xs border border-gray-200 shrink-0">
-                    Ru<span className="text-[#005CA9]">Pay</span>
-                  </span>
+                  {[
+                    { name: 'UPI', src: paymentLogos.upi.brand },
+                    { name: 'Google Pay', src: paymentLogos.upi.gpay },
+                    { name: 'PhonePe', src: paymentLogos.upi.phonepe },
+                    { name: 'Paytm', src: paymentLogos.upi.paytm },
+                    { name: 'Visa', src: paymentLogos.cards.visa },
+                    { name: 'Mastercard', src: paymentLogos.cards.mastercard },
+                    { name: 'RuPay', src: paymentLogos.cards.rupay },
+                  ].map(({ name, src }) => (
+                    <span key={name} className="inline-flex h-6 w-11 items-center justify-center rounded bg-white px-1 shadow-2xs border border-gray-200 shrink-0">
+                      <img src={src} alt={name} className="max-h-full max-w-full object-contain" />
+                    </span>
+                  ))}
                 </div>
               </div>
             </section>

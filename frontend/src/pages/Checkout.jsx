@@ -388,6 +388,12 @@ const Checkout = () => {
       selectedDate.getDate() === 7;
     if (isNovemberSeventh2026 && slotStartMinutes >= 18 * 60) return false;
 
+    const isNovemberEleventh2026 =
+      selectedDate.getFullYear() === 2026 &&
+      selectedDate.getMonth() === 10 &&
+      selectedDate.getDate() === 11;
+    if (isNovemberEleventh2026 && slotStartMinutes === 10 * 60) return false;
+
     if (selectedDate > todayDate) return true;
     if (selectedDate < todayDate) return false;
 

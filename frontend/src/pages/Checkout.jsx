@@ -378,12 +378,18 @@ const Checkout = () => {
     const selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const todayDate = new Date(current.getFullYear(), current.getMonth(), current.getDate());
 
-    if (selectedDate > todayDate) return true;
-    if (selectedDate < todayDate) return false;
-
     const slotStartMinutes = slot.startHour * 60 + slot.startMinute;
     const slotEndMinutes = slot.endHour * 60 + slot.endMinute;
     const currentMinutes = current.getHours() * 60 + current.getMinutes();
+
+    const isNovemberSeventh2026 =
+      selectedDate.getFullYear() === 2026 &&
+      selectedDate.getMonth() === 10 &&
+      selectedDate.getDate() === 7;
+    if (isNovemberSeventh2026 && slotStartMinutes >= 18 * 60) return false;
+
+    if (selectedDate > todayDate) return true;
+    if (selectedDate < todayDate) return false;
 
     return (slotStartMinutes - currentMinutes >= 120) && (currentMinutes < slotEndMinutes);
   };

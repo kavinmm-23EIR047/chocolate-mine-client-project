@@ -60,7 +60,7 @@ const adminService = {
   ---------------------------------------- */
   getKOTData: (id) => api.get(`/admin/orders/${id}/kot`),
   printKOT: (id) => {
-    const rawUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
+    const rawUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5001');
     const baseUrl = rawUrl.replace(/\/api\/v\d+.*$/, '');
     const token = localStorage.getItem('token') || '';
     const url = `${baseUrl}/api/v1/admin/orders/${id}/kot/print${token ? `?token=${encodeURIComponent(token)}` : ''}`;

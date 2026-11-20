@@ -226,6 +226,7 @@ function App() {
                   <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
                   <Route path="/shop" element={<ErrorBoundary><Shop /></ErrorBoundary>} />
                   <Route path="/custom-cake" element={<ErrorBoundary><CustomCake /></ErrorBoundary>} />
+                  <Route path="/custom-cakes" element={<Navigate to="/custom-cake" replace />} />
                   <Route path="/product/:slug" element={<ErrorBoundary><ProductDetails /></ErrorBoundary>} />
                   <Route path="/occasion/:name" element={<ErrorBoundary><OccasionProducts /></ErrorBoundary>} />
                   <Route path="/cart" element={<ErrorBoundary><Cart /></ErrorBoundary>} />

@@ -21,6 +21,8 @@ import { CategoryCircles } from '../components/home/Category';
 import ReviewsHome from '../components/home/ReviewsHome';
 import HappyFaces from '../components/home/HappyFaces';
 import HomeFAQ from '../components/home/HomeFAQ';
+import HomeSEOContent from '../components/home/HomeSEOContent';
+import useSEO from '../hooks/useSEO';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -37,6 +39,13 @@ const fadeUp = {
 };
 
 const Home = () => {
+  useSEO({
+    title: 'The Chocolate Mine | Order Cakes Online in Coimbatore | Best Custom & Eggless Cakes',
+    description: "Order cakes online in Coimbatore from The Chocolate Mine — Coimbatore's #1 trusted online bakery. Best custom cakes, 100% pure veg & eggless cakes, birthday cakes & chocolates with 2-3 hr express delivery.",
+    keywords: 'order cakes online in coimbatore, best custom cakes in coimbatore, best veg and eggless cakes in coimbatore, eggless cakes coimbatore, no 1 trusted online cake shop in coimbatore, best cake shop in coimbatore, online cake delivery coimbatore, buy cakes online coimbatore, cake delivery coimbatore, designer cakes coimbatore, birthday cakes coimbatore, wedding cakes coimbatore, 100 pure veg cakes coimbatore',
+    canonical: 'https://thechocolatemine.in/'
+  });
+
   const [searchParams] = useSearchParams();
   const query = searchParams.get('search') || '';
 
@@ -128,7 +137,7 @@ const Home = () => {
       <HomeLoader show={showHomeLoader} onFinish={handleLoaderFinish} />
       <PopupBanner enabled={!showHomeLoader && !query} />
 
-      <h1 className="sr-only">The Chocolate Mine - Premium Handcrafted Artisan Chocolates, Cakes & Custom Desserts in Coimbatore | Pan India Delivery | Pure Veg & Eggless Cakes</h1>
+      <h1 className="sr-only">The Chocolate Mine - Best Custom Cakes in Coimbatore | 100% Pure Veg & Eggless Cakes | #1 Trusted Online Cake Ordering & Delivery Shop in Coimbatore</h1>
 
       {/* 1. TrustBar (Top-most element) */}
       {!query && (
@@ -257,6 +266,9 @@ const Home = () => {
 
           {/* Happy Faces Section (Under ReviewsHome) */}
           {!query && <HappyFaces />}
+
+          {/* SEO Authority & Keywords Section */}
+          {!query && <HomeSEOContent />}
 
           {/* FAQ Section */}
           {!query && <HomeFAQ />}

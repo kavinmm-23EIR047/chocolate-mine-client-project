@@ -18,6 +18,7 @@ import api from '../utils/api';
 import compressImage from '../utils/compressImage';
 import PureVegIcon from '../assets/pure veg.webp';
 import { toSentenceCase } from '../utils/textUtils';
+import useSEO from '../hooks/useSEO';
 
 // ── Import separated data ────────────────────────────────────────────────
 import {
@@ -60,6 +61,13 @@ const SectionCard = ({ title, expanded, onToggle, children }) => (
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────
 export default function CustomCake() {
+  useSEO({
+    title: 'Best Custom Cakes in Coimbatore | Designer Birthday & Wedding Cakes | The Chocolate Mine',
+    description: 'Order the best custom cakes in Coimbatore. 100% pure veg and eggless bespoke designer cakes, multi-tier wedding cakes, photo cakes & theme cakes with express delivery across Coimbatore.',
+    keywords: 'best custom cakes in coimbatore, custom cakes coimbatore, designer cakes coimbatore, birthday cakes coimbatore, theme cakes coimbatore, eggless custom cakes coimbatore, 2 tier cakes coimbatore, wedding cakes coimbatore',
+    canonical: 'https://thechocolatemine.in/custom-cake'
+  });
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();

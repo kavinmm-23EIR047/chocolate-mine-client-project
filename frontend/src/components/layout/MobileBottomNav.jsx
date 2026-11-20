@@ -10,16 +10,49 @@ const MobileBottomNav = () => {
   const cartCount = cartItems?.reduce((total, item) => total + item.qty, 0) || 0;
 
   useEffect(() => {
-    const footer = document.querySelector('footer');
-    if (!footer) return undefined;
+    const getFooter = () => document.getElementById('site-footer') || document.querySelector('footer');
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsFooterVisible(entry.isIntersecting),
-      { threshold: 0.01 }
-    );
+    const handleCheck = () => {
+      const footer = getFooter();
+      if (!footer) return;
+      const rect = footer.getBoundingClientRect();
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+      // Disappear as soon as the top of footer enters viewport
+      const visible = rect.top <= windowHeight + 10;
+      setIsFooterVisible(visible);
+    };
 
-    observer.observe(footer);
-    return () => observer.disconnect();
+    // Check immediately and on scroll/resize
+    handleCheck();
+    window.addEventListener('scroll', handleCheck, { passive: true });
+    window.addEventListener('resize', handleCheck, { passive: true });
+
+    // Backup IntersectionObserver
+    let observer;
+    const footerEl = getFooter();
+    if (footerEl) {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting || entry.boundingClientRect.top <= window.innerHeight) {
+            setIsFooterVisible(true);
+          } else {
+            setIsFooterVisible(false);
+          }
+        },
+        { threshold: [0, 0.01, 0.1], rootMargin: '0px 0px 40px 0px' }
+      );
+      observer.observe(footerEl);
+    }
+
+    // Interval check to handle dynamic page content loading
+    const interval = setInterval(handleCheck, 400);
+
+    return () => {
+      window.removeEventListener('scroll', handleCheck);
+      window.removeEventListener('resize', handleCheck);
+      clearInterval(interval);
+      if (observer) observer.disconnect();
+    };
   }, [location.pathname]);
 
   const navItems = [
@@ -31,11 +64,15 @@ const MobileBottomNav = () => {
   ];
 
   const hideOn = ['/product', '/checkout', '/cart', '/login', '/register', '/forgot-password'];
-  if (isFooterVisible || hideOn.some((path) => location.pathname.startsWith(path))) return null;
+  const shouldHidePermanently = hideOn.some((path) => location.pathname.startsWith(path));
+
+  if (shouldHidePermanently) return null;
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 flex px-2 pb-2 pointer-events-none sm:px-4 lg:hidden"
+      className={`fixed inset-x-0 bottom-0 z-40 flex px-2 pb-2 pointer-events-none sm:px-4 lg:hidden transition-all duration-300 ease-in-out ${
+        isFooterVisible ? 'translate-y-[120%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+      }`}
       style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
     >
       <nav

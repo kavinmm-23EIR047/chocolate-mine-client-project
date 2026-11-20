@@ -12,6 +12,7 @@ import ProductCard from '../product/ProductCard';
 import { useDeliveryLocation } from '../context/LocationContext';
 import FilterSidebar from '../components/filter/FilterSidebar';
 import FilterDrawer from '../components/filter/FilterDrawer';
+import useSEO from '../hooks/useSEO';
 
 const getBaseFilterWord = (term) => {
   if (!term) return '';
@@ -24,6 +25,13 @@ const formatLabel = (str) => {
 };
 
 const Shop = () => {
+  useSEO({
+    title: 'Order Cakes Online in Coimbatore | 100% Veg & Eggless Cakes | The Chocolate Mine',
+    description: "Shop online for fresh birthday cakes, eggless cakes, custom delicacies, brownies, and chocolates in Coimbatore. Fast 2-3 hour delivery across Coimbatore from The Chocolate Mine.",
+    keywords: 'online cake ordering coimbatore, buy cakes online coimbatore, eggless cakes coimbatore, birthday cakes coimbatore, best cake shop in coimbatore, chocolate cake delivery coimbatore',
+    canonical: 'https://thechocolatemine.in/shop'
+  });
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);

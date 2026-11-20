@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, MapPin, Leaf, ShieldCheck, Phone } from 'lucide-react';
 
 const TRUST = [
-  { icon: <Sparkles size={16} />, label: '100% Handcrafted Artisanal Quality' },
-  { icon: <MapPin size={16} />, label: 'Coimbatore · Pan India Delivery' },
-  { icon: <Leaf size={16} />, label: '100% Pure Veg · Eggless' },
-  { icon: <ShieldCheck size={16} />, label: 'RazorPay secure checkout' },
-  { icon: <Phone size={16} />, label: '24×7 WhatsApp support' },
+  { icon: <Sparkles size={16} />, label: 'Best Custom Cakes in Coimbatore' },
+  { icon: <Leaf size={16} />, label: '100% Pure Veg & Eggless Cakes' },
+  { icon: <ShieldCheck size={16} />, label: '#1 Trusted Online Cake Shop' },
+  { icon: <MapPin size={16} />, label: 'Express 2-3 Hr Delivery Across Coimbatore' },
+  { icon: <Phone size={16} />, label: '4.9★ Rated · 12K+ Happy Customers' },
 ];
 
 const TrustBar = () => {

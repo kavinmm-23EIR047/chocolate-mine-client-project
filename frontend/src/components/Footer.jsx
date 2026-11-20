@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Mail, Phone, MapPin, ShieldCheck, CreditCard, Truck,
-  Cake, Cookie, Candy, Flower2, Flame, IceCream
+  Cake, Cookie, Candy, Flower2, Flame, IceCream, ChevronDown
 } from 'lucide-react';
 import {
   FaInstagram as InstagramIcon,
@@ -16,6 +16,11 @@ import api from '../utils/api';
 
 const Footer = () => {
   const [quickShopItems, setQuickShopItems] = useState([]);
+  const [openSections, setOpenSections] = useState({});
+
+  const toggleSection = (id) => {
+    setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     const fetchQuickShopData = async () => {
@@ -54,7 +59,7 @@ const Footer = () => {
     fetchQuickShopData();
   }, []);
   return (
-    <footer className="dark bg-footer text-footer-text pt-8 sm:pt-12 pb-8 sm:pb-12 overflow-hidden relative transition-colors duration-300">
+    <footer id="site-footer" className="dark bg-footer text-footer-text pt-8 sm:pt-12 pb-8 sm:pb-12 overflow-hidden relative transition-colors duration-300">
 
       {/* ─── AMBIENT BACKGROUND WATERMARKS & BLURS ─── */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -mr-64 -mt-64 pointer-events-none" />
@@ -202,9 +207,8 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* ─── MIDDLE LINKS GRID ─── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 tv:gap-x-16 gap-y-12 mb-16 sm:mb-20 tv:mb-28 text-left border-t border-border pt-12 tv:pt-16">
-
+        {/* ─── MIDDLE LINKS: DESKTOP GRID ─── */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 tv:gap-x-16 gap-y-12 mb-16 sm:mb-20 tv:mb-28 text-left border-t border-border pt-12 tv:pt-16">
           <div>
             <h4 className="text-[11px] font-black uppercase tracking-[0.35em] mb-6 text-accent">Navigation</h4>
             <ul className="space-y-3.5">
@@ -303,6 +307,264 @@ const Footer = () => {
                 </div>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* ─── MIDDLE LINKS: MOBILE DROPDOWNS ─── */}
+        <div className="sm:hidden mb-10 border-t border-border pt-4 space-y-2 text-left">
+          {/* Navigation Dropdown */}
+          <div className="border-b border-border/20 py-1">
+            <button
+              onClick={() => toggleSection('nav')}
+              className="w-full flex items-center justify-between py-2.5 text-left text-xs font-black uppercase tracking-wider text-accent"
+            >
+              <span>Navigation</span>
+              <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['nav'] ? 'rotate-180' : ''}`} />
+            </button>
+            {openSections['nav'] && (
+              <ul className="py-2 space-y-2.5 pl-2 text-xs">
+                {[
+                  { name: 'Home', path: '/' },
+                  { name: 'Shop All', path: '/shop' },
+                  { name: 'Bestsellers', path: '/shop?bestseller=true' },
+                  { name: 'Special Cakes', path: '/custom-cake' },
+                  { name: 'Offer Cakes', path: '/shop?offers=true' }
+                ].map((item, i) => (
+                  <li key={i}>
+                    <Link to={item.path} className="text-muted hover:text-primary transition-all uppercase tracking-wider block font-medium">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Support Dropdown */}
+          <div className="border-b border-border/20 py-1">
+            <button
+              onClick={() => toggleSection('support')}
+              className="w-full flex items-center justify-between py-2.5 text-left text-xs font-black uppercase tracking-wider text-accent"
+            >
+              <span>Support</span>
+              <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['support'] ? 'rotate-180' : ''}`} />
+            </button>
+            {openSections['support'] && (
+              <ul className="py-2 space-y-2.5 pl-2 text-xs">
+                {[
+                  { name: 'My Account', path: '/account/dashboard' },
+                  { name: 'My Orders', path: '/account/orders' },
+                  { name: 'Contact Us', path: '/contact' },
+                  { name: 'Privacy Policy', path: '/privacy' },
+                  { name: 'Terms & Conditions', path: '/terms' },
+                  { name: 'Refund Policy', path: '/refund' },
+                  { name: 'Delivery Policy', path: '/delivery' }
+                ].map((item, i) => (
+                  <li key={i}>
+                    <Link to={item.path} className="text-muted hover:text-primary transition-all uppercase tracking-wider block font-medium">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Quick Shop Dropdown */}
+          <div className="border-b border-border/20 py-1">
+            <button
+              onClick={() => toggleSection('quickshop')}
+              className="w-full flex items-center justify-between py-2.5 text-left text-xs font-black uppercase tracking-wider text-accent"
+            >
+              <span>Quick Shop</span>
+              <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['quickshop'] ? 'rotate-180' : ''}`} />
+            </button>
+            {openSections['quickshop'] && (
+              <ul className="py-2 space-y-2.5 pl-2 text-xs">
+                {(quickShopItems.length > 0 ? quickShopItems : [
+                  { name: 'Bento Cakes', path: '/shop?category=Bento%20Cakes' },
+                  { name: 'Birthday Cakes', path: '/shop?category=Birthday%20Cakes' },
+                  { name: 'Chocolates', path: '/shop?category=Chocolates' },
+                  { name: 'Desserts', path: '/shop?category=Desserts' }
+                ]).map((item, i) => (
+                  <li key={i}>
+                    <Link to={item.path} className="text-muted hover:text-primary transition-all uppercase tracking-wider block font-medium">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Experience Us Dropdown */}
+          <div className="border-b border-border/20 py-1">
+            <button
+              onClick={() => toggleSection('experience')}
+              className="w-full flex items-center justify-between py-2.5 text-left text-xs font-black uppercase tracking-wider text-accent"
+            >
+              <span>Experience Us</span>
+              <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['experience'] ? 'rotate-180' : ''}`} />
+            </button>
+            {openSections['experience'] && (
+              <div className="py-3 space-y-4 pl-1 text-xs text-muted">
+                <div className="flex items-start gap-2.5">
+                  <MapPin size={15} className="text-primary shrink-0 mt-0.5" />
+                  <a href="https://maps.app.goo.gl/1aPW7FVjAmLBnwxc7" target="_blank" rel="noopener noreferrer" className="hover:text-primary leading-normal transition-colors">
+                    No.7, 3, Race Course Rd, Gopalapuram, Coimbatore 641018
+                  </a>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <Phone size={15} className="text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <a href="tel:+919150670077" className="hover:text-primary transition-colors font-bold text-foreground block">
+                      +91 91506 70077
+                    </a>
+                    <span className="text-[10px]">Sun: 10AM–10PM | Mon–Sat: 10AM–10:30PM</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <Mail size={15} className="text-primary shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <a href="mailto:chocolatemine.care@gmail.com" className="hover:text-primary transition-colors block break-all">
+                      chocolatemine.care@gmail.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ─── SEO KEYWORDS & POPULAR SEARCHES DIRECTORY ─── */}
+        <div className="border-t border-border pt-8 pb-6 text-left">
+          <h4 className="text-[11px] font-black uppercase tracking-[0.35em] mb-3 text-accent">
+            Popular Cake Searches in Coimbatore | The Chocolate Mine
+          </h4>
+          <p className="text-[11px] text-muted leading-relaxed mb-4">
+            Looking for the <strong className="text-foreground">best custom cakes in Coimbatore</strong> or <strong className="text-foreground">100% pure veg and eggless cakes in Coimbatore</strong>? The Chocolate Mine is Coimbatore’s <strong className="text-foreground">#1 trusted online ordering cake shop</strong>. Explore our top searched cake categories:
+          </p>
+
+          {/* Desktop Grid */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6 text-[11px] text-muted leading-relaxed">
+            <div>
+              <p className="font-bold text-foreground mb-2 uppercase tracking-wider text-[10px]">Custom Cakes Coimbatore</p>
+              <ul className="space-y-1">
+                <li><Link to="/custom-cake" className="hover:text-primary transition-colors">Best Custom Cakes in Coimbatore</Link></li>
+                <li><Link to="/custom-cake" className="hover:text-primary transition-colors">Designer Birthday Cakes</Link></li>
+                <li><Link to="/custom-cake" className="hover:text-primary transition-colors">2-Tier & 3-Tier Wedding Cakes</Link></li>
+                <li><Link to="/custom-cake" className="hover:text-primary transition-colors">Theme & Fondant Cakes</Link></li>
+                <li><Link to="/custom-cake" className="hover:text-primary transition-colors">Custom Photo Cakes Coimbatore</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-bold text-foreground mb-2 uppercase tracking-wider text-[10px]">Veg & Eggless Cakes</p>
+              <ul className="space-y-1">
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Best Veg and Eggless Cakes in Coimbatore</Link></li>
+                <li><Link to="/shop?category=Chocolates" className="hover:text-primary transition-colors">100% Pure Veg Chocolate Cakes</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Eggless Dark Chocolate Truffle</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Eggless Red Velvet & Fruit Cakes</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Eggless Gourmet Brownies</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-bold text-foreground mb-2 uppercase tracking-wider text-[10px]">Online Cake Delivery</p>
+              <ul className="space-y-1">
+                <li><Link to="/shop" className="hover:text-primary transition-colors">#1 Trusted Online Ordering Shop</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Same Day Cake Delivery Coimbatore</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Midnight Birthday Cake Delivery</Link></li>
+                <li><Link to="/shop" className="hover:text-primary transition-colors">Express 2-3 Hour Delivery</Link></li>
+                <li><Link to="/stores" className="hover:text-primary transition-colors">Bakery in Race Course Coimbatore</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-bold text-foreground mb-2 uppercase tracking-wider text-[10px]">Delivery Locations</p>
+              <p className="text-[10px] leading-relaxed">
+                Race Course, RS Puram, Gandhipuram, Saibaba Colony, Peelamedu, Saravanampatti, Singanallur, Ramanathapuram, Vadavalli, Kovaipudur, Hopes College, Ganapathy, Kuniyamuthur, and all areas across Coimbatore.
+              </p>
+            </div>
+          </div>
+
+          {/* Mobile SEO Dropdowns */}
+          <div className="sm:hidden space-y-1 text-left">
+            {/* Custom Cakes Dropdown */}
+            <div className="border-b border-border/20 py-1.5">
+              <button
+                onClick={() => toggleSection('seo_custom')}
+                className="w-full flex items-center justify-between py-2 text-left font-bold text-foreground text-xs uppercase tracking-wider"
+              >
+                <span>Custom Cakes Coimbatore</span>
+                <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['seo_custom'] ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections['seo_custom'] && (
+                <ul className="py-2 pl-2 space-y-1.5 text-[11px] text-muted">
+                  <li><Link to="/custom-cake" className="hover:text-primary transition-colors block py-0.5">Best Custom Cakes in Coimbatore</Link></li>
+                  <li><Link to="/custom-cake" className="hover:text-primary transition-colors block py-0.5">Designer Birthday Cakes</Link></li>
+                  <li><Link to="/custom-cake" className="hover:text-primary transition-colors block py-0.5">2-Tier & 3-Tier Wedding Cakes</Link></li>
+                  <li><Link to="/custom-cake" className="hover:text-primary transition-colors block py-0.5">Theme & Fondant Cakes</Link></li>
+                  <li><Link to="/custom-cake" className="hover:text-primary transition-colors block py-0.5">Custom Photo Cakes Coimbatore</Link></li>
+                </ul>
+              )}
+            </div>
+
+            {/* Veg & Eggless Dropdown */}
+            <div className="border-b border-border/20 py-1.5">
+              <button
+                onClick={() => toggleSection('seo_veg')}
+                className="w-full flex items-center justify-between py-2 text-left font-bold text-foreground text-xs uppercase tracking-wider"
+              >
+                <span>Veg & Eggless Cakes</span>
+                <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['seo_veg'] ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections['seo_veg'] && (
+                <ul className="py-2 pl-2 space-y-1.5 text-[11px] text-muted">
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Best Veg and Eggless Cakes in Coimbatore</Link></li>
+                  <li><Link to="/shop?category=Chocolates" className="hover:text-primary transition-colors block py-0.5">100% Pure Veg Chocolate Cakes</Link></li>
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Eggless Dark Chocolate Truffle</Link></li>
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Eggless Red Velvet & Fruit Cakes</Link></li>
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Eggless Gourmet Brownies</Link></li>
+                </ul>
+              )}
+            </div>
+
+            {/* Online Cake Delivery Dropdown */}
+            <div className="border-b border-border/20 py-1.5">
+              <button
+                onClick={() => toggleSection('seo_delivery')}
+                className="w-full flex items-center justify-between py-2 text-left font-bold text-foreground text-xs uppercase tracking-wider"
+              >
+                <span>Online Cake Delivery</span>
+                <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['seo_delivery'] ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections['seo_delivery'] && (
+                <ul className="py-2 pl-2 space-y-1.5 text-[11px] text-muted">
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">#1 Trusted Online Ordering Shop</Link></li>
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Same Day Cake Delivery Coimbatore</Link></li>
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Midnight Birthday Cake Delivery</Link></li>
+                  <li><Link to="/shop" className="hover:text-primary transition-colors block py-0.5">Express 2-3 Hour Delivery</Link></li>
+                  <li><Link to="/stores" className="hover:text-primary transition-colors block py-0.5">Bakery in Race Course Coimbatore</Link></li>
+                </ul>
+              )}
+            </div>
+
+            {/* Delivery Locations Dropdown */}
+            <div className="border-b border-border/20 py-1.5">
+              <button
+                onClick={() => toggleSection('seo_locations')}
+                className="w-full flex items-center justify-between py-2 text-left font-bold text-foreground text-xs uppercase tracking-wider"
+              >
+                <span>Delivery Locations</span>
+                <ChevronDown size={15} className={`text-primary transition-transform duration-300 ${openSections['seo_locations'] ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections['seo_locations'] && (
+                <p className="py-2 pl-2 text-[10px] text-muted leading-relaxed">
+                  Race Course, RS Puram, Gandhipuram, Saibaba Colony, Peelamedu, Saravanampatti, Singanallur, Ramanathapuram, Vadavalli, Kovaipudur, Hopes College, Ganapathy, Kuniyamuthur, and all areas across Coimbatore.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 

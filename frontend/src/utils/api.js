@@ -14,7 +14,7 @@ export const getApiBaseUrl = () => {
       return window.location.origin + '/api/v1';
     }
   }
-  return envUrl || (import.meta.env.PROD ? window.location.origin + '/api/v1' : 'http://localhost:5000/api/v1');
+  return envUrl || (import.meta.env.PROD ? window.location.origin + '/api/v1' : 'http://localhost:5001/api/v1');
 };
 
 const api = axios.create({

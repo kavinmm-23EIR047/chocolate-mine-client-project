@@ -298,8 +298,8 @@ export default function CustomCakeBrowse({
               <span className="text-white/40">/</span>
               <span className="text-[11px] font-bold uppercase tracking-wider text-white">Custom Cakes</span>
             </nav>
-            <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">Custom Cakes</h1>
-            <p className="text-sm text-white/80 font-medium max-w-md">Choose your tier and theme to start configuring your dream cake.</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">Best Custom Cakes in Coimbatore</h1>
+            <p className="text-sm text-white/80 font-medium max-w-lg">Bespoke designer birthday, wedding & theme cakes in Coimbatore. 100% Pure Veg & Eggless with express delivery.</p>
           </div>
           <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -334,8 +334,8 @@ export default function CustomCakeBrowse({
       {/* ── Mobile Page Header ── */}
       <div className="lg:hidden flex items-start justify-between gap-3 pt-1">
         <div className="min-w-0 text-left">
-          <h1 className="text-xl font-black text-[var(--heading)] leading-none">Custom Cakes</h1>
-          <p className="text-[11px] text-[var(--muted)] mt-1 font-medium">Choose your tier and theme to start configuring.</p>
+          <h1 className="text-lg font-black text-[var(--heading)] leading-tight">Best Custom Cakes in Coimbatore</h1>
+          <p className="text-[11px] text-[var(--muted)] mt-1 font-medium">100% Pure Veg & Eggless Designer Cakes in Coimbatore.</p>
         </div>
         <span className="text-[10px] font-bold text-[var(--muted)] shrink-0">
           {filteredThemes.length} {filteredThemes.length === 1 ? 'theme' : 'themes'}

@@ -42,7 +42,7 @@ const Orders = () => {
   useEffect(() => {
     if (!user) return;
 
-    socketRef.current = io(import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000'), {
+    socketRef.current = io(import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5001'), {
       transports: ['websocket'],
       withCredentials: true
     });

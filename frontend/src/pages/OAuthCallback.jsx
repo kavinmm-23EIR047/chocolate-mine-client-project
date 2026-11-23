@@ -34,6 +34,16 @@ const OAuthCallback = () => {
         const { user, requiresDetails } = response.data || {};
         if (user) updateUser(user, token);
 
+        if (user?.role === 'staff') {
+          navigate('/staff/dashboard', { replace: true });
+          return;
+        }
+
+        if (user?.role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
+          return;
+        }
+
         if (requiresDetails || !user?.phoneVerified) {
           navigate('/verify-phone', { replace: true });
           return;

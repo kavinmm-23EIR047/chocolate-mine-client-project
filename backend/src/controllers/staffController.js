@@ -127,8 +127,7 @@ const STATUS_TRANSITIONS = {
 // @desc    Staff Dashboard Stats
 // @route   GET /api/v1/staff/dashboard
 exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
-  const [confirmedCount, outForDeliveryOrders, deliveredOrders, inShopOrdersCount, failedCount, paidCount] = await Promise.all([
-    Order.countDocuments({ orderStatus: 'confirmed' }),
+  const [outForDeliveryOrders, deliveredOrders, inShopOrdersCount, failedCount, paidCount] = await Promise.all([
     Order.countDocuments({ orderStatus: 'out_for_delivery' }),
     Order.countDocuments({ orderStatus: 'delivered' }),
     InShopOrder.countDocuments(),
@@ -139,7 +138,7 @@ exports.getStaffDashboard = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
-      confirmedOrders: confirmedCount,
+      confirmedOrders: paidCount,
       outForDeliveryOrders,
       deliveredOrders,
       inShopOrdersCount,

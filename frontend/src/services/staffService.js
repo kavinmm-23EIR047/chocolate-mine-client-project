@@ -1,4 +1,23 @@
-import api from '../utils/api';
+import api, { getApiBaseUrl } from '../utils/api';
+
+const getAuthenticatedUrl = (path) => {
+  const apiBaseUrl = getApiBaseUrl().replace(/\/+$/, '');
+  const normalizedPath = path.replace(/^\/+/, '');
+  const url = `${apiBaseUrl}/${normalizedPath}`;
+  let token = null;
+
+  try {
+    token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!token) {
+      const authUser = sessionStorage.getItem('auth_user') || localStorage.getItem('auth_user');
+      token = authUser ? JSON.parse(authUser)?.token : null;
+    }
+  } catch (error) {
+    console.warn('Could not read the session token for the print link:', error);
+  }
+
+  return token ? `${url}?token=${encodeURIComponent(token)}` : url;
+};
 
 const staffService = {
   /* ----------------------------------------
@@ -32,10 +51,11 @@ const staffService = {
      KOT (Kitchen Order Ticket)
   ---------------------------------------- */
   getKOTData: (id) => api.get(`/staff/orders/${id}/kot`),
+  getKOTPrintUrl: (id) => getAuthenticatedUrl(`/staff/orders/${id}/kot/print`),
   printKOT: (id) => {
-    const url = `${import.meta.env.VITE_API_URL}/staff/orders/${id}/kot/print`;
-    window.open(url, '_blank');
+    window.open(getAuthenticatedUrl(`/staff/orders/${id}/kot/print`), '_blank', 'noopener,noreferrer');
   },
+  getInvoiceUrl: (id) => getAuthenticatedUrl(`/orders/${id}/invoice`),
   markKOTPrinted: (id) => api.patch(`/staff/orders/${id}/print-kot`),
 
   /* ----------------------------------------

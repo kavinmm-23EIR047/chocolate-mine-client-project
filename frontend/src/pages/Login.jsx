@@ -70,12 +70,17 @@ const Login = () => {
 
     try {
       setLoading(true);
-      await login({
+      const response = await login({
         email: formData.email.trim(),
         password: formData.password,
       });
       toast.success('Welcome back to The Chocolate Mine!');
-      navigate('/');
+      const destination = response.user?.role === 'staff'
+        ? '/staff/dashboard'
+        : response.user?.role === 'admin'
+          ? '/admin/dashboard'
+          : '/';
+      navigate(destination, { replace: true });
     } catch (err) {
       const errData = err.response?.data;
       if (errData?.requiresOtp) {
@@ -334,9 +339,15 @@ const Login = () => {
 
                     if (response.data?.user && response.data?.token) {
                       updateUser(response.data.user, response.data.token);
-                      if (response.data.user.phoneVerified) {
+                      if (response.data.user.role === 'staff') {
                         toast.success('Welcome back to The Chocolate Mine!');
-                        navigate('/');
+                        navigate('/staff/dashboard', { replace: true });
+                      } else if (response.data.user.role === 'admin') {
+                        toast.success('Welcome back to The Chocolate Mine!');
+                        navigate('/admin/dashboard', { replace: true });
+                      } else if (response.data.user.phoneVerified) {
+                        toast.success('Welcome back to The Chocolate Mine!');
+                        navigate('/', { replace: true });
                       } else {
                         toast.success('Welcome! Please add your mobile number for delivery updates.');
                         navigate('/verify-phone');

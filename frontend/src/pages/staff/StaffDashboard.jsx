@@ -1565,7 +1565,7 @@ const StaffDashboard = () => {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [notificationsMuted, setNotificationsMuted] = useState(false);
   const [serviceHoursInfo, setServiceHoursInfo] = useState(null);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('list');
   const [orderSearch, setOrderSearch] = useState('');
   const [newOrdersTab, setNewOrdersTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1920,8 +1920,7 @@ const StaffDashboard = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
-                          window.open(`${apiUrl}/orders/${order._id}/invoice`, '_blank');
+                          window.open(staffService.getInvoiceUrl(order._id), '_blank', 'noopener,noreferrer');
                         }}
                         className="px-3 py-1.5 rounded-xl bg-secondary/10 hover:bg-secondary/20 text-secondary font-extrabold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-secondary/30"
                         title="Download & Print Invoice PDF"
@@ -2199,7 +2198,7 @@ const StaffDashboard = () => {
                   <OrderStatusDropdown order={order} onUpdate={handleDeliveryStatusUpdate} onRefresh={fetchData} />
 
                   <a 
-                    href={`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000')}/staff/orders/${order._id}/kot/print`}
+                    href={staffService.getKOTPrintUrl(order._id)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2.5 bg-card border border-border/80 rounded-xl hover:bg-primary/10 hover:border-primary/40 transition-all text-heading shrink-0 flex items-center justify-center active:scale-95 cursor-pointer" 
@@ -2371,7 +2370,7 @@ const StaffDashboard = () => {
                     <OrderStatusDropdown order={order} onUpdate={handleDeliveryStatusUpdate} />
 
                     <a 
-                      href={`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000')}/staff/orders/${order._id}/kot/print`}
+                      href={staffService.getKOTPrintUrl(order._id)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 bg-heading text-background rounded-xl hover:opacity-90 transition-all shrink-0 flex items-center justify-center active:scale-95 cursor-pointer" 

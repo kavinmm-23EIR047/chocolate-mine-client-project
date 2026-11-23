@@ -1567,7 +1567,19 @@ const StaffDashboard = () => {
   const [serviceHoursInfo, setServiceHoursInfo] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [orderSearch, setOrderSearch] = useState('');
-  const [newOrdersTab, setNewOrdersTab] = useState('all');
+  const [newOrdersTab, setNewOrdersTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') === 'failed' ? 'failed' : 'paid';
+  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') === 'failed') {
+      setNewOrdersTab('failed');
+    } else {
+      setNewOrdersTab('paid');
+    }
+  }, [location.search]);
 
   const getPageType = (path) => {
     if (path.includes('orders/create-inshop')) return 'create-inshop';
@@ -1945,8 +1957,7 @@ const StaffDashboard = () => {
 
   let finalOrdersToDisplay = filteredOrdersList;
   if (pageType === 'new') {
-    if (newOrdersTab === 'paid') finalOrdersToDisplay = paidNewOrders;
-    else if (newOrdersTab === 'failed') finalOrdersToDisplay = failedNewOrders;
+    finalOrdersToDisplay = newOrdersTab === 'failed' ? failedNewOrders : paidNewOrders;
   }
 
   return (
@@ -2020,21 +2031,6 @@ const StaffDashboard = () => {
 
       {pageType === 'new' && (
         <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
-          <button
-            type="button"
-            onClick={() => setNewOrdersTab('all')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 border cursor-pointer ${
-              newOrdersTab === 'all'
-                ? 'bg-amber-900 text-white dark:bg-amber-500 dark:text-slate-950 border-amber-800 dark:border-amber-400 shadow-sm'
-                : 'bg-card border-border text-muted hover:text-heading'
-            }`}
-          >
-            <span>All New Orders</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${newOrdersTab === 'all' ? 'bg-white/20 text-white dark:bg-black/20 dark:text-slate-950' : 'bg-border/60 text-heading'}`}>
-              {filteredOrdersList.length}
-            </span>
-          </button>
-
           <button
             type="button"
             onClick={() => setNewOrdersTab('paid')}

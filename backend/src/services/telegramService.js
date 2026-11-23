@@ -7,11 +7,25 @@ const Product = require('../models/Product');
 const { resolveProductWeight } = require('../utils/productUtils');
 
 /**
- * Core Telegram sender using Bot API.
- * Fails silently — never breaks the main execution flow.
- * @param {string} message - Plain text or Markdown message
+ * Escapes characters that have special meaning in Telegram HTML mode.
+ * @param {string|number} str
+ * @returns {string}
  */
-const sendTelegram = async (message) => {
+const escapeHtml = (str) => {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+};
+
+/**
+ * Core Telegram sender using Bot API.
+ * Uses HTML parse mode with automatic plain-text retry fallback so alerts never fail silently.
+ * @param {string} message - HTML or plain text message
+ * @param {Object} [options]
+ */
+const sendTelegram = async (message, options = {}) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -20,17 +34,42 @@ const sendTelegram = async (message) => {
     return;
   }
 
+  const parseMode = options.parse_mode !== undefined ? options.parse_mode : 'HTML';
+
   try {
     await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
       chat_id: chatId,
       text: message,
-      parse_mode: 'Markdown'
+      ...(parseMode ? { parse_mode: parseMode } : {})
     });
     logger.info('Telegram Alert SENT');
   } catch (err) {
     const errMsg = err.response?.data?.description || err.message;
-    logger.error(`Telegram FAILED: ${errMsg}`);
+    logger.error(`Telegram FAILED (${parseMode}): ${errMsg}`);
+
+    // Automatic Fallback: If Telegram rejects due to entity parsing issues (e.g. unclosed tag or special chars),
+    // immediately retry sending as plain text so the admin always receives the order alert!
+    if (errMsg.includes("can't parse entities") || errMsg.includes('entity')) {
+      try {
+        logger.warn('Retrying Telegram message as plain-text fallback...');
+        const plainText = String(message)
+          .replace(/<[^>]*>/g, '') // strip HTML tags
+          .replace(/[*_`\[\]()]/g, ''); // strip markdown chars if any
+
+        await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+          chat_id: chatId,
+          text: plainText
+        });
+        logger.info('✅ Telegram Alert SENT via plain-text fallback');
+        return;
+      } catch (fallbackErr) {
+        const fallbackMsg = fallbackErr.response?.data?.description || fallbackErr.message;
+        logger.error(`Telegram fallback FAILED: ${fallbackMsg}`);
+        throw fallbackErr;
+      }
     }
+    throw err;
+  }
 };
 
 // =============================================================================
@@ -57,16 +96,17 @@ const getDisplayFlavor = (item) => {
 // =============================================================================
 
 /**
- * Formats an order item for Telegram display.
+ * Formats an order item for Telegram display using HTML tags.
  * For custom cakes, shows theme, flavour, weight, and personalized message.
  * 
  * @param {Object} item - Order item from database
+ * @param {Object} [product] - Populated product doc
  * @returns {string} Formatted item string (multi-line if custom cake)
  */
 const formatOrderItem = (item, product = null) => {
   const finalUnitPrice = Number(item.finalPrice ?? item.price ?? 0);
   const origPrice = Number(item.price || 0);
-  let priceDetails = ``;
+  let priceDetails = '';
   if (origPrice > finalUnitPrice) {
     priceDetails = ` (Orig: ₹${origPrice}, Offer: ₹${finalUnitPrice})`;
   } else {
@@ -75,16 +115,18 @@ const formatOrderItem = (item, product = null) => {
 
   let addonStr = '';
   if (item.addons && Array.isArray(item.addons) && item.addons.length > 0) {
-    const addonList = item.addons.map(a => `${a.name} (x${a.qty || 1}) - ₹${a.price * (a.qty || 1)}`).join(', ');
+    const addonList = item.addons
+      .map(a => `${escapeHtml(a.name)} (x${a.qty || 1}) - ₹${a.price * (a.qty || 1)}`)
+      .join(', ');
     addonStr = `\n   └ Addons: ${addonList}`;
   }
 
   if (item.isCustomCake && item.customDetails) {
     const cd = item.customDetails;
-    let details = `🎨 *${item.name}* (x${item.qty})${priceDetails}\n`;
-    if (cd.designTheme) details += `   Theme: ${cd.designTheme}\n`;
-    if (cd.flavour) details += `   Flavor: ${cd.flavour}\n`;
-    if (cd.weight) details += `   Weight: ${cd.weight}\n`;
+    let details = `🎨 <b>${escapeHtml(item.name)}</b> (x${item.qty})${priceDetails}\n`;
+    if (cd.designTheme) details += `   Theme: ${escapeHtml(cd.designTheme)}\n`;
+    if (cd.flavour) details += `   Flavor: ${escapeHtml(cd.flavour)}\n`;
+    if (cd.weight) details += `   Weight: ${escapeHtml(cd.weight)}\n`;
     if (cd.messageOnCake) {
       let cleanedMsg = cd.messageOnCake.trim();
       if (cleanedMsg !== 'Name: , Age: , Message: None' && cleanedMsg !== 'Name: , Age: , Message:') {
@@ -92,7 +134,9 @@ const formatOrderItem = (item, product = null) => {
         if (match && match[1]) {
           cleanedMsg = match[1].trim();
         }
-        if (cleanedMsg && cleanedMsg !== 'None') details += `   🎂 Message: ${cleanedMsg}\n`;
+        if (cleanedMsg && cleanedMsg !== 'None') {
+          details += `   🎂 Message: ${escapeHtml(cleanedMsg)}\n`;
+        }
       }
     }
     if (addonStr) details += `   ${addonStr.trim()}\n`;
@@ -100,7 +144,7 @@ const formatOrderItem = (item, product = null) => {
   }
   
   // Normal product
-  let details = `🍰 *${item.name}* (x${item.qty})${priceDetails}`;
+  let details = `🍰 <b>${escapeHtml(item.name)}</b> (x${item.qty})${priceDetails}`;
   const resolvedFlavor = getDisplayFlavor(item);
   const showFlavor = item.selectedFlavor || resolvedFlavor !== 'Standard';
 
@@ -124,9 +168,9 @@ const formatOrderItem = (item, product = null) => {
   const msgOnCake = (item.cakeMessage || item.messageOnCake || '').trim();
   if (showFlavor || showWeight || msgOnCake || addonStr) {
     details += `\n`;
-    if (showFlavor) details += `   Flavor: ${resolvedFlavor}\n`;
-    if (showWeight) details += `   Weight: ${showWeight}\n`;
-    if (msgOnCake) details += `   🎂 Message: "${msgOnCake}"\n`;
+    if (showFlavor) details += `   Flavor: ${escapeHtml(resolvedFlavor)}\n`;
+    if (showWeight) details += `   Weight: ${escapeHtml(showWeight)}\n`;
+    if (msgOnCake) details += `   🎂 Message: "${escapeHtml(msgOnCake)}"\n`;
     if (addonStr) details += `   ${addonStr.trim()}\n`;
   }
   return details.trim();
@@ -148,7 +192,7 @@ const sendMediaWhatsApp = () => {};
 
 /**
  * Rich Order alert for internal staff/admin group
- * Now includes custom cake details inline with items.
+ * Includes custom cake details inline with items.
  */
 const formatIST = (dateVal) => {
   const d = dateVal ? new Date(dateVal) : new Date();
@@ -192,81 +236,83 @@ const sendInternalOrderAlert = async (phone, order) => {
     return formatOrderItem(item, prod);
   }).join('\n');
   
+  const addr = orderObj.address || {};
   const addrParts = [];
-  if (orderObj.address.fullName) addrParts.push(orderObj.address.fullName);
-  if (orderObj.address.houseNo) addrParts.push(orderObj.address.houseNo);
-  if (orderObj.address.street) addrParts.push(orderObj.address.street);
-  if (orderObj.address.landmark) addrParts.push(`Landmark: ${orderObj.address.landmark}`);
-  if (orderObj.address.city) addrParts.push(orderObj.address.city);
-  if (orderObj.address.pincode) addrParts.push(orderObj.address.pincode);
+  if (addr.fullName) addrParts.push(escapeHtml(addr.fullName));
+  if (addr.houseNo) addrParts.push(escapeHtml(addr.houseNo));
+  if (addr.street) addrParts.push(escapeHtml(addr.street));
+  if (addr.landmark) addrParts.push(`Landmark: ${escapeHtml(addr.landmark)}`);
+  if (addr.city) addrParts.push(escapeHtml(addr.city));
+  if (addr.pincode) addrParts.push(escapeHtml(addr.pincode));
   const address = addrParts.join(', ');
 
   let mapsUrlMsg = '';
-  if (orderObj.address.lat && orderObj.address.lng) {
-    mapsUrlMsg = `\n🗺️ *Directions:* https://www.google.com/maps/search/?api=1&query=${orderObj.address.lat},${orderObj.address.lng}`;
+  if (addr.lat && addr.lng) {
+    mapsUrlMsg = `\n🗺️ <b>Directions:</b> <a href="https://www.google.com/maps/search/?api=1&query=${addr.lat},${addr.lng}">Open in Google Maps</a>`;
   }
 
   const orderedTimeString = formatIST(orderObj.createdAt || orderObj.updatedAt);
   const deliveryDateString = orderObj.deliveryDate ? new Date(orderObj.deliveryDate).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A';
   
-  const message = `🍫 *New Order Received*\n\n` +
-    `🆔 *Order ID:* ${orderObj.orderNumber}\n` +
-    `👤 *Customer Name:* ${orderObj.address.fullName}\n` +
-    `📞 *Customer Phone:* ${orderObj.address.phone}\n` +
-    `📍 *Full Address:* ${address}\n\n` +
-    `🍰 *Ordered Items:*\n${itemsList}\n\n` +
-    `💰 *Pricing Breakdown:*\n` +
+  const message = `🍫 <b>New Order Received</b>\n\n` +
+    `🆔 <b>Order ID:</b> ${escapeHtml(orderObj.orderNumber)}\n` +
+    `👤 <b>Customer Name:</b> ${escapeHtml(addr.fullName || 'N/A')}\n` +
+    `📞 <b>Customer Phone:</b> ${escapeHtml(addr.phone || 'N/A')}\n` +
+    `📍 <b>Full Address:</b> ${address}\n\n` +
+    `🍰 <b>Ordered Items:</b>\n${itemsList}\n\n` +
+    `💰 <b>Pricing Breakdown:</b>\n` +
     `   Subtotal: ₹${orderObj.subtotal}\n` +
     (orderObj.discount > 0 ? `   Discount: -₹${orderObj.discount}\n` : '') +
     `   Delivery Charge: ₹${orderObj.deliveryCharge}\n` +
     `   Convenience Fee (2.5%): ₹${orderObj.convenienceFee}\n` +
     `   GST (5%): Included in product price\n` +
-    `   *Grand Total:* ₹${orderObj.total}\n\n` +
-    `📅 *Delivery Date:* ${deliveryDateString}\n` +
-    `⏰ *Delivery Slot:* ${orderObj.deliverySlot || 'N/A'}\n` +
-    `📅 *Ordered Time:* ${orderedTimeString} (IST)` +
+    `   <b>Grand Total:</b> ₹${orderObj.total}\n\n` +
+    `📅 <b>Delivery Date:</b> ${deliveryDateString}\n` +
+    `⏰ <b>Delivery Slot:</b> ${escapeHtml(orderObj.deliverySlot || 'N/A')}\n` +
+    `📅 <b>Ordered Time:</b> ${orderedTimeString} (IST)` +
     mapsUrlMsg + `\n\n` +
     `Please check admin dashboard now.`;
 
-  return sendTelegram(message);
+  return sendTelegram(message, { parse_mode: 'HTML' });
 };
 
 const sendKitchenAlert = (phone, orderNumber) => {
-  return sendTelegram(`🍴 *New Kitchen Order:* ${orderNumber}\nPlease check dashboard to accept.`);
+  return sendTelegram(`🍴 <b>New Kitchen Order:</b> ${escapeHtml(orderNumber)}\nPlease check dashboard to accept.`);
 };
 
 const sendUrgentSlotAlert = (phone, orderNumber, slot) => {
-  return sendTelegram(`⚡ *URGENT SAME SLOT ORDER*\nOrder: ${orderNumber}\nSlot: ${slot}\nImmediate attention required!`);
+  return sendTelegram(`⚡ <b>URGENT SAME SLOT ORDER</b>\nOrder: ${escapeHtml(orderNumber)}\nSlot: ${escapeHtml(slot)}\nImmediate attention required!`);
 };
 
 const sendAdminNewOrder = (phone, orderNumber, total) => {
-  return sendTelegram(`📥 *New Order:* ${orderNumber}\nTotal: ₹${total}`);
+  return sendTelegram(`📥 <b>New Order:</b> ${escapeHtml(orderNumber)}\nTotal: ₹${total}`);
 };
 
 const sendHighValueAlert = (phone, orderNumber, total) => {
-  return sendTelegram(`⚠️ *HIGH VALUE ALERT*\nOrder: ${orderNumber}\nAmount: ₹${total}`);
+  return sendTelegram(`⚠️ <b>HIGH VALUE ALERT</b>\nOrder: ${escapeHtml(orderNumber)}\nAmount: ₹${total}`);
 };
 
 const sendAdminPaymentFailure = (phone, customerName, amount) => {
-  return sendTelegram(`🔴 *Payment FAILED*\nAmount: ₹${amount}\nCustomer: ${customerName}\nReview in dashboard.`);
+  return sendTelegram(`🔴 <b>Payment FAILED</b>\nAmount: ₹${amount}\nCustomer: ${escapeHtml(customerName)}\nReview in dashboard.`);
 };
 
 const sendLowStockAlert = (phone, productName, stock) => {
-  return sendTelegram(`⚠️ *LOW STOCK ALERT*\nProduct: ${productName}\nRemaining: ${stock} units\nRestock immediately.`);
+  return sendTelegram(`⚠️ <b>LOW STOCK ALERT</b>\nProduct: ${escapeHtml(productName)}\nRemaining: ${stock} units\nRestock immediately.`);
 };
 
 const sendServerErrorAlert = (errorMsg) => {
-  return sendTelegram(`🔥 *SERVER ERROR*\nMsg: ${errorMsg}`);
+  return sendTelegram(`🔥 <b>SERVER ERROR</b>\nMsg: ${escapeHtml(errorMsg)}`);
 };
 
 const sendStaffAlert = (message) => {
-  return sendTelegram(`👨‍🍳 *Staff Alert:* ${message}`);
+  return sendTelegram(`👨‍🍳 <b>Staff Alert:</b> ${escapeHtml(message)}`);
 };
 
 // For backward compatibility, also export the old name
 const sendInternalOrderAlertWithCustomDetails = sendInternalOrderAlert;
 
 module.exports = {
+  escapeHtml,
   formatOrderItem,
   sendTelegram,
   sendInternalOrderAlert,

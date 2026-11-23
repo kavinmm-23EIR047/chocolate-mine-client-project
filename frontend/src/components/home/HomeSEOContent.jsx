@@ -148,7 +148,7 @@ const HomeSEOContent = () => {
           </h2>
 
           <p className="mt-2 text-xs sm:text-sm text-muted max-w-lg mx-auto leading-relaxed">
-            Welcome to <strong className="text-foreground">The Chocolate Mine</strong> — Coimbatore’s most trusted online cake shop. 
+            Welcome to <strong className="text-foreground">The Chocolate Mine</strong> — Coimbatore’s most trusted online cake shop.
             We handcraft pure indulgence with 100% pure veg & eggless cakes, bespoke custom birthday and wedding cakes, and artisanal chocolates delivered fresh across the city.
           </p>
         </div>

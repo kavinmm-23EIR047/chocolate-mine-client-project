@@ -4,6 +4,7 @@ import { Toaster, toast } from 'react-hot-toast';
 
 // Context Providers
 import { ThemeProvider } from './context/ThemeContext';
+import { SiteThemeProvider } from './context/SiteThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { LocationProvider } from './context/LocationContext';
@@ -73,6 +74,7 @@ import CategoryManager from './pages/admin/CategoryManager';
 import OccasionManager from './pages/admin/OccasionManager';
 import AddonManager from './pages/admin/AddonManager';
 import AdminBanner from './pages/admin/AdminBanner';
+import AdminThemes from './pages/admin/AdminThemes';
 import AdminCustomCakes from './pages/admin/AdminCustomCakes';
 import AdminReviews from './pages/admin/AdminReviews';
 
@@ -194,6 +196,7 @@ function App() {
         <LocationProvider>
           <WishlistProvider>
             <ThemeProvider>
+              <SiteThemeProvider>
               <BrandIntroGate />
               <Router>
                 <OfflineStateBanner />
@@ -285,6 +288,7 @@ function App() {
                   <Route path="occasions" element={<OccasionManager />} />
                   <Route path="addons" element={<AddonManager />} />
                   <Route path="banners" element={<AdminBanner />} />
+                  <Route path="themes" element={<AdminThemes />} />
                   <Route path="custom-cakes" element={<AdminCustomCakes />} />
                   <Route path="reviews" element={<AdminReviews />} />
                   <Route path="google-reviews" element={<AdminGoogleReviews />} />
@@ -305,6 +309,7 @@ function App() {
                 </Route>
               </Routes>
             </Router>
+              </SiteThemeProvider>
           </ThemeProvider>
         </WishlistProvider>
       </LocationProvider>

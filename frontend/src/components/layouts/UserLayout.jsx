@@ -7,6 +7,7 @@ import MobileBottomNav from '../layout/MobileBottomNav';
 import NotificationPrompt from '../ui/NotificationPrompt';
 import NotificationBanner from '../ui/NotificationBanner';
 import CocoaLeavesBackground from '../ui/CocoaLeavesBackground';
+import ChristmasThemeOverlay from '../themes/christmas/ChristmasThemeOverlay';
 import PaymentFailedModal from '../ui/PaymentFailedModal';
 import { useAuth } from '../../context/AuthContext';
 import PureVegIcon from '../../assets/pure veg.webp';
@@ -58,6 +59,8 @@ const UserLayout = () => {
       <div className="min-h-screen flex flex-col bg-background relative overflow-x-hidden">
         {/* ── COCOA LEAF BACKGROUND WATERMARKS ── */}
         <CocoaLeavesBackground />
+        {/* ── ADMIN-CONTROLLED CHRISTMAS THEME OVERLAYS ── */}
+        <ChristmasThemeOverlay />
 
         {/* Hide Navbar & NotificationBanner on mobile for Login/Register/Auth pages */}
         <header className={`sticky top-0 z-[200] w-full ${isAuthPage ? 'hidden md:block' : 'block'}`}>

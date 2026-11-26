@@ -196,7 +196,7 @@ const SwiggyCartAction = ({ cartQuantity, handleQuantityChange, handleInitialAdd
   }
 
   return (
-    <div className="absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] overflow-hidden shadow-md">
+    <div className="isolate absolute -bottom-3.5 md:-bottom-4 left-1/2 -translate-x-1/2 z-20 rounded-md p-[1.5px] overflow-hidden shadow-md">
       {/* Moving Linear Gradient Border Backdrop Background */}
       <motion.div
         className="absolute inset-0 w-[200%] h-[200%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,var(--accent)_0%,var(--secondary)_50%,transparent_100%)]"
@@ -582,11 +582,11 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg', o
   return (
     <motion.div
       layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={handleCardClick}
-      className={`menu-light-card group w-full h-full min-w-0 flex flex-col justify-between cursor-pointer transition-all duration-200 p-3 sm:p-4 pb-8 ${cardStyleMap[cardStyle]}`}
+      className={`menu-light-card group w-full h-full min-w-0 flex flex-col sm:justify-between cursor-pointer transition-all duration-200 p-2.5 sm:p-4 pb-3 sm:pb-4 ${cardStyleMap[cardStyle]}`}
       style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
     >
       <div>
-        <div className="relative aspect-square overflow-visible shrink-0 w-full mb-8" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
+        <div className="relative aspect-square overflow-visible shrink-0 w-full mb-5 sm:mb-6" style={{ background: 'var(--surface)', borderRadius: '12px' }}>
           <div className="w-full h-full overflow-hidden rounded-xl relative">
             {hasValidImage ? (
               <>
@@ -653,8 +653,8 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg', o
           />
         </div>
 
-        <div className="flex flex-col text-left mt-1">
-          <div className="flex items-center gap-1.5 flex-wrap mb-2">
+        <div className="flex flex-col text-left mt-0.5 sm:mt-1">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap mb-1 sm:mb-2">
             {(product?.isVeg !== false) && <AnimatedProductBadge type="veg" />}
             {!isOutOfStock && <AnimatedProductBadge type="available" />}
             {product.bestseller && <AnimatedProductBadge type="bestseller" />}
@@ -663,25 +663,25 @@ const ProductCard = ({ product, layout = 'vertical', cardStyle = 'rounded-lg', o
           </div>
 
           {getDisplayCategory() && (
-            <span className="text-[11px] md:text-xs font-extrabold uppercase tracking-wider mb-1 block opacity-90" style={{ color: 'var(--muted)' }}>
+            <span className="text-[10px] md:text-xs font-extrabold uppercase tracking-wider mb-0.5 sm:mb-1 block opacity-90 truncate sm:whitespace-normal" style={{ color: 'var(--muted)' }}>
               {getDisplayCategory()}
             </span>
           )}
-          <h3 className="text-[14px] md:text-[15px] font-bold leading-tight mb-1 break-words" style={{ color: 'var(--heading)' }}>
+          <h3 className="text-[13px] sm:text-[14px] md:text-[15px] font-bold leading-snug mb-0.5 sm:mb-1 break-words line-clamp-2" style={{ color: 'var(--heading)' }}>
             {toSentenceCase(product.name)}
           </h3>
 
-          <div className="flex items-center gap-1 text-[12px] font-medium mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
+          <div className="flex items-center gap-1 text-[11px] sm:text-[12px] font-medium mb-0.5 sm:mb-1 flex-wrap" style={{ color: 'var(--muted)' }}>
 
             <div className="flex items-center gap-0.5">
-              <MapPin size={11} strokeWidth={2.5} />
-              <span className="capitalize break-all">{locationDisplay}</span>
+              <MapPin size={10} strokeWidth={2.5} className="shrink-0 sm:w-[11px] sm:h-[11px]" />
+              <span className="capitalize truncate">{locationDisplay}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col text-left mt-2">
+      <div className="flex flex-col text-left mt-1.5 sm:mt-2">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[15px] md:text-[17px] font-black" style={{ color: 'var(--heading)' }}>₹{Math.round(finalPrice)}</span>
           {hasOffer && (

@@ -21,6 +21,7 @@ import {
   Cake,
   Star,
   PlusSquare,
+  Sparkles,
 } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -45,6 +46,7 @@ const menuItems = [
   { path: '/admin/occasions', label: 'Occasions', icon: Gift },
   { path: '/admin/addons', label: 'Add-ons', icon: PlusSquare },
   { path: '/admin/banners', label: 'Banners', icon: ImageIcon },
+  { path: '/admin/themes', label: 'Themes', icon: Sparkles },
   { path: '/admin/google-reviews', label: 'Google Reviews', icon: Star },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];

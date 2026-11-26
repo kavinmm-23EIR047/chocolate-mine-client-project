@@ -153,6 +153,7 @@ app.use('/api/v1/banners', require('./src/routes/bannerRoutes'));
 app.use('/api/v1/custom-cakes/flavours', require('./src/routes/customCakeFlavorRoutes'));
 app.use('/api/v1/custom-cakes', require('./src/routes/customCakeRoutes'));
 app.use('/api/custom-cakes', require('./src/routes/customCakeRoutes'));
+app.use('/api/v1/themes', require('./src/routes/themeRoutes'));
 
 // Protected routes
 app.use('/api/v1/cart', require('./src/routes/cartRoutes'));
@@ -205,6 +206,7 @@ const socketHandler = require('./src/sockets');
 const staffController = require('./src/controllers/staffController');
 const orderController = require('./src/controllers/orderController');
 const paymentController = require('./src/controllers/paymentController');
+const themeController = require('./src/controllers/themeController');
 
 // Pass io instance to controllers
 staffController.setIo(io);
@@ -213,6 +215,9 @@ if (orderController.setIo) {
 }
 if (paymentController.setIo) {
   paymentController.setIo(io);
+}
+if (themeController.setIo) {
+  themeController.setIo(io);
 }
 
 // Initialize socket handler

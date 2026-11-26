@@ -68,4 +68,13 @@ router.put('/categories/:id', upload.single('image'), categoryController.updateC
 router.patch('/categories/:id', upload.single('image'), categoryController.updateCategory);
 router.delete('/categories/:id', categoryController.deleteCategory);
 
+// --- Seasonal Themes Management ---
+const themeController = require('../controllers/themeController');
+router.get('/themes', themeController.getAllThemes);
+router.post('/themes', themeController.createTheme);
+router.patch('/themes/:id', themeController.updateTheme);
+router.patch('/themes/:id/enable', themeController.toggleThemeEnable);
+router.patch('/themes/:id/visible', themeController.toggleThemeVisible);
+router.delete('/themes/:id', themeController.deleteTheme);
+
 module.exports = router;
